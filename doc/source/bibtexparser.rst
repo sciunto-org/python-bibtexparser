@@ -1,5 +1,5 @@
-Zimnotes
-========
+BibtexParser
+============
 
 
 .. automodule:: bibtexparser

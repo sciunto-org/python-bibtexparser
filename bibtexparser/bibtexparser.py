@@ -19,7 +19,9 @@
 # Francois Boulogne <fboulogne at april dot org>
 
 """
-BibTex parser.
+.. module:: bibtexparser
+
+.. moduleauthor: 
 """
 
 import sys
@@ -72,7 +74,7 @@ class BibTexParser(object):
     def parse(self):
         """Parse the bibtex into a TODO 
 
-        :return: records, metadata
+        :returns: records, metadata
         """
         records = []
         record = ""
@@ -106,7 +108,7 @@ class BibTexParser(object):
         
         :param record:
 
-        :return:
+        :returns:
         """
         
         d = {}
