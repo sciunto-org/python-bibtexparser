@@ -21,7 +21,7 @@
 """
 .. module:: bibtexparser
 
-.. moduleauthor: 
+.. moduleauthor:
 """
 
 import sys
@@ -30,6 +30,7 @@ import io
 import json
 import unicodedata
 import re
+
 
 class BibTexParser(object):
     """
@@ -42,7 +43,7 @@ class BibTexParser(object):
     def __init__(self, fileobj):
 
         data = fileobj.read()
-        
+
         # On some sample data files, the character encoding detection simply hangs
         # We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
@@ -51,28 +52,28 @@ class BibTexParser(object):
         if data[:3] == '\xef\xbb\xbf':
             data = data[3:]
         self.fileobj = io.StringIO(data)
-        
+
         # set which bibjson schema this parser parses to
         self.has_metadata = False
         self.persons = []
-        # if bibtex file has substition strings, they are stored here, 
+        # if bibtex file has substition strings, they are stored here,
         # then the values are checked for those substitions in add_val
         self.replace_dict = {}
         # pre-defined set of key changes
         self.alt_dict = {
-            'keyw':'keyword',
-            'keywords':'keyword',
-            'authors':'author',
-            'editors':'editor',
-            'url':'link',
-            'urls':'link',
-            'links':'link',
-            'subjects':'subject'
+            'keyw': 'keyword',
+            'keywords': 'keyword',
+            'authors': 'author',
+            'editors': 'editor',
+            'url': 'link',
+            'urls': 'link',
+            'links': 'link',
+            'subjects': 'subject'
         }
-        self.identifier_types = ["doi","isbn","issn"]
+        self.identifier_types = ['doi', 'isbn', 'issn']
 
     def parse(self):
-        """Parse the bibtex into a TODO 
+        """Parse the bibtex into a TODO
 
         :returns: records, metadata
         """
@@ -102,28 +103,28 @@ class BibTexParser(object):
     def parse_record(self, record):
         """Parse a record.
 
-        * tidy whitespace and other rubbish; 
+        * tidy whitespace and other rubbish;
         * parse out the bibtype and citekey
         * find all the key-value pairs it contains
-        
+
         :param record:
 
         :returns:
         """
-        
+
         d = {}
-        
+
         if not record.startswith('@'):
             return d
 
         # prepare record
         record = '\n'.join([i.strip() for i in record.split('\n')])
         if '}\n' in record:
-            record, rubbish = record.replace('\r\n','\n').replace('\r','\n').rsplit('}\n',1)
+            record, rubbish = record.replace('\r\n', '\n').replace('\r', '\n').rsplit('}\n', 1)
 
         # if a string record, put it in the replace_dict
         if record.lower().startswith('@string'):
-            key, val = [i.strip().strip('"').strip('{').strip('}').replace('\n',' ') for i in record.split('{',1)[1].strip('\n').strip(',').strip('}').split('=')]
+            key, val = [i.strip().strip('"').strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('\n').strip(',').strip('}').split('=')]
             self.replace_dict[key] = val
             return d
 
@@ -134,15 +135,15 @@ class BibTexParser(object):
         for kv in kvs:
             if kv.startswith('@') and not inkey:
                 # it is the start of the record - set the bibtype and citekey (id)
-                bibtype, id = kv.split('{',1)
+                bibtype, id = kv.split('{', 1)
                 bibtype = self.add_key(bibtype)
                 id = id.strip('}').strip(',')
             elif '=' in kv and not inkey:
                 # it is a line with a key value pair on it
-                key, val = [i.strip() for i in kv.split('=',1)]
+                key, val = [i.strip() for i in kv.split('=', 1)]
                 key = self.add_key(key)
                 # if it looks like the value spans lines, store details for next loop
-                if ( val.startswith('{') and not val.endswith('}') ) or ( val.startswith('"') and not val.replace('}','').endswith('"') ):
+                if (val.startswith('{') and not val.endswith('}')) or (val.startswith('"') and not val.replace('}', '').endswith('"')):
                     inkey = key
                     inval = val
                 else:
@@ -151,7 +152,7 @@ class BibTexParser(object):
                 # if this line continues the value from a previous line, append
                 inval += ',' + kv
                 # if it looks like this line finishes the value, store it and clear for next loop
-                if ( inval.startswith('{') and inval.endswith('}') ) or ( inval.startswith('"') and inval.endswith('"') ):
+                if (inval.startswith('{') and inval.endswith('}')) or (inval.startswith('"') and inval.endswith('"')):
                     d[inkey] = self.add_val(inval)
                     inkey = ""
                     inval = ""
@@ -173,9 +174,9 @@ class BibTexParser(object):
         # apply any customisations to the record object then return it
         return self.customisations(d)
 
-    def customisations(self,record):
+    def customisations(self, record):
         """alters some values to fit bibjson format"""
-        if 'eprint' in record and not 'year' in record: 
+        if 'eprint' in record and not 'year' in record:
             yy = '????'
             ss = record['eprint'].split('/')
             if len(ss) == 2: yy = ss[1][0:2]
@@ -189,27 +190,27 @@ class BibTexParser(object):
             record["type"] = record["type"].lower()
         if "author" in record:
             if record["author"]:
-                record["author"] = self.getnames([i.strip() for i in record["author"].replace('\n',' ').split(" and ")])
+                record["author"] = self.getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
                 # convert author to object
-                record["author"] = [{"name":i,"id":i.replace(',','').replace(' ','').replace('.','')} for i in record["author"]]
+                record["author"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["author"]]
             else:
                 del record["author"]
         if "editor" in record:
             if record["editor"]:
-                record["editor"] = self.getnames([i.strip() for i in record["editor"].replace('\n',' ').split(" and ")])
+                record["editor"] = self.getnames([i.strip() for i in record["editor"].replace('\n', ' ').split(" and ")])
                 # convert editor to object
-                record["editor"] = [{"name":i,"id":i.replace(',','').replace(' ','').replace('.','')} for i in record["editor"]]
+                record["editor"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
             else:
                 del record["editor"]
         if "journal" in record:
             # switch journal to object
             if record["journal"]:
-                record["journal"] = {"name":record["journal"],"id":record["journal"].replace(',','').replace(' ','').replace('.','')}
+                record["journal"] = {"name": record["journal"], "id": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
         if "keyword" in record:
-            record["keyword"] = [i.strip() for i in record["keyword"].replace('\n','').split(",")]
+            record["keyword"] = [i.strip() for i in record["keyword"].replace('\n', '').split(",")]
         if "subject" in record:
             if record["subject"]:
-                record["subject"] = {"name":record["subject"],"id":record["subject"].replace(',','').replace(' ','').replace('.','')}
+                record["subject"] = {"name": record["subject"], "id": record["subject"].replace(',', '').replace(' ', '').replace('.', '')}
         if "link" in record:
             links = [i.strip().replace("  "," ") for i in record["link"].split('\n')]
             record['link'] = []
@@ -233,20 +234,20 @@ class BibTexParser(object):
                 link = record['doi']
                 if link.startswith('10'):
                     link = 'http://dx.doi.org/' + link
-                record['link'].append( {"url": link, "anchor":"doi"} )
+                record['link'].append({"url": link, "anchor":"doi"})
         for ident in self.identifier_types:
             if ident in record:
                 if ident == 'issn':
                     if 'journal' in record:
                         if 'identifier' not in record['journal']:
                             record['journal']['identifier'] = []
-                        record['journal']['identifier'].append({"id":record[ident], "type":"issn"})
+                        record['journal']['identifier'].append({"id": record[ident], "type": "issn"})
                 else:
                     if 'identifier' not in record:
                         record['identifier'] = []
-                    record['identifier'].append({"id":record[ident], "type":ident})
+                    record['identifier'].append({"id": record[ident], "type": ident})
                 del record[ident]
-        
+
         return record
 
 
@@ -278,7 +279,7 @@ class BibTexParser(object):
         if not isinstance(val, str):
             val = str(val,self.encoding,'ignore')
 
-        for translation in (self.unicode_to_latex, self.unicode_to_crappy_latex1): 
+        for translation in (self.unicode_to_latex, self.unicode_to_crappy_latex1):
             if '\\' in val or '{' in val:
                 for k, v in translation.items():
                     if v in val:
@@ -2708,12 +2709,12 @@ class BibTexParser(object):
         "\uD7FF": "\\mathtt{9}",
     }
     # These are dangerous
-    # should not be used on 
+    # should not be used on
     # {\'E} for instance!
     unicode_to_crappy_latex2 = {
-        "\u0300": "\\`", 
-        "\u0301": "\\'", 
-        "\u0302": "\\^", 
+        "\u0300": "\\`",
+        "\u0301": "\\'",
+        "\u0302": "\\^",
         "\u0327": "\\c",
         }
 
