@@ -26,7 +26,7 @@ To install with pip:
 Manual installation
 -------------------
 
-`Download <http://source.sciunto.org/bibtexparser`_
+`Download <http://source.sciunto.org/bibtexparser/>`_
 
 .. code-block:: sh
 
