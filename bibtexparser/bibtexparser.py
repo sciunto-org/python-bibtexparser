@@ -179,9 +179,12 @@ class BibTexParser(object):
         if 'eprint' in record and not 'year' in record:
             yy = '????'
             ss = record['eprint'].split('/')
-            if len(ss) == 2: yy = ss[1][0:2]
-            if yy[0] in ['0']: record['year'] = '20' + yy
-            elif yy[0] in ['9']: record['year'] = '19' + yy
+            if len(ss) == 2:
+                yy = ss[1][0:2]
+            if yy[0] in ['0']:
+                record['year'] = '20' + yy
+            elif yy[0] in ['9']:
+                record['year'] = '19' + yy
         if "pages" in record:
             if "-" in record["pages"]:
                 p = [i.strip().strip('-') for i in record["pages"].split("-")]
@@ -212,11 +215,11 @@ class BibTexParser(object):
             if record["subject"]:
                 record["subject"] = {"name": record["subject"], "id": record["subject"].replace(',', '').replace(' ', '').replace('.', '')}
         if "link" in record:
-            links = [i.strip().replace("  "," ") for i in record["link"].split('\n')]
+            links = [i.strip().replace("  ", " ") for i in record["link"].split('\n')]
             record['link'] = []
             for link in links:
                 parts = link.split(" ")
-                linkobj = { "url":parts[0] }
+                linkobj = {"url": parts[0]}
                 if len(parts) > 1:
                     linkobj["anchor"] = parts[1]
                 if len(parts) > 2:
@@ -234,7 +237,7 @@ class BibTexParser(object):
                 link = record['doi']
                 if link.startswith('10'):
                     link = 'http://dx.doi.org/' + link
-                record['link'].append({"url": link, "anchor":"doi"})
+                record['link'].append({"url": link, "anchor": "doi"})
         for ident in self.identifier_types:
             if ident in record:
                 if ident == 'issn':
@@ -250,9 +253,7 @@ class BibTexParser(object):
 
         return record
 
-
     # some methods to tidy and format keys and vals
-
     def strip_quotes(self, val):
         """Strip double quotes enclosing string"""
         val = val.strip()
@@ -277,7 +278,7 @@ class BibTexParser(object):
             if val == k:
                 val = self.replace_dict[k]
         if not isinstance(val, str):
-            val = str(val,self.encoding,'ignore')
+            val = str(val, self.encoding, 'ignore')
 
         for translation in (self.unicode_to_latex, self.unicode_to_crappy_latex1):
             if '\\' in val or '{' in val:
@@ -310,16 +311,14 @@ class BibTexParser(object):
         return val
         #return unicodedata.normalize('NFKD', val).replace('\x00', '').replace('\x1A', '')
 
-
     def add_key(self, key):
         key = key.strip().strip('@').lower()
         if key in list(self.alt_dict.keys()):
             key = self.alt_dict[key]
         if not isinstance(key, str):
-            return str(key,'utf-8')
+            return str(key, 'utf-8')
         else:
             return key
-
 
     def getnames(self, names):
         """make people names as surname, firstnames
@@ -331,19 +330,20 @@ class BibTexParser(object):
         tidynames = []
         for namestring in names:
             namestring = namestring.strip()
-            if len(namestring) < 1: continue
+            if len(namestring) < 1:
+                continue
             if ',' in namestring:
-                namesplit = namestring.split(',',1)
+                namesplit = namestring.split(',', 1)
                 last = namesplit[0].strip()
                 firsts = [i.strip().strip('.') for i in namesplit[1].split()]
             else:
                 namesplit = namestring.split()
                 last = namesplit.pop()
-                firsts = [i.replace('.',' ').strip() for i in namesplit]
-            if last in ['jnr','jr','junior']:
+                firsts = [i.replace('.', ' ').strip() for i in namesplit]
+            if last in ['jnr', 'jr', 'junior']:
                 last = firsts.pop()
             for item in firsts:
-                if item in ['van','der','de','la']:
+                if item in ['van', 'der', 'de', 'la']:
                     last = firsts.pop() + ' ' + last
             tidynames.append(last + ", " + ' '.join(firsts))
         return tidynames
@@ -5075,4 +5075,3 @@ class BibTexParser(object):
         "\uD7FE": "\\mathtt{8}",
         "\uD7FF": "\\mathtt{9}",
     }
-
