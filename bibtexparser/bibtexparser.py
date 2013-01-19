@@ -18,12 +18,6 @@
 # Etienne Posthumus (epoz)
 # Francois Boulogne <fboulogne at april dot org>
 
-#"""
-#.. module:: bibtexparser
-#
-#.. moduleauthor:
-#"""
-
 import sys
 import string
 import io
@@ -34,14 +28,15 @@ import re
 
 class BibTexParser(object):
     """
+    A parser for bibtex files
 
     Example:
-    >>> parser = BibTexParser(filehandle)
-    >>> records, metadata = parser.parse()
+
+    >>> parser = BibTexParser(filehandler)
+    >>> records = parser.parse()
 
     """
     def __init__(self, fileobj):
-
         data = fileobj.read()
 
         # On some sample data files, the character encoding detection simply hangs
@@ -73,9 +68,9 @@ class BibTexParser(object):
         self.identifier_types = ['doi', 'isbn', 'issn']
 
     def parse(self):
-        """Parse the bibtex into a TODO
+        """Parse the bibtex into a list.
 
-        :returns: records
+        :returns: list -- records
         """
         records = []
         record = ""
