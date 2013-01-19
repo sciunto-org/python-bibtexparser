@@ -11,7 +11,7 @@ Welcome to BibtexParser's documentation!
 
 
 :Author: François Boulogne
-:Download: `Stable version <http://sciunto.org/source/>`_
+:Download: `Stable version <http://source.sciunto.org/>`_
 :Developer's corner: `github.com project <https://github.com/sciunto/python-bibtexparser>`_
 :Generated: |today|
 :License: AGPL v3
@@ -21,21 +21,10 @@ Welcome to BibtexParser's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-    install
-
-
-
-.. include install.rst
-.. include bibtexparser.rst
-
-How to install
-==============
-
-See :doc:`install`.
-
-See :doc:`bibtexparser`.
+    install.rst
+    bibtexparser.rst
 
 
 Indices and tables
