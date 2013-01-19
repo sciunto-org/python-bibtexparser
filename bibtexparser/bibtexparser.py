@@ -28,7 +28,7 @@ import re
 
 class BibTexParser(object):
     """
-    A parser for bibtex files
+    A parser for bibtex files.
 
     Example:
 
@@ -68,7 +68,7 @@ class BibTexParser(object):
         self.identifier_types = ['doi', 'isbn', 'issn']
 
     def parse(self):
-        """Parse the bibtex into a list.
+        """Parse the bibtex into a list of records.
 
         :returns: list -- records
         """
@@ -98,13 +98,13 @@ class BibTexParser(object):
     def parse_record(self, record):
         """Parse a record.
 
-        * tidy whitespace and other rubbish;
+        * tidy whitespace and other rubbish
         * parse out the bibtype and citekey
         * find all the key-value pairs it contains
 
-        :param record:
+        :param record: a record
 
-        :returns:
+        :returns: dict --
         """
 
         d = {}
@@ -170,7 +170,11 @@ class BibTexParser(object):
         return self.customisations(d)
 
     def customisations(self, record):
-        """alters some values to fit bibjson format"""
+        """Alters some values to fit bibjson format
+
+        :param record: a record
+        :returns: -- customized record
+        """
         if 'eprint' in record and not 'year' in record:
             yy = '????'
             ss = record['eprint'].split('/')
@@ -250,21 +254,36 @@ class BibTexParser(object):
 
     # some methods to tidy and format keys and vals
     def strip_quotes(self, val):
-        """Strip double quotes enclosing string"""
+        """Strip double quotes enclosing string
+
+        :param val: a value
+        :type val: string
+        :returns: string -- value
+        """
         val = val.strip()
         if val.startswith('"') and val.endswith('"'):
             return val[1:-1]
         return val
 
     def strip_braces(self, val):
-        """Strip braces enclosing string"""
+        """Strip braces enclosing string
+
+        :param val: a value
+        :type val: string
+        :returns: string -- value
+        """
         val.strip()
         if val.startswith('{') and val.endswith('}'):
             return val[1:-1]
         return val
 
     def string_subst(self, val):
-        """ Substitute string definitions """
+        """ Substitute string definitions
+
+        :param val: a value
+        :type val: string
+        :returns: string -- value
+        """
         #Corrected from upstream
         #See https://github.com/okfn/bibserver/issues/250
         if not val:
@@ -316,11 +335,12 @@ class BibTexParser(object):
             return key
 
     def getnames(self, names):
-        """make people names as surname, firstnames
-        or surname, initials. should eventually combine up the two
+        """Make people names as surname, firstnames
+        or surname, initials. Should eventually combine up the two
 
-        :param names: list
-        :return: list
+        :param names: a list of names
+        :type names: list
+        :return: list -- Correctly formated names
         """
         tidynames = []
         for namestring in names:
