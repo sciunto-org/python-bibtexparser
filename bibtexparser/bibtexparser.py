@@ -18,11 +18,11 @@
 # Etienne Posthumus (epoz)
 # Francois Boulogne <fboulogne at april dot org>
 
-"""
-.. module:: bibtexparser
-
-.. moduleauthor:
-"""
+#"""
+#.. module:: bibtexparser
+#
+#.. moduleauthor:
+#"""
 
 import sys
 import string
@@ -75,7 +75,7 @@ class BibTexParser(object):
     def parse(self):
         """Parse the bibtex into a TODO
 
-        :returns: records, metadata
+        :returns: records
         """
         records = []
         record = ""
@@ -98,7 +98,7 @@ class BibTexParser(object):
             parsed = self.parse_record(record)
             if parsed:
                 records.append(parsed)
-        return records, {}
+        return records
 
     def parse_record(self, record):
         """Parse a record.
