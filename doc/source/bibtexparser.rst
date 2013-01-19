@@ -1,8 +1,8 @@
 BibtexParser
 ============
 
-
 .. automodule:: bibtexparser
     :members:
-    :undoc-members:
+    :inherited-members:
     :show-inheritance:
+
