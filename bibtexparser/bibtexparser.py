@@ -25,6 +25,118 @@ import json
 import unicodedata
 import re
 
+def getnames(names):
+    """Make people names as surname, firstnames
+    or surname, initials. Should eventually combine up the two
+
+    :param names: a list of names
+    :type names: list
+    :return: list -- Correctly formated names
+    """
+    tidynames = []
+    for namestring in names:
+        namestring = namestring.strip()
+        if len(namestring) < 1:
+            continue
+        if ',' in namestring:
+            namesplit = namestring.split(',', 1)
+            last = namesplit[0].strip()
+            firsts = [i.strip().strip('.') for i in namesplit[1].split()]
+        else:
+            namesplit = namestring.split()
+            last = namesplit.pop()
+            firsts = [i.replace('.', ' ').strip() for i in namesplit]
+        if last in ['jnr', 'jr', 'junior']:
+            last = firsts.pop()
+        for item in firsts:
+            if item in ['van', 'der', 'de', 'la']:
+                last = firsts.pop() + ' ' + last
+        tidynames.append(last + ", " + ' '.join(firsts))
+    return tidynames
+
+def customisations(self, record):
+    """Alters some values to fit bibjson format
+
+    :param record: a record
+    :returns: -- customized record
+    """
+    if 'eprint' in record and not 'year' in record:
+        yy = '????'
+        ss = record['eprint'].split('/')
+        if len(ss) == 2:
+            yy = ss[1][0:2]
+        if yy[0] in ['0']:
+            record['year'] = '20' + yy
+        elif yy[0] in ['9']:
+            record['year'] = '19' + yy
+    if "pages" in record:
+        if "-" in record["pages"]:
+            p = [i.strip().strip('-') for i in record["pages"].split("-")]
+            record["pages"] = p[0] + ' to ' + p[-1]
+    if "type" in record:
+        record["type"] = record["type"].lower()
+    if "author" in record:
+        if record["author"]:
+            record["author"] = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
+            # convert author to object
+            record["author"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["author"]]
+        else:
+            del record["author"]
+    if "editor" in record:
+        if record["editor"]:
+            record["editor"] = getnames([i.strip() for i in record["editor"].replace('\n', ' ').split(" and ")])
+            # convert editor to object
+            record["editor"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
+        else:
+            del record["editor"]
+    if "journal" in record:
+        # switch journal to object
+        if record["journal"]:
+            record["journal"] = {"name": record["journal"], "id": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
+    if "keyword" in record:
+        record["keyword"] = [i.strip() for i in record["keyword"].replace('\n', '').split(",")]
+    if "subject" in record:
+        if record["subject"]:
+            record["subject"] = {"name": record["subject"], "id": record["subject"].replace(',', '').replace(' ', '').replace('.', '')}
+    if "link" in record:
+        links = [i.strip().replace("  ", " ") for i in record["link"].split('\n')]
+        record['link'] = []
+        for link in links:
+            parts = link.split(" ")
+            linkobj = {"url": parts[0]}
+            if len(parts) > 1:
+                linkobj["anchor"] = parts[1]
+            if len(parts) > 2:
+                linkobj["format"] = parts[2]
+            if len(linkobj["url"]) > 0:
+                record["link"].append(linkobj)
+    if 'doi' in record:
+        if 'link' not in record:
+            record['link'] = []
+        nodoi = True
+        for item in record['link']:
+            if 'doi' in item:
+                nodoi = False
+        if nodoi:
+            link = record['doi']
+            if link.startswith('10'):
+                link = 'http://dx.doi.org/' + link
+            record['link'].append({"url": link, "anchor": "doi"})
+    for ident in self.identifier_types:
+        if ident in record:
+            if ident == 'issn':
+                if 'journal' in record:
+                    if 'identifier' not in record['journal']:
+                        record['journal']['identifier'] = []
+                    record['journal']['identifier'].append({"id": record[ident], "type": "issn"})
+            else:
+                if 'identifier' not in record:
+                    record['identifier'] = []
+                record['identifier'].append({"id": record[ident], "type": ident})
+            del record[ident]
+
+    return record
+
 
 class BibTexParser(object):
     """
@@ -52,7 +164,7 @@ class BibTexParser(object):
         self.has_metadata = False
         self.persons = []
         # if bibtex file has substition strings, they are stored here,
-        # then the values are checked for those substitions in add_val
+        # then the values are checked for those substitions in _add_val
         self.replace_dict = {}
         # pre-defined set of key changes
         self.alt_dict = {
@@ -131,24 +243,24 @@ class BibTexParser(object):
             if kv.startswith('@') and not inkey:
                 # it is the start of the record - set the bibtype and citekey (id)
                 bibtype, id = kv.split('{', 1)
-                bibtype = self.add_key(bibtype)
+                bibtype = self._add_key(bibtype)
                 id = id.strip('}').strip(',')
             elif '=' in kv and not inkey:
                 # it is a line with a key value pair on it
                 key, val = [i.strip() for i in kv.split('=', 1)]
-                key = self.add_key(key)
+                key = self._add_key(key)
                 # if it looks like the value spans lines, store details for next loop
                 if (val.startswith('{') and not val.endswith('}')) or (val.startswith('"') and not val.replace('}', '').endswith('"')):
                     inkey = key
                     inval = val
                 else:
-                    d[key] = self.add_val(val)
+                    d[key] = self._add_val(val)
             elif inkey:
                 # if this line continues the value from a previous line, append
                 inval += ',' + kv
                 # if it looks like this line finishes the value, store it and clear for next loop
                 if (inval.startswith('{') and inval.endswith('}')) or (inval.startswith('"') and inval.endswith('"')):
-                    d[inkey] = self.add_val(inval)
+                    d[inkey] = self._add_val(inval)
                     inkey = ""
                     inval = ""
 
@@ -166,94 +278,13 @@ class BibTexParser(object):
             if d['type'] == 'personal bibliography' or d['type'] == 'comment':
                 self.has_metadata = True
 
+        return d
         # apply any customisations to the record object then return it
-        return self.customisations(d)
+        #return self.customisations(d)
 
-    def customisations(self, record):
-        """Alters some values to fit bibjson format
-
-        :param record: a record
-        :returns: -- customized record
-        """
-        if 'eprint' in record and not 'year' in record:
-            yy = '????'
-            ss = record['eprint'].split('/')
-            if len(ss) == 2:
-                yy = ss[1][0:2]
-            if yy[0] in ['0']:
-                record['year'] = '20' + yy
-            elif yy[0] in ['9']:
-                record['year'] = '19' + yy
-        if "pages" in record:
-            if "-" in record["pages"]:
-                p = [i.strip().strip('-') for i in record["pages"].split("-")]
-                record["pages"] = p[0] + ' to ' + p[-1]
-        if "type" in record:
-            record["type"] = record["type"].lower()
-        if "author" in record:
-            if record["author"]:
-                record["author"] = self.getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
-                # convert author to object
-                record["author"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["author"]]
-            else:
-                del record["author"]
-        if "editor" in record:
-            if record["editor"]:
-                record["editor"] = self.getnames([i.strip() for i in record["editor"].replace('\n', ' ').split(" and ")])
-                # convert editor to object
-                record["editor"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
-            else:
-                del record["editor"]
-        if "journal" in record:
-            # switch journal to object
-            if record["journal"]:
-                record["journal"] = {"name": record["journal"], "id": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
-        if "keyword" in record:
-            record["keyword"] = [i.strip() for i in record["keyword"].replace('\n', '').split(",")]
-        if "subject" in record:
-            if record["subject"]:
-                record["subject"] = {"name": record["subject"], "id": record["subject"].replace(',', '').replace(' ', '').replace('.', '')}
-        if "link" in record:
-            links = [i.strip().replace("  ", " ") for i in record["link"].split('\n')]
-            record['link'] = []
-            for link in links:
-                parts = link.split(" ")
-                linkobj = {"url": parts[0]}
-                if len(parts) > 1:
-                    linkobj["anchor"] = parts[1]
-                if len(parts) > 2:
-                    linkobj["format"] = parts[2]
-                if len(linkobj["url"]) > 0:
-                    record["link"].append(linkobj)
-        if 'doi' in record:
-            if 'link' not in record:
-                record['link'] = []
-            nodoi = True
-            for item in record['link']:
-                if 'doi' in item:
-                    nodoi = False
-            if nodoi:
-                link = record['doi']
-                if link.startswith('10'):
-                    link = 'http://dx.doi.org/' + link
-                record['link'].append({"url": link, "anchor": "doi"})
-        for ident in self.identifier_types:
-            if ident in record:
-                if ident == 'issn':
-                    if 'journal' in record:
-                        if 'identifier' not in record['journal']:
-                            record['journal']['identifier'] = []
-                        record['journal']['identifier'].append({"id": record[ident], "type": "issn"})
-                else:
-                    if 'identifier' not in record:
-                        record['identifier'] = []
-                    record['identifier'].append({"id": record[ident], "type": ident})
-                del record[ident]
-
-        return record
 
     # some methods to tidy and format keys and vals
-    def strip_quotes(self, val):
+    def _strip_quotes(self, val):
         """Strip double quotes enclosing string
 
         :param val: a value
@@ -265,7 +296,7 @@ class BibTexParser(object):
             return val[1:-1]
         return val
 
-    def strip_braces(self, val):
+    def _strip_braces(self, val):
         """Strip braces enclosing string
 
         :param val: a value
@@ -277,7 +308,7 @@ class BibTexParser(object):
             return val[1:-1]
         return val
 
-    def string_subst(self, val):
+    def _string_subst(self, val):
         """ Substitute string definitions
 
         :param val: a value
@@ -313,19 +344,19 @@ class BibTexParser(object):
                     val = k.join(parts)
         return val
 
-    def add_val(self, val):
+    def _add_val(self, val):
         if not val or val == "{}":
             return ''
         """ Clean instring before adding to dictionary """
-        val = self.strip_braces(val)
-        val = self.strip_quotes(val)
-        val = self.strip_braces(val)
-        val = self.string_subst(val)
+        val = self._strip_braces(val)
+        val = self._strip_quotes(val)
+        val = self._strip_braces(val)
+        val = self._string_subst(val)
         """alter based on particular key types"""
         return val
         #return unicodedata.normalize('NFKD', val).replace('\x00', '').replace('\x1A', '')
 
-    def add_key(self, key):
+    def _add_key(self, key):
         key = key.strip().strip('@').lower()
         if key in list(self.alt_dict.keys()):
             key = self.alt_dict[key]
@@ -334,34 +365,6 @@ class BibTexParser(object):
         else:
             return key
 
-    def getnames(self, names):
-        """Make people names as surname, firstnames
-        or surname, initials. Should eventually combine up the two
-
-        :param names: a list of names
-        :type names: list
-        :return: list -- Correctly formated names
-        """
-        tidynames = []
-        for namestring in names:
-            namestring = namestring.strip()
-            if len(namestring) < 1:
-                continue
-            if ',' in namestring:
-                namesplit = namestring.split(',', 1)
-                last = namesplit[0].strip()
-                firsts = [i.strip().strip('.') for i in namesplit[1].split()]
-            else:
-                namesplit = namestring.split()
-                last = namesplit.pop()
-                firsts = [i.replace('.', ' ').strip() for i in namesplit]
-            if last in ['jnr', 'jr', 'junior']:
-                last = firsts.pop()
-            for item in firsts:
-                if item in ['van', 'der', 'de', 'la']:
-                    last = firsts.pop() + ' ' + last
-            tidynames.append(last + ", " + ' '.join(firsts))
-        return tidynames
 
     # list of latex conversions from
     # https://gist.github.com/798549
