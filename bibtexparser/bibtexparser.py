@@ -193,7 +193,7 @@ class BibTexParser(object):
             else:
                 if line.strip().startswith('@'):
                     if record != "":
-                        parsed = self.parse_record(record)
+                        parsed = self._parse_record(record)
                         if parsed:
                             records.append(parsed)
                     record = ""
@@ -202,12 +202,12 @@ class BibTexParser(object):
 
         # catch any remaining record and send it for parsing
         if record != "":
-            parsed = self.parse_record(record)
+            parsed = self._parse_record(record)
             if parsed:
                 records.append(parsed)
         return records
 
-    def parse_record(self, record):
+    def _parse_record(self, record):
         """Parse a record.
 
         * tidy whitespace and other rubbish
