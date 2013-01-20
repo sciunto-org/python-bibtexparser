@@ -145,7 +145,7 @@ class BibTexParser(object):
     Example:
 
     >>> parser = BibTexParser(filehandler)
-    >>> records = parser.parse()
+    >>> records = parser.get_entry_list()
 
     """
     def __init__(self, fileobj):
@@ -179,7 +179,27 @@ class BibTexParser(object):
         }
         self.identifier_types = ['doi', 'isbn', 'issn']
 
-    def parse(self):
+        self.records = self._parse_records()
+
+    def get_entry_list():
+        """Get a list of bibtex entries.
+
+        :retuns: list -- entries
+        """
+        return self.records
+
+    def get_entry_dict():
+        """Get a dictionnary of bibtex entries.
+        The dict key is the bibtex entry key
+
+        :retuns: dict -- entries
+        """
+        entries_hash = {}
+        for entry in self.records:
+            entries_hash[entry['id']] = entry
+        return entries_hash
+
+    def _parse_records(self):
         """Parse the bibtex into a list of records.
 
         :returns: list -- records
