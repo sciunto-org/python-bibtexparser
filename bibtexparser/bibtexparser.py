@@ -181,14 +181,14 @@ class BibTexParser(object):
 
         self.records = self._parse_records()
 
-    def get_entry_list():
+    def get_entry_list(self):
         """Get a list of bibtex entries.
 
         :retuns: list -- entries
         """
         return self.records
 
-    def get_entry_dict():
+    def get_entry_dict(self):
         """Get a dictionnary of bibtex entries.
         The dict key is the bibtex entry key
 
