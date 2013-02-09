@@ -54,12 +54,13 @@ def getnames(names):
         tidynames.append(last + ", " + ' '.join(firsts))
     return tidynames
 
-def customisations(self, record):
+def customisations(record):
     """Alters some values to fit bibjson format
 
     :param record: a record
     :returns: -- customized record
     """
+    identifier_types = ['doi', 'isbn', 'issn']
     if 'eprint' in record and not 'year' in record:
         yy = '????'
         ss = record['eprint'].split('/')
@@ -122,7 +123,7 @@ def customisations(self, record):
             if link.startswith('10'):
                 link = 'http://dx.doi.org/' + link
             record['link'].append({"url": link, "anchor": "doi"})
-    for ident in self.identifier_types:
+    for ident in identifier_types:
         if ident in record:
             if ident == 'issn':
                 if 'journal' in record:
@@ -177,7 +178,6 @@ class BibTexParser(object):
             'links': 'link',
             'subjects': 'subject'
         }
-        self.identifier_types = ['doi', 'isbn', 'issn']
 
         self.records = self._parse_records()
 
@@ -298,9 +298,9 @@ class BibTexParser(object):
             if d['type'] == 'personal bibliography' or d['type'] == 'comment':
                 self.has_metadata = True
 
-        return d
+        #return d
         # apply any customisations to the record object then return it
-        #return self.customisations(d)
+        return customisations(d)
 
 
     # some methods to tidy and format keys and vals
