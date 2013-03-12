@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/sciunto/python-bibtexparser.png)](http://travis-ci.org/sciunto/python-bibtexparser)
+
 python-bibtexparser
 ===================
 
