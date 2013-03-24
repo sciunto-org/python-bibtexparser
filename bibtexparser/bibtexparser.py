@@ -80,7 +80,7 @@ def customisations(record):
         if record["author"]:
             record["author"] = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
             # convert author to object
-            record["author"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["author"]]
+            #record["author"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["author"]]
         else:
             del record["author"]
     if "editor" in record:
@@ -90,10 +90,10 @@ def customisations(record):
             record["editor"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
         else:
             del record["editor"]
-    if "journal" in record:
+    #if "journal" in record:
         # switch journal to object
-        if record["journal"]:
-            record["journal"] = {"name": record["journal"], "id": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
+        #if record["journal"]:
+        #    record["journal"] = {"name": record["journal"], "id": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
     if "keyword" in record:
         record["keyword"] = [i.strip() for i in record["keyword"].replace('\n', '').split(",")]
     if "subject" in record:
