@@ -235,7 +235,6 @@ class BibTexParser(object):
 
         :returns: dict --
         """
-        print('parse record')
         d = {}
 
         if not record.startswith('@'):
@@ -296,11 +295,9 @@ class BibTexParser(object):
                 self.has_metadata = True
 
         if customisation is None:
-            print('Je cust pas')
             return d
         else:
             # apply any customisations to the record object then return it
-            print('Je cust')
             return customisation(d)
 
 
