@@ -1,3 +1,11 @@
 unittest
 ========
 * getnames
+
+DOC
+===
+
+* docstrings
+* doctests
+* add examples in docs/
+* Explain how to customize
