@@ -4,7 +4,7 @@
 python-bibtexparser
 ===================
 
-Bibtex parser in Python.
+Bibtex parser in Python 3.
 
 The original source code was part of bibserver from okfn
 http://github.com/okfn/bibserver
