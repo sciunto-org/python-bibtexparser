@@ -31,7 +31,7 @@ from bibtexparser.bibtexparser import BibTexParser, customisations
 class TestBibtexParser(unittest.TestCase):
 
     def test_article(self):
-        with open('tests/data/article.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile)
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
@@ -47,7 +47,7 @@ class TestBibtexParser(unittest.TestCase):
                          'volume': '12',
                          'month': 'jan'
                          }]
-        self.assert_equal(res, expected)
+        self.assertEqual(res, expected)
 
     #def test_article_cust(self):
     #bib = BibTexParser(bibfile, customisation=customisations)
