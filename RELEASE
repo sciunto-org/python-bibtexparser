@@ -5,6 +5,6 @@ How to release
 * Update version in docs/source/conf.py
 * Update the file info.py
 * Create a tarball and upload it on github
-    git archive master | bzip2 > libzimsciunto-x.y.tar.bz2
+    git archive master | bzip2 > bibtexparser-x.y.tar.bz2
 * Send the package on pypi
     python setup.py sdist upload
