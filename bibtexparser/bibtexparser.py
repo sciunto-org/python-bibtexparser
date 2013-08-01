@@ -18,12 +18,7 @@
 # Etienne Posthumus (epoz)
 # Francois Boulogne <fboulogne at april dot org>
 
-import sys
-import string
 import io
-import json
-import unicodedata
-import re
 
 def getnames(names):
     """Make people names as surname, firstnames
