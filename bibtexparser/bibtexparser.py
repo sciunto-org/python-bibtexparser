@@ -136,13 +136,15 @@ class BibTexParser(object):
     """
     A parser for bibtex files.
 
+    :param customisation: a function
+
     Example:
 
     >>> parser = BibTexParser(filehandler)
     >>> records = parser.get_entry_list()
 
     """
-    def __init__(self, fileobj):
+    def __init__(self, fileobj, customisation=None):
         data = fileobj.read()
 
         # On some sample data files, the character encoding detection simply hangs
@@ -172,7 +174,7 @@ class BibTexParser(object):
             'subjects': 'subject'
         }
 
-        self.records = self._parse_records()
+        self.records = self._parse_records(customisation=customisation)
 
     def get_entry_list(self):
         """Get a list of bibtex entries.
@@ -192,9 +194,10 @@ class BibTexParser(object):
             entries_hash[entry['id']] = entry
         return entries_hash
 
-    def _parse_records(self):
+    def _parse_records(self, customisation=None):
         """Parse the bibtex into a list of records.
 
+        :param customisation: a function
         :returns: list -- records
         """
         records = []
@@ -206,7 +209,7 @@ class BibTexParser(object):
             else:
                 if line.strip().startswith('@'):
                     if record != "":
-                        parsed = self._parse_record(record)
+                        parsed = self._parse_record(record, customisation=customisation)
                         if parsed:
                             records.append(parsed)
                     record = ""
@@ -215,12 +218,12 @@ class BibTexParser(object):
 
         # catch any remaining record and send it for parsing
         if record != "":
-            parsed = self._parse_record(record)
+            parsed = self._parse_record(record, customisation=customisation)
             if parsed:
                 records.append(parsed)
         return records
 
-    def _parse_record(self, record):
+    def _parse_record(self, record, customisation=None):
         """Parse a record.
 
         * tidy whitespace and other rubbish
@@ -228,10 +231,11 @@ class BibTexParser(object):
         * find all the key-value pairs it contains
 
         :param record: a record
+        :param customisation: a function
 
         :returns: dict --
         """
-
+        print('parse record')
         d = {}
 
         if not record.startswith('@'):
@@ -291,9 +295,13 @@ class BibTexParser(object):
             if d['type'] == 'personal bibliography' or d['type'] == 'comment':
                 self.has_metadata = True
 
-        #return d
-        # apply any customisations to the record object then return it
-        return customisations(d)
+        if customisation is None:
+            print('Je cust pas')
+            return d
+        else:
+            # apply any customisations to the record object then return it
+            print('Je cust')
+            return customisation(d)
 
 
     # some methods to tidy and format keys and vals
