@@ -20,6 +20,7 @@
 
 import io
 
+
 def getnames(names):
     """Make people names as surname, firstnames
     or surname, initials. Should eventually combine up the two
@@ -48,6 +49,7 @@ def getnames(names):
                 last = firsts.pop() + ' ' + last
         tidynames.append(last + ", " + ' '.join(firsts))
     return tidynames
+
 
 def customisations(record):
     """Alters some values to fit bibjson format
