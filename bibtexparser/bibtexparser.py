@@ -20,7 +20,7 @@
 
 import io
 
-__all__ = ['getnames', 'BibTexParser']
+__all__ = ['getnames', 'BibTexParser', 'customisations']
 
 
 def getnames(names):
