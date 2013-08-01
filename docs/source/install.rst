@@ -4,12 +4,12 @@ How to install?
 Requirements
 ------------
 
-* python 3
+* python 3.2 or later
 
 Package manager
 ---------------
 
-An AUR package is not yet available. 
+An AUR package is not yet available.
 
 PyPI
 ----
