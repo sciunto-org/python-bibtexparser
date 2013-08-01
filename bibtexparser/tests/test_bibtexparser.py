@@ -36,8 +36,7 @@ class TestBibtexParser(unittest.TestCase):
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
                          'type': 'article',
-                         'abstract': 'This is an abstract. This line should be long enough to test
-                                      \nmultilines...',
+                         'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...',
                          'year': '2013',
                          'journal': 'Nice Journal',
                          'id': 'Cesar2013',
