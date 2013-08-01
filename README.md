@@ -12,6 +12,10 @@ http://github.com/okfn/bibserver
 
 The aim of this project is to provide a standalone library in python.
 
+Documentation
+=============
+
+https://bibtexparser.readthedocs.org/
 
 License
 =======
