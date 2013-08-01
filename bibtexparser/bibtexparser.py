@@ -20,6 +20,8 @@
 
 import io
 
+__all__ = ['getnames', 'BibTexParser']
+
 
 def getnames(names):
     """Make people names as surname, firstnames
