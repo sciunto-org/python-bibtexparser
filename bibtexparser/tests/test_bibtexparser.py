@@ -49,6 +49,21 @@ class TestBibtexParser(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
-    #def test_article_cust(self):
-    #bib = BibTexParser(bibfile, customisation=customisations)
-    #print(bib.get_entry_list())
+    def test_article_cust(self):
+        with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile, customisation=customisations)
+            res = bib.get_entry_list()
+        expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...',
+                     'type': 'article',
+                     'pages': '12 to 23',
+                     'volume': '12',
+                     'id': 'Cesar2013',
+                     'year': '2013',
+                     'author': ['César, Jean'],
+                     'journal': {'id': 'NiceJournal', 'name': 'Nice Journal'},
+                     'comments': 'A comment',
+                     'month': 'jan',
+                     'keyword': ['keyword1', 'keyword2'],
+                     'title': 'An amazing title'
+                     }]
+        self.assertEqual(res, expected)
