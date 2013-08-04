@@ -4,7 +4,8 @@
 # License:
 
 import unittest
-from bibtexparser import getnames
+from bibtexparser.bparser import getnames
+
 
 class TestBibtexParserMethod(unittest.TestCase):
 
@@ -25,7 +26,7 @@ class TestBibtexParserMethod(unittest.TestCase):
         self.assertEqual(result, expected)
 
 
-from bibtexparser import BibTexParser, customisations
+from bibtexparser.bparser import BibTexParser, customisations
 
 
 class TestBibtexParser(unittest.TestCase):

@@ -1,7 +1,7 @@
 BibtexParser
 ============
 
-.. automodule:: bibtexparser
+.. automodule:: bparser
     :members:
     :inherited-members:
     :show-inheritance:

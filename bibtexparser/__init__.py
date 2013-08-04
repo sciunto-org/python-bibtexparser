@@ -1,2 +1,10 @@
+"""
+Bibtexparser Module
+"""
 
-from .bibtexparser import *
+__all__ = ['bparser', 'info', 'latexenc']
+
+from . import bparser, info, latexenc
+
+#from . import *
+
