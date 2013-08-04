@@ -7,4 +7,5 @@ python:
 script:
   - nosetests
   - cd docs
+  - pip install sphinx
   - make html
