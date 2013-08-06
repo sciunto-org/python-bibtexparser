@@ -144,9 +144,10 @@ class BibTexParser(object):
     :param customisation: a function
 
     Example:
-
+    >>> from bibtexparser.bparser import BibTexParser
     >>> parser = BibTexParser(filehandler)
-    >>> records = parser.get_entry_list()
+    >>> record_list = parser.get_entry_list()
+    >>> records_dict = parser.get_entry_dict()
 
     """
     def __init__(self, fileobj, customisation=None):
