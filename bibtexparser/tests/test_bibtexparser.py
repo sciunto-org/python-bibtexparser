@@ -29,8 +29,12 @@ class TestBibtexParserMethod(unittest.TestCase):
 from bibtexparser.bparser import BibTexParser, customisations
 
 
-class TestBibtexParser(unittest.TestCase):
+class TestBibtexParserList(unittest.TestCase):
 
+
+    ###########
+    # ARTICLE
+    ###########
     def test_article(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile)
@@ -67,4 +71,40 @@ class TestBibtexParser(unittest.TestCase):
                      'keyword': ['keyword1', 'keyword2'],
                      'title': 'An amazing title'
                      }]
+        self.assertEqual(res, expected)
+
+    ###########
+    # BOOK
+    ###########
+    def test_book(self):
+        with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            res = bib.get_entry_list()
+            expected = [{'type': 'book',
+                         'year': '1987',
+                         'edition': '2',
+                         'publisher': 'Wiley Edition',
+                         'id': 'Bird1987',
+                         'volume': '1',
+                         'title': 'Dynamics of Polymeric Liquid',
+                         'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'
+                         }]
+
+        self.assertEqual(res, expected)
+
+    @unittest.skip('Bug on dot after letters')
+    def test_book_cust(self):
+        with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile, customisation=customisations)
+            res = bib.get_entry_list()
+            expected = [{'type': 'book',
+                         'year': '1987',
+                         'edition': '2',
+                         'publisher': 'Wiley Edition',
+                         'id': 'Bird1987',
+                         'volume': '1',
+                         'title': 'Dynamics of Polymeric Liquid',
+                         'author': ['Bird, R.B.', 'Armstrong, R.C.', 'Hassager, O.']
+                         }]
+
         self.assertEqual(res, expected)
