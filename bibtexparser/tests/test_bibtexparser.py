@@ -14,6 +14,9 @@ class TestBibtexParserMethod(unittest.TestCase):
                  'F. Bar',
                  'Jean de Savigny',
                  'Jean la Tour',
+                 'Jean le Tour',
+                 'Mike ben Akar',
+                 #'Jean de la Tour',
                  #'Johannes Diderik van der Waals',
                  ]
         result = getnames(names)
@@ -21,6 +24,9 @@ class TestBibtexParserMethod(unittest.TestCase):
                     'Bar, F',
                     'de Savigny, Jean',
                     'la Tour, Jean',
+                    'le Tour, Jean',
+                    'ben Akar, Mike',
+                    #'de la Tour, Jean',
                     #'van der Waals, Johannes Diderik',
                     ]
         self.assertEqual(result, expected)

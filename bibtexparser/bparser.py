@@ -48,7 +48,7 @@ def getnames(names):
         if last in ['jnr', 'jr', 'junior']:
             last = firsts.pop()
         for item in firsts:
-            if item in ['van', 'der', 'de', 'la']:
+            if item in ['ben', 'van', 'der', 'de', 'la', 'le']:
                 last = firsts.pop() + ' ' + last
         tidynames.append(last + ", " + ' '.join(firsts))
     return tidynames
