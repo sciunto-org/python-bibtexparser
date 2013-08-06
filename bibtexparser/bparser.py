@@ -31,6 +31,7 @@ class BibTexParser(object):
     :param customisation: a function
 
     Example:
+
     >>> from bibtexparser.bparser import BibTexParser
     >>> filehandler = open('bibtex', 'r')
     >>> parser = BibTexParser(filehandler)

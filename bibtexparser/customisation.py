@@ -3,6 +3,9 @@
 # Author: Francois Boulogne
 # License:
 
+"""
+A set of functions useful for customizing bibtex fields.
+"""
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
            'page', 'doi', 'type']
