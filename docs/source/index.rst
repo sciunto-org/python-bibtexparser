@@ -27,6 +27,7 @@ Contents:
 
 
 .. code-block:: python
+
     # Prepare a bibtex sample
     # for illustration purpose
 
