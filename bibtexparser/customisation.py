@@ -4,17 +4,17 @@
 # License:
 
 
-__all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link', 
+__all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
            'page', 'doi', 'type']
 
 
 def getnames(names):
     """Make people names as surname, firstnames
-    or surname, initials. Should eventually combine up the two
+    or surname, initials. Should eventually combine up the two.
 
     :param names: a list of names
     :type names: list
-    :return: list -- Correctly formated names
+    :returns: list -- Correctly formated names
     """
     tidynames = []
     for namestring in names:
@@ -40,6 +40,11 @@ def getnames(names):
 
 def author(record):
     """
+    Split author field into a list of "Name, Surname".
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
 
     """
     if "author" in record:
@@ -52,6 +57,10 @@ def author(record):
 
 def editor(record):
     """
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
 
     """
     if "editor" in record:
@@ -66,6 +75,11 @@ def editor(record):
 
 def page(record):
     """
+    Separate pages by the word "to".
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
 
     """
     if "pages" in record:
@@ -77,6 +91,11 @@ def page(record):
 
 def type(record):
     """
+    Put the type into lower case.
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
 
     """
     if "type" in record:
@@ -86,6 +105,12 @@ def type(record):
 
 def journal(record):
     """
+    Turn the journal field into a dict composed of the original journal name
+    and a journal id (without coma or blank).
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
 
     """
     if "journal" in record:
@@ -98,6 +123,11 @@ def journal(record):
 
 def keyword(record):
     """
+    Split keyword field into a list.
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
 
     """
     if "keyword" in record:
@@ -108,6 +138,10 @@ def keyword(record):
 
 def link(record):
     """
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
 
     """
     if "link" in record:
@@ -128,6 +162,10 @@ def link(record):
 
 def doi(record):
     """
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
 
     """
     if 'doi' in record:
