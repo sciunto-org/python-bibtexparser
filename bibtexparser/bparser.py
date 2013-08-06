@@ -21,7 +21,7 @@
 import io
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2
 
-__all__ = ['BibTexParser', 'customisations']
+__all__ = ['BibTexParser']
 
 
 class BibTexParser(object):
@@ -32,6 +32,7 @@ class BibTexParser(object):
 
     Example:
     >>> from bibtexparser.bparser import BibTexParser
+    >>> filehandler = open('bibtex', 'r')
     >>> parser = BibTexParser(filehandler)
     >>> record_list = parser.get_entry_list()
     >>> records_dict = parser.get_entry_dict()
@@ -193,8 +194,6 @@ class BibTexParser(object):
             # apply any customisations to the record object then return it
             return customisation(d)
 
-
-    # some methods to tidy and format keys and vals
     def _strip_quotes(self, val):
         """Strip double quotes enclosing string
 
@@ -265,7 +264,6 @@ class BibTexParser(object):
         val = self._string_subst(val)
         """alter based on particular key types"""
         return val
-        #return unicodedata.normalize('NFKD', val).replace('\x00', '').replace('\x1A', '')
 
     def _add_key(self, key):
         key = key.strip().strip('@').lower()
