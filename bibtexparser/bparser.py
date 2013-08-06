@@ -21,39 +21,10 @@
 import io
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2
 
-__all__ = ['getnames', 'BibTexParser', 'customisations']
+__all__ = ['BibTexParser', 'customisations']
 
 
-def getnames(names):
-    """Make people names as surname, firstnames
-    or surname, initials. Should eventually combine up the two
-
-    :param names: a list of names
-    :type names: list
-    :return: list -- Correctly formated names
-    """
-    tidynames = []
-    for namestring in names:
-        namestring = namestring.strip()
-        if len(namestring) < 1:
-            continue
-        if ',' in namestring:
-            namesplit = namestring.split(',', 1)
-            last = namesplit[0].strip()
-            firsts = [i.strip().strip('.') for i in namesplit[1].split()]
-        else:
-            namesplit = namestring.split()
-            last = namesplit.pop()
-            firsts = [i.replace('.', ' ').strip() for i in namesplit]
-        if last in ['jnr', 'jr', 'junior']:
-            last = firsts.pop()
-        for item in firsts:
-            if item in ['ben', 'van', 'der', 'de', 'la', 'le']:
-                last = firsts.pop() + ' ' + last
-        tidynames.append(last + ", " + ' '.join(firsts))
-    return tidynames
-
-
+from bibtexparser.customisation import *
 def customisations(record):
     """Alters some values to fit bibjson format
 
@@ -61,6 +32,7 @@ def customisations(record):
     :returns: -- customized record
     """
     identifier_types = ['doi', 'isbn', 'issn']
+
     if 'eprint' in record and not 'year' in record:
         yy = '????'
         ss = record['eprint'].split('/')
@@ -70,57 +42,10 @@ def customisations(record):
             record['year'] = '20' + yy
         elif yy[0] in ['9']:
             record['year'] = '19' + yy
-    if "pages" in record:
-        if "-" in record["pages"]:
-            p = [i.strip().strip('-') for i in record["pages"].split("-")]
-            record["pages"] = p[0] + ' to ' + p[-1]
-    if "type" in record:
-        record["type"] = record["type"].lower()
-    if "author" in record:
-        if record["author"]:
-            record["author"] = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
-        else:
-            del record["author"]
-    if "editor" in record:
-        if record["editor"]:
-            record["editor"] = getnames([i.strip() for i in record["editor"].replace('\n', ' ').split(" and ")])
-            # convert editor to object
-            record["editor"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
-        else:
-            del record["editor"]
-    if "journal" in record:
-        # switch journal to object
-        if record["journal"]:
-            record["journal"] = {"name": record["journal"], "id": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
-    if "keyword" in record:
-        record["keyword"] = [i.strip() for i in record["keyword"].replace('\n', '').split(",")]
+
     if "subject" in record:
         if record["subject"]:
             record["subject"] = {"name": record["subject"], "id": record["subject"].replace(',', '').replace(' ', '').replace('.', '')}
-    if "link" in record:
-        links = [i.strip().replace("  ", " ") for i in record["link"].split('\n')]
-        record['link'] = []
-        for link in links:
-            parts = link.split(" ")
-            linkobj = {"url": parts[0]}
-            if len(parts) > 1:
-                linkobj["anchor"] = parts[1]
-            if len(parts) > 2:
-                linkobj["format"] = parts[2]
-            if len(linkobj["url"]) > 0:
-                record["link"].append(linkobj)
-    if 'doi' in record:
-        if 'link' not in record:
-            record['link'] = []
-        nodoi = True
-        for item in record['link']:
-            if 'doi' in item:
-                nodoi = False
-        if nodoi:
-            link = record['doi']
-            if link.startswith('10'):
-                link = 'http://dx.doi.org/' + link
-            record['link'].append({"url": link, "anchor": "doi"})
     for ident in identifier_types:
         if ident in record:
             if ident == 'issn':
@@ -134,6 +59,14 @@ def customisations(record):
                 record['identifier'].append({"id": record[ident], "type": ident})
             del record[ident]
 
+    record = type(record)
+    record = author(record)
+    record = editor(record)
+    record = journal(record)
+    record = keyword(record)
+    record = link(record)
+    record = page(record)
+    record = doi(record)
     return record
 
 
