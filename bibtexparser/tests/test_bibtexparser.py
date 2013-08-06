@@ -4,35 +4,27 @@
 # License:
 
 import unittest
-from bibtexparser.bparser import getnames
+
+from bibtexparser.bparser import BibTexParser
+from bibtexparser.customisation import *
 
 
-class TestBibtexParserMethod(unittest.TestCase):
+def customisations(record):
+    """Use all functions
 
-    def test_getnames(self):
-        names = ['Foo Bar',
-                 'F. Bar',
-                 'Jean de Savigny',
-                 'Jean la Tour',
-                 'Jean le Tour',
-                 'Mike ben Akar',
-                 #'Jean de la Tour',
-                 #'Johannes Diderik van der Waals',
-                 ]
-        result = getnames(names)
-        expected = ['Bar, Foo',
-                    'Bar, F',
-                    'de Savigny, Jean',
-                    'la Tour, Jean',
-                    'le Tour, Jean',
-                    'ben Akar, Mike',
-                    #'de la Tour, Jean',
-                    #'van der Waals, Johannes Diderik',
-                    ]
-        self.assertEqual(result, expected)
+    :param record: a record
+    :returns: -- customized record
+    """
 
-
-from bibtexparser.bparser import BibTexParser, customisations
+    record = type(record)
+    record = author(record)
+    record = editor(record)
+    record = journal(record)
+    record = keyword(record)
+    record = link(record)
+    record = page(record)
+    record = doi(record)
+    return record
 
 
 class TestBibtexParserList(unittest.TestCase):

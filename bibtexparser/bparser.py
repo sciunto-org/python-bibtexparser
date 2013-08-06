@@ -24,52 +24,6 @@ from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, un
 __all__ = ['BibTexParser', 'customisations']
 
 
-from bibtexparser.customisation import *
-def customisations(record):
-    """Alters some values to fit bibjson format
-
-    :param record: a record
-    :returns: -- customized record
-    """
-    identifier_types = ['doi', 'isbn', 'issn']
-
-    if 'eprint' in record and not 'year' in record:
-        yy = '????'
-        ss = record['eprint'].split('/')
-        if len(ss) == 2:
-            yy = ss[1][0:2]
-        if yy[0] in ['0']:
-            record['year'] = '20' + yy
-        elif yy[0] in ['9']:
-            record['year'] = '19' + yy
-
-    if "subject" in record:
-        if record["subject"]:
-            record["subject"] = {"name": record["subject"], "id": record["subject"].replace(',', '').replace(' ', '').replace('.', '')}
-    for ident in identifier_types:
-        if ident in record:
-            if ident == 'issn':
-                if 'journal' in record:
-                    if 'identifier' not in record['journal']:
-                        record['journal']['identifier'] = []
-                    record['journal']['identifier'].append({"id": record[ident], "type": "issn"})
-            else:
-                if 'identifier' not in record:
-                    record['identifier'] = []
-                record['identifier'].append({"id": record[ident], "type": ident})
-            del record[ident]
-
-    record = type(record)
-    record = author(record)
-    record = editor(record)
-    record = journal(record)
-    record = keyword(record)
-    record = link(record)
-    record = page(record)
-    record = doi(record)
-    return record
-
-
 class BibTexParser(object):
     """
     A parser for bibtex files.
