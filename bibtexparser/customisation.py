@@ -4,7 +4,9 @@
 # License:
 
 
-__all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link', 'page', 'doi', 'type']
+__all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link', 
+           'page', 'doi', 'type']
+
 
 def getnames(names):
     """Make people names as surname, firstnames
@@ -93,6 +95,7 @@ def journal(record):
 
     return record
 
+
 def keyword(record):
     """
 
@@ -140,5 +143,3 @@ def doi(record):
                 link = 'http://dx.doi.org/' + link
             record['link'].append({"url": link, "anchor": "doi"})
     return record
-
-
