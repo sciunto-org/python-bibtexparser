@@ -6,3 +6,7 @@ BibtexParser
     :inherited-members:
     :show-inheritance:
 
+.. automodule:: customisation
+    :members:
+    :inherited-members:
+    :show-inheritance:
