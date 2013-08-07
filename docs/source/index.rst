@@ -25,11 +25,9 @@ Contents:
     install.rst
     bibtexparser.rst
 
+Prepare a bibtex sample for illustration purpose:
 
 .. code-block:: python
-
-    # Prepare a bibtex sample
-    # for illustration purpose
 
     bibtex = """@ARTICLE{Cesar2013,
       author = {Jean César},
@@ -49,8 +47,10 @@ Contents:
     with open('bibtex.bib', 'w') as bibfile:
         bibfile.write(bibtex)
 
-    # OK. Everything is in place.
-    # Let's parse the bibtex.
+
+OK. Everything is in place. Let's parse the bibtex.
+
+.. code-block:: python
 
     from bibtexparser.bparser import BibTexParser
 
@@ -58,8 +58,12 @@ Contents:
         bp = BibTexParser(bibfile)
         print(bp.get_entry_list())
 
-    # You get
-    # [{'journal': 'Nice Journal', 'comments': 'A comment', 'pages': '12--23', 'month': 'jan', 'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...', 'title': 'An amazing title', 'year': '2013', 'volume': '12', 'id': 'Cesar2013', 'author': 'Jean César', 'keyword': 'keyword1, keyword2', 'type': 'article'}]
+
+It prints a list of dictionaries:
+
+.. code-block:: sh
+
+    [{'journal': 'Nice Journal', 'comments': 'A comment', 'pages': '12--23', 'month': 'jan', 'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...', 'title': 'An amazing title', 'year': '2013', 'volume': '12', 'id': 'Cesar2013', 'author': 'Jean César', 'keyword': 'keyword1, keyword2', 'type': 'article'}]
 
 
 

@@ -28,6 +28,7 @@ class BibTexParser(object):
     """
     A parser for bibtex files.
 
+    :param fileobj: a filehandler
     :param customisation: a function
 
     Example:
