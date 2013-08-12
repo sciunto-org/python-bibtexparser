@@ -24,6 +24,7 @@ Contents:
 
     install.rst
     bibtexparser.rst
+    bibtex_conv.rst
 
 Prepare a bibtex sample for illustration purpose:
 
