@@ -15,6 +15,8 @@ The aim of this project is to provide a standalone library in python.
 Documentation
 =============
 
+Documentation including installation procedure and archives.
+
 https://bibtexparser.readthedocs.org/
 
 License
