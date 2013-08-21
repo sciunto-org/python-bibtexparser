@@ -5,6 +5,8 @@
 
 """
 A set of functions useful for customizing bibtex fields.
+You can find inspiration from these functions to design yours.
+Each of them takes a record and return the modified record.
 """
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
