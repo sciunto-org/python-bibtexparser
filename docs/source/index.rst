@@ -67,6 +67,35 @@ It prints a list of dictionaries:
     [{'journal': 'Nice Journal', 'comments': 'A comment', 'pages': '12--23', 'month': 'jan', 'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...', 'title': 'An amazing title', 'year': '2013', 'volume': '12', 'id': 'Cesar2013', 'author': 'Jean César', 'keyword': 'keyword1, keyword2', 'type': 'article'}]
 
 
+Customizations
+
+.. code-block:: python
+
+    from bibtexparser.bparser import BibTexParser
+    from bibtexparser.customization import *
+
+    # Let's define a function to customize our entries.
+    # It takes a record and return this record.
+    def customizations(record):
+        """Use all functions delivered by the library
+
+        :param record: a record
+        :returns: -- customized record
+        """
+        record = type(record)
+        record = author(record)
+        record = editor(record)
+        record = journal(record)
+        record = keyword(record)
+        record = link(record)
+        record = page(record)
+        record = doi(record)
+        return record
+
+    with open('bibtex.bib', 'r') as bibfile:
+        bp = BibTexParser(bibfile, customization=customizations)
+        print(bp.get_entry_list())
+
 
 Indices and tables
 ==================
