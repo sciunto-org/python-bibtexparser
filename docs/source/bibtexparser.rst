@@ -12,7 +12,7 @@ Bibtexparser module
 Customization functions
 -----------------------
 
-.. automodule:: customisation
+.. automodule:: customization
     :members:
     :inherited-members:
     :show-inheritance:

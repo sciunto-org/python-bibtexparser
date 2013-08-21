@@ -4,6 +4,6 @@ Bibtexparser Module
 """
 Parser for bibtex files.
 """
-__all__ = ['bparser', 'info', 'latexenc', 'customisation']
+__all__ = ['bparser', 'info', 'latexenc', 'customization']
 
-from . import bparser, info, latexenc, customisation
+from . import bparser, info, latexenc, customization

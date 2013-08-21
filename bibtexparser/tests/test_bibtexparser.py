@@ -6,10 +6,10 @@
 import unittest
 
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.customisation import *
+from bibtexparser.customization import *
 
 
-def customisations(record):
+def customizations(record):
     """Use all functions
 
     :param record: a record
@@ -54,7 +54,7 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_article_cust(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customisation=customisations)
+            bib = BibTexParser(bibfile, customization=customizations)
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...',
                      'type': 'article',
@@ -93,7 +93,7 @@ class TestBibtexParserList(unittest.TestCase):
     @unittest.skip('Bug on dot after letters')
     def test_book_cust(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customisation=customisations)
+            bib = BibTexParser(bibfile, customization=customizations)
             res = bib.get_entry_list()
             expected = [{'type': 'book',
                          'year': '1987',

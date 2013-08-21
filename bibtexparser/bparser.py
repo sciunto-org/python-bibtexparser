@@ -29,7 +29,7 @@ class BibTexParser(object):
     A parser for bibtex files.
 
     :param fileobj: a filehandler
-    :param customisation: a function
+    :param customization: a function
 
     Example:
 
@@ -40,7 +40,7 @@ class BibTexParser(object):
     >>> records_dict = parser.get_entry_dict()
 
     """
-    def __init__(self, fileobj, customisation=None):
+    def __init__(self, fileobj, customization=None):
         data = fileobj.read()
 
         # On some sample data files, the character encoding detection simply hangs
@@ -70,7 +70,7 @@ class BibTexParser(object):
             'subjects': 'subject'
         }
 
-        self.records = self._parse_records(customisation=customisation)
+        self.records = self._parse_records(customization=customization)
 
     def get_entry_list(self):
         """Get a list of bibtex entries.
@@ -90,10 +90,10 @@ class BibTexParser(object):
             entries_hash[entry['id']] = entry
         return entries_hash
 
-    def _parse_records(self, customisation=None):
+    def _parse_records(self, customization=None):
         """Parse the bibtex into a list of records.
 
-        :param customisation: a function
+        :param customization: a function
         :returns: list -- records
         """
         records = []
@@ -105,7 +105,7 @@ class BibTexParser(object):
             else:
                 if line.strip().startswith('@'):
                     if record != "":
-                        parsed = self._parse_record(record, customisation=customisation)
+                        parsed = self._parse_record(record, customization=customization)
                         if parsed:
                             records.append(parsed)
                     record = ""
@@ -114,12 +114,12 @@ class BibTexParser(object):
 
         # catch any remaining record and send it for parsing
         if record != "":
-            parsed = self._parse_record(record, customisation=customisation)
+            parsed = self._parse_record(record, customization=customization)
             if parsed:
                 records.append(parsed)
         return records
 
-    def _parse_record(self, record, customisation=None):
+    def _parse_record(self, record, customization=None):
         """Parse a record.
 
         * tidy whitespace and other rubbish
@@ -127,7 +127,7 @@ class BibTexParser(object):
         * find all the key-value pairs it contains
 
         :param record: a record
-        :param customisation: a function
+        :param customization: a function
 
         :returns: dict --
         """
@@ -190,11 +190,11 @@ class BibTexParser(object):
             if d['type'] == 'personal bibliography' or d['type'] == 'comment':
                 self.has_metadata = True
 
-        if customisation is None:
+        if customization is None:
             return d
         else:
-            # apply any customisations to the record object then return it
-            return customisation(d)
+            # apply any customizations to the record object then return it
+            return customization(d)
 
     def _strip_quotes(self, val):
         """Strip double quotes enclosing string

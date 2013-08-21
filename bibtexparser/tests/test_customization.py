@@ -5,7 +5,7 @@
 
 import unittest
 
-from bibtexparser.customisation import getnames
+from bibtexparser.customization import getnames
 
 
 class TestBibtexParserMethod(unittest.TestCase):
