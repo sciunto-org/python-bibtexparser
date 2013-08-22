@@ -15,8 +15,6 @@ Welcome to BibtexParser's documentation!
 :Version: |release|
 
 
-Beware! The api is not yet stabilized.
-
 Contents:
 
 .. toctree::
