@@ -28,3 +28,7 @@ Common Errors in Bibliographies John Owens
 
 * http://www.ece.ucdavis.edu/~jowens/biberrors.html
 
+Common abbreviations for journals
+---------------------------------
+
+* Jabref list http://jabref.sourceforge.net/resources.php#downloadlists
