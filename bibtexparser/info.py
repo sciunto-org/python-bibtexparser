@@ -8,9 +8,9 @@ NAME = "BibtexParser"
 URL = "https://github.com/sciunto/python-bibtexparser"
 LICENSE = "AGPLv3"
 EMAIL = "fboulogne@sciunto.org"
-VERSION = "0.2"
+VERSION = "0.3"
 
-SHORT_DESCRIPTION = "Bibtex parser"
+SHORT_DESCRIPTION = "Bibtex parser for python3"
 
 AUHTORS = ["Francois Boulogne <fboulogne@sciunto.org>"]
 
