@@ -9,7 +9,7 @@ Requirements
 Package manager
 ---------------
 
-An AUR package is not yet available.
+* [Archlinux](https://aur.archlinux.org/packages/python-bibtexparser/)
 
 PyPI
 ----
