@@ -8,7 +8,7 @@ Welcome to BibtexParser's documentation!
 
 
 :Author: François Boulogne
-:Download: `Stable version <http://source.sciunto.org/>`_
+:Download: `Stable version <http://source.sciunto.org/bibtexparser/>`_
 :Developer's corner: `github.com project <https://github.com/sciunto/python-bibtexparser>`_
 :Generated: |today|
 :License: AGPL v3
