@@ -7,10 +7,10 @@ You can find inspiration from these functions to design yours.
 Each of them takes a record and return the modified record.
 """
 
-from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2
+from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
-           'page', 'doi', 'type', 'convert_to_unicode']
+           'page', 'doi', 'type', 'convert_to_unicode', 'homogeneize_latex_encoding']
 
 
 def getnames(names):
@@ -214,4 +214,21 @@ def convert_to_unicode(record):
                             parts[key] = parts[key] + parts[key+1][0]
                             parts[key+1] = parts[key+1][1:]
                     record[val] = k.join(parts)
+    return record
+
+
+def homogeneize_latex_encoding(record):
+    """
+    Homogeneize the latex enconding style for bibtex
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
+    """
+    # First, we convert everything to unicode
+    record = convert_to_unicode(record)
+    # And then, we fall back
+    for val in record:
+        record[val] = string_to_latex(record[val])
+        record[val] = protect_uppercase(record[val])
     return record

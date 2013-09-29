@@ -3,7 +3,7 @@
 
 import unittest
 
-from bibtexparser.customization import getnames, convert_to_unicode
+from bibtexparser.customization import getnames, convert_to_unicode, homogeneize_latex_encoding
 
 
 class TestBibtexParserMethod(unittest.TestCase):
@@ -34,4 +34,10 @@ class TestBibtexParserMethod(unittest.TestCase):
         record = {'toto': '{\`a} \`{a}'}
         result = convert_to_unicode(record)
         expected = {'toto': 'à à'}
+        self.assertEqual(result, expected)
+
+    def test_homogeneize(self):
+        record = {'toto': 'à {\`a} \`{a}'}
+        result = homogeneize_latex_encoding(record)
+        expected = {'toto': '{\`a} {\`a} {\`a}'}
         self.assertEqual(result, expected)

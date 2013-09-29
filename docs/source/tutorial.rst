@@ -92,6 +92,16 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 
 * Case 2: you plan to use this library to work with latex but your bibtex is not really clean.
 
+.. code-block:: python
+
+    from bibtexparser.bparser import BibTexParser
+    from bibtexparser.customization import homogeneize_latex_encoding
+
+    with open('bibtex.bib', 'r') as bibfile:
+        bp = BibTexParser(bibfile, customization=homogeneize_latex_encoding)
+        print(bp.get_entry_list())
+
+
 * Case 3: you plan to use this library to work with something different and your bibtex is not really clean.
   Then, you probably want to use unicode.
 
