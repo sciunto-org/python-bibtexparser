@@ -73,7 +73,7 @@ The library includes several functions which may suit your needs. Otherwise,you 
         record = journal(record)
         record = keyword(record)
         record = link(record)
-        record = page(record)
+        record = page_double_hyphen(record)
         record = doi(record)
         return record
 

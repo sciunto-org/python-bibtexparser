@@ -10,7 +10,8 @@ Each of them takes a record and return the modified record.
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
-           'page', 'doi', 'type', 'convert_to_unicode', 'homogeneize_latex_encoding']
+           'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
+           'homogeneize_latex_encoding']
 
 
 def getnames(names):
@@ -78,9 +79,9 @@ def editor(record):
     return record
 
 
-def page(record):
+def page_double_hyphen(record):
     """
-    Separate pages by the word "to".
+    Separate pages by a double hyphen (--).
 
     :param record: the record.
     :type record: dict
@@ -90,7 +91,7 @@ def page(record):
     if "pages" in record:
         if "-" in record["pages"]:
             p = [i.strip().strip('-') for i in record["pages"].split("-")]
-            record["pages"] = p[0] + ' to ' + p[-1]
+            record["pages"] = p[0] + '--' + p[-1]
     return record
 
 

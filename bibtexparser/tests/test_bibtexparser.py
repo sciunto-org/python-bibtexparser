@@ -21,7 +21,7 @@ def customizations(record):
     record = journal(record)
     record = keyword(record)
     record = link(record)
-    record = page(record)
+    record = page_double_hyphen(record)
     record = doi(record)
     record = convert_to_unicode(record)
     return record
@@ -43,7 +43,7 @@ class TestBibtexParserList(unittest.TestCase):
                          'year': '2013',
                          'journal': 'Nice Journal',
                          'id': 'Cesar2013',
-                         'pages': '12--23',
+                         'pages': '12-23',
                          'title': 'An amazing title',
                          'comments': 'A comment',
                          'author': 'Jean César',
@@ -58,7 +58,7 @@ class TestBibtexParserList(unittest.TestCase):
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...',
                      'type': 'article',
-                     'pages': '12 to 23',
+                     'pages': '12--23',
                      'volume': '12',
                      'id': 'Cesar2013',
                      'year': '2013',
