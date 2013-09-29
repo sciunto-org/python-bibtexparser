@@ -34,7 +34,6 @@ class TestLatexConverter(unittest.TestCase):
         expected = '{A}'
         self.assertEqual(result, expected)
 
-from libcitebib.converter import protect_uppercase
 class TestUppercaseProtection(unittest.TestCase):
 
     def test_uppercase(self):
