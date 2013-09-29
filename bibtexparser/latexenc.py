@@ -18,9 +18,38 @@
 # Etienne Posthumus (epoz)
 # Francois Boulogne <fboulogne at april dot org>
 
-import io
+import re
 
-__all__ = ['unicode_to_latex', 'unicode_to_crappy_latex1', 'unicode_to_crappy_latex2']
+__all__ = ['string_to_latex', 'protect_uppercase', 'unicode_to_latex',
+           'unicode_to_crappy_latex1', 'unicode_to_crappy_latex2']
+
+
+def string_to_latex(string):
+    """
+    Convert a string to its latex equivalent
+    """
+    escape = [' ', '{', '}']
+
+    new = []
+    for char in string:
+        if char in escape:
+            new.append(char)
+        elif char in unicode_to_latex.keys():
+            new.append(unicode_to_latex[char])
+        else:
+            new.append(char)
+    return ''.join(new)
+
+
+def protect_uppercase(string):
+    """
+    Protect uppercase letters for bibtex
+
+    :param string: string to convert
+    :returns: string
+    """
+    string = re.sub("([A-Z])", '{\g<1>}', string)
+    return string
 
 
 # list of latex conversions from
