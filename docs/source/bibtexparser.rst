@@ -1,5 +1,5 @@
-BibtexParser
-============
+BibtexParser: API
+=================
 
 Bibtexparser module
 -------------------
