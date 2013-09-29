@@ -229,8 +229,6 @@ class BibTexParser(object):
         :type val: string
         :returns: string -- value
         """
-        #Corrected from upstream
-        #See https://github.com/okfn/bibserver/issues/250
         if not val:
             return ''
         for k in list(self.replace_dict.keys()):
