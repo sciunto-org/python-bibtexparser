@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Author: Francois Boulogne
-# License:
 
 import unittest
 
-from bibtexparser.customization import getnames
+from bibtexparser.customization import getnames, convert_to_unicode
 
 
 class TestBibtexParserMethod(unittest.TestCase):
@@ -30,4 +28,10 @@ class TestBibtexParserMethod(unittest.TestCase):
                     #'de la Tour, Jean',
                     #'van der Waals, Johannes Diderik',
                     ]
+        self.assertEqual(result, expected)
+
+    def test_convert_to_unicode(self):
+        record = {'toto': '{\`a} \`{a}'}
+        result = convert_to_unicode(record)
+        expected = {'toto': 'à à'}
         self.assertEqual(result, expected)

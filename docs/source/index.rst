@@ -21,8 +21,8 @@ Contents:
     :maxdepth: 2
 
     install.rst
-    bibtexparser.rst
     tutorial.rst
+    bibtexparser.rst
     bibtex_conv.rst
 
 

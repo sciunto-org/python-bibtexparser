@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Author: Francois Boulogne
-# License:
 
 """
 A set of functions useful for customizing bibtex fields.
@@ -9,8 +7,10 @@ You can find inspiration from these functions to design yours.
 Each of them takes a record and return the modified record.
 """
 
+from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2
+
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
-           'page', 'doi', 'type']
+           'page', 'doi', 'type', 'convert_to_unicode']
 
 
 def getnames(names):
@@ -185,4 +185,33 @@ def doi(record):
             if link.startswith('10'):
                 link = 'http://dx.doi.org/' + link
             record['link'].append({"url": link, "anchor": "doi"})
+    return record
+
+
+def convert_to_unicode(record):
+    """
+    Convert accent from latex to unicode style.
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
+    """
+    for val in record:
+        for translation in (unicode_to_latex, unicode_to_crappy_latex1):
+            if '\\' in record[val] or '{' in record[val]:
+                for k, v in translation.items():
+                    if v in record[val]:
+                        record[val] = record[val].replace(str(v), str(k))
+
+        # If there is still very crappy items
+        if '\\' in record[val]:
+            for k, v in unicode_to_crappy_latex2.items():
+                if v in record[val]:
+                    parts = record[val].split(str(v))
+                    for key, record[val] in enumerate(parts):
+                        if key+1 < len(parts) and len(parts[key+1]) > 0:
+                            # Change order to display accents
+                            parts[key] = parts[key] + parts[key+1][0]
+                            parts[key+1] = parts[key+1][1:]
+                    record[val] = k.join(parts)
     return record

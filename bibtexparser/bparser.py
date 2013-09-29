@@ -19,7 +19,6 @@
 # Francois Boulogne <fboulogne at april dot org>
 
 import io
-from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2
 
 __all__ = ['BibTexParser']
 
@@ -27,6 +26,9 @@ __all__ = ['BibTexParser']
 class BibTexParser(object):
     """
     A parser for bibtex files.
+
+    By default (i.e. without customizations), each value in entries are considered
+    as a string.
 
     :param fileobj: a filehandler
     :param customization: a function
@@ -237,23 +239,6 @@ class BibTexParser(object):
         if not isinstance(val, str):
             val = str(val, self.encoding, 'ignore')
 
-        for translation in (unicode_to_latex, unicode_to_crappy_latex1):
-            if '\\' in val or '{' in val:
-                for k, v in translation.items():
-                    if v in val:
-                        val = val.replace(str(v), str(k))
-
-        # If there is still very crappy items
-        if '\\' in val:
-            for k, v in unicode_to_crappy_latex2.items():
-                if v in val:
-                    parts = val.split(str(v))
-                    for key, val in enumerate(parts):
-                        if key+1 < len(parts) and len(parts[key+1]) > 0:
-                            # Change order to display accents
-                            parts[key] = parts[key] + parts[key+1][0]
-                            parts[key+1] = parts[key+1][1:]
-                    val = k.join(parts)
         return val
 
     def _add_val(self, val):

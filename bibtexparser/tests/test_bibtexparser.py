@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Author: Francois Boulogne
-# License:
 
 import unittest
 
@@ -24,6 +22,7 @@ def customizations(record):
     record = link(record)
     record = page(record)
     record = doi(record)
+    record = convert_to_unicode(record)
     return record
 
 
@@ -69,6 +68,7 @@ class TestBibtexParserList(unittest.TestCase):
                      'keyword': ['keyword1', 'keyword2'],
                      'title': 'An amazing title'
                      }]
+        print(res)
         self.assertEqual(res, expected)
 
     ###########

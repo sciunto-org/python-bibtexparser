@@ -50,6 +50,10 @@ It prints a list of dictionaries:
 Customizations
 --------------
 
+By default, the parser does not alter the content of each field but there are many cases where this is not usable.
+For instance, instead of a string with a list of authors, you can prefer a list.
+The library includes several functions which may suit your needs. Otherwise,you can read them to create your own functions.
+
 .. code-block:: python
 
     from bibtexparser.bparser import BibTexParser
@@ -58,7 +62,7 @@ Customizations
     # Let's define a function to customize our entries.
     # It takes a record and return this record.
     def customizations(record):
-        """Use all functions delivered by the library
+        """Use some functions delivered by the library
 
         :param record: a record
         :returns: -- customized record
@@ -76,6 +80,31 @@ Customizations
     with open('bibtex.bib', 'r') as bibfile:
         bp = BibTexParser(bibfile, customization=customizations)
         print(bp.get_entry_list())
+
+
+Accents and weird characters
+---------------------------
+
+Your bibtex may content accents and specific characters.
+They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``{\'e}`` is prefered. Moreover, you may want to manipulate ``é``. There is different situations:
+
+* Case 1: you plan to use this library to work with latex and you assume that the original bibtex is clean. You have nothing to do.
+
+* Case 2: you plan to use this library to work with latex but your bibtex is not really clean.
+
+* Case 3: you plan to use this library to work with something different and your bibtex is not really clean.
+  Then, you probably want to use unicode.
+
+.. code-block:: python
+
+    from bibtexparser.bparser import BibTexParser
+    from bibtexparser.customization import convert_to_unicode
+
+    with open('bibtex.bib', 'r') as bibfile:
+        bp = BibTexParser(bibfile, customization=convert_to_unicode)
+        print(bp.get_entry_list())
+
+Note: if you want to mix different customization functions, you can write your own function.
 
 
 Indices and tables
