@@ -2,6 +2,7 @@ v0.4
 ====
 
 * Transformations on characters are now considered as a customization
+* New customization: clean latex style
 
 v0.3
 ====

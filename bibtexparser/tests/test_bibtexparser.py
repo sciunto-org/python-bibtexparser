@@ -8,7 +8,8 @@ from bibtexparser.customization import *
 
 
 def customizations(record):
-    """Use all functions
+    """Use all functions related to specific fields
+    + converter to unicode.
 
     :param record: a record
     :returns: -- customized record
