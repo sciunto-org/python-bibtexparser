@@ -3,6 +3,7 @@ v0.4
 
 * Transformations on characters are now considered as a customization
 * New customization: clean latex style
+* Fix issue related to name processing
 
 v0.3
 ====
