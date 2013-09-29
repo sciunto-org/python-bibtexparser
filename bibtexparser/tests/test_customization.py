@@ -3,11 +3,14 @@
 
 import unittest
 
-from bibtexparser.customization import getnames, convert_to_unicode, homogeneize_latex_encoding
+from bibtexparser.customization import getnames, convert_to_unicode, homogeneize_latex_encoding, page_double_hyphen
 
 
 class TestBibtexParserMethod(unittest.TestCase):
 
+    ###########
+    # getnames
+    ###########
     def test_getnames(self):
         names = ['Foo Bar',
                  'F. Bar',
@@ -30,12 +33,45 @@ class TestBibtexParserMethod(unittest.TestCase):
                     ]
         self.assertEqual(result, expected)
 
+    ###########
+    # page_double_hyphen
+    ###########
+    def test_page_double_hyphen_alreadyOK(self):
+        record = {'pages': '12--24'}
+        result = page_double_hyphen(record)
+        expected = record
+        self.assertEqual(result, expected)
+
+    def test_page_double_hyphen_simple(self):
+        record = {'pages': '12-24'}
+        result = page_double_hyphen(record)
+        expected = {'pages': '12--24'}
+        self.assertEqual(result, expected)
+
+    def test_page_double_hyphen_space(self):
+        record = {'pages': '12 - 24'}
+        result = page_double_hyphen(record)
+        expected = {'pages': '12--24'}
+        self.assertEqual(result, expected)
+
+    def test_page_double_hyphen_nothing(self):
+        record = {'pages': '12 24'}
+        result = page_double_hyphen(record)
+        expected = {'pages': '12 24'}
+        self.assertEqual(result, expected)
+
+    ###########
+    # convert to unicode
+    ###########
     def test_convert_to_unicode(self):
         record = {'toto': '{\`a} \`{a}'}
         result = convert_to_unicode(record)
         expected = {'toto': 'à à'}
         self.assertEqual(result, expected)
 
+    ###########
+    # homogeneize
+    ###########
     def test_homogeneize(self):
         record = {'toto': 'à {\`a} \`{a}'}
         result = homogeneize_latex_encoding(record)
