@@ -255,6 +255,12 @@ class BibTexParser(object):
         return val
 
     def _add_key(self, key):
+        """ Add a key and homogeneize alternative forms.
+
+        :param key: a key
+        :type key: string
+        :returns: string -- value
+        """
         key = key.strip().strip('@').lower()
         if key in list(self.alt_dict.keys()):
             key = self.alt_dict[key]
