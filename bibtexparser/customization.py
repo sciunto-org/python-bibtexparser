@@ -30,11 +30,11 @@ def getnames(names):
         if ',' in namestring:
             namesplit = namestring.split(',', 1)
             last = namesplit[0].strip()
-            firsts = [i.strip().strip('.') for i in namesplit[1].split()]
+            firsts = [i.strip() for i in namesplit[1].split()]
         else:
             namesplit = namestring.split()
             last = namesplit.pop()
-            firsts = [i.replace('.', ' ').strip() for i in namesplit]
+            firsts = [i.replace('.', '. ').strip() for i in namesplit]
         if last in ['jnr', 'jr', 'junior']:
             last = firsts.pop()
         for item in firsts:

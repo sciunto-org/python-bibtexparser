@@ -13,6 +13,9 @@ class TestBibtexParserMethod(unittest.TestCase):
     ###########
     def test_getnames(self):
         names = ['Foo Bar',
+                 'Foo B. Bar',
+                 'F. B. Bar',
+                 'F.B. Bar',
                  'F. Bar',
                  'Jean de Savigny',
                  'Jean la Tour',
@@ -23,7 +26,10 @@ class TestBibtexParserMethod(unittest.TestCase):
                  ]
         result = getnames(names)
         expected = ['Bar, Foo',
-                    'Bar, F',
+                    'Bar, Foo B.',
+                    'Bar, F. B.',
+                    'Bar, F. B.',
+                    'Bar, F.',
                     'de Savigny, Jean',
                     'la Tour, Jean',
                     'le Tour, Jean',

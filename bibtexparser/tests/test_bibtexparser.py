@@ -91,7 +91,6 @@ class TestBibtexParserList(unittest.TestCase):
 
         self.assertEqual(res, expected)
 
-    @unittest.skip('Bug on dot after letters')
     def test_book_cust(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile, customization=customizations)
