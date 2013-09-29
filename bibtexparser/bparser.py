@@ -240,14 +240,18 @@ class BibTexParser(object):
         return val
 
     def _add_val(self, val):
+        """ Clean instring before adding to dictionary
+
+        :param val: a value
+        :type val: string
+        :returns: string -- value
+        """
         if not val or val == "{}":
             return ''
-        """ Clean instring before adding to dictionary """
         val = self._strip_braces(val)
         val = self._strip_quotes(val)
         val = self._strip_braces(val)
         val = self._string_subst(val)
-        """alter based on particular key types"""
         return val
 
     def _add_key(self, key):
