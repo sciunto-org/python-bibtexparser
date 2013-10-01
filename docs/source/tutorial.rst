@@ -114,6 +114,7 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
         bp = BibTexParser(bibfile, customization=convert_to_unicode)
         print(bp.get_entry_list())
 
+
 Note: if you want to mix different customization functions, you can write your own function.
 
 

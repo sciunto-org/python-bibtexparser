@@ -224,6 +224,8 @@ def homogeneize_latex_encoding(record):
     """
     Homogeneize the latex enconding style for bibtex
 
+    This function is experimental.
+
     :param record: the record.
     :type record: dict
     :returns: dict -- the modified record.
