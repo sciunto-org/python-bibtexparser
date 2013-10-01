@@ -83,3 +83,6 @@ class TestBibtexParserMethod(unittest.TestCase):
         result = homogeneize_latex_encoding(record)
         expected = {'toto': '{\`a} {\`a} {\`a}'}
         self.assertEqual(result, expected)
+
+if __name__ == '__main__':
+    unittest.main()

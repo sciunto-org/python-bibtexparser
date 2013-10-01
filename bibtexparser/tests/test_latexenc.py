@@ -47,3 +47,6 @@ class TestUppercaseProtection(unittest.TestCase):
         result = protect_uppercase(string)
         expected = 'a'
         self.assertEqual(result, expected)
+
+if __name__ == '__main__':
+    unittest.main()
