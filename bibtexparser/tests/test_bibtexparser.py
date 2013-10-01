@@ -89,7 +89,7 @@ class TestBibtexParserList(unittest.TestCase):
                      }]
         self.assertEqual(res, expected)
 
-    #@unittest.skip('should improve latex support')
+    @unittest.skip('should improve latex support')
     def test_article_cust_latex(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile, customization=customizations_latex)
@@ -144,7 +144,7 @@ class TestBibtexParserList(unittest.TestCase):
 
         self.assertEqual(res, expected)
 
-    #@unittest.skip('should improve latex support')
+    @unittest.skip('should improve latex support')
     def test_book_cust_latex(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile, customization=customizations_latex)
