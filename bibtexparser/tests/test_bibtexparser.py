@@ -7,7 +7,7 @@ from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
 
 
-def customizations(record):
+def customizations_unicode(record):
     """Use all functions related to specific fields
     + converter to unicode.
 
@@ -54,7 +54,7 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_article_cust(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customization=customizations)
+            bib = BibTexParser(bibfile, customization=customizations_unicode)
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
                      'type': 'article',
@@ -69,7 +69,6 @@ class TestBibtexParserList(unittest.TestCase):
                      'keyword': ['keyword1', 'keyword2'],
                      'title': 'An amazing title'
                      }]
-        print(res)
         self.assertEqual(res, expected)
 
     ###########
@@ -93,7 +92,7 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_book_cust(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customization=customizations)
+            bib = BibTexParser(bibfile, customization=customizations_unicode)
             res = bib.get_entry_list()
             expected = [{'type': 'book',
                          'year': '1987',
