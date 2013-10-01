@@ -83,7 +83,7 @@ The library includes several functions which may suit your needs. Otherwise,you 
 
 
 Accents and weird characters
----------------------------
+----------------------------
 
 Your bibtex may content accents and specific characters.
 They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``{\'e}`` is prefered. Moreover, you may want to manipulate ``é``. There is different situations:
