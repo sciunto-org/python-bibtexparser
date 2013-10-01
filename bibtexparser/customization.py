@@ -63,6 +63,8 @@ def author(record):
 
 def editor(record):
     """
+    Turn the editor field into a dict composed of the original editor name
+    and a editor id (without coma or blank).
 
     :param record: the record.
     :type record: dict
