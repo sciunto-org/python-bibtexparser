@@ -89,23 +89,22 @@ class TestBibtexParserList(unittest.TestCase):
                      }]
         self.assertEqual(res, expected)
 
-    @unittest.skip('should improve latex support')
     def test_article_cust_latex(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile, customization=customizations_latex)
             res = bib.get_entry_list()
-        expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+        expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
                      'type': 'article',
                      'pages': '12--23',
                      'volume': '12',
                      'id': 'Cesar2013',
                      'year': '2013',
-                     'author': ['César, Jean'],
+                     'author': ['C{\\\'e}sar, Jean'],
                      'journal': {'id': 'NiceJournal', 'name': 'Nice Journal'},
                      'comments': 'A comment',
                      'month': 'jan',
                      'keyword': ['keyword1', 'keyword2'],
-                     'title': 'An amazing title'
+                     'title': '{A}n amazing title'
                      }]
         self.assertEqual(res, expected)
 
