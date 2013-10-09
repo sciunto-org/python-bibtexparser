@@ -159,5 +159,28 @@ class TestBibtexParserList(unittest.TestCase):
 
         self.assertEqual(res, expected)
 
+    ###########
+    # TRAPS
+    ###########
+    @unittest.skip('Parser is not able to make the difference between accent and end of field')
+    def test_traps(self):
+        with open('bibtexparser/tests/data/traps.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            res = bib.get_entry_list()
+            expected = [{'keyword': 'keyword1, keyword2',
+                         'type': 'article',
+                         'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                         'year': '2013',
+                         'journal': 'Nice Journal',
+                         'id': 'Laide2013',
+                         'pages': '12-23',
+                         'title': 'An amazing title',
+                         'comments': 'A comment',
+                         'author': 'Jean Laid{\\\'e}, Ben Loaeb',
+                         'volume': '12',
+                         'month': 'jan'
+                         }]
+        self.assertEqual(res, expected)
+
 if __name__ == '__main__':
     unittest.main()
