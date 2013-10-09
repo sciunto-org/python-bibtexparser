@@ -144,7 +144,6 @@ class TestBibtexParserList(unittest.TestCase):
 
         self.assertEqual(res, expected)
 
-    @unittest.skip('should improve latex support')
     def test_book_cust_latex(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile, customization=customizations_latex)
@@ -155,7 +154,7 @@ class TestBibtexParserList(unittest.TestCase):
                          'publisher': 'Wiley Edition',
                          'id': 'Bird1987',
                          'volume': '1',
-                         'title': 'Dynamics of Polymeric Liquid',
+                         'title': '{D}ynamics of {P}olymeric {L}iquid',
                          'author': ['Bird, R.B.', 'Armstrong, R.C.', 'Hassager, O.']
                          }]
 
