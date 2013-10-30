@@ -7,11 +7,21 @@ You can find inspiration from these functions to design yours.
 Each of them takes a record and return the modified record.
 """
 
+import sys
+
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
            'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
            'homogeneize_latex_encoding']
+
+# utility function
+if sys.version_info >= (3, 0):
+    def __to_unicode(s):
+        return str(s)
+else:
+    def __to_unicode(s):
+        return s.decode("unicode-escape")
 
 
 def getnames(names):
@@ -204,7 +214,7 @@ def convert_to_unicode(record):
             if '\\' in record[val] or '{' in record[val]:
                 for k, v in translation.items():
                     if v in record[val]:
-                        record[val] = record[val].replace(str(v), str(k))
+                        record[val] = record[val].replace(str(v), __to_unicode(k))
 
         # If there is still very crappy items
         if '\\' in record[val]:

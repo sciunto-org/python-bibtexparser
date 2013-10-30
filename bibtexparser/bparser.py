@@ -18,9 +18,15 @@
 # Etienne Posthumus (epoz)
 # Francois Boulogne <fboulogne at april dot org>
 
-import io
+import sys
 
 __all__ = ['BibTexParser']
+
+
+if sys.version_info >= (3, 0):
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 
 class BibTexParser(object):
@@ -52,7 +58,7 @@ class BibTexParser(object):
         # Some files have Byte-order marks inserted at the start
         if data[:3] == '\xef\xbb\xbf':
             data = data[3:]
-        self.fileobj = io.StringIO(data)
+        self.fileobj = StringIO(data)
 
         # set which bibjson schema this parser parses to
         self.has_metadata = False
