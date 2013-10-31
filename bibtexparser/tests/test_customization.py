@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import unittest
 
 from bibtexparser.customization import getnames, convert_to_unicode, homogeneize_latex_encoding, page_double_hyphen
