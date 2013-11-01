@@ -4,6 +4,7 @@ How to install?
 Requirements
 ------------
 
+* python **2.7** or later
 * python **3.2** or later
 
 Package manager
@@ -22,14 +23,11 @@ To install with pip:
 
     pip install bibtexparser
 
-Make sure you call **pip3**.
 
 Manual installation
 -------------------
 
 `Download <http://source.sciunto.org/bibtexparser/>`_ the archive.
-
-Make sure you call **python3**.
 
 .. code-block:: sh
 
