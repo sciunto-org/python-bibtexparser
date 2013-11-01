@@ -18,9 +18,17 @@
 # Etienne Posthumus (epoz)
 # Francois Boulogne <fboulogne at april dot org>
 
-import io
+import sys
 
 __all__ = ['BibTexParser']
+
+
+if sys.version_info >= (3, 0):
+    from io import StringIO
+    ustr = str
+else:
+    from StringIO import StringIO
+    ustr = unicode
 
 
 class BibTexParser(object):
@@ -52,7 +60,7 @@ class BibTexParser(object):
         # Some files have Byte-order marks inserted at the start
         if data[:3] == '\xef\xbb\xbf':
             data = data[3:]
-        self.fileobj = io.StringIO(data)
+        self.fileobj = StringIO(data)
 
         # set which bibjson schema this parser parses to
         self.has_metadata = False
@@ -234,8 +242,8 @@ class BibTexParser(object):
         for k in list(self.replace_dict.keys()):
             if val == k:
                 val = self.replace_dict[k]
-        if not isinstance(val, str):
-            val = str(val, self.encoding, 'ignore')
+        if not isinstance(val, ustr):
+            val = ustr(val, self.encoding, 'ignore')
 
         return val
 
@@ -264,7 +272,7 @@ class BibTexParser(object):
         key = key.strip().strip('@').lower()
         if key in list(self.alt_dict.keys()):
             key = self.alt_dict[key]
-        if not isinstance(key, str):
-            return str(key, 'utf-8')
+        if not isinstance(key, ustr):
+            return ustr(key, 'utf-8')
         else:
             return key

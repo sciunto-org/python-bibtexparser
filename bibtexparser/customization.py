@@ -204,7 +204,7 @@ def convert_to_unicode(record):
             if '\\' in record[val] or '{' in record[val]:
                 for k, v in translation.items():
                     if v in record[val]:
-                        record[val] = record[val].replace(str(v), str(k))
+                        record[val] = record[val].replace(v, k)
 
         # If there is still very crappy items
         if '\\' in record[val]:
