@@ -1,2 +1,8 @@
+- François Boulogne
+  Project coordinator
+
+- bibserver's contributors
+  for the parser's core
+
 - Shuen-Huei (Drake) Guan
   Python 2.7 porting
