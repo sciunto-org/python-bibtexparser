@@ -2,6 +2,7 @@ v
 ====
 
 * Python 2.7 support
+* Fix issue related to accents
 
 v0.4
 ====
@@ -26,4 +27,5 @@ v0.2
 
 v0.1
 ====
+
 * First preliminary release
