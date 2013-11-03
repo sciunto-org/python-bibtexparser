@@ -7,6 +7,8 @@ You can find inspiration from these functions to design yours.
 Each of them takes a record and return the modified record.
 """
 
+import itertools
+
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
@@ -200,15 +202,14 @@ def convert_to_unicode(record):
     :returns: dict -- the modified record.
     """
     for val in record:
-        for translation in (unicode_to_latex, unicode_to_crappy_latex1):
-            if '\\' in record[val] or '{' in record[val]:
-                for k, v in translation.items():
-                    if v in record[val]:
-                        record[val] = record[val].replace(v, k)
+        if '\\' in record[val] or '{' in record[val]:
+            for k, v in itertools.chain(unicode_to_crappy_latex1, unicode_to_latex):
+                if v in record[val]:
+                    record[val] = record[val].replace(v, k)
 
         # If there is still very crappy items
         if '\\' in record[val]:
-            for k, v in unicode_to_crappy_latex2.items():
+            for k, v in unicode_to_crappy_latex2:
                 if v in record[val]:
                     parts = record[val].split(str(v))
                     for key, record[val] in enumerate(parts):
