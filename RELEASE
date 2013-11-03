@@ -5,7 +5,7 @@ How to release
 * Update version in docs/source/conf.py
 * Update the file bibtexparser/info.py
 * git tag -a 'vX'
-* Create a tarball and upload it on github
+* Create a tarball and upload it on the server
     git archive master | bzip2 > bibtexparser-x.y.tar.bz2
 * Send the package on pypi
     python setup.py sdist upload
