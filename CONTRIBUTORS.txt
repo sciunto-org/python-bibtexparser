@@ -2,7 +2,7 @@
   Project coordinator
 
 - bibserver's contributors
-  for the parser's core
+  for the parser's core and the permission to release this project under LGPLv3
 
 - Shuen-Huei (Drake) Guan
   Python 2.7 porting

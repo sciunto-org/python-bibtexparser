@@ -1,6 +1,7 @@
-v
+v0.5
 ====
 
+* Permission from original authors and OKFN to use LGPLv3
 * Python 2.7 support
 * Fix issue related to accents
 

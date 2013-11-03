@@ -8,7 +8,9 @@ Bibtex parser in Python 3 and 2.7.
 
 The original source code was part of bibserver from okfn
 http://github.com/okfn/bibserver
-
+This project is released under the AGPLv3. Okfn and the original authors
+kindly provided the permission to use a subpart of their project
+(ie the bibtex parser) under LGPLv3. Many thanks to them!
 
 The aim of this project is to provide a standalone library in python.
 
@@ -21,6 +23,7 @@ https://bibtexparser.readthedocs.org/
 
 License
 =======
-AGPLv3. See COPYING for details.
+
+LGPLv3. See COPYING for details.
 
 
