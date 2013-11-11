@@ -8,6 +8,7 @@ Each of them takes a record and return the modified record.
 """
 
 import itertools
+import re
 
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
 
@@ -131,17 +132,19 @@ def journal(record):
     return record
 
 
-def keyword(record):
+def keyword(record, sep=',|;'):
     """
     Split keyword field into a list.
 
     :param record: the record.
     :type record: dict
+    :param sep: pattern used for the splitting regexp.
+    :type record: string, optional
     :returns: dict -- the modified record.
 
     """
     if "keyword" in record:
-        record["keyword"] = [i.strip() for i in record["keyword"].replace('\n', '').split(",")]
+        record["keyword"] = [i.strip() for i in re.split(sep, record["keyword"].replace('\n', ''))]
 
     return record
 

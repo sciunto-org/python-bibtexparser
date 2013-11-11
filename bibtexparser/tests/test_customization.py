@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 
-from bibtexparser.customization import getnames, convert_to_unicode, homogeneize_latex_encoding, page_double_hyphen
+from bibtexparser.customization import getnames, convert_to_unicode, homogeneize_latex_encoding, page_double_hyphen, keyword
 
 
 class TestBibtexParserMethod(unittest.TestCase):
@@ -87,6 +87,15 @@ class TestBibtexParserMethod(unittest.TestCase):
         record = {'toto': 'à {\`a} \`{a}'}
         result = homogeneize_latex_encoding(record)
         expected = {'toto': '{\`a} {\`a} {\`a}'}
+        self.assertEqual(result, expected)
+
+    ###########
+    # keywords
+    ###########
+    def test_keywords(self):
+        record = {'keyword': "a b, a b , a b;a b ; a b, a b\n"}
+        result = keyword(record)
+        expected = {'keyword': ['a b'] * 6}
         self.assertEqual(result, expected)
 
 if __name__ == '__main__':
