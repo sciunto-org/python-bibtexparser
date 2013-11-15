@@ -1,16 +1,22 @@
+v0.
+====
+
+* ENH: split keywords with various separators
+
+
 v0.5
 ====
 
 * Permission from original authors and OKFN to use LGPLv3
-* Python 2.7 support
-* Fix issue related to accents
+* ENH: Python 2.7 support
+* FIX: issue related to accents
 
 v0.4
 ====
 
-* Transformations on characters are now considered as a customization
-* New customization: clean latex style
-* Fix issue related to name processing
+* ENH: Transformations on characters are now considered as a customization
+* ENH: New customization: clean latex style
+* FIX: issue related to name processing
 
 v0.3
 ====
