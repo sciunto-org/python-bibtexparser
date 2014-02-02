@@ -23,8 +23,8 @@ Contents:
     install.rst
     tutorial.rst
     bibtexparser.rst
-    bibtex_conv.rst
     logging.rst
+    bibtex_conv.rst
 
 
 Indices and tables

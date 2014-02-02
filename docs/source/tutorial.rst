@@ -118,10 +118,3 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 Note: if you want to mix different customization functions, you can write your own function.
 
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
