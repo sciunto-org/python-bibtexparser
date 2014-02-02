@@ -1,5 +1,5 @@
-v0.
-====
+v0.5.1
+======
 
 * ENH: split keywords with various separators
 * ENH: get_entry_dict make the dict once
