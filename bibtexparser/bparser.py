@@ -189,7 +189,7 @@ class BibTexParser(object):
                 key, val = [i.strip() for i in kv.split('=', 1)]
                 key = self._add_key(key)
                 # if it looks like the value spans lines, store details for next loop
-                if (val.startswith('{') and not val.endswith('}')) or (val.startswith('"') and not val.replace('}', '').endswith('"')):
+                if (val.count('{') != val.count('}')) or (val.startswith('"') and not val.replace('}', '').endswith('"')):
                     logger.debug('The line is not ending the record.')
                     inkey = key
                     inval = val
@@ -199,7 +199,7 @@ class BibTexParser(object):
             elif inkey:
                 logger.debug('Continues the previous line to complete the key pair value...')
                 # if this line continues the value from a previous line, append
-                inval += ',' + kv
+                inval += ', ' + kv
                 # if it looks like this line finishes the value, store it and clear for next loop
                 if (inval.startswith('{') and inval.endswith('}')) or (inval.startswith('"') and inval.endswith('"')):
                     logger.debug('This line represents the end of the current key-pair value')

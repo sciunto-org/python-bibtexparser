@@ -4,6 +4,7 @@ v0.
 * ENH: split keywords with various separators
 * ENH: get_entry_dict make the dict once
 * ENH: add messages with logging
+* FIX: fix unittest related to braces detection
 
 v0.5
 ====

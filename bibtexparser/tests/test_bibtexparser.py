@@ -179,7 +179,6 @@ class TestBibtexParserList(unittest.TestCase):
     ###########
     # TRAPS
     ###########
-    @unittest.skip('Parser is not able to make the difference between accent and end of field')
     def test_traps(self):
         with open('bibtexparser/tests/data/traps.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile)
