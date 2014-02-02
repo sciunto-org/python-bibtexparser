@@ -73,6 +73,7 @@ class BibTexParser(object):
         }
 
         self.records = self._parse_records(customization=customization)
+        self.entries_hash = {}
 
     def get_entry_list(self):
         """Get a list of bibtex entries.
@@ -87,9 +88,10 @@ class BibTexParser(object):
 
         :retuns: dict -- entries
         """
-        entries_hash = {}
-        for entry in self.records:
-            entries_hash[entry['id']] = entry
+        # If the hash has never been made, make it
+        if not entries_hash:
+            for entry in self.records:
+                entries_hash[entry['id']] = entry
         return entries_hash
 
     def _parse_records(self, customization=None):

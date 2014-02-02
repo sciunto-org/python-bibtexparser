@@ -2,7 +2,8 @@ v0.
 ====
 
 * ENH: split keywords with various separators
-
+* ENH: get_entry_dict make the dict once
+* ENH: add messages with logging
 
 v0.5
 ====
@@ -30,7 +31,6 @@ v0.2
 
 * TEST: initialized
 * DOC: initialized
-
 
 v0.1
 ====
