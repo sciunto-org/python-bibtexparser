@@ -78,7 +78,7 @@ class BibTexParser(object):
     def get_entry_list(self):
         """Get a list of bibtex entries.
 
-        :retuns: list -- entries
+        :returns: list -- entries
         """
         return self.records
 
@@ -86,7 +86,7 @@ class BibTexParser(object):
         """Get a dictionnary of bibtex entries.
         The dict key is the bibtex entry key
 
-        :retuns: dict -- entries
+        :returns: dict -- entries
         """
         # If the hash has never been made, make it
         if not self.entries_hash:
