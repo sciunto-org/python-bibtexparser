@@ -63,3 +63,4 @@ The example below can be used to print these messages in the console.
             bp = BibTexParser(bibfile)
             print(bp.get_entry_list())
 
+I recommend you to use this output if you would like to report a bug.
