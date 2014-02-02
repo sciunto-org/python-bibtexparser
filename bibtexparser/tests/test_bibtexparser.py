@@ -52,24 +52,40 @@ class TestBibtexParserList(unittest.TestCase):
     ###########
     # ARTICLE
     ###########
+    # test also that list and dict are equivalent
     def test_article(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile)
-            res = bib.get_entry_list()
-            expected = [{'keyword': 'keyword1, keyword2',
-                         'type': 'article',
-                         'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
-                         'year': '2013',
-                         'journal': 'Nice Journal',
-                         'id': 'Cesar2013',
-                         'pages': '12-23',
-                         'title': 'An amazing title',
-                         'comments': 'A comment',
-                         'author': 'Jean César',
-                         'volume': '12',
-                         'month': 'jan'
-                         }]
-        self.assertEqual(res, expected)
+            res_list = bib.get_entry_list()
+            res_dict = bib.get_entry_dict()
+            expected_list = [{'keyword': 'keyword1, keyword2',
+                              'type': 'article',
+                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                              'year': '2013',
+                              'journal': 'Nice Journal',
+                              'id': 'Cesar2013',
+                              'pages': '12-23',
+                              'title': 'An amazing title',
+                              'comments': 'A comment',
+                              'author': 'Jean César',
+                              'volume': '12',
+                              'month': 'jan'
+                              }]
+            expected_dict = {'Cesar2013': {'keyword': 'keyword1, keyword2',
+                              'type': 'article',
+                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                              'year': '2013',
+                              'journal': 'Nice Journal',
+                              'id': 'Cesar2013',
+                              'pages': '12-23',
+                              'title': 'An amazing title',
+                              'comments': 'A comment',
+                              'author': 'Jean César',
+                              'volume': '12',
+                              'month': 'jan'
+                              }}
+        self.assertEqual(res_list, expected_list)
+        self.assertEqual(res_dict, expected_dict)
 
     def test_article_cust_unicode(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
