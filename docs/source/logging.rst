@@ -62,3 +62,4 @@ The example below can be used to print these messages in the console.
         with open('/tmp/bibtex.bib', 'r') as bibfile:
             bp = BibTexParser(bibfile)
             print(bp.get_entry_list())
+
