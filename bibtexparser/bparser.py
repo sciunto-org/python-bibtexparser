@@ -89,10 +89,10 @@ class BibTexParser(object):
         :retuns: dict -- entries
         """
         # If the hash has never been made, make it
-        if not entries_hash:
+        if not self.entries_hash:
             for entry in self.records:
-                entries_hash[entry['id']] = entry
-        return entries_hash
+                self.entries_hash[entry['id']] = entry
+        return self.entries_hash
 
     def _parse_records(self, customization=None):
         """Parse the bibtex into a list of records.
