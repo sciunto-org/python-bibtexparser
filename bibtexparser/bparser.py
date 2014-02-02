@@ -169,11 +169,12 @@ class BibTexParser(object):
             return d
 
         # for each line in record
-        logger.debug('Split the record of its lines')
+        logger.debug('Split the record of its lines and treat them')
         kvs = [i.strip() for i in record.split(',\n')]
         inkey = ""
         inval = ""
         for kv in kvs:
+            logger.debug('Inspect: %s', kv)
             if kv.startswith('@') and not inkey:
                 # it is the start of the record - set the bibtype and citekey (id)
                 logger.debug('Line starts with @ and the key is not stored yet.')
@@ -187,9 +188,11 @@ class BibTexParser(object):
                 key = self._add_key(key)
                 # if it looks like the value spans lines, store details for next loop
                 if (val.startswith('{') and not val.endswith('}')) or (val.startswith('"') and not val.replace('}', '').endswith('"')):
+                    logger.debug('The line is not ending the record.')
                     inkey = key
                     inval = val
                 else:
+                    logger.debug('The line is the end of the record.')
                     d[key] = self._add_val(val)
             elif inkey:
                 logger.debug('Continues the previous line to complete the key pair value...')
@@ -204,13 +207,15 @@ class BibTexParser(object):
                 else:
                     logger.debug('This line does NOT represent the end of the current key-pair value')
 
+        logger.debug('All lines have been treated')
+        if not d:
+            logger.debug('The dict is empty, return it.')
+            return d
+
         # put author names into persons list
         if 'author_data' in d:
             self.persons = [i for i in d['author_data'].split('\n')]
             del d['author_data']
-
-        if not d:
-            return d
 
         d['type'] = bibtype
         d['id'] = id
