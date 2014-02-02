@@ -24,6 +24,7 @@ Contents:
     tutorial.rst
     bibtexparser.rst
     bibtex_conv.rst
+    logging.rst
 
 
 Indices and tables
