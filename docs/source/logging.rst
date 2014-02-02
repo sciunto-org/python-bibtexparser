@@ -7,6 +7,7 @@ Bibtexparser includes a large quantity of debug messages which helps to understa
 The example below can be used to print these messages in the console.
 
 .. code-block:: python
+
     import logging
     import logging.config
 
