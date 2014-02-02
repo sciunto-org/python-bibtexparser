@@ -16,7 +16,7 @@ Welcome to BibtexParser's documentation!
 
 BibtexParser is a python library to parse bibtex files. The code is tested with unittests.
 
-If you use BibtexParser for your project, feel free to send me an email. I will be happy to hear that and to mention your project in the documentation.
+If you use BibtexParser for your project, feel free to send me an email. I would be happy to hear that and to mention your project in the documentation.
 
 Contents:
 
