@@ -24,14 +24,13 @@ class TestLatexConverter(unittest.TestCase):
     def test_accent(self):
         string = 'à é è ö'
         result = string_to_latex(string)
-        expected = "\`{a} \\\'{e} \`{e} \\\"{o}"
+        expected = "{\`a} {\\\'e} {\`e} {\\\"o}"
         self.assertEqual(result, expected)
 
-    def test_uppercase(self):
-        """ Don't touch { and }"""
-        string = '{A}'
+    def test_special_caracter(self):
+        string = 'ç'
         result = string_to_latex(string)
-        expected = '{A}'
+        expected = '{\c c}'
         self.assertEqual(result, expected)
 
 class TestUppercaseProtection(unittest.TestCase):
