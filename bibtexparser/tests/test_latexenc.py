@@ -27,7 +27,7 @@ class TestLatexConverter(unittest.TestCase):
         expected = "\`{a} \\\'{e} \`{e} \\\"{o}"
         self.assertEqual(result, expected)
 
-    def test_accent(self):
+    def test_uppercase(self):
         """ Don't touch { and }"""
         string = '{A}'
         result = string_to_latex(string)
