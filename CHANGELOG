@@ -1,4 +1,5 @@
 * ENH: fix tests latex encoding
+* ENH: support @comment
 
 v0.5.1
 ======
