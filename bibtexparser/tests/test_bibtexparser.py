@@ -198,5 +198,21 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
+    ###########
+    # FEATURES
+    ###########
+    def test_features(self):
+        with open('bibtexparser/tests/data/features.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            res = bib.get_entry_list()
+            expected = [{'type': 'inproceedings',
+                         'year': '2014',
+                         'title': 'Cool Stuff',
+                         'author': 'John',
+                         'id': 'mykey',
+                         'booktitle': 'My International Conference',
+                         }]
+        self.assertEqual(res, expected)
+
 if __name__ == '__main__':
     unittest.main()
