@@ -214,5 +214,17 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
+    ###########
+    # WRONG
+    ###########
+    def test_features(self):
+        with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            res = bib.get_entry_list()
+            expected = [{'author': 'correct',
+                         'id': 'bar',
+                         'type': 'article'}]
+        self.assertEqual(res, expected)
+
 if __name__ == '__main__':
     unittest.main()

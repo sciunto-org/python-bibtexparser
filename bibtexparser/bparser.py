@@ -189,7 +189,6 @@ class BibTexParser(object):
         inval = ""
         for kv in kvs:
             logger.debug('Inspect: %s', kv)
-            #TODO: We may check that the keyword belongs to a known type
             if kv.startswith('@') and not inkey:
                 # it is the start of the record - set the bibtype and citekey (id)
                 logger.debug('Line starts with @ and the key is not stored yet.')
@@ -198,6 +197,22 @@ class BibTexParser(object):
                 id = id.strip('}').strip(',')
                 logger.debug('bibtype = %s', bibtype)
                 logger.debug('id = %s', id)
+                if bibtype not in ('article',
+                                   'book',
+                                   'booklet',
+                                   'conference',
+                                   'inbook',
+                                   'incollection',
+                                   'inproceedings',
+                                   'manual',
+                                   'mastersthesis',
+                                   'misc',
+                                   'phdthesis',
+                                   'proceedings',
+                                   'techreport',
+                                   'unpublished'):
+                    logger.warning('Entry type %s not standard. Not considered.', bibtype)
+                    break
             elif '=' in kv and not inkey:
                 # it is a line with a key value pair on it
                 logger.debug('Line contains a key-pair value and the key is not stored yet.')
