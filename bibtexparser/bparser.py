@@ -162,6 +162,12 @@ class BibTexParser(object):
         if '}\n' in record:
             record, rubbish = record.replace('\r\n', '\n').replace('\r', '\n').rsplit('}\n', 1)
 
+        # if a preamble record, ignore it
+        if record.lower().startswith('@preamble'):
+            logger.debug('The record startswith @preamble')
+            logger.debug('Return an empty dict')
+            return {}
+
         # if a comment record, ignore it
         if record.lower().startswith('@comment'):
             logger.debug('The record startswith @comment')
@@ -190,6 +196,8 @@ class BibTexParser(object):
                 bibtype, id = kv.split('{', 1)
                 bibtype = self._add_key(bibtype)
                 id = id.strip('}').strip(',')
+                logger.debug('bibtype = %s', bibtype)
+                logger.debug('id = %s', id)
             elif '=' in kv and not inkey:
                 # it is a line with a key value pair on it
                 logger.debug('Line contains a key-pair value and the key is not stored yet.')
