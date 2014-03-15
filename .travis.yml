@@ -5,9 +5,11 @@ python:
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   - pip install sphinx
+  - pip install coverage
   - python setup.py install
 # command to run tests, e.g. python setup.py test
 script:
   - nosetests
+  - coverage report -m
   - cd docs
   - make html
