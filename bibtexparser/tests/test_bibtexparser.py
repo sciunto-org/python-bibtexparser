@@ -214,6 +214,21 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
+    @unittest.skip('Bug #13')
+    def test_features2(self):
+        with open('bibtexparser/tests/data/features2.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            res = bib.get_entry_list()
+            expected = [{'type': 'inproceedings',
+                         'year': '2014',
+                         'title': 'Cool Stuff',
+                         'author': 'John Doe',
+                         'id': 'mykey',
+                         'booktitle': 'My International Conference',
+                         }]
+        self.assertEqual(res, expected)
+
+
     ###########
     # WRONG
     ###########
