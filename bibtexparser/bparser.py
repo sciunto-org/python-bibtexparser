@@ -189,6 +189,7 @@ class BibTexParser(object):
         inval = ""
         for kv in kvs:
             logger.debug('Inspect: %s', kv)
+            #TODO: We may check that the keyword belongs to a known type
             if kv.startswith('@') and not inkey:
                 # it is the start of the record - set the bibtype and citekey (id)
                 logger.debug('Line starts with @ and the key is not stored yet.')
