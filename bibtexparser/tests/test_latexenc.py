@@ -15,6 +15,7 @@
 #
 # Author: Francois Boulogne <fboulogne at sciunto dot org>, 2012
 
+from __future__ import unicode_literals
 import unittest
 
 from bibtexparser.latexenc import *
