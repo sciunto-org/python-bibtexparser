@@ -10,7 +10,7 @@ LICENSE = "LGPLv3"
 EMAIL = "fboulogne@sciunto.org"
 VERSION = "0.5.2"
 
-SHORT_DESCRIPTION = "Bibtex parser for python3"
+SHORT_DESCRIPTION = "Bibtex parser for python 2 and 3"
 
 AUHTORS = ["Francois Boulogne <fboulogne@sciunto.org>"]
 
