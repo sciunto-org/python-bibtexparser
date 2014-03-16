@@ -1,4 +1,6 @@
 * ENH: fix tests latex encoding
+* ENH: support @comment
+* ENH: check that bibtype belongs to a known type
 
 v0.5.1
 ======
