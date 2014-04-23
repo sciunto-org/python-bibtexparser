@@ -283,7 +283,7 @@ class BibTexParser(object):
         :type val: string
         :returns: string -- value
         """
-        val.strip()
+        val = val.strip()
         if val.startswith('{') and val.endswith('}'):
             return val[1:-1]
         return val
