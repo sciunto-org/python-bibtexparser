@@ -29,6 +29,7 @@ def customizations_unicode(record):
     record = convert_to_unicode(record)
     return record
 
+
 def customizations_latex(record):
     """Use all functions related to specific fields
     + converter to latex.
@@ -92,7 +93,6 @@ class TestBibtexParserFunc(unittest.TestCase):
             expected = 'before {remove} after'
             self.assertEqual(result, expected)
 
-    @unittest.skip('Bug')
     def test_strip_braces_n(self):
         with open(self.bibfile, 'r') as bibfile:
             bib = BibTexParser(bibfile)
@@ -101,9 +101,7 @@ class TestBibtexParserFunc(unittest.TestCase):
             self.assertEqual(result, expected)
 
 
-
 class TestBibtexParserList(unittest.TestCase):
-
 
     ###########
     # ARTICLE
@@ -284,11 +282,10 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
-
     ###########
     # WRONG
     ###########
-    def test_features(self):
+    def test_wrong(self):
         with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile)
             res = bib.get_entry_list()
