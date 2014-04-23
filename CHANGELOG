@@ -1,3 +1,6 @@
+
+* FIX: missing strip() (#14) by Sebastien Diemer
+
 v0.5.2
 ======
 
