@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 import unittest
+import tempfile
+import os.path
 
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
@@ -45,6 +47,60 @@ def customizations_latex(record):
     record = page_double_hyphen(record)
     record = doi(record)
     return record
+
+
+class TestBibtexParserFunc(unittest.TestCase):
+
+    bibfile = os.path.join(tempfile.gettempdir(), "tmp-testfile")
+
+    def setUp(self):
+        with open(self.bibfile, "w") as f:
+            f.write("r")
+
+    def test_strip_quotes(self):
+        with open(self.bibfile, 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            result = bib._strip_quotes('"before remove after"')
+            expected = 'before remove after'
+            self.assertEqual(result, expected)
+
+    def test_strip_quotes_n(self):
+        with open(self.bibfile, 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            result = bib._strip_quotes('"before remove after"\n')
+            expected = 'before remove after'
+            self.assertEqual(result, expected)
+
+    def test_strip_quotes2(self):
+        with open(self.bibfile, 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            result = bib._strip_quotes('before "remove" after')
+            expected = 'before "remove" after'
+            self.assertEqual(result, expected)
+
+    def test_strip_braces(self):
+        with open(self.bibfile, 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            result = bib._strip_braces('{before remove after}')
+            expected = 'before remove after'
+            self.assertEqual(result, expected)
+
+    def test_strip_braces2(self):
+        with open(self.bibfile, 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            result = bib._strip_braces('before {remove} after')
+            expected = 'before {remove} after'
+            self.assertEqual(result, expected)
+
+    @unittest.skip('Bug')
+    def test_strip_braces_n(self):
+        with open(self.bibfile, 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            result = bib._strip_braces('{before remove after}\n')
+            expected = 'before remove after'
+            self.assertEqual(result, expected)
+
+
 
 class TestBibtexParserList(unittest.TestCase):
 
