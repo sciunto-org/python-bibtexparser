@@ -9,7 +9,7 @@ install:
   - python setup.py install
 # command to run tests, e.g. python setup.py test
 script:
-  - nosetests --with-coverage
+    - nosetests --with-coverage --cover-package=bibtexparser
   - cd docs
   - make html
 
