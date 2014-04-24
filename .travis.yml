@@ -9,7 +9,7 @@ install:
   - python setup.py install
 # command to run tests, e.g. python setup.py test
 script:
-  - nosetests
+  - nosetests --with-coverage
   - cd docs
   - make html
 
