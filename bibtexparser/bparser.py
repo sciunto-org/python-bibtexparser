@@ -267,6 +267,7 @@ class BibTexParser(object):
         :type val: string
         :returns: string -- value
         """
+        logger.debug('Strip quotes')
         val = val.strip()
         if val.startswith('"') and val.endswith('"'):
             return val[1:-1]
@@ -279,6 +280,7 @@ class BibTexParser(object):
         :type val: string
         :returns: string -- value
         """
+        logger.debug('Strip braces')
         val = val.strip()
         if val.startswith('{') and val.endswith('}'):
             return val[1:-1]
@@ -291,6 +293,7 @@ class BibTexParser(object):
         :type val: string
         :returns: string -- value
         """
+        logger.debug('Substitute string definitions')
         if not val:
             return ''
         for k in list(self.replace_dict.keys()):
