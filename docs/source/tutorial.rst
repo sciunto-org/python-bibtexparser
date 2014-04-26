@@ -36,7 +36,7 @@ OK. Everything is in place. Let's parse the bibtex.
     from bibtexparser.bparser import BibTexParser
 
     with open('bibtex.bib', 'r') as bibfile:
-        bp = BibTexParser(bibfile)
+        bp = BibTexParser(bibfile.read())
         print(bp.get_entry_list())
 
 
@@ -78,7 +78,7 @@ The library includes several functions which may suit your needs. Otherwise,you 
         return record
 
     with open('bibtex.bib', 'r') as bibfile:
-        bp = BibTexParser(bibfile, customization=customizations)
+        bp = BibTexParser(bibfile.read(), customization=customizations)
         print(bp.get_entry_list())
 
 
@@ -98,7 +98,7 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
     from bibtexparser.customization import homogeneize_latex_encoding
 
     with open('bibtex.bib', 'r') as bibfile:
-        bp = BibTexParser(bibfile, customization=homogeneize_latex_encoding)
+        bp = BibTexParser(bibfile.read(), customization=homogeneize_latex_encoding)
         print(bp.get_entry_list())
 
 
@@ -111,7 +111,7 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
     from bibtexparser.customization import convert_to_unicode
 
     with open('bibtex.bib', 'r') as bibfile:
-        bp = BibTexParser(bibfile, customization=convert_to_unicode)
+        bp = BibTexParser(bibfile.read(), customization=convert_to_unicode)
         print(bp.get_entry_list())
 
 

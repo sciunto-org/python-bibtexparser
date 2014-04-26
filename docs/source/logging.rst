@@ -61,7 +61,7 @@ The example below can be used to print these messages in the console.
         from bibtexparser.bparser import BibTexParser
 
         with open('/tmp/bibtex.bib', 'r') as bibfile:
-            bp = BibTexParser(bibfile)
+            bp = BibTexParser(bibfile.read())
             print(bp.get_entry_list())
 
 I recommend you to use this output if you would like to report a bug.
