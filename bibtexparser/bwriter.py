@@ -12,7 +12,7 @@ def bibtex(parsed):
     """
     data = parsed.get_entry_dict()
     bibtex = ''
-    for entry in data.keys():
+    for entry in sorted(data.keys()):
         bibtex += '@' + data[entry]['type'] + '{' + data[entry]['id'] + ",\n"
 
         for field in [i for i in sorted(data[entry]) if i not in ['type', 'id']]:
