@@ -294,5 +294,46 @@ class TestBibtexParserList(unittest.TestCase):
                          'type': 'article'}]
         self.assertEqual(res, expected)
 
+    ###########
+    # ENCODING
+    ###########
+    def test_encoding(self):
+        with open('bibtexparser/tests/data/encoding.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile)
+            res = bib.get_entry_list()
+            expected = [{'keyword': 'keyword1, keyword2',
+                              'type': 'article',
+                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                              'year': '2013',
+                              'journal': 'Elémentaire',
+                              'id': 'Cesar_2013',
+                              'pages': '12-23',
+                              'title': 'An amazing title: à',
+                              'comments': 'A comment',
+                              'author': 'Jean César',
+                              'volume': '12',
+                              'month': 'jan'
+                         }]
+        self.assertEqual(res, expected)
+
+    def test_encoding_with_homogeneize(self):
+        with open('bibtexparser/tests/data/encoding.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile, customization=homogeneize_latex_encoding)
+            res = bib.get_entry_list()
+            expected = [{'keyword': 'keyword1, keyword2',
+                              'type': 'article',
+                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
+                              'year': '2013',
+                              'journal': 'El{\\\'e}mentaire',
+                              'id': 'Cesar_2013',
+                              'pages': '12-23',
+                              'title': '{A}n amazing title: {\\`a}',
+                              'comments': 'A comment',
+                              'author': 'Jean C{\\\'e}sar',
+                              'volume': '12',
+                              'month': 'jan'
+                         }]
+        self.assertEqual(res, expected)
+
 if __name__ == '__main__':
     unittest.main()

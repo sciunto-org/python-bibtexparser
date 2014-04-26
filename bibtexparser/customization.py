@@ -238,7 +238,8 @@ def homogeneize_latex_encoding(record):
     record = convert_to_unicode(record)
     # And then, we fall back
     for val in record:
-        record[val] = string_to_latex(record[val])
-        if val == 'title':
-            record[val] = protect_uppercase(record[val])
+        if val not in ('id',):
+            record[val] = string_to_latex(record[val])
+            if val == 'title':
+                record[val] = protect_uppercase(record[val])
     return record
