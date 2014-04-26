@@ -16,3 +16,11 @@ Customization functions
     :members:
     :inherited-members:
     :show-inheritance:
+
+Writer
+------
+
+.. automodule:: bwriter
+    :members:
+    :inherited-members:
+    :show-inheritance:
