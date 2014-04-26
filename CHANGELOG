@@ -1,3 +1,4 @@
+* ENH: add writer (#16), thanks to Lucas Verney
 * MAINT: Remove non-standard --BREAK-- command detection
 * FIX: missing strip() (#14) by Sebastien Diemer
 
