@@ -21,6 +21,11 @@ Documentation including installation procedure and archives.
 
 https://bibtexparser.readthedocs.org/
 
+Upgrading
+=========
+
+Please, read the changelog before upgrading for API modifications.
+
 License
 =======
 
