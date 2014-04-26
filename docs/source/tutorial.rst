@@ -118,3 +118,13 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 Note: if you want to mix different customization functions, you can write your own function.
 
 
+Write a bibtex
+--------------
+
+After modifications, you can generate a string containing all entries in the bibtex format.
+
+.. code-block:: python
+
+    from bibtexparser.bwriter import bibtex
+
+    output = bibtex(bp)
