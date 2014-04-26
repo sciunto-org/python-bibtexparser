@@ -121,18 +121,14 @@ class BibTexParser(object):
         # read each line, bundle them up until they form an object, then send for parsing
         for linenumber, line in enumerate(self.fileobj):
             logger.debug('Inspect line %s', linenumber)
-            if '--BREAK--' in line:
-                logger.debug('--BREAK-- encountered')
-                break
-            else:
-                if line.strip().startswith('@'):
-                    logger.debug('Line starts with @')
-                    _add_parsed_record(record, records)
-                    logger.debug('The record is set to empty')
-                    record = ""
-                if len(line.strip()) > 0:
-                    logger.debug('The line is not empty, add it to record')
-                    record += line
+            if line.strip().startswith('@'):
+                logger.debug('Line starts with @')
+                _add_parsed_record(record, records)
+                logger.debug('The record is set to empty')
+                record = ""
+            if len(line.strip()) > 0:
+                logger.debug('The line is not empty, add it to record')
+                record += line
 
         # catch any remaining record and send it for parsing
         _add_parsed_record(record, records)
