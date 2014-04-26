@@ -9,6 +9,7 @@
 
 import sys
 import logging
+import io
 
 logger = logging.getLogger(__name__)
 
@@ -30,20 +31,23 @@ class BibTexParser(object):
     By default (i.e. without customizations), each value in entries are considered
     as a string.
 
-    :param fileobj: a filehandler
+    :param data: a string
     :param customization: a function
 
     Example:
 
     >>> from bibtexparser.bparser import BibTexParser
     >>> filehandler = open('bibtex', 'r')
-    >>> parser = BibTexParser(filehandler)
+    >>> parser = BibTexParser(filehandler.read())
     >>> record_list = parser.get_entry_list()
     >>> records_dict = parser.get_entry_dict()
 
     """
-    def __init__(self, fileobj, customization=None):
-        data = fileobj.read()
+    def __init__(self, data, customization=None):
+        if type(data) is io.TextIOWrapper:
+            logger.critical("The API has changed. You should pass data instead \
+                             of a filehandler.")
+            raise TypeError('Wrong type for data')
 
         # On some sample data files, the character encoding detection simply hangs
         # We are going to default to utf8, and mandate it.
@@ -185,7 +189,7 @@ class BibTexParser(object):
         inval = ""
         for kv in kvs:
             logger.debug('Inspect: %s', kv)
-            #TODO: We may check that the keyword belongs to a known type
+            # TODO: We may check that the keyword belongs to a known type
             if kv.startswith('@') and not inkey:
                 # it is the start of the record - set the bibtype and citekey (id)
                 logger.debug('Line starts with @ and the key is not stored yet.')

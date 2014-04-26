@@ -60,42 +60,42 @@ class TestBibtexParserFunc(unittest.TestCase):
 
     def test_strip_quotes(self):
         with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             result = bib._strip_quotes('"before remove after"')
             expected = 'before remove after'
             self.assertEqual(result, expected)
 
     def test_strip_quotes_n(self):
         with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             result = bib._strip_quotes('"before remove after"\n')
             expected = 'before remove after'
             self.assertEqual(result, expected)
 
     def test_strip_quotes2(self):
         with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             result = bib._strip_quotes('before "remove" after')
             expected = 'before "remove" after'
             self.assertEqual(result, expected)
 
     def test_strip_braces(self):
         with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             result = bib._strip_braces('{before remove after}')
             expected = 'before remove after'
             self.assertEqual(result, expected)
 
     def test_strip_braces2(self):
         with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             result = bib._strip_braces('before {remove} after')
             expected = 'before {remove} after'
             self.assertEqual(result, expected)
 
     def test_strip_braces_n(self):
         with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             result = bib._strip_braces('{before remove after}\n')
             expected = 'before remove after'
             self.assertEqual(result, expected)
@@ -103,13 +103,17 @@ class TestBibtexParserFunc(unittest.TestCase):
 
 class TestBibtexParserList(unittest.TestCase):
 
+    def test_wrong(self):
+        with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
+            self.assetRaises(TypeError, BibTexParser, bibfile)  # API modification
+
     ###########
     # ARTICLE
     ###########
     # test also that list and dict are equivalent
     def test_article(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             res_list = bib.get_entry_list()
             res_dict = bib.get_entry_dict()
             expected_list = [{'keyword': 'keyword1, keyword2',
@@ -143,7 +147,7 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_article_cust_unicode(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customization=customizations_unicode)
+            bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
                      'type': 'article',
@@ -162,7 +166,7 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_article_cust_latex(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customization=customizations_latex)
+            bib = BibTexParser(bibfile.read(), customization=customizations_latex)
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
                      'type': 'article',
@@ -184,7 +188,7 @@ class TestBibtexParserList(unittest.TestCase):
     ###########
     def test_book(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'type': 'book',
                          'year': '1987',
@@ -200,7 +204,7 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_book_cust_unicode(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customization=customizations_unicode)
+            bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
             res = bib.get_entry_list()
             expected = [{'type': 'book',
                          'year': '1987',
@@ -216,7 +220,7 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_book_cust_latex(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customization=customizations_latex)
+            bib = BibTexParser(bibfile.read(), customization=customizations_latex)
             res = bib.get_entry_list()
             expected = [{'type': 'book',
                          'year': '1987',
@@ -235,7 +239,7 @@ class TestBibtexParserList(unittest.TestCase):
     ###########
     def test_traps(self):
         with open('bibtexparser/tests/data/traps.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
                          'type': 'article',
@@ -257,7 +261,7 @@ class TestBibtexParserList(unittest.TestCase):
     ###########
     def test_features(self):
         with open('bibtexparser/tests/data/features.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'type': 'inproceedings',
                          'year': '2014',
@@ -271,7 +275,7 @@ class TestBibtexParserList(unittest.TestCase):
     @unittest.skip('Bug #13')
     def test_features2(self):
         with open('bibtexparser/tests/data/features2.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'type': 'inproceedings',
                          'year': '2014',
@@ -287,7 +291,7 @@ class TestBibtexParserList(unittest.TestCase):
     ###########
     def test_wrong(self):
         with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'author': 'correct',
                          'id': 'bar',
