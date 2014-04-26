@@ -303,7 +303,7 @@ class TestBibtexParserList(unittest.TestCase):
     ###########
     def test_encoding(self):
         with open('bibtexparser/tests/data/encoding.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
                               'type': 'article',
@@ -322,7 +322,7 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_encoding_with_homogeneize(self):
         with open('bibtexparser/tests/data/encoding.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile, customization=homogeneize_latex_encoding)
+            bib = BibTexParser(bibfile.read(), customization=homogeneize_latex_encoding)
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
                               'type': 'article',

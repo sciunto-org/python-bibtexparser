@@ -19,7 +19,7 @@ class TestBibtexWriterList(unittest.TestCase):
     ###########
     def test_article(self):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
 
         with open('bibtexparser/tests/data/article_output.bib', 'r') as bibfile:
             expected = bibfile.read()
@@ -35,7 +35,7 @@ class TestBibtexWriterList(unittest.TestCase):
     ###########
     def test_book(self):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
 
         with open('bibtexparser/tests/data/book_output.bib', 'r') as bibfile:
             expected = bibfile.read()
@@ -48,7 +48,7 @@ class TestBibtexWriterList(unittest.TestCase):
     ###########
     def test_multiple(self):
         with open('bibtexparser/tests/data/multiple_entries.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile)
+            bib = BibTexParser(bibfile.read())
 
         with open('bibtexparser/tests/data/multiple_entries_output.bib', 'r') as bibfile:
             expected = bibfile.read()
