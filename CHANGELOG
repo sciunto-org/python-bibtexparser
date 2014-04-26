@@ -1,5 +1,6 @@
 
 * FIX: missing strip() (#14) by Sebastien Diemer
+* API breakage: the parser takes data instead of a filehandler
 
 v0.5.2
 ======
