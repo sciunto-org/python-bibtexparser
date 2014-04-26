@@ -53,9 +53,9 @@ class BibTexParser(object):
         # We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
 
-        # Some files have Byte-order marks inserted at the start
-        if data[:3] == '\xef\xbb\xbf':
-            data = data[3:]
+        ## Some files have Byte-order marks inserted at the start
+        #if data[:3] == '\xef\xbb\xbf':
+        #    data = data[3:]
         self.fileobj = StringIO(data)
 
         # set which bibjson schema this parser parses to
