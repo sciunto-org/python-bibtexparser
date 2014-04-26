@@ -45,8 +45,8 @@ class BibTexParser(object):
     """
     def __init__(self, data, customization=None):
         if type(data) is io.TextIOWrapper:
-            logger.critical('The API has changed. You should pass data instead
-                             of a filehandler.')
+            logger.critical("The API has changed. You should pass data instead \
+                             of a filehandler.")
             raise TypeError('Wrong type for data')
 
         # On some sample data files, the character encoding detection simply hangs
