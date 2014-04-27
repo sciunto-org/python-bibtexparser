@@ -23,7 +23,7 @@ class TestBibtexWriterList(unittest.TestCase):
 
         with open('bibtexparser/tests/data/article_output.bib', 'r') as bibfile:
             expected = bibfile.read()
-        result = bibtex(bib)
+        result = to_bibtex(bib)
         if not sys.version_info >= (3, 0):
             if isinstance(result, unicode):
                 result = result.encode('utf-8')
@@ -39,7 +39,7 @@ class TestBibtexWriterList(unittest.TestCase):
 
         with open('bibtexparser/tests/data/book_output.bib', 'r') as bibfile:
             expected = bibfile.read()
-        result = bibtex(bib)
+        result = to_bibtex(bib)
         self.maxDiff = None
         self.assertEqual(expected, result)
 
@@ -52,6 +52,6 @@ class TestBibtexWriterList(unittest.TestCase):
 
         with open('bibtexparser/tests/data/multiple_entries_output.bib', 'r') as bibfile:
             expected = bibfile.read()
-        result = bibtex(bib)
+        result = to_bibtex(bib)
         self.maxDiff = None
         self.assertEqual(expected, result)

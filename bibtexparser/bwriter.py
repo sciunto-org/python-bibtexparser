@@ -3,7 +3,7 @@
 # Author: Francois Boulogne
 # License:
 
-def bibtex(parsed):
+def to_bibtex(parsed):
     """
     Convert parsed data to a bibtex string.
 

@@ -125,6 +125,6 @@ After modifications, you can generate a string containing all entries in the bib
 
 .. code-block:: python
 
-    from bibtexparser.bwriter import bibtex
+    from bibtexparser.bwriter import to_bibtex
 
-    output = bibtex(bp)
+    output = to_bibtex(bp)
