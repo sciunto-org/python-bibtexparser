@@ -1,4 +1,8 @@
-* API: enhance the naming choice
+v0.5.4
+======
+
+* ENH: json output
+* API: enhance the naming choice for bwriter
 
 v0.5.3
 ======

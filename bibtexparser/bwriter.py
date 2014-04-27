@@ -3,6 +3,9 @@
 # Author: Francois Boulogne
 # License:
 
+import json
+
+
 def to_bibtex(parsed):
     """
     Convert parsed data to a bibtex string.
@@ -20,3 +23,13 @@ def to_bibtex(parsed):
         bibtex += "}\n\n"
     return bibtex
 
+
+def to_json(parsed):
+    """
+    Convert parsed data to json.
+
+    :param parsed: BibTexParser object
+    :returns: string -- json
+    """
+    return json.dumps(parsed.get_entry_dict(), sort_keys=True,
+                      indent=4, separators=(',', ': '))
