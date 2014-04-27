@@ -9,7 +9,7 @@ import unittest
 import sys
 
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.bwriter import bibtex
+from bibtexparser.bwriter import to_bibtex
 
 
 class TestBibtexWriterList(unittest.TestCase):
