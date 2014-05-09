@@ -104,8 +104,11 @@ class TestBibtexParserFunc(unittest.TestCase):
 class TestBibtexParserList(unittest.TestCase):
 
     def test_wrong(self):
+        """
+        Wrong entry type
+        """
         with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
-            self.assetRaises(TypeError, BibTexParser, bibfile)  # API modification
+            self.assetRaises(TypeError, BibTexParser, bibfile)
 
     ###########
     # ARTICLE

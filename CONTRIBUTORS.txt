@@ -6,3 +6,9 @@
 
 - Shuen-Huei (Drake) Guan
   Python 2.7 porting
+
+- Sebastien Diemer
+  Bugfix
+
+- Georg C. Brückmann
+  Support for non-standard entry types

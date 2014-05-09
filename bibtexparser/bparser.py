@@ -28,11 +28,13 @@ class BibTexParser(object):
     """
     A parser for bibtex files.
 
-    By default (i.e. without customizations), each value in entries are considered
-    as a string.
+    By default (i.e. without customizations), each value in entries are
+    considered as a string.
 
     :param data: a string
-    :param customization: a function
+    :param customization: a function to modify fields
+    :param ignore_nonstandard_types: If true, do not check the validity of
+    entries types (article, book...)
 
     Example:
 
@@ -43,14 +45,15 @@ class BibTexParser(object):
     >>> records_dict = parser.get_entry_dict()
 
     """
-    def __init__(self, data, customization=None, ignore_nonstandard_types=True):
+    def __init__(self, data, customization=None,
+                 ignore_nonstandard_types=True):
         if type(data) is io.TextIOWrapper:
             logger.critical("The API has changed. You should pass data instead \
                              of a filehandler.")
             raise TypeError('Wrong type for data')
 
-        # On some sample data files, the character encoding detection simply hangs
-        # We are going to default to utf8, and mandate it.
+        # On some sample data files, the character encoding detection simply
+        # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
 
         # Some files have Byte-order marks inserted at the start
