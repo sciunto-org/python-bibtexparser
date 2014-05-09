@@ -8,6 +8,7 @@ import os.path
 
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
+from bibtexparser import customization
 
 
 def customizations_unicode(record):
@@ -185,6 +186,28 @@ class TestBibtexParserList(unittest.TestCase):
                      'title': '{A}n amazing title'
                      }]
         self.assertEqual(res, expected)
+
+    def test_article_cust_order(self):
+        def cust(record):
+            record = customization.page_double_hyphen(record)
+            record = customization.homogeneize_latex_encoding(record)
+            record = customization.author(record)
+            return record
+
+        def cust2(record):
+            record = customization.author(record)
+            record = customization.page_double_hyphen(record)
+            record = customization.homogeneize_latex_encoding(record)
+            return record
+
+        with open('bibtexparser/tests/data/multiple_entries.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read(), customization=cust)
+            res = bib.get_entry_list()
+        with open('bibtexparser/tests/data/multiple_entries.bib', 'r') as bibfile:
+            bib2 = BibTexParser(bibfile.read(), customization=cust2)
+            res2 = bib.get_entry_list()
+        print(res2)
+        self.assertEqual(res, res2)
 
     ###########
     # BOOK
