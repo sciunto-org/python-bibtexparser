@@ -57,7 +57,10 @@ class BibTexParser(object):
         self.encoding = 'utf8'
 
         # Some files have Byte-order marks inserted at the start
-        if data[:3] == '\xef\xbb\xbf':
+        byte = '\xef\xbb\xbf'
+        if not isinstance(byte, ustr):
+            byte = ustr('\xef\xbb\xbf', self.encoding, 'ignore')
+        if data[:3] == byte:
             data = data[3:]
         self.fileobj = StringIO(data)
 
