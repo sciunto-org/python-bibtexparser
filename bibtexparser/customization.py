@@ -9,8 +9,11 @@ Each of them takes a record and return the modified record.
 
 import itertools
 import re
+import logging
 
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
+
+logger = logging.getLogger(__name__)
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
            'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
@@ -239,7 +242,11 @@ def homogeneize_latex_encoding(record):
     # And then, we fall back
     for val in record:
         if val not in ('id',):
+            logger.debug('Apply string_to_latex to: %s', val)
             record[val] = string_to_latex(record[val])
             if val == 'title':
+                logger.debug('Protect uppercase in title')
+                logger.debug('Before: %s', record[val])
                 record[val] = protect_uppercase(record[val])
+                logger.debug('After: %s', record[val])
     return record

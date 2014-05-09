@@ -36,7 +36,7 @@ def protect_uppercase(string):
     :param string: string to convert
     :returns: string
     """
-    string = re.sub("([A-Z])", '{\g<1>}', string)
+    string = re.sub('([^{]|^)([A-Z])([^}]|$)', '\g<1>{\g<2>}\g<3>', string)
     return string
 
 

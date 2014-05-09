@@ -37,9 +37,9 @@ class TestLatexConverter(unittest.TestCase):
 class TestUppercaseProtection(unittest.TestCase):
 
     def test_uppercase(self):
-        string = 'A'
+        string = 'An upPer Case A'
         result = protect_uppercase(string)
-        expected = '{A}'
+        expected = '{A}n up{P}er {C}ase {A}'
         self.assertEqual(result, expected)
 
     def test_lowercase(self):
@@ -47,6 +47,25 @@ class TestUppercaseProtection(unittest.TestCase):
         result = protect_uppercase(string)
         expected = 'a'
         self.assertEqual(result, expected)
+
+    def test_alreadyprotected(self):
+        string = '{A}, m{A}gnificient, it is a {A}...'
+        result = protect_uppercase(string)
+        expected = '{A}, m{A}gnificient, it is a {A}...'
+        self.assertEqual(result, expected)
+
+    def test_traps(self):
+        string = '{A, m{Agnificient, it is a {A'
+        result = protect_uppercase(string)
+        expected = '{A, m{Agnificient, it is a {A'
+        self.assertEqual(result, expected)
+
+    def test_traps2(self):
+        string = 'A}, mA}gnificient, it is a A}'
+        result = protect_uppercase(string)
+        expected = 'A}, mA}gnificient, it is a A}'
+        self.assertEqual(result, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
