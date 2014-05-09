@@ -43,7 +43,7 @@ class BibTexParser(object):
     >>> records_dict = parser.get_entry_dict()
 
     """
-    def __init__(self, data, customization=None):
+    def __init__(self, data, customization=None, ignore_nonstandard_types=True):
         if type(data) is io.TextIOWrapper:
             logger.critical("The API has changed. You should pass data instead \
                              of a filehandler.")
@@ -75,6 +75,7 @@ class BibTexParser(object):
             'links': 'link',
             'subjects': 'subject'
         }
+        self.ignore_nonstandard_types = ignore_nonstandard_types
 
         self.records = self._parse_records(customization=customization)
         self.entries_hash = {}
@@ -198,7 +199,7 @@ class BibTexParser(object):
                 id = id.strip('}').strip(',')
                 logger.debug('bibtype = %s', bibtype)
                 logger.debug('id = %s', id)
-                if bibtype not in ('article',
+                if self.ignore_nonstandard_types and bibtype not in ('article',
                                    'book',
                                    'booklet',
                                    'conference',
