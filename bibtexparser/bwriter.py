@@ -4,7 +4,11 @@
 # License:
 
 import json
+import logging
 
+logger = logging.getLogger(__name__)
+
+__all__ = ['to_bibtex', 'to_json']
 
 def to_bibtex(parsed):
     """
