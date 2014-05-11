@@ -206,19 +206,19 @@ class BibTexParser(object):
                 logger.debug('bibtype = %s', bibtype)
                 logger.debug('id = %s', id)
                 if self.ignore_nonstandard_types and bibtype not in ('article',
-                                   'book',
-                                   'booklet',
-                                   'conference',
-                                   'inbook',
-                                   'incollection',
-                                   'inproceedings',
-                                   'manual',
-                                   'mastersthesis',
-                                   'misc',
-                                   'phdthesis',
-                                   'proceedings',
-                                   'techreport',
-                                   'unpublished'):
+                                                                     'book',
+                                                                     'booklet',
+                                                                     'conference',
+                                                                     'inbook',
+                                                                     'incollection',
+                                                                     'inproceedings',
+                                                                     'manual',
+                                                                     'mastersthesis',
+                                                                     'misc',
+                                                                     'phdthesis',
+                                                                     'proceedings',
+                                                                     'techreport',
+                                                                     'unpublished'):
                     logger.warning('Entry type %s not standard. Not considered.', bibtype)
                     break
             elif '=' in kv and not inkey:
