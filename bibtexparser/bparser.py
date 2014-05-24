@@ -84,8 +84,6 @@ class BibTexParser(object):
         }
         self.ignore_nonstandard_types = ignore_nonstandard_types
 
-        # TODO?: Does not match two subsequent variables or strings, such as  "start" # foo # bar # "end"  or  "start" # "end".
-        #        Also doesn't support braces instead of quotes.
         self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
 
         self.records = self._parse_records(customization=customization)
@@ -189,8 +187,8 @@ class BibTexParser(object):
         # if a string record, put it in the replace_dict
         if record.lower().startswith('@string'):
             logger.debug('The record startswith @string')
-            key, val = [i.strip().strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('\n').strip(',').strip('}').split('=')]            
-            key = key.lower() # key is case insensitive
+            key, val = [i.strip().strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('\n').strip(',').strip('}').split('=')]
+            key = key.lower()  # key is case insensitive
             val = self._string_subst_partial(val)
             if val.startswith('"') or val.lower() not in self.replace_dict:
                 self.replace_dict[key] = val.strip('"')
@@ -336,15 +334,18 @@ class BibTexParser(object):
         def repl(m):
             k = m.group('id')
             replacement = self.replace_dict[k.lower()] if k.lower() in self.replace_dict else k
-            pre  = '"' if m.group('pre')  is not '"' else ''
-            post = '"' if m.group('post') is not '"' else ''
+            pre = '"' if m.group('pre') != '"' else ''
+            post = '"' if m.group('post') != '"' else ''
             return pre + replacement + post
 
         logger.debug('Substitute string definitions inside larger expressions')
         if '#' not in val:
             return val
-
-        return self.replace_all_re.sub(repl,val)
+    
+        # TODO?: Does not match two subsequent variables or strings, such as  "start" # foo # bar # "end"  or  "start" # "end".
+        # TODO:  Does not support braces instead of quotes, e.g.: {start} # foo # {bar}
+        # TODO:  Does not support strings like: "te#s#t"        
+        return self.replace_all_re.sub(repl, val)
 
     def _add_val(self, val):
         """ Clean instring before adding to dictionary
