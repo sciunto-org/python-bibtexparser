@@ -10,6 +10,7 @@
 import sys
 import logging
 import io
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,10 @@ class BibTexParser(object):
             'subjects': 'subject'
         }
         self.ignore_nonstandard_types = ignore_nonstandard_types
+
+        # TODO?: Does not match two subsequent variables or strings, such as  "start" # foo # bar # "end"  or  "start" # "end".
+        #        Also doesn't support braces instead of quotes.
+        self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
 
         self.records = self._parse_records(customization=customization)
         self.entries_hash = {}
@@ -184,8 +189,13 @@ class BibTexParser(object):
         # if a string record, put it in the replace_dict
         if record.lower().startswith('@string'):
             logger.debug('The record startswith @string')
-            key, val = [i.strip().strip('"').strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('\n').strip(',').strip('}').split('=')]
-            self.replace_dict[key] = val
+            key, val = [i.strip().strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('\n').strip(',').strip('}').split('=')]            
+            key = key.lower() # key is case insensitive
+            val = self._string_subst_partial(val)
+            if val.startswith('"') or val.lower() not in self.replace_dict:
+                self.replace_dict[key] = val.strip('"')
+            else:
+                self.replace_dict[key] = self.replace_dict[val.lower()]
             logger.debug('Return a dict')
             return d
 
@@ -226,6 +236,7 @@ class BibTexParser(object):
                 logger.debug('Line contains a key-pair value and the key is not stored yet.')
                 key, val = [i.strip() for i in kv.split('=', 1)]
                 key = self._add_key(key)
+                val = self._string_subst_partial(val)
                 # if it looks like the value spans lines, store details for next loop
                 if (val.count('{') != val.count('}')) or (val.startswith('"') and not val.replace('}', '').endswith('"')):
                     logger.debug('The line is not ending the record.')
@@ -308,12 +319,32 @@ class BibTexParser(object):
         if not val:
             return ''
         for k in list(self.replace_dict.keys()):
-            if val == k:
+            if val.lower() == k:
                 val = self.replace_dict[k]
         if not isinstance(val, ustr):
             val = ustr(val, self.encoding, 'ignore')
 
         return val
+
+    def _string_subst_partial(self, val):
+        """ Substitute string definitions inside larger expressions
+
+        :param val: a value
+        :type val: string
+        :returns: string -- value
+        """
+        def repl(m):
+            k = m.group('id')
+            replacement = self.replace_dict[k.lower()] if k.lower() in self.replace_dict else k
+            pre  = '"' if m.group('pre')  is not '"' else ''
+            post = '"' if m.group('post') is not '"' else ''
+            return pre + replacement + post
+
+        logger.debug('Substitute string definitions inside larger expressions')
+        if '#' not in val:
+            return val
+
+        return self.replace_all_re.sub(repl,val)
 
     def _add_val(self, val):
         """ Clean instring before adding to dictionary

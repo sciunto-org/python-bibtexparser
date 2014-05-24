@@ -298,7 +298,7 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
-    @unittest.skip('Bug #13')
+    # @unittest.skip('Bug #13')
     def test_features2(self):
         with open('bibtexparser/tests/data/features2.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -309,6 +309,8 @@ class TestBibtexParserList(unittest.TestCase):
                          'author': 'John Doe',
                          'id': 'mykey',
                          'booktitle': 'My International Conference',
+                         'note': 'Email: John.Doe@example.com',
+                         'pages': '1--10',
                          }]
         self.assertEqual(res, expected)
 
