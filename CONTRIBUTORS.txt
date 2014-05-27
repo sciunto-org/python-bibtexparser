@@ -12,3 +12,6 @@
 
 - Georg C. Brückmann
   Support for non-standard entry types
+
+- Uwe Schmidt
+  String replacement

@@ -1,5 +1,11 @@
+Parser
+======
+
+* String replacement, some cases are implemented, but there is still todos. See #20.
+
 unittest
 ========
+
 * getnames: missing cases
 
 DOC
@@ -8,3 +14,4 @@ DOC
 * docstrings
 * doctests
 * add examples in docs/
+

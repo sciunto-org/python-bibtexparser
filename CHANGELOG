@@ -1,6 +1,7 @@
 
 * ENH: Add (optional) support for non-standard entry types by Georg C. Brückmann
 * FIX: protect uppercase only on unprotected characters. #18
+* ENH: string replacement by Uwe Schmidt (#13 #20)
 
 v0.5.4
 ======
