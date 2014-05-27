@@ -1,6 +1,16 @@
 Bibtex tips and conventions
 ===========================
 
+Format
+------
+
+http://maverick.inria.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
+
+* Comments
+* Variable
+* @preamble
+* Name convention
+
 Display your bibliography in html pages
 ---------------------------------------
 
@@ -32,3 +42,4 @@ Common abbreviations for journals
 ---------------------------------
 
 * Jabref list http://jabref.sourceforge.net/resources.php#downloadlists
+
