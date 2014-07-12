@@ -9,7 +9,8 @@ import unittest
 import sys
 
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.bwriter import to_bibtex
+from bibtexparser.bwriter import to_bibtex, to_json
+from bibtexparser.customization import author
 
 
 class TestBibtexWriterList(unittest.TestCase):
@@ -55,3 +56,11 @@ class TestBibtexWriterList(unittest.TestCase):
         result = to_bibtex(bib)
         self.maxDiff = None
         self.assertEqual(expected, result)
+
+    ###########
+    # Exception
+    ###########
+    def test_exception_typeerror(self):
+        with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read(), customization=author)
+        self.assertRaises(TypeError, to_bibtex, bib)

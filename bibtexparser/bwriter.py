@@ -10,12 +10,16 @@ logger = logging.getLogger(__name__)
 
 __all__ = ['to_bibtex', 'to_json']
 
+
 def to_bibtex(parsed):
     """
     Convert parsed data to a bibtex string.
+    All fields must be strings, which is the expected behavior without
+    customization.
 
     :param parsed: BibTexParser object
     :returns: string -- bibtex
+    :raises: TypeError if a field is not a string
     """
     data = parsed.get_entry_dict()
     bibtex = ''
@@ -23,14 +27,18 @@ def to_bibtex(parsed):
         bibtex += '@' + data[entry]['type'] + '{' + data[entry]['id'] + ",\n"
 
         for field in [i for i in sorted(data[entry]) if i not in ['type', 'id']]:
-            bibtex += " " + field + " = {" + data[entry][field] + "},\n"
+            try:
+                bibtex += " " + field + " = {" + data[entry][field] + "},\n"
+            except TypeError:
+                raise TypeError("The field %s in entry %s must be a string"
+                                % (field, entry))
         bibtex += "}\n\n"
     return bibtex
 
 
 def to_json(parsed):
     """
-    Convert parsed data to json.
+    Convert parsed data to json. This function is EXPERIMENTAL.
 
     :param parsed: BibTexParser object
     :returns: string -- json
