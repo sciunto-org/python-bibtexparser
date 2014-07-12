@@ -38,7 +38,7 @@ def to_bibtex(parsed):
 
 def to_json(parsed):
     """
-    Convert parsed data to json.
+    Convert parsed data to json. This function is EXPERIMENTAL.
 
     :param parsed: BibTexParser object
     :returns: string -- json
