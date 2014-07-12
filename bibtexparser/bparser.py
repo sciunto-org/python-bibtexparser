@@ -170,7 +170,13 @@ class BibTexParser(object):
         # prepare record
         record = '\n'.join([i.strip() for i in record.split('\n')])
         if '}\n' in record:
-            record, rubbish = record.replace('\r\n', '\n').replace('\r', '\n').rsplit('}\n', 1)
+            logger.debug('}\\n detected in the record. Clean up.')
+            record = record.replace('\r\n', '\n').replace('\r', '\n').rstrip('\n')
+            # treat the case for which the last line of the record
+            # does not have a coma
+            if record.endswith('}\n}') or record.endswith('}}'):
+                logger.debug('Missing coma in the last line of the record. Fix it.')
+                record = re.sub('}(\n|)}$', '},\n}', record)
 
         # if a preamble record, ignore it
         if record.lower().startswith('@preamble'):

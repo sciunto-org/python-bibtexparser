@@ -209,6 +209,32 @@ class TestBibtexParserList(unittest.TestCase):
         print(res2)
         self.assertEqual(res, res2)
 
+    def test_article_missing_coma(self):
+        with open('bibtexparser/tests/data/article_missing_coma.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            res = bib.get_entry_list()
+        expected = [{'type': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'id': 'Cesar2013',
+                     'year': '2013',
+                     'author': 'Jean Cesar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     },
+                    {'type': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'id': 'Baltazar2013',
+                     'year': '2013',
+                     'author': 'Jean Baltazar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     }]
+        self.assertEqual(res, expected)
+
     ###########
     # BOOK
     ###########
