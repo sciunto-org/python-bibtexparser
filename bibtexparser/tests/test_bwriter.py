@@ -10,6 +10,7 @@ import sys
 
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.bwriter import to_bibtex
+from bibtexparser.customization import author
 
 
 class TestBibtexWriterList(unittest.TestCase):
@@ -55,3 +56,14 @@ class TestBibtexWriterList(unittest.TestCase):
         result = to_bibtex(bib)
         self.maxDiff = None
         self.assertEqual(expected, result)
+
+    ###########
+    # Exception
+    ###########
+    def test_article(self):
+        with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read(), customization=author)
+
+        with open('bibtexparser/tests/data/article_output.bib', 'r') as bibfile:
+            expected = bibfile.read()
+        self.assertRaises(TypeError, to_bibtex, bib)
