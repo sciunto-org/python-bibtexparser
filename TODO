@@ -1,3 +1,10 @@
+JSON
+====
+
+* add unittests
+* Satisfy bibjson: http://www.bibjson.org/
+
+
 Parser
 ======
 
