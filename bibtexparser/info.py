@@ -6,7 +6,7 @@ Gather all information about the software
 
 NAME = "BibtexParser"
 URL = "https://github.com/sciunto/python-bibtexparser"
-LICENSE = "LGPLv3"
+LICENSE = "LGPLv3 or BSD"
 EMAIL = "fboulogne@sciunto.org"
 VERSION = "0.5.5"
 

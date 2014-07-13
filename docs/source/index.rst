@@ -11,7 +11,7 @@ Welcome to BibtexParser's documentation!
 :Download: `Stable version <http://source.sciunto.org/bibtexparser/>`_
 :Developer's corner: `github.com project <https://github.com/sciunto/python-bibtexparser>`_
 :Generated: |today|
-:License: LGPL v3
+:License: LGPL v3 or BSD
 :Version: |release|
 
 BibtexParser is a python library to parse bibtex files. The code is tested with unittests.

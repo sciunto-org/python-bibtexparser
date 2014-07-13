@@ -34,6 +34,11 @@ Please, read the changelog before upgrading for API modifications.
 License
 =======
 
-LGPLv3. See COPYING for details.
+Dual license (at your choice):
+
+* LGPLv3.
+* BSD
+
+See COPYING for details.
 
 
