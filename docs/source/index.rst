@@ -36,6 +36,7 @@ Other projects
 
 * http://pybtex.sourceforge.net/
 * http://pybliographer.org/
+* https://github.com/matthew-brett/babybib
 
 Indices and tables
 ==================
