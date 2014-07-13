@@ -31,6 +31,12 @@ Contents:
     who.rst
 
 
+Other projects
+==============
+
+* http://pybtex.sourceforge.net/
+* http://pybliographer.org/
+
 Indices and tables
 ==================
 
