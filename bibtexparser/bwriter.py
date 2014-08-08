@@ -24,15 +24,15 @@ def to_bibtex(parsed):
     data = parsed.get_entry_dict()
     bibtex = ''
     for entry in sorted(data.keys()):
-        bibtex += '@' + data[entry]['type'] + '{' + data[entry]['id'] + ",\n"
+        bibtex += '@' + data[entry]['type'] + '{' + data[entry]['id']
 
         for field in [i for i in sorted(data[entry]) if i not in ['type', 'id']]:
             try:
-                bibtex += " " + field + " = {" + data[entry][field] + "},\n"
+                bibtex += ",\n " + field + " = {" + data[entry][field] + "}"
             except TypeError:
                 raise TypeError("The field %s in entry %s must be a string"
                                 % (field, entry))
-        bibtex += "}\n\n"
+        bibtex += "\n}\n\n"
     return bibtex
 
 
