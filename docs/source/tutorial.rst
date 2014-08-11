@@ -19,7 +19,7 @@ Prepare a bibtex sample for illustration purpose:
       abstract = {This is an abstract. This line should be long enough to test
     	 multilines...},
       comments = {A comment},
-      keywords = {keyword1, keyword2},
+      keywords = {keyword1, keyword2}
     }
     """
 
