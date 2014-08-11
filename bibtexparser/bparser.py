@@ -34,8 +34,7 @@ class BibTexParser(object):
 
     :param data: a string
     :param customization: a function to modify fields
-    :param ignore_nonstandard_types: If true, do not check the validity of
-    entries types (article, book...)
+    :param ignore_nonstandard_types: If true, do not check the validity of entries types (article, book...)
     :param homogenise_fields: do some key changes e.g. url->link, default True
 
     Example:
