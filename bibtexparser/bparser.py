@@ -36,7 +36,7 @@ class BibTexParser(object):
     :param customization: a function to modify fields
     :param ignore_nonstandard_types: If true, do not check the validity of
     entries types (article, book...)
-    :param homogenise_keys: do some key changes e.g. url->link, default True
+    :param homogenise_fields: do some key changes e.g. url->link, default True
 
     Example:
 
@@ -49,7 +49,7 @@ class BibTexParser(object):
     """
     def __init__(self, data, customization=None,
                  ignore_nonstandard_types=True,
-                 homogenise_keys=True):
+                 homogenise_fields=True):
         if type(data) is io.TextIOWrapper:
             logger.critical("The API has changed. You should pass data instead \
                              of a filehandler.")
@@ -74,7 +74,7 @@ class BibTexParser(object):
         # then the values are checked for those substitions in _add_val
         self.replace_dict = {}
 
-        self.homogenise_keys = homogenise_keys
+        self.homogenise_fields = homogenise_fields
         # pre-defined set of key changes
         self.alt_dict = {
             'keyw': 'keyword',
@@ -380,7 +380,7 @@ class BibTexParser(object):
         :returns: string -- value
         """
         key = key.strip().strip('@').lower()
-        if self.homogenise_keys:
+        if self.homogenise_fields:
             if key in list(self.alt_dict.keys()):
                 key = self.alt_dict[key]
         if not isinstance(key, ustr):

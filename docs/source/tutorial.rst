@@ -35,16 +35,27 @@ OK. Everything is in place. Let's parse the bibtex.
 
     from bibtexparser.bparser import BibTexParser
 
-    with open('bibtex.bib', 'r') as bibfile:
+    with open('bibtex.bib') as bibfile:
         bp = BibTexParser(bibfile.read())
         print(bp.get_entry_list())
 
 
 It prints a list of dictionaries:
 
-.. code-block:: sh
+.. code-block:: python
 
-    [{'journal': 'Nice Journal', 'comments': 'A comment', 'pages': '12--23', 'month': 'jan', 'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...', 'title': 'An amazing title', 'year': '2013', 'volume': '12', 'id': 'Cesar2013', 'author': 'Jean César', 'keyword': 'keyword1, keyword2', 'type': 'article'}]
+    [{'journal': 'Nice Journal',
+      'comments': 'A comment',
+      'pages': '12--23',
+      'month': 'jan',
+      'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...',
+      'title': 'An amazing title',
+      'year': '2013',
+      'volume': '12',
+      'id': 'Cesar2013',
+      'author': 'Jean César',
+      'keyword': 'keyword1, keyword2',
+      'type': 'article'}]
 
 
 Customizations
@@ -117,6 +128,15 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 
 Note: if you want to mix different customization functions, you can write your own function.
 
+Cleaning bibtex tags/field names
+--------------------------------
+
+Bibtex tags/field names are always converted to lower case. By default, some field names are also modified, e.g.
+authors->author. Disable this behaviour as follows:
+
+.. code-block::python
+
+    bp = BibTexParser(bibfile.read(), homogenise_fields=False)
 
 Write a bibtex
 --------------
