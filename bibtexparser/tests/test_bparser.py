@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import tempfile
 import os.path
+import codecs
 
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
@@ -116,7 +117,7 @@ class TestBibtexParserList(unittest.TestCase):
     ###########
     # test also that list and dict are equivalent
     def test_article(self):
-        with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
+        with codecs.open('bibtexparser/tests/data/article.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
             res_list = bib.get_entry_list()
             res_dict = bib.get_entry_dict()
@@ -150,7 +151,7 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res_dict, expected_dict)
 
     def test_article_cust_unicode(self):
-        with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
+        with codecs.open('bibtexparser/tests/data/article.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
@@ -169,7 +170,7 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_article_cust_latex(self):
-        with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
+        with codecs.open('bibtexparser/tests/data/article.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_latex)
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
@@ -290,7 +291,7 @@ class TestBibtexParserList(unittest.TestCase):
     # TRAPS
     ###########
     def test_traps(self):
-        with open('bibtexparser/tests/data/traps.bib', 'r') as bibfile:
+        with codecs.open('bibtexparser/tests/data/traps.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
@@ -355,7 +356,7 @@ class TestBibtexParserList(unittest.TestCase):
     # ENCODING
     ###########
     def test_encoding(self):
-        with open('bibtexparser/tests/data/encoding.bib', 'r') as bibfile:
+        with codecs.open('bibtexparser/tests/data/encoding.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
@@ -374,7 +375,7 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_encoding_with_homogeneize(self):
-        with open('bibtexparser/tests/data/encoding.bib', 'r') as bibfile:
+        with codecs.open('bibtexparser/tests/data/encoding.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=homogeneize_latex_encoding)
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
