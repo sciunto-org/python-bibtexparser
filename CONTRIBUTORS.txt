@@ -15,3 +15,6 @@
 
 - Uwe Schmidt
   String replacement
+
+- faph
+  coma fixes and other improvements
