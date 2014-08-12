@@ -1,3 +1,4 @@
+* ENH: Removed comma after last key-value pair by faph (#28)
 * ENH: optional keys sanitising by faph (#29)
 * FIX: missing coma at the end of a record (#24)
 * DOC: clarify the usecase of to_bibtex
