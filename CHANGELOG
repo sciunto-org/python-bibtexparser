@@ -1,3 +1,4 @@
+* ENH: optional keys sanitising by faph (#29)
 * FIX: missing coma at the end of a record (#24)
 * DOC: clarify the usecase of to_bibtex
 * FIX: raise exception for TypeError in to_bibtex (#22)

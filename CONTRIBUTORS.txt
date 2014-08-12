@@ -17,4 +17,4 @@
   String replacement
 
 - faph
-  coma fixes and other improvements
+  coma fixes, optional keys sanitising and other improvements
