@@ -54,6 +54,9 @@ class BibTexParser(object):
                              of a filehandler.")
             raise TypeError('Wrong type for data')
 
+        self.comments = [] # list of BibTeX @comment items in same order as in parsed BibTeX file.
+        self.entries = []  # list of BibTeX bibliographic entries (book, article, etc)
+
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
@@ -89,15 +92,17 @@ class BibTexParser(object):
 
         self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
 
-        self.records = self._parse_records(customization=customization)
+        self.entries = self._parse_records(customization=customization)
         self.entries_hash = {}
 
     def get_entry_list(self):
         """Get a list of bibtex entries.
 
         :returns: list -- entries
+        .. deprecated:: 0.5.6
+           Use :attr:`entries` instead.
         """
-        return self.records
+        return self.entries
 
     def get_entry_dict(self):
         """Get a dictionnary of bibtex entries.
@@ -107,9 +112,16 @@ class BibTexParser(object):
         """
         # If the hash has never been made, make it
         if not self.entries_hash:
-            for entry in self.records:
+            for entry in self.entries:
                 self.entries_hash[entry['id']] = entry
         return self.entries_hash
+
+    def comments(self):
+        """Returns list of BibTeX @comment items in same order as in parsed BibTeX file.
+
+        :returns: list -- @comment items
+        """
+        return self.comments
 
     def _parse_records(self, customization=None):
         """Parse the bibtex into a list of records.
@@ -187,9 +199,13 @@ class BibTexParser(object):
             logger.debug('Return an empty dict')
             return {}
 
-        # if a comment record, ignore it
+        # if a comment record, add to self.comments
         if record.lower().startswith('@comment'):
             logger.debug('The record startswith @comment')
+            logger.debug('Store comment in list of comments')
+
+            self.comments.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
+
             logger.debug('Return an empty dict')
             return {}
 

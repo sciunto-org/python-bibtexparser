@@ -37,10 +37,11 @@ OK. Everything is in place. Let's parse the bibtex.
 
     with open('bibtex.bib') as bibfile:
         bp = BibTexParser(bibfile.read())
-        print(bp.get_entry_list())
+        print(bp.entries)
+        print(bp.comments)
 
 
-It prints a list of dictionaries:
+It prints a list of dictionaries for reference entries, for example books, articles:
 
 .. code-block:: python
 
@@ -57,6 +58,8 @@ It prints a list of dictionaries:
       'keyword': 'keyword1, keyword2',
       'type': 'article'}]
 
+
+This will  also print a list of @comment items. All other comments (any text outside @...{} blocks) are ignored.
 
 Customizations
 --------------
@@ -90,7 +93,7 @@ The library includes several functions which may suit your needs. Otherwise,you 
 
     with open('bibtex.bib', 'r') as bibfile:
         bp = BibTexParser(bibfile.read(), customization=customizations)
-        print(bp.get_entry_list())
+        print(bp.entries)
 
 
 Accents and weird characters
@@ -110,7 +113,7 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 
     with open('bibtex.bib', 'r') as bibfile:
         bp = BibTexParser(bibfile.read(), customization=homogeneize_latex_encoding)
-        print(bp.get_entry_list())
+        print(bp.entries)
 
 
 * Case 3: you plan to use this library to work with something different and your bibtex is not really clean.
@@ -123,7 +126,7 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 
     with open('bibtex.bib', 'r') as bibfile:
         bp = BibTexParser(bibfile.read(), customization=convert_to_unicode)
-        print(bp.get_entry_list())
+        print(bp.entries)
 
 
 Note: if you want to mix different customization functions, you can write your own function.
