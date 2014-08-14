@@ -134,7 +134,7 @@ Cleaning bibtex tags/field names
 Bibtex tags/field names are always converted to lower case. By default, some field names are also modified, e.g.
 authors->author. Disable this behaviour as follows:
 
-.. code-block::python
+.. code-block:: python
 
     bp = BibTexParser(bibfile.read(), homogenise_fields=False)
 
