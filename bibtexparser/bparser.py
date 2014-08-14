@@ -152,12 +152,13 @@ class BibTexParser(object):
             logger.debug('Inspect line %s', linenumber)
             if line.strip().startswith('@'):
                 logger.debug('Line starts with @')
+                # Parse previous record
                 _add_parsed_record(record, records)
+                # Start new record
                 logger.debug('The record is set to empty')
                 record = ""
-            if len(line.strip()) > 0:
-                logger.debug('The line is not empty, add it to record')
-                record += line
+            # Keep adding lines to the record
+            record += line
 
         # catch any remaining record and send it for parsing
         _add_parsed_record(record, records)
@@ -182,6 +183,16 @@ class BibTexParser(object):
             logger.debug('The record does not start with @. Return empty dict.')
             return {}
 
+        # if a comment record, add to self.comments
+        if record.lower().startswith('@comment'):
+            logger.debug('The record startswith @comment')
+            logger.debug('Store comment in list of comments')
+
+            self.comments.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
+
+            logger.debug('Return an empty dict')
+            return {}
+
         # prepare record
         record = '\n'.join([i.strip() for i in record.split('\n')])
         if '}\n' in record:
@@ -196,16 +207,6 @@ class BibTexParser(object):
         # if a preamble record, ignore it
         if record.lower().startswith('@preamble'):
             logger.debug('The record startswith @preamble')
-            logger.debug('Return an empty dict')
-            return {}
-
-        # if a comment record, add to self.comments
-        if record.lower().startswith('@comment'):
-            logger.debug('The record startswith @comment')
-            logger.debug('Store comment in list of comments')
-
-            self.comments.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
-
             logger.debug('Return an empty dict')
             return {}
 

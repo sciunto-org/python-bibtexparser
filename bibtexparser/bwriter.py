@@ -23,6 +23,8 @@ def to_bibtex(parsed):
     """
     data = parsed.get_entry_dict()
     bibtex = ''
+
+    # Add bibliographic blocks
     for entry in sorted(data.keys()):
         bibtex += '@' + data[entry]['type'] + '{' + data[entry]['id']
 
@@ -33,6 +35,10 @@ def to_bibtex(parsed):
                 raise TypeError("The field %s in entry %s must be a string"
                                 % (field, entry))
         bibtex += "\n}\n\n"
+
+    # Add comment blocks
+    for comment in parsed.comments:
+        bibtex += "@comment{{{0}}}\n\n".format(comment)
     return bibtex
 
 
