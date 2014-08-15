@@ -26,8 +26,10 @@ def to_bibtex(parsed):
 
     # Add bibliographic blocks
     for entry in sorted(data.keys()):
+        # Write BibTeX key
         bibtex += '@' + data[entry]['type'] + '{' + data[entry]['id']
 
+        # Write field = value lines
         for field in [i for i in sorted(data[entry]) if i not in ['type', 'id']]:
             try:
                 bibtex += ",\n " + field + " = {" + data[entry][field] + "}"

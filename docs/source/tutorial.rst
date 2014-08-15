@@ -1,10 +1,10 @@
 Tutorial
 ========
 
-Prepare a bibtex
-----------------
+Prepare a BibTeX file
+---------------------
 
-Prepare a bibtex sample for illustration purpose:
+Prepare a BibTeX sample file for illustration purpose:
 
 .. code-block:: python
 
@@ -26,19 +26,22 @@ Prepare a bibtex sample for illustration purpose:
     with open('bibtex.bib', 'w') as bibfile:
         bibfile.write(bibtex)
 
-Parse
------
+Parsing the file into a bibliographic database object
+-----------------------------------------------------
 
-OK. Everything is in place. Let's parse the bibtex.
+OK. Everything is in place. Let's parse the BibTeX file.
 
 .. code-block:: python
 
-    from bibtexparser.bparser import BibTexParser
+    import bibtexparser
 
-    with open('bibtex.bib') as bibfile:
-        bp = BibTexParser(bibfile.read())
-        print(bp.entries)
-        print(bp.comments)
+    with open('bibtex.bib') as bibtex_file:
+        bibtex_str = bibtex_file.read()
+
+    bibtex_database = bibtexparser.loads(bibtex_str)
+
+    print(bibtex_database.entries)
+    print(bibtex_database.comments)
 
 
 It prints a list of dictionaries for reference entries, for example books, articles:
@@ -60,6 +63,16 @@ It prints a list of dictionaries for reference entries, for example books, artic
 
 
 This will  also print a list of @comment items. All other comments (any text outside @...{} blocks) are ignored.
+
+Alternatively, you can parse a file-like object directly like this:
+
+.. code-block:: python
+
+    import bibtexparser
+
+    with open('bibtex.bib') as bibtex_file:
+        bibtex_database = bibtexparser.load(bibtex_file)
+
 
 Customizations
 --------------

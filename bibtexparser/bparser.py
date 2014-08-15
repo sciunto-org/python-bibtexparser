@@ -11,6 +11,7 @@ import sys
 import logging
 import io
 import re
+import codecs
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,8 @@ class BibTexParser(object):
     >>> records_dict = parser.get_entry_dict()
 
     """
-    def __init__(self, data, customization=None,
+    def __init__(self, data=None,
+                 customization=None,
                  ignore_nonstandard_types=True,
                  homogenise_fields=True):
         if type(data) is io.TextIOWrapper:
@@ -54,20 +56,15 @@ class BibTexParser(object):
                              of a filehandler.")
             raise TypeError('Wrong type for data')
 
-        self.comments = [] # list of BibTeX @comment items in same order as in parsed BibTeX file.
-        self.entries = []  # list of BibTeX bibliographic entries (book, article, etc)
+        self.comments = []      # list of BibTeX @comment items in same order as in parsed BibTeX file.
+        self.entries = []       # list of BibTeX bibliographic entries (book, article, etc)
+        self.entries_hash = {}  # dict of entries
+
+        self.customization = customization
 
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
-
-        # Some files have Byte-order marks inserted at the start
-        byte = '\xef\xbb\xbf'
-        if not isinstance(byte, ustr):
-            byte = ustr('\xef\xbb\xbf', self.encoding, 'ignore')
-        if data[:3] == byte:
-            data = data[3:]
-        self.fileobj = StringIO(data)
 
         # set which bibjson schema this parser parses to
         self.has_metadata = False
@@ -92,8 +89,36 @@ class BibTexParser(object):
 
         self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
 
-        self.entries = self._parse_records(customization=customization)
-        self.entries_hash = {}
+        if data is not None:
+            self.bibtex_file_obj = self._bibtex_file_obj(data)
+            self._parse_records(customization=customization)
+
+    def _bibtex_file_obj(self, bibtex_str):
+        # Some files have Byte-order marks inserted at the start
+        byte = '\xef\xbb\xbf'
+        if not isinstance(byte, ustr):
+            byte = ustr('\xef\xbb\xbf', self.encoding, 'ignore')
+        if bibtex_str[:3] == byte:
+            bibtex_str = bibtex_str[3:]
+        return StringIO(bibtex_str)
+
+    def parse(self, bibtex_str):
+        """Parse a BibTeX string into an object
+
+        :param bibtex_str: BibTeX string
+        :return: BibTexParser - the actual bib database object
+        """
+        self.bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
+        self._parse_records(customization=self.customization)
+        return self
+
+    def parse_file(self, file):
+        """Parse a BibTeX file into an object
+
+        :param file: BibTeX file or file-like object
+        :return: BibTexParser - the actual bib database object
+        """
+        return self.parse(file.read())
 
     def get_entry_list(self):
         """Get a list of bibtex entries.
@@ -115,13 +140,6 @@ class BibTexParser(object):
             for entry in self.entries:
                 self.entries_hash[entry['id']] = entry
         return self.entries_hash
-
-    def comments(self):
-        """Returns list of BibTeX @comment items in same order as in parsed BibTeX file.
-
-        :returns: list -- @comment items
-        """
-        return self.comments
 
     def _parse_records(self, customization=None):
         """Parse the bibtex into a list of records.
@@ -148,7 +166,7 @@ class BibTexParser(object):
         records = []
         record = ""
         # read each line, bundle them up until they form an object, then send for parsing
-        for linenumber, line in enumerate(self.fileobj):
+        for linenumber, line in enumerate(self.bibtex_file_obj):
             logger.debug('Inspect line %s', linenumber)
             if line.strip().startswith('@'):
                 logger.debug('Line starts with @')
@@ -163,7 +181,8 @@ class BibTexParser(object):
         # catch any remaining record and send it for parsing
         _add_parsed_record(record, records)
         logger.debug('Return the result')
-        return records
+        #return records
+        self.entries = records
 
     def _parse_record(self, record, customization=None):
         """Parse a record.
