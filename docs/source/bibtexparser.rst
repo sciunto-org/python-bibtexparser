@@ -1,4 +1,4 @@
-BibtexParser: API
+bibtexparser: API
 =================
 
 :mod:`bibtexparser` --- Parsing and writing BibTeX files
@@ -7,13 +7,17 @@ BibtexParser: API
 .. automodule:: bibtexparser
     :members: load, loads, dumps, dump
 
-bparser module
---------------
+:mod:`bibtexparser.bibdatabase` --- The bibliographic database object
+---------------------------------------------------------------------
+
+.. autoclass:: bibdatabase.BibDatabase
+    :members: comments, entries, entries_dict
+
+:mod:`bibtexparser.bparser` --- Modifying the default parser
+------------------------------------------------------------
 
 .. automodule:: bparser
     :members:
-    :inherited-members:
-    :show-inheritance:
 
 Customization functions
 -----------------------

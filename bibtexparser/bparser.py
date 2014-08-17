@@ -28,21 +28,16 @@ else:
 
 class BibTexParser(object):
     """
-    A parser for BibTeX bibliographic data files.
-
-    By default (i.e. without customizations), each value in entries are
-    considered as a string.
-
-    :param data: a string
-    :param customization: a function to modify fields
-    :param ignore_nonstandard_types: If true, do not check the validity of entries types (article, book...)
-    :param homogenise_fields: do some key changes e.g. url->link, default True
-
+    A parser for reading BibTeX bibliographic data files.
     """
+
     def __new__(cls, data=None,
                 customization=None,
                 ignore_nonstandard_types=True,
                 homogenise_fields=True):
+        """
+        To catch the old API structure in which creating the parser would immediately parse and return data.
+        """
 
         if data is None:
             return super(BibTexParser, cls).__new__(cls)
@@ -50,14 +45,29 @@ class BibTexParser(object):
             # For backwards compatibility: if data is given, parse and return the `BibDatabase` object instead of the
             # parser.
             parser = BibTexParser()
-            parser.customization=customization
-            parser.ignore_nonstandard_types=ignore_nonstandard_types
-            parser.homogenise_fields=homogenise_fields
+            parser.customization = customization
+            parser.ignore_nonstandard_types = ignore_nonstandard_types
+            parser.homogenise_fields = homogenise_fields
             return parser.parse(data)
 
     def __init__(self):
+        """
+        Creates a parser for rading BibTeX files
+
+        :return: parser
+        :rtype: `BibTexParser`
+        """
         self.bib_database = BibDatabase()
+        #: Callback function to process BibTeX entries after parsing, for example to create a list from a string with
+        #: multiple values. By default all BibTeX values are treated as simple strings. Default: `None`.
         self.customization = None
+
+        #: Ignore non-standard BibTeX types (`book`, `article`, etc). Default: True.
+        self.ignore_nonstandard_types = True
+
+        #: Sanitise BibTeX field names, for example change `url` to `link` etc. Field names are always converted to
+        #: lowercase names. Default: `True`.
+        self.homogenise_fields = True
 
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
@@ -67,7 +77,6 @@ class BibTexParser(object):
         # then the values are checked for those substitions in _add_val
         self.replace_dict = {}
 
-        self.homogenise_fields = True
         # pre-defined set of key changes
         self.alt_dict = {
             'keyw': 'keyword',
@@ -79,7 +88,6 @@ class BibTexParser(object):
             'links': 'link',
             'subjects': 'subject'
         }
-        self.ignore_nonstandard_types = True
 
         self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
 
