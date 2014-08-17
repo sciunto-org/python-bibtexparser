@@ -1,8 +1,14 @@
 BibtexParser: API
 =================
 
-Bibtexparser module
--------------------
+:mod:`bibtexparser` --- Parsing and writing BibTeX files
+--------------------------------------------------------
+
+.. automodule:: bibtexparser
+    :members: load, loads, dumps, dump
+
+bparser module
+--------------
 
 .. automodule:: bparser
     :members:

@@ -11,7 +11,7 @@ import sys
 import logging
 import io
 import re
-import codecs
+from bibtexparser.bibdatabase import BibDatabase
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ else:
 
 class BibTexParser(object):
     """
-    A parser for bibtex files.
+    A parser for BibTeX bibliographic data files.
 
     By default (i.e. without customizations), each value in entries are
     considered as a string.
@@ -38,42 +38,36 @@ class BibTexParser(object):
     :param ignore_nonstandard_types: If true, do not check the validity of entries types (article, book...)
     :param homogenise_fields: do some key changes e.g. url->link, default True
 
-    Example:
-
-    >>> from bibtexparser.bparser import BibTexParser
-    >>> filehandler = open('bibtex', 'r')
-    >>> parser = BibTexParser(filehandler.read())
-    >>> record_list = parser.get_entry_list()
-    >>> records_dict = parser.get_entry_dict()
-
     """
-    def __init__(self, data=None,
-                 customization=None,
-                 ignore_nonstandard_types=True,
-                 homogenise_fields=True):
-        if type(data) is io.TextIOWrapper:
-            logger.critical("The API has changed. You should pass data instead \
-                             of a filehandler.")
-            raise TypeError('Wrong type for data')
+    def __new__(cls, data=None,
+                customization=None,
+                ignore_nonstandard_types=True,
+                homogenise_fields=True):
 
-        self.comments = []      # list of BibTeX @comment items in same order as in parsed BibTeX file.
-        self.entries = []       # list of BibTeX bibliographic entries (book, article, etc)
-        self.entries_hash = {}  # dict of entries
+        if data is None:
+            return super(BibTexParser, cls).__new__(cls)
+        else:
+            # For backwards compatibility: if data is given, parse and return the `BibDatabase` object instead of the
+            # parser.
+            parser = BibTexParser()
+            parser.customization=customization
+            parser.ignore_nonstandard_types=ignore_nonstandard_types
+            parser.homogenise_fields=homogenise_fields
+            return parser.parse(data)
 
-        self.customization = customization
+    def __init__(self):
+        self.bib_database = BibDatabase()
+        self.customization = None
 
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
 
-        # set which bibjson schema this parser parses to
-        self.has_metadata = False
-        self.persons = []
         # if bibtex file has substition strings, they are stored here,
         # then the values are checked for those substitions in _add_val
         self.replace_dict = {}
 
-        self.homogenise_fields = homogenise_fields
+        self.homogenise_fields = True
         # pre-defined set of key changes
         self.alt_dict = {
             'keyw': 'keyword',
@@ -85,13 +79,9 @@ class BibTexParser(object):
             'links': 'link',
             'subjects': 'subject'
         }
-        self.ignore_nonstandard_types = ignore_nonstandard_types
+        self.ignore_nonstandard_types = True
 
         self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
-
-        if data is not None:
-            self.bibtex_file_obj = self._bibtex_file_obj(data)
-            self._parse_records(customization=customization)
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
@@ -106,46 +96,28 @@ class BibTexParser(object):
         """Parse a BibTeX string into an object
 
         :param bibtex_str: BibTeX string
-        :return: BibTexParser - the actual bib database object
+        :type: str or unicode
+        :return: bibliographic database
+        :rtype: BibDatabase
         """
         self.bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         self._parse_records(customization=self.customization)
-        return self
+        return self.bib_database
 
     def parse_file(self, file):
         """Parse a BibTeX file into an object
 
         :param file: BibTeX file or file-like object
-        :return: BibTexParser - the actual bib database object
+        :type: file
+        :return: bibliographic database
+        :rtype: BibDatabase
         """
         return self.parse(file.read())
-
-    def get_entry_list(self):
-        """Get a list of bibtex entries.
-
-        :returns: list -- entries
-        .. deprecated:: 0.5.6
-           Use :attr:`entries` instead.
-        """
-        return self.entries
-
-    def get_entry_dict(self):
-        """Get a dictionnary of bibtex entries.
-        The dict key is the bibtex entry key
-
-        :returns: dict -- entries
-        """
-        # If the hash has never been made, make it
-        if not self.entries_hash:
-            for entry in self.entries:
-                self.entries_hash[entry['id']] = entry
-        return self.entries_hash
 
     def _parse_records(self, customization=None):
         """Parse the bibtex into a list of records.
 
         :param customization: a function
-        :returns: list -- records
         """
         def _add_parsed_record(record, records):
             """
@@ -180,9 +152,8 @@ class BibTexParser(object):
 
         # catch any remaining record and send it for parsing
         _add_parsed_record(record, records)
-        logger.debug('Return the result')
-        #return records
-        self.entries = records
+        logger.debug('Set the list of entries')
+        self.bib_database.entries = records
 
     def _parse_record(self, record, customization=None):
         """Parse a record.
@@ -207,7 +178,7 @@ class BibTexParser(object):
             logger.debug('The record startswith @comment')
             logger.debug('Store comment in list of comments')
 
-            self.comments.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
+            self.bib_database.comments.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
 
             logger.debug('Return an empty dict')
             return {}
@@ -306,16 +277,8 @@ class BibTexParser(object):
             logger.debug('The dict is empty, return it.')
             return d
 
-        # put author names into persons list
-        if 'author_data' in d:
-            self.persons = [i for i in d['author_data'].split('\n')]
-            del d['author_data']
-
         d['type'] = bibtype
         d['id'] = id
-        if not self.has_metadata and 'type' in d:
-            if d['type'] == 'personal bibliography' or d['type'] == 'comment':
-                self.has_metadata = True
 
         if customization is None:
             logger.debug('No customization to apply, return dict')

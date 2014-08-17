@@ -3,14 +3,12 @@
 
 from __future__ import unicode_literals
 import unittest
-import tempfile
-import os.path
 import codecs
 
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
 from bibtexparser import customization
-import bibtexparser
+
 
 def customizations_unicode(record):
     """Use all functions related to specific fields
@@ -53,54 +51,41 @@ def customizations_latex(record):
 
 
 class TestBibtexParserFunc(unittest.TestCase):
-
-    bibfile = os.path.join(tempfile.gettempdir(), "tmp-testfile")
-
-    def setUp(self):
-        with open(self.bibfile, "w") as f:
-            f.write("r")
-
     def test_strip_quotes(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_quotes('"before remove after"')
-            expected = 'before remove after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_quotes('"before remove after"')
+        expected = 'before remove after'
+        self.assertEqual(result, expected)
 
     def test_strip_quotes_n(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_quotes('"before remove after"\n')
-            expected = 'before remove after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_quotes('"before remove after"\n')
+        expected = 'before remove after'
+        self.assertEqual(result, expected)
 
     def test_strip_quotes2(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_quotes('before "remove" after')
-            expected = 'before "remove" after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_quotes('before "remove" after')
+        expected = 'before "remove" after'
+        self.assertEqual(result, expected)
 
     def test_strip_braces(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_braces('{before remove after}')
-            expected = 'before remove after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_braces('{before remove after}')
+        expected = 'before remove after'
+        self.assertEqual(result, expected)
 
     def test_strip_braces2(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_braces('before {remove} after')
-            expected = 'before {remove} after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_braces('before {remove} after')
+        expected = 'before {remove} after'
+        self.assertEqual(result, expected)
 
     def test_strip_braces_n(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_braces('{before remove after}\n')
-            expected = 'before remove after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_braces('{before remove after}\n')
+        expected = 'before remove after'
+        self.assertEqual(result, expected)
 
 
 class TestBibtexParserList(unittest.TestCase):
@@ -392,49 +377,6 @@ class TestBibtexParserList(unittest.TestCase):
                               'month': 'jan'
                          }]
         self.assertEqual(res, expected)
-
-
-class TestBibtexParserParserMethods(unittest.TestCase):
-    input_file_path = 'bibtexparser/tests/data/book.bib'
-    entries_expected = [{'type': 'book',
-                         'year': '1987',
-                         'edition': '2',
-                         'publisher': 'Wiley Edition',
-                         'id': 'Bird1987',
-                         'volume': '1',
-                         'title': 'Dynamics of Polymeric Liquid',
-                         'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'
-                        }]
-
-    def test_parse_immediately(self):
-        with open(self.input_file_path) as bibtex_file:
-            bibtex_str = bibtex_file.read()
-        bibtex_database = BibTexParser(bibtex_str)
-        self.assertEqual(bibtex_database.entries, self.entries_expected)
-
-    def test_parse_str(self):
-        parser = BibTexParser()
-        with open(self.input_file_path) as bibtex_file:
-            bibtex_str = bibtex_file.read()
-        bibtex_database = parser.parse(bibtex_str)
-        self.assertEqual(bibtex_database.entries, self.entries_expected)
-
-    def test_parse_file(self):
-        parser = BibTexParser()
-        with open(self.input_file_path) as bibtex_file:
-            bibtex_database = parser.parse_file(bibtex_file)
-        self.assertEqual(bibtex_database.entries, self.entries_expected)
-
-    def test_parse_str_module(self):
-        with open(self.input_file_path) as bibtex_file:
-            bibtex_str = bibtex_file.read()
-        bibtex_database = bibtexparser.loads(bibtex_str)
-        self.assertEqual(bibtex_database.entries, self.entries_expected)
-
-    def test_parse_file_module(self):
-        with open(self.input_file_path) as bibtex_file:
-            bibtex_database = bibtexparser.load(bibtex_file)
-        self.assertEqual(bibtex_database.entries, self.entries_expected)
 
 
 if __name__ == '__main__':
