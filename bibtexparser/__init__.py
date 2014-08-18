@@ -19,7 +19,7 @@ And writing::
 
 """
 __all__ = [
-    'loads', 'load', 'dumps',
+    'loads', 'load', 'dumps','dump'
     'bparser', 'bwrite', 'info', 'latexenc', 'customization'
 ]
 __version__ = '0.5.5'
@@ -70,10 +70,9 @@ def dumps(bib_database, writer=None):
     :return: BibTeX string
     :rtype: unicode
     """
-    if writer is not None:
-        raise NotImplementedError
-        # TODO: make bwriter into a class
-    return bwriter.to_bibtex(bib_database)
+    if writer is None:
+        writer = bwriter.BibTexWriter()
+    return writer.write(bib_database)
 
 
 def dump(bib_database, bibtex_file, writer=None):
@@ -87,7 +86,6 @@ def dump(bib_database, bibtex_file, writer=None):
     :param writer: custom writer to use (optional) (not yet implemented)
     :type writer: BibTexWriter
     """
-    if writer is not None:
-        raise NotImplementedError
-        # TODO: make bwriter into a class
-    bibtex_file.write(bwriter.to_bibtex(bib_database))
+    if writer is None:
+        writer = bwriter.BibTexWriter()
+    bibtex_file.write(writer.write(bib_database))

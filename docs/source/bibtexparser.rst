@@ -27,10 +27,9 @@ Customization functions
     :inherited-members:
     :show-inheritance:
 
-Writer
-------
 
-.. automodule:: bwriter
+:mod:`bibtexparser.bwriter` --- Modifying the default writer
+------------------------------------------------------------
+
+.. autoclass:: bwriter.BibTexWriter
     :members:
-    :inherited-members:
-    :show-inheritance:

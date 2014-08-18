@@ -29,6 +29,17 @@ else:
 class BibTexParser(object):
     """
     A parser for reading BibTeX bibliographic data files.
+
+    Example::
+
+        from bibtexparser.bparser import BibTexParser
+
+        bibtex_str = ...
+
+        parser = BibTexParser()
+        parser.ignore_nonstandard_types = False
+        parser.homogenise_fields = False
+        bib_database = bibtexparser.loads(bibtex_str, parser)
     """
 
     def __new__(cls, data=None,
@@ -62,7 +73,7 @@ class BibTexParser(object):
         #: multiple values. By default all BibTeX values are treated as simple strings. Default: `None`.
         self.customization = None
 
-        #: Ignore non-standard BibTeX types (`book`, `article`, etc). Default: True.
+        #: Ignore non-standard BibTeX types (`book`, `article`, etc). Default: `True`.
         self.ignore_nonstandard_types = True
 
         #: Sanitise BibTeX field names, for example change `url` to `link` etc. Field names are always converted to
