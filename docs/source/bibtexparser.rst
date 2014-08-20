@@ -11,7 +11,7 @@ bibtexparser: API
 ---------------------------------------------------------------------
 
 .. autoclass:: bibdatabase.BibDatabase
-    :members: comments, entries, entries_dict
+    :members: entries, entries_dict, comments, strings, preambles
 
 :mod:`bibtexparser.bparser` --- Modifying the default parser
 ------------------------------------------------------------

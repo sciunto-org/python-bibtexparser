@@ -86,7 +86,7 @@ class BibTexParser(object):
 
         # if bibtex file has substition strings, they are stored here,
         # then the values are checked for those substitions in _add_val
-        self.replace_dict = {}
+        # self.bib_database.strings = {}
 
         # pre-defined set of key changes
         self.alt_dict = {
@@ -121,7 +121,6 @@ class BibTexParser(object):
         """
         self.bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         self._parse_records(customization=self.customization)
-        print(self.replace_dict)
         return self.bib_database
 
     def parse_file(self, file):
@@ -193,12 +192,22 @@ class BibTexParser(object):
             logger.debug('The record does not start with @. Return empty dict.')
             return {}
 
-        # if a comment record, add to self.comments
+        # if a comment record, add to bib_database.comments
         if record.lower().startswith('@comment'):
             logger.debug('The record startswith @comment')
             logger.debug('Store comment in list of comments')
 
             self.bib_database.comments.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
+
+            logger.debug('Return an empty dict')
+            return {}
+
+        # if a preamble record, add to bib_database.preambles
+        if record.lower().startswith('@preamble'):
+            logger.debug('The record startswith @preamble')
+            logger.debug('Store preamble in list of preambles')
+
+            self.bib_database.preambles.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
 
             logger.debug('Return an empty dict')
             return {}
@@ -214,22 +223,16 @@ class BibTexParser(object):
                 logger.debug('Missing coma in the last line of the record. Fix it.')
                 record = re.sub('}(\n|)}$', '},\n}', record)
 
-        # if a preamble record, ignore it
-        if record.lower().startswith('@preamble'):
-            logger.debug('The record startswith @preamble')
-            logger.debug('Return an empty dict')
-            return {}
-
         # if a string record, put it in the replace_dict
         if record.lower().startswith('@string'):
             logger.debug('The record startswith @string')
             key, val = [i.strip().strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('\n').strip(',').strip('}').split('=')]
             key = key.lower()  # key is case insensitive
             val = self._string_subst_partial(val)
-            if val.startswith('"') or val.lower() not in self.replace_dict:
-                self.replace_dict[key] = val.strip('"')
+            if val.startswith('"') or val.lower() not in self.bib_database.strings:
+                self.bib_database.strings[key] = val.strip('"')
             else:
-                self.replace_dict[key] = self.replace_dict[val.lower()]
+                self.bib_database.strings[key] = self.bib_database.strings[val.lower()]
             logger.debug('Return a dict')
             return d
 
@@ -344,9 +347,9 @@ class BibTexParser(object):
         logger.debug('Substitute string definitions')
         if not val:
             return ''
-        for k in list(self.replace_dict.keys()):
+        for k in list(self.bib_database.strings.keys()):
             if val.lower() == k:
-                val = self.replace_dict[k]
+                val = self.bib_database.strings[k]
         if not isinstance(val, ustr):
             val = ustr(val, self.encoding, 'ignore')
 
@@ -361,7 +364,7 @@ class BibTexParser(object):
         """
         def repl(m):
             k = m.group('id')
-            replacement = self.replace_dict[k.lower()] if k.lower() in self.replace_dict else k
+            replacement = self.bib_database.strings[k.lower()] if k.lower() in self.bib_database.strings else k
             pre = '"' if m.group('pre') != '"' else ''
             post = '"' if m.group('post') != '"' else ''
             return pre + replacement + post

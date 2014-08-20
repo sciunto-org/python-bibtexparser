@@ -40,7 +40,7 @@ class BibTexWriter(object):
 
     def __init__(self):
         #: List of BibTeX elements to write, valid values are `entries`, `comments`, `preambles`, `strings`.
-        self.contents = ['entries', 'comments']
+        self.contents = ['comments', 'preambles', 'strings', 'entries']
         #: Character(s) for indenting BibTeX field-value pairs. Default: single space.
         self.indent = ' '
         #: Characters(s) for separating BibTeX entries. Default: new line.
@@ -95,16 +95,13 @@ class BibTexWriter(object):
         return bibtex
 
     def _comments_to_bibtex(self, bib_database):
-        bibtex = ''
-        for comment in bib_database.comments:
-            bibtex += "@comment{{{0}}}\n{1}".format(comment, self.entry_separator)
-        return bibtex
+        return ''.join(['@comment{{{0}}}\n{1}'.format(comment, self.entry_separator)
+                        for comment in bib_database.comments])
 
     def _preambles_to_bibtex(self, bib_database):
-        # TODO: implement preamble writing
-        raise NotImplementedError
+        return ''.join(['@preamble{{{0}}}\n{1}'.format(preamble, self.entry_separator)
+                        for preamble in bib_database.preambles])
 
     def _strings_to_bibtex(self, bib_database):
-        # TODO: implement string definitions writing
-        raise NotImplementedError
-
+        return ''.join(['@string{{{0} = "{1}"}}\n{2}'.format(name, value, self.entry_separator)
+                        for name, value in bib_database.strings.items()])

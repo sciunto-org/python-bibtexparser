@@ -143,3 +143,5 @@ class TestEntrySorting(unittest.TestCase):
         result = bibtexparser.dumps(bib_database, writer)
         expected = "@book{a\n}\n\n@article{b,\n year = {2000}\n}\n\n@book{c,\n year = {2010}\n}\n\n"
         self.assertEqual(result, expected)
+
+
