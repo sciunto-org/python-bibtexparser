@@ -1,8 +1,8 @@
 Tutorial
 ========
 
-Prepare a BibTeX file
----------------------
+Preparing a BibTeX file
+-----------------------
 
 Prepare a BibTeX sample file for illustration purpose:
 
@@ -38,10 +38,8 @@ OK. Everything is in place. Let's parse the BibTeX file.
     with open('bibtex.bib') as bibtex_file:
         bibtex_str = bibtex_file.read()
 
-    bibtex_database = bibtexparser.loads(bibtex_str)
-
-    print(bibtex_database.entries)
-    print(bibtex_database.comments)
+    bib_database = bibtexparser.loads(bibtex_str)
+    print(bib_database.entries)
 
 
 It prints a list of dictionaries for reference entries, for example books, articles:
@@ -62,7 +60,6 @@ It prints a list of dictionaries for reference entries, for example books, artic
       'type': 'article'}]
 
 
-This will  also print a list of @comment items. All other comments (any text outside @...{} blocks) are ignored.
 
 Alternatively, you can parse a file-like object directly like this:
 
@@ -71,18 +68,34 @@ Alternatively, you can parse a file-like object directly like this:
     import bibtexparser
 
     with open('bibtex.bib') as bibtex_file:
-        bibtex_database = bibtexparser.load(bibtex_file)
+        bib_database = bibtexparser.load(bibtex_file)
+
+
+Creating a BibTeX file or string
+--------------------------------
+
+The bibliographic data can be converted back into a BibTeX file like this:
+
+.. code-block:: python
+
+    import bibtexparser
+
+    bibtex_str = bibtexparser.dumps(bib_database)
 
 
 Customizations
 --------------
 
-By default, the parser does not alter the content of each field but there are many cases where this is not usable.
-For instance, instead of a string with a list of authors, you can prefer a list.
-The library includes several functions which may suit your needs. Otherwise,you can read them to create your own functions.
+By default, the parser does not alter the content of each field and keeps it as a simple string. There are many cases
+where this is not desired. For example, instead of a string with a multiple of authors, it could be parsed as a list.
+
+To modify field values during parsing, a callback function can be supplied to the parser which can be used to modify
+BibTeX entries. The library includes several functions which may be used. Alternatively, you can read them to create
+your own functions.
 
 .. code-block:: python
 
+    import bibtexparser
     from bibtexparser.bparser import BibTexParser
     from bibtexparser.customization import *
 
@@ -104,9 +117,11 @@ The library includes several functions which may suit your needs. Otherwise,you 
         record = doi(record)
         return record
 
-    with open('bibtex.bib', 'r') as bibfile:
-        bp = BibTexParser(bibfile.read(), customization=customizations)
-        print(bp.entries)
+    with open('bibtex.bib') as bibtex_file:
+        parser = BibTexParser()
+        parser.customization = customizations
+        bib_database = bibtexparser.load(bibtex_file, parser=parser)
+        print(bib_database.entries)
 
 
 Accents and weird characters
@@ -121,12 +136,15 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 
 .. code-block:: python
 
+    import bibtexparser
     from bibtexparser.bparser import BibTexParser
     from bibtexparser.customization import homogeneize_latex_encoding
 
-    with open('bibtex.bib', 'r') as bibfile:
-        bp = BibTexParser(bibfile.read(), customization=homogeneize_latex_encoding)
-        print(bp.entries)
+    with open('bibtex.bib') as bibfile:
+        parser = BibTexParser()
+        parser.customization = homogeneize_latex_encoding
+        bib_database = bibtexparser.load(bibtex_file, parser=parser)
+        print(bib_database.entries)
 
 
 * Case 3: you plan to use this library to work with something different and your bibtex is not really clean.
@@ -134,33 +152,16 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 
 .. code-block:: python
 
+    import bibtexparser
     from bibtexparser.bparser import BibTexParser
     from bibtexparser.customization import convert_to_unicode
 
-    with open('bibtex.bib', 'r') as bibfile:
-        bp = BibTexParser(bibfile.read(), customization=convert_to_unicode)
-        print(bp.entries)
+    with open('bibtex.bib') as bibfile:
+        parser = BibTexParser()
+        parser.customization = convert_to_unicode
+        bib_database = bibtexparser.load(bibtex_file, parser=parser)
+        print(bib_database.entries)
 
 
 Note: if you want to mix different customization functions, you can write your own function.
 
-Cleaning bibtex tags/field names
---------------------------------
-
-Bibtex tags/field names are always converted to lower case. By default, some field names are also modified, e.g.
-authors->author. Disable this behaviour as follows:
-
-.. code-block:: python
-
-    bp = BibTexParser(bibfile.read(), homogenise_fields=False)
-
-Write a bibtex
---------------
-
-After modifications, you can generate a string containing all entries in the bibtex format.
-
-.. code-block:: python
-
-    from bibtexparser.bwriter import to_bibtex
-
-    output = to_bibtex(bp)

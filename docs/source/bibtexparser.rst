@@ -19,8 +19,8 @@ bibtexparser: API
 .. automodule:: bparser
     :members:
 
-Customization functions
------------------------
+:mod:`bibtexparser.customization` --- Record customization functions
+--------------------------------------------------------------------
 
 .. automodule:: customization
     :members:
