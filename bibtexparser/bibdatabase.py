@@ -22,12 +22,19 @@ class BibDatabase(object):
         """
         return self.entries
 
+    @staticmethod
+    def entry_sort_key(entry, fields):
+        result = []
+        for field in fields:
+            result.append(str(entry.get(field, '')).lower())  # Sorting always as string
+        return tuple(result)
+
     def get_entry_dict(self):
         """Return a dictionary of BibTeX entries.
         The dict key is the BibTeX entry key
         """
         # If the hash has never been made, make it
-        if len(self._entries_dict) == 0:
+        if not self._entries_dict:
             for entry in self.entries:
                 self._entries_dict[entry['id']] = entry
         return self._entries_dict

@@ -121,6 +121,7 @@ class BibTexParser(object):
         """
         self.bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         self._parse_records(customization=self.customization)
+        print(self.replace_dict)
         return self.bib_database
 
     def parse_file(self, file):

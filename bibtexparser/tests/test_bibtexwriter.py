@@ -84,3 +84,62 @@ class TestBibTexWriter(unittest.TestCase):
 }
 """
         self.assertEqual(result, expected)
+
+
+class TestEntrySorting(unittest.TestCase):
+    bib_database = BibDatabase()
+    bib_database.entries = [{'id': 'b',
+                             'type': 'article'},
+                            {'id': 'c',
+                             'type': 'book'},
+                            {'id': 'a',
+                             'type': 'book'}]
+
+    def test_sort_default(self):
+        result = bibtexparser.dumps(self.bib_database)
+        expected = "@book{a\n}\n\n@article{b\n}\n\n@book{c\n}\n\n"
+        self.assertEqual(result, expected)
+
+    def test_sort_none(self):
+        writer = BibTexWriter()
+        writer.order_entries_by = None
+        result = bibtexparser.dumps(self.bib_database, writer)
+        expected = "@article{b\n}\n\n@book{c\n}\n\n@book{a\n}\n\n"
+        self.assertEqual(result, expected)
+
+    def test_sort_id(self):
+        writer = BibTexWriter()
+        writer.order_entries_by = ('id', )
+        result = bibtexparser.dumps(self.bib_database, writer)
+        expected = "@book{a\n}\n\n@article{b\n}\n\n@book{c\n}\n\n"
+        self.assertEqual(result, expected)
+
+    def test_sort_type(self):
+        writer = BibTexWriter()
+        writer.order_entries_by = ('type', )
+        result = bibtexparser.dumps(self.bib_database, writer)
+        expected = "@article{b\n}\n\n@book{c\n}\n\n@book{a\n}\n\n"
+        self.assertEqual(result, expected)
+
+    def test_sort_type_id(self):
+        writer = BibTexWriter()
+        writer.order_entries_by = ('type', 'id')
+        result = bibtexparser.dumps(self.bib_database, writer)
+        expected = "@article{b\n}\n\n@book{a\n}\n\n@book{c\n}\n\n"
+        self.assertEqual(result, expected)
+
+    def test_sort_missing_field(self):
+        bib_database = BibDatabase()
+        bib_database.entries = [{'id': 'b',
+                                 'type': 'article',
+                                 'year': '2000'},
+                                {'id': 'c',
+                                 'type': 'book',
+                                 'year': '2010'},
+                                {'id': 'a',
+                                 'type': 'book'}]
+        writer = BibTexWriter()
+        writer.order_entries_by = ('year', )
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = "@book{a\n}\n\n@article{b,\n year = {2000}\n}\n\n@book{c,\n year = {2010}\n}\n\n"
+        self.assertEqual(result, expected)

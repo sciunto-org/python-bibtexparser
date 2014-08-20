@@ -4,6 +4,7 @@
 # License:
 
 import logging
+from bibtexparser.bibdatabase import BibDatabase
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ class BibTexWriter(object):
         writer = BibTexWriter()
         writer.contents = ['comments', 'entries']
         writer.indent = '  '
+        writer.order_entries_by = ('type', 'author', 'year')
         bibtex_str = bibtexparser.dumps(bib_database, writer)
 
     """
@@ -43,6 +45,8 @@ class BibTexWriter(object):
         self.indent = ' '
         #: Characters(s) for separating BibTeX entries. Default: new line.
         self.entry_separator = '\n'
+        #: Tuple of fields for ordering entries. Set to `None` to disable sorting. Default: BibTeX key `('id', )`.
+        self.order_entries_by = ('id', )
 
     def write(self, bib_database):
         """
@@ -65,8 +69,14 @@ class BibTexWriter(object):
 
     def _entries_to_bibtex(self, bib_database):
         bibtex = ''
-        for entry_id in sorted(bib_database.entries_dict.keys()):
-            bibtex += self._entry_to_bibtex(bib_database.entries_dict[entry_id])
+        if self.order_entries_by:
+            # TODO: allow sort field does not exist for entry
+            entries = sorted(bib_database.entries, key=lambda x: BibDatabase.entry_sort_key(x, self.order_entries_by))
+        else:
+            entries = bib_database.entries
+
+        for entry in entries:
+            bibtex += self._entry_to_bibtex(entry)
         return bibtex
 
     def _entry_to_bibtex(self, entry):
