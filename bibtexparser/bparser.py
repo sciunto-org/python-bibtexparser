@@ -84,10 +84,6 @@ class BibTexParser(object):
         # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
 
-        # if bibtex file has substition strings, they are stored here,
-        # then the values are checked for those substitions in _add_val
-        # self.bib_database.strings = {}
-
         # pre-defined set of key changes
         self.alt_dict = {
             'keyw': 'keyword',
