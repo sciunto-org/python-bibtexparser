@@ -3,8 +3,6 @@
 
 from __future__ import unicode_literals
 import unittest
-import tempfile
-import os.path
 import codecs
 
 from bibtexparser.bparser import BibTexParser
@@ -53,54 +51,41 @@ def customizations_latex(record):
 
 
 class TestBibtexParserFunc(unittest.TestCase):
-
-    bibfile = os.path.join(tempfile.gettempdir(), "tmp-testfile")
-
-    def setUp(self):
-        with open(self.bibfile, "w") as f:
-            f.write("r")
-
     def test_strip_quotes(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_quotes('"before remove after"')
-            expected = 'before remove after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_quotes('"before remove after"')
+        expected = 'before remove after'
+        self.assertEqual(result, expected)
 
     def test_strip_quotes_n(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_quotes('"before remove after"\n')
-            expected = 'before remove after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_quotes('"before remove after"\n')
+        expected = 'before remove after'
+        self.assertEqual(result, expected)
 
     def test_strip_quotes2(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_quotes('before "remove" after')
-            expected = 'before "remove" after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_quotes('before "remove" after')
+        expected = 'before "remove" after'
+        self.assertEqual(result, expected)
 
     def test_strip_braces(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_braces('{before remove after}')
-            expected = 'before remove after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_braces('{before remove after}')
+        expected = 'before remove after'
+        self.assertEqual(result, expected)
 
     def test_strip_braces2(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_braces('before {remove} after')
-            expected = 'before {remove} after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_braces('before {remove} after')
+        expected = 'before {remove} after'
+        self.assertEqual(result, expected)
 
     def test_strip_braces_n(self):
-        with open(self.bibfile, 'r') as bibfile:
-            bib = BibTexParser(bibfile.read())
-            result = bib._strip_braces('{before remove after}\n')
-            expected = 'before remove after'
-            self.assertEqual(result, expected)
+        parser = BibTexParser()
+        result = parser._strip_braces('{before remove after}\n')
+        expected = 'before remove after'
+        self.assertEqual(result, expected)
 
 
 class TestBibtexParserList(unittest.TestCase):
@@ -207,7 +192,6 @@ class TestBibtexParserList(unittest.TestCase):
         with open('bibtexparser/tests/data/multiple_entries.bib', 'r') as bibfile:
             bib2 = BibTexParser(bibfile.read(), customization=cust2)
             res2 = bib.get_entry_list()
-        print(res2)
         self.assertEqual(res, res2)
 
     def test_article_missing_coma(self):
@@ -392,6 +376,7 @@ class TestBibtexParserList(unittest.TestCase):
                               'month': 'jan'
                          }]
         self.assertEqual(res, expected)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -9,7 +9,7 @@ import unittest
 import sys
 
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.bwriter import to_bibtex, to_json
+from bibtexparser.bwriter import to_bibtex
 from bibtexparser.customization import author
 
 
