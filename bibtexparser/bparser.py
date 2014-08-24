@@ -54,6 +54,9 @@ class BibTexParser(object):
                              of a filehandler.")
             raise TypeError('Wrong type for data')
 
+        self.comments = [] # list of BibTeX @comment items in same order as in parsed BibTeX file.
+        self.entries = []  # list of BibTeX bibliographic entries (book, article, etc)
+
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
@@ -89,15 +92,17 @@ class BibTexParser(object):
 
         self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
 
-        self.records = self._parse_records(customization=customization)
+        self.entries = self._parse_records(customization=customization)
         self.entries_hash = {}
 
     def get_entry_list(self):
         """Get a list of bibtex entries.
 
         :returns: list -- entries
+        .. deprecated:: 0.5.6
+           Use :attr:`entries` instead.
         """
-        return self.records
+        return self.entries
 
     def get_entry_dict(self):
         """Get a dictionnary of bibtex entries.
@@ -107,9 +112,16 @@ class BibTexParser(object):
         """
         # If the hash has never been made, make it
         if not self.entries_hash:
-            for entry in self.records:
+            for entry in self.entries:
                 self.entries_hash[entry['id']] = entry
         return self.entries_hash
+
+    def comments(self):
+        """Returns list of BibTeX @comment items in same order as in parsed BibTeX file.
+
+        :returns: list -- @comment items
+        """
+        return self.comments
 
     def _parse_records(self, customization=None):
         """Parse the bibtex into a list of records.
@@ -140,12 +152,13 @@ class BibTexParser(object):
             logger.debug('Inspect line %s', linenumber)
             if line.strip().startswith('@'):
                 logger.debug('Line starts with @')
+                # Parse previous record
                 _add_parsed_record(record, records)
+                # Start new record
                 logger.debug('The record is set to empty')
                 record = ""
-            if len(line.strip()) > 0:
-                logger.debug('The line is not empty, add it to record')
-                record += line
+            # Keep adding lines to the record
+            record += line
 
         # catch any remaining record and send it for parsing
         _add_parsed_record(record, records)
@@ -170,6 +183,16 @@ class BibTexParser(object):
             logger.debug('The record does not start with @. Return empty dict.')
             return {}
 
+        # if a comment record, add to self.comments
+        if record.lower().startswith('@comment'):
+            logger.debug('The record startswith @comment')
+            logger.debug('Store comment in list of comments')
+
+            self.comments.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
+
+            logger.debug('Return an empty dict')
+            return {}
+
         # prepare record
         record = '\n'.join([i.strip() for i in record.split('\n')])
         if '}\n' in record:
@@ -184,12 +207,6 @@ class BibTexParser(object):
         # if a preamble record, ignore it
         if record.lower().startswith('@preamble'):
             logger.debug('The record startswith @preamble')
-            logger.debug('Return an empty dict')
-            return {}
-
-        # if a comment record, ignore it
-        if record.lower().startswith('@comment'):
-            logger.debug('The record startswith @comment')
             logger.debug('Return an empty dict')
             return {}
 
