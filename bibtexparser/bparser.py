@@ -329,9 +329,23 @@ class BibTexParser(object):
         """
         logger.debug('Strip braces')
         val = val.strip()
-        if val.startswith('{') and val.endswith('}'):
+        if val.startswith('{') and val.endswith('}') and self._full_span(val):
             return val[1:-1]
         return val
+
+    def _full_span(self, val):
+        cnt = 0
+        for i in range(0, len(val)):
+                if val[i] == '{':
+                        cnt += 1
+                elif val[i] == '}':
+                        cnt -= 1
+                if cnt == 0:
+                        break
+        if i == len(val) - 1:
+                return True
+        else:
+                return False
 
     def _string_subst(self, val):
         """ Substitute string definitions
@@ -368,10 +382,10 @@ class BibTexParser(object):
         logger.debug('Substitute string definitions inside larger expressions')
         if '#' not in val:
             return val
-    
+
         # TODO?: Does not match two subsequent variables or strings, such as  "start" # foo # bar # "end"  or  "start" # "end".
         # TODO:  Does not support braces instead of quotes, e.g.: {start} # foo # {bar}
-        # TODO:  Does not support strings like: "te#s#t"        
+        # TODO:  Does not support strings like: "te#s#t"
         return self.replace_all_re.sub(repl, val)
 
     def _add_val(self, val):

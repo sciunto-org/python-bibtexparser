@@ -285,7 +285,7 @@ class TestBibtexParserList(unittest.TestCase):
                          'journal': 'Nice Journal',
                          'id': 'Laide2013',
                          'pages': '12-23',
-                         'title': 'An amazing title',
+                         'title': '{An} amazing {title}',
                          'comments': 'A comment',
                          'author': 'Jean Laid{\\\'e}, Ben Loaeb',
                          'volume': '12',

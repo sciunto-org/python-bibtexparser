@@ -17,4 +17,7 @@
   String replacement
 
 - faph
-  coma fixes, optional keys sanitising and other improvements
+  coma fixes, optional keys sanitising, refactoring and other improvements
+
+- Steven M. Bellovin
+  Fix braces detection
