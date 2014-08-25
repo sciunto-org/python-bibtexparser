@@ -1,4 +1,6 @@
 * FIX: if title contained multiples words in braces (#34)
+* ENH: code refactoring (#33)
+* ENH: support for comment blocks (#32)
 * ENH: Removed comma after last key-value pair by faph (#28)
 * ENH: optional keys sanitising by faph (#29)
 * FIX: missing coma at the end of a record (#24)
