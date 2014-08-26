@@ -220,6 +220,11 @@ class TestBibtexParserList(unittest.TestCase):
                      }]
         self.assertEqual(res, expected)
 
+    def test_article_start_with_whitespace(self):
+        with open('bibtexparser/tests/data/article_start_with_whitespace.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            self.assertEqual(len(bib.get_entry_list()), 2)
+
     ###########
     # BOOK
     ###########

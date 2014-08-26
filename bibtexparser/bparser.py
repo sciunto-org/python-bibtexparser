@@ -163,7 +163,7 @@ class BibTexParser(object):
                 logger.debug('The record is set to empty')
                 record = ""
             # Keep adding lines to the record
-            record += line
+            record += line.lstrip()
 
         # catch any remaining record and send it for parsing
         _add_parsed_record(record, records)
