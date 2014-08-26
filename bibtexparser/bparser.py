@@ -156,6 +156,8 @@ class BibTexParser(object):
         for linenumber, line in enumerate(self.bibtex_file_obj):
             logger.debug('Inspect line %s', linenumber)
             if line.strip().startswith('@'):
+                # Remove leading whitespaces
+                line = line.lstrip()
                 logger.debug('Line starts with @')
                 # Parse previous record
                 _add_parsed_record(record, records)
@@ -163,7 +165,7 @@ class BibTexParser(object):
                 logger.debug('The record is set to empty')
                 record = ""
             # Keep adding lines to the record
-            record += line.lstrip()
+            record += line
 
         # catch any remaining record and send it for parsing
         _add_parsed_record(record, records)
