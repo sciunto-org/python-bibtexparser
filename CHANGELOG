@@ -1,4 +1,5 @@
-* FIX: if title contained multiples words in braces (#34)
+* ENH: support for bibtex with leading spaces (#34)
+* FIX: if title contained multiples words in braces
 * ENH: code refactoring (#33)
 * ENH: support for comment blocks (#32)
 * ENH: Removed comma after last key-value pair by faph (#28)

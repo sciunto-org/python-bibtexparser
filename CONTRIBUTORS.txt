@@ -21,3 +21,6 @@
 
 - Steven M. Bellovin
   Fix braces detection
+
+- Sven Goossens
+  Support for bibtex with leading spaces
