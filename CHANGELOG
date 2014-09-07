@@ -1,3 +1,4 @@
+* DOC: clarify version number
 * ENH: support for bibtex with leading spaces (#34)
 * FIX: if title contained multiples words in braces
 * ENH: code refactoring (#33)
