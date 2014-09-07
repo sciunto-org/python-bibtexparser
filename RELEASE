@@ -8,3 +8,5 @@ How to release
     git archive master  --prefix 'bibtexparser/' | bzip2 > bibtexparser-x.y.tar.bz2
 * Send the package on pypi
     python setup.py sdist upload
+* tick the doc version on readthedocs
+* Update version in __init__.py
