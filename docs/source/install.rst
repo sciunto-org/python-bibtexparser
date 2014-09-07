@@ -31,6 +31,6 @@ Manual installation
 
 .. code-block:: sh
 
-    python setup.py --root=/usr/local/bin
+    python setup.py install --root=/usr/local/bin
 
 
