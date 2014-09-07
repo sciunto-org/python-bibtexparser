@@ -22,7 +22,7 @@ __all__ = [
     'loads', 'load', 'dumps','dump'
     'bparser', 'bwrite', 'latexenc', 'customization'
 ]
-__version__ = '0.6.0'
+__version__ = 'devel'
 
 from . import bparser, bwriter, latexenc, customization
 
