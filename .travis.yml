@@ -13,16 +13,19 @@ matrix:
       env: TEST_SUITE=suite_pypy
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
-  - pip install sphinx
-  - pip install coveralls
+  - if [[ $TEST_SUITE == suite_3_4 ]]; then
+        pip install sphinx;
+    fi;
+  - pip install coverage
   - python setup.py install
 # command to run tests, e.g. python setup.py test
 script:
-  - nosetests --with-coverage --cover-package=bibtexparser
+  - nosetests --with-coverage  --cover-erase --cover-package=bibtexparser
   - if [[ $TEST_SUITE == suite_3_4 ]]; then
         cd docs;
         make html;
     fi;
 
 after_success:
+  - pip install coveralls
   - coveralls
