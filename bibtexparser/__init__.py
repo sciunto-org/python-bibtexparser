@@ -19,12 +19,12 @@ And writing::
 
 """
 __all__ = [
-    'loads', 'load', 'dumps','dump'
-    'bparser', 'bwrite', 'latexenc', 'customization'
+    'loads', 'load', 'dumps', 'dump', 'bibdatabase',
+    'bparser', 'bwrite', 'latexenc', 'customization',
 ]
 __version__ = 'devel'
 
-from . import bparser, bwriter, latexenc, customization
+from . import bibdatabase, bparser, bwriter, latexenc, customization
 
 
 def loads(bibtex_str, parser=None):
