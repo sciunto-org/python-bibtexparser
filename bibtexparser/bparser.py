@@ -270,6 +270,11 @@ class BibTexParser(object):
                 # it is a line with a key value pair on it
                 logger.debug('Line contains a key-pair value and the key is not stored yet.')
                 key, val = [i.strip() for i in kv.split('=', 1)]
+                if key == 'type':
+                    # Thesis types use a 'type' key to describe the Thesis type,
+                    # but 'type' is used by bibtexparser to describe the entry
+                    # type.
+                    key = 'thesistype'
                 key = self._add_key(key)
                 val = self._string_subst_partial(val)
                 # if it looks like the value spans lines, store details for next loop
