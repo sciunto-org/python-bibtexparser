@@ -236,7 +236,7 @@ class BibTexParser(object):
 
         # for each line in record
         logger.debug('Split the record of its lines and treat them')
-        kvs = [i.strip() for i in record.split(',\n')]
+        kvs = [i.strip() for i in re.split(',\s*\n|\n\s*,', record)]
         inkey = ""
         inval = ""
         for kv in kvs:
@@ -247,7 +247,7 @@ class BibTexParser(object):
                 logger.debug('Line starts with @ and the key is not stored yet.')
                 bibtype, id = kv.split('{', 1)
                 bibtype = self._add_key(bibtype)
-                id = id.strip('}').strip(',')
+                id = id.lstrip().strip('}').strip(',')
                 logger.debug('bibtype = %s', bibtype)
                 logger.debug('id = %s', id)
                 if self.ignore_nonstandard_types and bibtype not in ('article',
