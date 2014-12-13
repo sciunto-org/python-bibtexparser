@@ -140,7 +140,7 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
     from bibtexparser.bparser import BibTexParser
     from bibtexparser.customization import homogeneize_latex_encoding
 
-    with open('bibtex.bib') as bibfile:
+    with open('bibtex.bib') as bibtex_file:
         parser = BibTexParser()
         parser.customization = homogeneize_latex_encoding
         bib_database = bibtexparser.load(bibtex_file, parser=parser)
@@ -156,7 +156,7 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
     from bibtexparser.bparser import BibTexParser
     from bibtexparser.customization import convert_to_unicode
 
-    with open('bibtex.bib') as bibfile:
+    with open('bibtex.bib') as bibtex_file:
         parser = BibTexParser()
         parser.customization = convert_to_unicode
         bib_database = bibtexparser.load(bibtex_file, parser=parser)
