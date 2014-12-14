@@ -6,11 +6,11 @@ from tempfile import TemporaryFile
 
 class TestBibtexParserParserMethods(unittest.TestCase):
     input_file_path = 'bibtexparser/tests/data/book.bib'
-    entries_expected = [{'type': 'book',
+    entries_expected = [{'ENTRYTYPE': 'book',
                          'year': '1987',
                          'edition': '2',
                          'publisher': 'Wiley Edition',
-                         'id': 'Bird1987',
+                         'ID': 'Bird1987',
                          'volume': '1',
                          'title': 'Dynamics of Polymeric Liquid',
                          'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'

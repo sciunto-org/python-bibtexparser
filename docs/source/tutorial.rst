@@ -54,10 +54,10 @@ It prints a list of dictionaries for reference entries, for example books, artic
       'title': 'An amazing title',
       'year': '2013',
       'volume': '12',
-      'id': 'Cesar2013',
+      'ID': 'Cesar2013',
       'author': 'Jean César',
       'keyword': 'keyword1, keyword2',
-      'type': 'article'}]
+      'ENTRYTYPE': 'article'}]
 
 
 

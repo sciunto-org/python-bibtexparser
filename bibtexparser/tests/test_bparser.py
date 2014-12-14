@@ -107,11 +107,11 @@ class TestBibtexParserList(unittest.TestCase):
             res_list = bib.get_entry_list()
             res_dict = bib.get_entry_dict()
             expected_list = [{'keyword': 'keyword1, keyword2',
-                              'type': 'article',
+                              'ENTRYTYPE': 'article',
                               'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
                               'year': '2013',
                               'journal': 'Nice Journal',
-                              'id': 'Cesar2013',
+                              'ID': 'Cesar2013',
                               'pages': '12-23',
                               'title': 'An amazing title',
                               'comments': 'A comment',
@@ -120,11 +120,11 @@ class TestBibtexParserList(unittest.TestCase):
                               'month': 'jan'
                               }]
             expected_dict = {'Cesar2013': {'keyword': 'keyword1, keyword2',
-                              'type': 'article',
+                              'ENTRYTYPE': 'article',
                               'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
                               'year': '2013',
                               'journal': 'Nice Journal',
-                              'id': 'Cesar2013',
+                              'ID': 'Cesar2013',
                               'pages': '12-23',
                               'title': 'An amazing title',
                               'comments': 'A comment',
@@ -140,13 +140,13 @@ class TestBibtexParserList(unittest.TestCase):
             bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
-                     'type': 'article',
+                     'ENTRYTYPE': 'article',
                      'pages': '12--23',
                      'volume': '12',
-                     'id': 'Cesar2013',
+                     'ID': 'Cesar2013',
                      'year': '2013',
                      'author': ['César, Jean'],
-                     'journal': {'id': 'NiceJournal', 'name': 'Nice Journal'},
+                     'journal': {'ID': 'NiceJournal', 'name': 'Nice Journal'},
                      'comments': 'A comment',
                      'month': 'jan',
                      'keyword': ['keyword1', 'keyword2'],
@@ -159,13 +159,13 @@ class TestBibtexParserList(unittest.TestCase):
             bib = BibTexParser(bibfile.read(), customization=customizations_latex)
             res = bib.get_entry_list()
         expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
-                     'type': 'article',
+                     'ENTRYTYPE': 'article',
                      'pages': '12--23',
                      'volume': '12',
-                     'id': 'Cesar2013',
+                     'ID': 'Cesar2013',
                      'year': '2013',
                      'author': ['C{\\\'e}sar, Jean'],
-                     'journal': {'id': 'NiceJournal', 'name': 'Nice Journal'},
+                     'journal': {'ID': 'NiceJournal', 'name': 'Nice Journal'},
                      'comments': 'A comment',
                      'month': 'jan',
                      'keyword': ['keyword1', 'keyword2'],
@@ -198,20 +198,20 @@ class TestBibtexParserList(unittest.TestCase):
         with open('bibtexparser/tests/data/article_missing_coma.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
-        expected = [{'type': 'article',
+        expected = [{'ENTRYTYPE': 'article',
                      'journal': 'Nice Journal',
                      'volume': '12',
-                     'id': 'Cesar2013',
+                     'ID': 'Cesar2013',
                      'year': '2013',
                      'author': 'Jean Cesar',
                      'comments': 'A comment',
                      'keyword': 'keyword1, keyword2',
                      'title': 'An amazing title'
                      },
-                    {'type': 'article',
+                    {'ENTRYTYPE': 'article',
                      'journal': 'Nice Journal',
                      'volume': '12',
-                     'id': 'Baltazar2013',
+                     'ID': 'Baltazar2013',
                      'year': '2013',
                      'author': 'Jean Baltazar',
                      'comments': 'A comment',
@@ -232,11 +232,11 @@ class TestBibtexParserList(unittest.TestCase):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
-            expected = [{'type': 'book',
+            expected = [{'ENTRYTYPE': 'book',
                          'year': '1987',
                          'edition': '2',
                          'publisher': 'Wiley Edition',
-                         'id': 'Bird1987',
+                         'ID': 'Bird1987',
                          'volume': '1',
                          'title': 'Dynamics of Polymeric Liquid',
                          'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'
@@ -248,11 +248,11 @@ class TestBibtexParserList(unittest.TestCase):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
             res = bib.get_entry_list()
-            expected = [{'type': 'book',
+            expected = [{'ENTRYTYPE': 'book',
                          'year': '1987',
                          'edition': '2',
                          'publisher': 'Wiley Edition',
-                         'id': 'Bird1987',
+                         'ID': 'Bird1987',
                          'volume': '1',
                          'title': 'Dynamics of Polymeric Liquid',
                          'author': ['Bird, R.B.', 'Armstrong, R.C.', 'Hassager, O.']
@@ -264,11 +264,11 @@ class TestBibtexParserList(unittest.TestCase):
         with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_latex)
             res = bib.get_entry_list()
-            expected = [{'type': 'book',
+            expected = [{'ENTRYTYPE': 'book',
                          'year': '1987',
                          'edition': '2',
                          'publisher': 'Wiley Edition',
-                         'id': 'Bird1987',
+                         'ID': 'Bird1987',
                          'volume': '1',
                          'title': '{D}ynamics of {P}olymeric {L}iquid',
                          'author': ['Bird, R.B.', 'Armstrong, R.C.', 'Hassager, O.']
@@ -284,11 +284,11 @@ class TestBibtexParserList(unittest.TestCase):
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
-                         'type': 'article',
+                         'ENTRYTYPE': 'article',
                          'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
                          'year': '2013',
                          'journal': 'Nice Journal',
-                         'id': 'Laide2013',
+                         'ID': 'Laide2013',
                          'pages': '12-23',
                          'title': '{An} amazing {title}',
                          'comments': 'A comment',
@@ -305,11 +305,11 @@ class TestBibtexParserList(unittest.TestCase):
         with open('bibtexparser/tests/data/features.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
-            expected = [{'type': 'inproceedings',
+            expected = [{'ENTRYTYPE': 'inproceedings',
                          'year': '2014',
                          'title': 'Cool Stuff',
                          'author': 'John',
-                         'id': 'mykey',
+                         'ID': 'mykey',
                          'booktitle': 'My International Conference',
                          }]
         self.assertEqual(res, expected)
@@ -318,11 +318,11 @@ class TestBibtexParserList(unittest.TestCase):
         with open('bibtexparser/tests/data/features2.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
-            expected = [{'type': 'inproceedings',
+            expected = [{'ENTRYTYPE': 'inproceedings',
                          'year': '2014',
                          'title': 'Cool Stuff',
                          'author': 'John Doe',
-                         'id': 'mykey',
+                         'ID': 'mykey',
                          'booktitle': 'My International Conference',
                          'note': 'Email: John.Doe@example.com',
                          'pages': '1--10',
@@ -337,8 +337,8 @@ class TestBibtexParserList(unittest.TestCase):
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'author': 'correct',
-                         'id': 'bar',
-                         'type': 'article'}]
+                         'ID': 'bar',
+                         'ENTRYTYPE': 'article'}]
         self.assertEqual(res, expected)
 
     ###########
@@ -349,11 +349,11 @@ class TestBibtexParserList(unittest.TestCase):
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
-                              'type': 'article',
+                              'ENTRYTYPE': 'article',
                               'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
                               'year': '2013',
                               'journal': 'Elémentaire',
-                              'id': 'Cesar_2013',
+                              'ID': 'Cesar_2013',
                               'pages': '12-23',
                               'title': 'An amazing title: à',
                               'comments': 'A comment',
@@ -368,11 +368,11 @@ class TestBibtexParserList(unittest.TestCase):
             bib = BibTexParser(bibfile.read(), customization=homogeneize_latex_encoding)
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
-                              'type': 'article',
+                              'ENTRYTYPE': 'article',
                               'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
                               'year': '2013',
                               'journal': 'El{\\\'e}mentaire',
-                              'id': 'Cesar_2013',
+                              'ID': 'Cesar_2013',
                               'pages': '12-23',
                               'title': '{A}n amazing title: {\\`a}',
                               'comments': 'A comment',

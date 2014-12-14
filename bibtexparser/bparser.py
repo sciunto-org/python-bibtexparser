@@ -298,8 +298,8 @@ class BibTexParser(object):
             logger.debug('The dict is empty, return it.')
             return d
 
-        d['type'] = bibtype
-        d['id'] = id
+        d['ENTRYTYPE'] = bibtype
+        d['ID'] = id
 
         if customization is None:
             logger.debug('No customization to apply, return dict')

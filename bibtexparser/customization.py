@@ -81,7 +81,7 @@ def editor(record):
         if record["editor"]:
             record["editor"] = getnames([i.strip() for i in record["editor"].replace('\n', ' ').split(" and ")])
             # convert editor to object
-            record["editor"] = [{"name": i, "id": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
+            record["editor"] = [{"name": i, "ID": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
         else:
             del record["editor"]
     return record
@@ -130,7 +130,7 @@ def journal(record):
     if "journal" in record:
         # switch journal to object
         if record["journal"]:
-            record["journal"] = {"name": record["journal"], "id": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
+            record["journal"] = {"name": record["journal"], "ID": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
 
     return record
 
@@ -241,7 +241,7 @@ def homogeneize_latex_encoding(record):
     record = convert_to_unicode(record)
     # And then, we fall back
     for val in record:
-        if val not in ('id',):
+        if val not in ('ID',):
             logger.debug('Apply string_to_latex to: %s', val)
             record[val] = string_to_latex(record[val])
             if val == 'title':
