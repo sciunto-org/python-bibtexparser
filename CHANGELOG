@@ -1,3 +1,9 @@
+vXXXX
+=====
+
+* API: Previous type and id keywords which are automatically added to
+the dictionnary are now ENTRYTYPE and ID, respectively (#42).
+
 v0.6.0
 ======
 
