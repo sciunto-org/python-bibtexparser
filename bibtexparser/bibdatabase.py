@@ -44,7 +44,7 @@ class BibDatabase(object):
         # If the hash has never been made, make it
         if not self._entries_dict:
             for entry in self.entries:
-                self._entries_dict[entry['id']] = entry
+                self._entries_dict[entry['ID']] = entry
         return self._entries_dict
 
     entries_dict = property(get_entry_dict)

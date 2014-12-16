@@ -3,11 +3,11 @@ from bibtexparser.bibdatabase import BibDatabase
 
 
 class TestBibDatabase(unittest.TestCase):
-    entries = [{'type': 'book',
+    entries = [{'ENTRYTYPE': 'book',
                 'year': '1987',
                 'edition': '2',
                 'publisher': 'Wiley Edition',
-                'id': 'Bird1987',
+                'ID': 'Bird1987',
                 'volume': '1',
                 'title': 'Dynamics of Polymeric Liquid',
                 'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'

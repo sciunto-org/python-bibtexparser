@@ -31,7 +31,7 @@ class BibTexWriter(object):
         writer = BibTexWriter()
         writer.contents = ['comments', 'entries']
         writer.indent = '  '
-        writer.order_entries_by = ('type', 'author', 'year')
+        writer.order_entries_by = ('ENTRYTYPE', 'author', 'year')
         bibtex_str = bibtexparser.dumps(bib_database, writer)
 
     """
@@ -45,8 +45,8 @@ class BibTexWriter(object):
         self.indent = ' '
         #: Characters(s) for separating BibTeX entries. Default: new line.
         self.entry_separator = '\n'
-        #: Tuple of fields for ordering entries. Set to `None` to disable sorting. Default: BibTeX key `('id', )`.
-        self.order_entries_by = ('id', )
+        #: Tuple of fields for ordering entries. Set to `None` to disable sorting. Default: BibTeX key `('ID', )`.
+        self.order_entries_by = ('ID', )
 
     def write(self, bib_database):
         """
@@ -82,15 +82,15 @@ class BibTexWriter(object):
     def _entry_to_bibtex(self, entry):
         bibtex = ''
         # Write BibTeX key
-        bibtex += '@' + entry['type'] + '{' + entry['id']
+        bibtex += '@' + entry['ENTRYTYPE'] + '{' + entry['ID']
 
         # Write field = value lines
-        for field in [i for i in sorted(entry) if i not in ['type', 'id']]:
+        for field in [i for i in sorted(entry) if i not in ['ENTRYTYPE', 'ID']]:
             try:
                 bibtex += ",\n" + self.indent + field + " = {" + entry[field] + "}"
             except TypeError:
                 raise TypeError("The field %s in entry %s must be a string"
-                                % (field, entry['id']))
+                                % (field, entry['ID']))
         bibtex += "\n}\n" + self.entry_separator
         return bibtex
 

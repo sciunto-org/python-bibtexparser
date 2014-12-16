@@ -56,8 +56,8 @@ class TestBibTexWriter(unittest.TestCase):
 
     def test_indent(self):
         bib_database = BibDatabase()
-        bib_database.entries = [{'id': 'abc123',
-                                 'type': 'book',
+        bib_database.entries = [{'ID': 'abc123',
+                                 'ENTRYTYPE': 'book',
                                  'author': 'test'}]
         writer = BibTexWriter()
         writer.indent = '  '
@@ -72,8 +72,8 @@ class TestBibTexWriter(unittest.TestCase):
 
     def test_entry_separator(self):
         bib_database = BibDatabase()
-        bib_database.entries = [{'id': 'abc123',
-                                 'type': 'book',
+        bib_database.entries = [{'ID': 'abc123',
+                                 'ENTRYTYPE': 'book',
                                  'author': 'test'}]
         writer = BibTexWriter()
         writer.entry_separator = ''
@@ -88,12 +88,12 @@ class TestBibTexWriter(unittest.TestCase):
 
 class TestEntrySorting(unittest.TestCase):
     bib_database = BibDatabase()
-    bib_database.entries = [{'id': 'b',
-                             'type': 'article'},
-                            {'id': 'c',
-                             'type': 'book'},
-                            {'id': 'a',
-                             'type': 'book'}]
+    bib_database.entries = [{'ID': 'b',
+                             'ENTRYTYPE': 'article'},
+                            {'ID': 'c',
+                             'ENTRYTYPE': 'book'},
+                            {'ID': 'a',
+                             'ENTRYTYPE': 'book'}]
 
     def test_sort_default(self):
         result = bibtexparser.dumps(self.bib_database)
@@ -109,35 +109,35 @@ class TestEntrySorting(unittest.TestCase):
 
     def test_sort_id(self):
         writer = BibTexWriter()
-        writer.order_entries_by = ('id', )
+        writer.order_entries_by = ('ID', )
         result = bibtexparser.dumps(self.bib_database, writer)
         expected = "@book{a\n}\n\n@article{b\n}\n\n@book{c\n}\n\n"
         self.assertEqual(result, expected)
 
     def test_sort_type(self):
         writer = BibTexWriter()
-        writer.order_entries_by = ('type', )
+        writer.order_entries_by = ('ENTRYTYPE', )
         result = bibtexparser.dumps(self.bib_database, writer)
         expected = "@article{b\n}\n\n@book{c\n}\n\n@book{a\n}\n\n"
         self.assertEqual(result, expected)
 
     def test_sort_type_id(self):
         writer = BibTexWriter()
-        writer.order_entries_by = ('type', 'id')
+        writer.order_entries_by = ('ENTRYTYPE', 'ID')
         result = bibtexparser.dumps(self.bib_database, writer)
         expected = "@article{b\n}\n\n@book{a\n}\n\n@book{c\n}\n\n"
         self.assertEqual(result, expected)
 
     def test_sort_missing_field(self):
         bib_database = BibDatabase()
-        bib_database.entries = [{'id': 'b',
-                                 'type': 'article',
+        bib_database.entries = [{'ID': 'b',
+                                 'ENTRYTYPE': 'article',
                                  'year': '2000'},
-                                {'id': 'c',
-                                 'type': 'book',
+                                {'ID': 'c',
+                                 'ENTRYTYPE': 'book',
                                  'year': '2010'},
-                                {'id': 'a',
-                                 'type': 'book'}]
+                                {'ID': 'a',
+                                 'ENTRYTYPE': 'book'}]
         writer = BibTexWriter()
         writer.order_entries_by = ('year', )
         result = bibtexparser.dumps(bib_database, writer)
