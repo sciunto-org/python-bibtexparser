@@ -59,7 +59,7 @@ It prints a list of dictionaries for reference entries, for example books, artic
       'keyword': 'keyword1, keyword2',
       'ENTRYTYPE': 'article'}]
 
-
+Note that, by convention, uppercase keys are auto-generated data, while lowercase keys come from the original bibtex file.
 
 Alternatively, you can parse a file-like object directly like this:
 
