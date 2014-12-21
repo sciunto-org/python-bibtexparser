@@ -9,8 +9,7 @@ import unittest
 import sys
 
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.bwriter import BibTexWriter
-from bibtexparser.bwriter import to_bibtex
+from bibtexparser.bwriter import BibTexWriter, to_bibtex
 from bibtexparser.customization import author
 
 

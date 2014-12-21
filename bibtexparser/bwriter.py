@@ -48,7 +48,7 @@ class BibTexWriter(object):
         #: Tuple of fields for ordering entries. Set to `None` to disable sorting. Default: BibTeX key `('ID', )`.
         self.order_entries_by = ('ID', )
         #: BibTeX syntax allows comma first syntax
-        #: (common in functional languages), use this to enble
+        #: (common in functional languages), use this to enable
         #: comma first syntax as the bwritter output
         self.comma_first = False
 

@@ -229,20 +229,20 @@ class TestBibtexParserList(unittest.TestCase):
         with open('bibtexparser/tests/data/article_comma_first.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
-        expected = [{'type': 'article',
+        expected = [{'ENTRYTYPE': 'article',
                      'journal': 'Nice Journal',
                      'volume': '12',
-                     'id': 'Cesar2013',
+                     'ID': 'Cesar2013',
                      'year': '2013',
                      'author': 'Jean Cesar',
                      'comments': 'A comment',
                      'keyword': 'keyword1, keyword2',
                      'title': 'An amazing title'
                      },
-                    {'type': 'article',
+                    {'ENTRYTYPE': 'article',
                      'journal': 'Nice Journal',
                      'volume': '12',
-                     'id': 'Baltazar2013',
+                     'ID': 'Baltazar2013',
                      'year': '2013',
                      'author': 'Jean Baltazar',
                      'comments': 'A comment',
