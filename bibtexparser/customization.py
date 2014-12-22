@@ -60,10 +60,10 @@ def author(record):
 
     """
     if "author" in record:
-        if record["author"]:
-            record["author"] = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
+        if record['author']:
+            record['author'] = getnames([i.strip() for i in record['author'].replace('\n', ' ').split(" and ")])
         else:
-            del record["author"]
+            del record['author']
     return record
 
 
@@ -77,13 +77,13 @@ def editor(record):
     :returns: dict -- the modified record.
 
     """
-    if "editor" in record:
-        if record["editor"]:
-            record["editor"] = getnames([i.strip() for i in record["editor"].replace('\n', ' ').split(" and ")])
+    if 'editor' in record:
+        if record['editor']:
+            record['editor'] = getnames([i.strip() for i in record['editor'].replace('\n', ' ').split(" and ")])
             # convert editor to object
-            record["editor"] = [{"name": i, "ID": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
+            record['editor'] = [{'name': i, 'ID': i.replace(',', '').replace(' ', '').replace('.', '')} for i in record['editor']]
         else:
-            del record["editor"]
+            del record['editor']
     return record
 
 
@@ -96,10 +96,10 @@ def page_double_hyphen(record):
     :returns: dict -- the modified record.
 
     """
-    if "pages" in record:
-        if "-" in record["pages"]:
-            p = [i.strip().strip('-') for i in record["pages"].split("-")]
-            record["pages"] = p[0] + '--' + p[-1]
+    if 'pages' in record:
+        if '-' in record['pages']:
+            p = [i.strip().strip('-') for i in record['pages'].split('-')]
+            record['pages'] = p[0] + '--' + p[-1]
     return record
 
 
@@ -112,25 +112,25 @@ def type(record):
     :returns: dict -- the modified record.
 
     """
-    if "type" in record:
-        record["type"] = record["type"].lower()
+    if 'type' in record:
+        record['type'] = record['type'].lower()
     return record
 
 
 def journal(record):
     """
     Turn the journal field into a dict composed of the original journal name
-    and a journal id (without coma or blank).
+    and a journal ID (without coma or blank).
 
     :param record: the record.
     :type record: dict
     :returns: dict -- the modified record.
 
     """
-    if "journal" in record:
+    if 'journal' in record:
         # switch journal to object
-        if record["journal"]:
-            record["journal"] = {"name": record["journal"], "ID": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
+        if record['journal']:
+            record['journal'] = {'name': record['journal'], 'ID': record['journal'].replace(',', '').replace(' ', '').replace('.', '')}
 
     return record
 
@@ -146,8 +146,8 @@ def keyword(record, sep=',|;'):
     :returns: dict -- the modified record.
 
     """
-    if "keyword" in record:
-        record["keyword"] = [i.strip() for i in re.split(sep, record["keyword"].replace('\n', ''))]
+    if 'keyword' in record:
+        record['keyword'] = [i.strip() for i in re.split(sep, record['keyword'].replace('\n', ''))]
 
     return record
 
@@ -160,18 +160,18 @@ def link(record):
     :returns: dict -- the modified record.
 
     """
-    if "link" in record:
-        links = [i.strip().replace("  ", " ") for i in record["link"].split('\n')]
+    if 'link' in record:
+        links = [i.strip().replace("  ", " ") for i in record['link'].split('\n')]
         record['link'] = []
         for link in links:
             parts = link.split(" ")
-            linkobj = {"url": parts[0]}
+            linkobj = {'url': parts[0]}
             if len(parts) > 1:
-                linkobj["anchor"] = parts[1]
+                linkobj['anchor'] = parts[1]
             if len(parts) > 2:
-                linkobj["format"] = parts[2]
-            if len(linkobj["url"]) > 0:
-                record["link"].append(linkobj)
+                linkobj['format'] = parts[2]
+            if len(linkobj['url']) > 0:
+                record['link'].append(linkobj)
 
     return record
 
@@ -195,7 +195,7 @@ def doi(record):
             link = record['doi']
             if link.startswith('10'):
                 link = 'http://dx.doi.org/' + link
-            record['link'].append({"url": link, "anchor": "doi"})
+            record['link'].append({'url': link, 'anchor': "doi"})
     return record
 
 
