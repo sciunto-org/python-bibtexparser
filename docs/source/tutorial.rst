@@ -165,3 +165,100 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 
 Note: if you want to mix different customization functions, you can write your own function.
 
+
+Using the writer
+----------------
+
+In the first section we prepared a BibTeX sample file, we can prepare the same file using pure python and the ``BibTexWriter`` class.
+
+.. code-block:: python
+
+    from bibtexparser.bwriter import BibTexWriter
+    from bibtexparser.bibdatabase import BibDatabase
+
+    db = BibDatabase()
+    db.entries = [
+        {'journal': 'Nice Journal',
+         'comments': 'A comment',
+         'pages': '12--23',
+         'month': 'jan',
+         'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...',
+         'title': 'An amazing title',
+         'year': '2013',
+         'volume': '12',
+         'id': 'Cesar2013',
+         'author': 'Jean César',
+         'keyword': 'keyword1, keyword2',
+         'type': 'article'}]
+
+    writer = BibTexWriter()
+    with open('bibtex.bib', 'w') as bibfile:
+        bibfile.write(writer.write(db))
+
+This code generates the following file:
+
+.. code-block:: latex
+
+    @article{Cesar2013,
+     abstract = {This is an abstract. This line should be long enough to test
+    multilines...},
+     author = {Jean César},
+     comments = {A comment},
+     journal = {Nice Journal},
+     keyword = {keyword1, keyword2},
+     month = {jan},
+     pages = {12--23},
+     title = {An amazing title},
+     volume = {12},
+     year = {2013}
+    }
+
+The writer also posses several flags that can be enabled to customize the output file.
+For example we can use ``indent`` and ``comma_first`` to customize the previous entry, first the code:
+
+.. code-block:: python
+
+    from bibtexparser.bwriter import BibTexWriter
+    from bibtexparser.bibdatabase import BibDatabase
+
+    db = BibDatabase()
+    db.entries = [
+        {'journal': 'Nice Journal',
+         'comments': 'A comment',
+         'pages': '12--23',
+         'month': 'jan',
+         'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...',
+         'title': 'An amazing title',
+         'year': '2013',
+         'volume': '12',
+         'id': 'Cesar2013',
+         'author': 'Jean César',
+         'keyword': 'keyword1, keyword2',
+         'type': 'article'}]
+
+    writer = BibTexWriter()
+    writer.indent = '    '     # indent entries with 4 spaces instead of one
+    writer.comma_first = True  # place the comma at the beginning of the line
+    with open('bibtex.bib', 'w') as bibfile:
+        bibfile.write(writer.write(db))
+
+This code results in the following, customized, file:
+
+.. code-block:: latex
+
+    @article{Cesar2013
+    ,    abstract = {This is an abstract. This line should be long enough to test
+    multilines...}
+    ,    author = {Jean César}
+    ,    comments = {A comment}
+    ,    journal = {Nice Journal}
+    ,    keyword = {keyword1, keyword2}
+    ,    month = {jan}
+    ,    pages = {12--23}
+    ,    title = {An amazing title}
+    ,    volume = {12}
+    ,    year = {2013}
+    }
+
+Flags to the writer object can modify not only how an entry is printed but how several BibTeX entries are sorted and separated.
+See the :ref:`bibtexparser_api` for the full list of flags.

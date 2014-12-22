@@ -1,3 +1,5 @@
+.. _bibtexparser_api:
+
 bibtexparser: API
 =================
 

@@ -225,6 +225,32 @@ class TestBibtexParserList(unittest.TestCase):
             bib = BibTexParser(bibfile.read())
             self.assertEqual(len(bib.get_entry_list()), 2)
 
+    def test_article_comma_first(self):
+        with open('bibtexparser/tests/data/article_comma_first.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            res = bib.get_entry_list()
+        expected = [{'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'ID': 'Cesar2013',
+                     'year': '2013',
+                     'author': 'Jean Cesar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     },
+                    {'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'ID': 'Baltazar2013',
+                     'year': '2013',
+                     'author': 'Jean Baltazar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     }]
+        self.assertEqual(res, expected)
+
     ###########
     # BOOK
     ###########

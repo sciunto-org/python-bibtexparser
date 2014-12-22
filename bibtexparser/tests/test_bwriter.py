@@ -9,7 +9,7 @@ import unittest
 import sys
 
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.bwriter import to_bibtex
+from bibtexparser.bwriter import BibTexWriter, to_bibtex
 from bibtexparser.customization import author
 
 
@@ -45,6 +45,22 @@ class TestBibtexWriterList(unittest.TestCase):
         self.assertEqual(expected, result)
 
     ###########
+    # COMMA FIRST
+    ###########
+    def test_comma_first(self):
+        with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+
+        with open('bibtexparser/tests/data/book_comma_first.bib', 'r') as bibfile:
+            expected = bibfile.read()
+        writer = BibTexWriter()
+        writer.indent = '   '
+        writer.comma_first = True
+        result = writer.write(bib)
+        self.maxDiff = None
+        self.assertEqual(expected, result)
+
+    ###########
     # MULTIPLE
     ###########
     def test_multiple(self):
@@ -64,3 +80,4 @@ class TestBibtexWriterList(unittest.TestCase):
         with open('bibtexparser/tests/data/article.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=author)
         self.assertRaises(TypeError, to_bibtex, bib)
+
