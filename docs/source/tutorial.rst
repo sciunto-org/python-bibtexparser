@@ -124,6 +124,9 @@ your own functions.
         print(bib_database.entries)
 
 
+If you think that you have a customization which could be useful to others, please share with us!
+
+
 Accents and weird characters
 ----------------------------
 
@@ -213,7 +216,7 @@ This code generates the following file:
      year = {2013}
     }
 
-The writer also posses several flags that can be enabled to customize the output file.
+The writer also has several flags that can be enabled to customize the output file.
 For example we can use ``indent`` and ``comma_first`` to customize the previous entry, first the code:
 
 .. code-block:: python
