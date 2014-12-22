@@ -261,4 +261,4 @@ This code results in the following, customized, file:
     }
 
 Flags to the writer object can modify not only how an entry is printed but how several BibTeX entries are sorted and separated.
-See the :ref: `bibtexparser` for the full list of flags.
+See the :ref:`bibtexparser_api` for the full list of flags.
