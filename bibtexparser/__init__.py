@@ -20,7 +20,7 @@ And writing::
 """
 __all__ = [
     'loads', 'load', 'dumps', 'dump', 'bibdatabase',
-    'bparser', 'bwrite', 'latexenc', 'customization',
+    'bparser', 'bwriter', 'latexenc', 'customization',
 ]
 __version__ = 'devel'
 

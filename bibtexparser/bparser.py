@@ -11,7 +11,7 @@ import sys
 import logging
 import io
 import re
-from bibtexparser.bibdatabase import BibDatabase
+from .bibdatabase import BibDatabase
 
 logger = logging.getLogger(__name__)
 
