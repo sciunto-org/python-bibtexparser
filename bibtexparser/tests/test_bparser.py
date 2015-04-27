@@ -217,6 +217,27 @@ class TestBibtexParserList(unittest.TestCase):
                      'comments': 'A comment',
                      'keyword': 'keyword1, keyword2',
                      'title': 'An amazing title'
+                     },
+                    {'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'ID': 'Aimar2013',
+                     'year': '2013',
+                     'author': 'Jean Aimar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title',
+                     'month': 'january'
+                     },
+                    {'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'ID': 'Doute2013',
+                     'year': '2013',
+                     'author': 'Jean Doute',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
                      }]
         self.assertEqual(res, expected)
 

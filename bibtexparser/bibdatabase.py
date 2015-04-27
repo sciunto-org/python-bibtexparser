@@ -1,6 +1,21 @@
 from collections import OrderedDict
 
 
+COMMON_STRINGS = {
+        'jan': 'January',
+        'feb': 'February',
+        'mar': 'March',
+        'apr': 'April',
+        'may': 'May',
+        'jun': 'June',
+        'jul': 'July',
+        'aug': 'August',
+        'sep': 'September',
+        'oct': 'October',
+        'nov': 'November',
+        'dec': 'December',
+        }
+
 class BibDatabase(object):
     """
     A bibliographic database object following the data structure of a BibTeX file.
@@ -19,6 +34,9 @@ class BibDatabase(object):
         self.strings = OrderedDict()  # Not sure if order is import, keep order just in case
         #: List of BibTeX preamble (`@preamble{...}`) blocks.
         self.preambles = []
+
+    def load_common_strings(self):
+        self.strings.update(COMMON_STRINGS)
 
     def get_entry_list(self):
         """Get a list of bibtex entries.
@@ -48,3 +66,19 @@ class BibDatabase(object):
         return self._entries_dict
 
     entries_dict = property(get_entry_dict)
+
+    def expand_string(self, name):
+        try:
+            return self.strings[name]
+        except KeyError:
+            raise(KeyError("Unknown string: {}.".format(name)))
+
+
+class BibDataString(object):
+
+    def __init__(self, bibdatabase, name):
+        self._bibdatabase = bibdatabase
+        self.name = name.lower()
+
+    def get_value(self):
+        return self._bibdatabase.expand_string(self.name)
