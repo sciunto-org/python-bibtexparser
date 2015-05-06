@@ -279,7 +279,7 @@ def prepare_unicode_to_latex():
         ("\u0023", "\\#"),
         ("\u0024", "\\textdollar "),
         ("\u0025", "\\%"),
-        ("\u0026", "\\&amp;"),
+        ("\u0026", "\\&"),
         ("\u0027", "\\textquotesingle "),
         ("\u002A", "\\ast "),
         ("\u005C", "\\textbackslash "),
