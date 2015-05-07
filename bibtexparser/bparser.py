@@ -124,7 +124,12 @@ class BibTexParser(object):
             return t[0]
 
         def remove_braces(s, l, t):
-            return t[0].lstrip('{').rstrip('}')
+            if len(t[0]) < 1:
+                return ''
+            else:
+                start = 1 if t[0][0] == '{' else 0
+                end = -1 if t[0][-1] == '}' else None
+                return t[0][start:end]
 
         string_def_start = pp.CaselessKeyword("@string")
         preamble_start = pp.CaselessKeyword("@preamble")
