@@ -10,7 +10,6 @@
 import sys
 import logging
 import io
-import re
 import pyparsing as pp
 from .bibdatabase import BibDatabase, BibDataString
 
@@ -154,9 +153,10 @@ class BibTexParser(object):
 
         brace_in_quoted = pp.nestedExpr('{', '}')
         text_in_quoted = pp.Word(pp.printables, excludeChars='"{}')
-        quoted_value = pp.originalTextFor('"' +
-                pp.ZeroOrMore(text_in_quoted | brace_in_quoted) +
-                '"')('QuotedValue')
+        quoted_value = pp.originalTextFor(
+            '"' +
+            pp.ZeroOrMore(text_in_quoted | brace_in_quoted) +
+            '"')('QuotedValue')
         quoted_value.addParseAction(pp.removeQuotes)
         # TODO Make sure that content is escaped with quotes when contains '@'
 
@@ -317,47 +317,6 @@ class BibTexParser(object):
                 return True
         else:
                 return False
-
-    def _string_subst(self, val):
-        """ Substitute string definitions
-
-        :param val: a value
-        :type val: string
-        :returns: string -- value
-        """
-        logger.debug('Substitute string definitions')
-        if not val:
-            return ''
-        for k in list(self.bib_database.strings.keys()):
-            if val.lower() == k:
-                val = self.bib_database.strings[k]
-        if not isinstance(val, ustr):
-            val = ustr(val, self.encoding, 'ignore')
-
-        return val
-
-    def _string_subst_partial(self, val):
-        """ Substitute string definitions inside larger expressions
-
-        :param val: a value
-        :type val: string
-        :returns: string -- value
-        """
-        def repl(m):
-            k = m.group('id')
-            replacement = self.bib_database.strings[k.lower()] if k.lower() in self.bib_database.strings else k
-            pre = '"' if m.group('pre') != '"' else ''
-            post = '"' if m.group('post') != '"' else ''
-            return pre + replacement + post
-
-        logger.debug('Substitute string definitions inside larger expressions')
-        if '#' not in val:
-            return val
-
-        # TODO?: Does not match two subsequent variables or strings, such as  "start" # foo # bar # "end"  or  "start" # "end".
-        # TODO:  Does not support braces instead of quotes, e.g.: {start} # foo # {bar}
-        # TODO:  Does not support strings like: "te#s#t"
-        return self.replace_all_re.sub(repl, val)
 
     def _clean_val(self, val):
         """ Clean instring before adding to dictionary
