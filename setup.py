@@ -12,4 +12,5 @@ setup(
     author_email = "fboulogne@sciunto.org",
     description  = "Bibtex parser for python 2 and 3",
     packages = ['bibtexparser'],
+    install_requires = ['pyparsing'],
 )
