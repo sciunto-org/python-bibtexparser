@@ -339,7 +339,7 @@ class TestBibtexParserList(unittest.TestCase):
                          'pages': '12-23',
                          'title': '{An} amazing {title}',
                          'comments': 'A comment',
-                         'author': 'Jean Laid{\\\'e}, Ben Loaeb',
+                         'author': 'Jean Laid{\\\'e},\nBen Loaeb',
                          'volume': '12',
                          'month': 'jan'
                          }]
