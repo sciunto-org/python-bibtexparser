@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError as ex:
+    print('[python-bibtexparser] setuptools not found. Falling back to distutils.core')
+    from distutils.core import setup
 from bibtexparser import __version__ as version
 
 setup(
