@@ -14,6 +14,6 @@ setup(
     author       = "Francois Boulogne and other contributors",
     license      = "LGPLv3 or BSD",
     author_email = "fboulogne@sciunto.org",
-    description  = "Bibtex parser for python 2 and 3",
+    description  = "Bibtex parser for python 2.7 and 3.3 and newer",
     packages = ['bibtexparser'],
 )
