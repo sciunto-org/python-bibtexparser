@@ -92,7 +92,7 @@ class BibTexWriter(object):
         for field in [i for i in sorted(entry) if i not in ['ENTRYTYPE', 'ID']]:
             try:
                 if self.comma_first:
-                    bibtex += "\n," + self.indent + field + " = {" + entry[field] + "}"
+                    bibtex += "\n" + self.indent + ", " + field + " = {" + entry[field] + "}"
                 else:
                     bibtex += ",\n" + self.indent + field + " = {" + entry[field] + "}"
             except TypeError:
