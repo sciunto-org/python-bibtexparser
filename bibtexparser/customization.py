@@ -247,9 +247,25 @@ def homogeneize_latex_encoding(record):
         if val not in ('ID',):
             logger.debug('Apply string_to_latex to: %s', val)
             record[val] = string_to_latex(record[val])
-            if val == 'title':
-                logger.debug('Protect uppercase in title')
-                logger.debug('Before: %s', record[val])
-                record[val] = protect_uppercase(record[val])
-                logger.debug('After: %s', record[val])
+    return record
+
+def protect_uppercase_latex(record):
+    """
+    Protect the title-uppercase latex enconding style for bibtex
+
+    This function is experimental.
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
+    """
+    # First, we convert everything to unicode
+    record = convert_to_unicode(record)
+    # And then, we fall back
+    for val in record:
+        if val == 'title':
+            logger.debug('Protect uppercase in title')
+            logger.debug('Before: %s', record[val])
+            record[val] = protect_uppercase(record[val])
+            logger.debug('After: %s', record[val])
     return record
