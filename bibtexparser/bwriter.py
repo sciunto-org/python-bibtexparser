@@ -51,15 +51,15 @@ class BibTexWriter(object):
         #: Tuple of fields for ordering BibTeX entries. Set to `None` to disable sorting. Default: BibTeX key `('ID', )`.
         self.order_entries_by = ('ID', )
         #: Tuple of fields for display order in a single BibTeX entry. Fields not listed here will be displayed
-        #: alphabetically at the end. Set to 'None' for alphabetical order. Default: 'None'
-        self.display_order = None
+        #: alphabetically at the end. Set to '[]' for alphabetical order. Default: '[]'
+        self.display_order = []
         #: BibTeX syntax allows comma first syntax
         #: (common in functional languages), use this to enable
         #: comma first syntax as the bwritter output
         self.comma_first = False
 
         #: internal variable used if self.align_values = True
-        self._max_field_with = 0
+        self._max_field_width = 0
 
 
     def write(self, bib_database):
@@ -114,9 +114,9 @@ class BibTexWriter(object):
         for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
             try:
                 if self.comma_first:
-                    bibtex += "\n, {0}{1:<{3}} = {{{2}}}".format(self.indent, field, entry[field], self._max_field_width)
+                    bibtex += "\n" + self.indent + ", " + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
                 else:
-                    bibtex += ",\n {0}{1:<{3}} = {{{2}}}".format(self.indent, field, entry[field], self._max_field_width)
+                    bibtex += ",\n" + self.indent + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
             except TypeError:
                 raise TypeError(u"The field %s in entry %s must be a string"
                                 % (field, entry['ID']))
