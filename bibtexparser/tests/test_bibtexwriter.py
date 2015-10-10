@@ -88,6 +88,41 @@ class TestBibTexWriter(unittest.TestCase):
 """
         self.assertEqual(result, expected)
 
+        with open('bibtexparser/tests/data/multiple_entries_and_comments.bib') as bibtex_file:
+            bib_database = bibtexparser.load(bibtex_file)
+        writer = BibTexWriter()
+        writer.contents = ['entries']
+        writer.align_values = True
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{Toto3000,
+ author    = {Toto, A and Titi, B},
+ title     = {A title}
+}
+
+@article{Wigner1938,
+ author    = {Wigner, E.},
+ doi       = {10.1039/TF9383400029},
+ issn      = {0014-7672},
+ journal   = {Trans. Faraday Soc.},
+ owner     = {fr},
+ pages     = {29--41},
+ publisher = {The Royal Society of Chemistry},
+ title     = {The transition state method},
+ volume    = {34},
+ year      = {1938}
+}
+
+@book{Yablon2005,
+ author    = {Yablon, A.D.},
+ publisher = {Springer},
+ title     = {Optical fiber fusion slicing},
+ year      = {2005}
+}
+
+"""
+        self.assertEqual(result, expected)
+
 
     def test_entry_separator(self):
         bib_database = BibDatabase()
