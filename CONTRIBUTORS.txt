@@ -27,3 +27,6 @@
 
 - Michal Grochmal
   Comma first syntax support
+
+- Cschaffner
+  New features in bwriter
