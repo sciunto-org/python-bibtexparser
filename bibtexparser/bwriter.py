@@ -43,14 +43,24 @@ class BibTexWriter(object):
         self.contents = ['comments', 'preambles', 'strings', 'entries']
         #: Character(s) for indenting BibTeX field-value pairs. Default: single space.
         self.indent = ' '
+        #: Align values. Determines the maximal number of characters used in any fieldname and aligns all values
+        #    according to that by filling up with single spaces. Default: False
+        self.align_values = False
         #: Characters(s) for separating BibTeX entries. Default: new line.
         self.entry_separator = '\n'
-        #: Tuple of fields for ordering entries. Set to `None` to disable sorting. Default: BibTeX key `('ID', )`.
+        #: Tuple of fields for ordering BibTeX entries. Set to `None` to disable sorting. Default: BibTeX key `('ID', )`.
         self.order_entries_by = ('ID', )
+        #: Tuple of fields for display order in a single BibTeX entry. Fields not listed here will be displayed
+        #: alphabetically at the end. Set to '[]' for alphabetical order. Default: '[]'
+        self.display_order = []
         #: BibTeX syntax allows comma first syntax
         #: (common in functional languages), use this to enable
         #: comma first syntax as the bwritter output
         self.comma_first = False
+
+        #: internal variable used if self.align_values = True
+        self._max_field_width = 0
+
 
     def write(self, bib_database):
         """
@@ -79,6 +89,11 @@ class BibTexWriter(object):
         else:
             entries = bib_database.entries
 
+        if self.align_values:
+            # determine maximum field width to be used
+            widths = [max(map(len, entry.keys())) for entry in entries]
+            self._max_field_width = max(widths)
+
         for entry in entries:
             bibtex += self._entry_to_bibtex(entry)
         return bibtex
@@ -88,15 +103,22 @@ class BibTexWriter(object):
         # Write BibTeX key
         bibtex += '@' + entry['ENTRYTYPE'] + '{' + entry['ID']
 
+        # create display_order of fields for this entry
+        # first those keys which are both in self.display_order and in entry.keys
+        display_order = [i for i in self.display_order if i in entry]
+        # then all the other fields sorted alphabetically
+        more_fields = [i for i in sorted(entry) if i not in self.display_order]
+        display_order += [i for i in sorted(entry) if i not in self.display_order]
+
         # Write field = value lines
-        for field in [i for i in sorted(entry) if i not in ['ENTRYTYPE', 'ID']]:
+        for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
             try:
                 if self.comma_first:
-                    bibtex += "\n" + self.indent + ", " + field + " = {" + entry[field] + "}"
+                    bibtex += "\n" + self.indent + ", " + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
                 else:
-                    bibtex += ",\n" + self.indent + field + " = {" + entry[field] + "}"
+                    bibtex += ",\n" + self.indent + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
             except TypeError:
-                raise TypeError("The field %s in entry %s must be a string"
+                raise TypeError(u"The field %s in entry %s must be a string"
                                 % (field, entry['ID']))
         bibtex += "\n}\n" + self.entry_separator
         return bibtex
