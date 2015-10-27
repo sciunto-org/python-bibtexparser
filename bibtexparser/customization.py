@@ -97,9 +97,12 @@ def page_double_hyphen(record):
 
     """
     if "pages" in record:
-        if "-" in record["pages"]:
-            p = [i.strip().strip('-') for i in record["pages"].split("-")]
-            record["pages"] = p[0] + '--' + p[-1]
+        # hyphen, non-breaking hyphen, en dash, em dash, hyphen-minus, minus sign
+        separators = [u'‐', u'‑', u'–', u'—', u'-', u'−']
+        for separator in separators:
+            if separator in record["pages"]:
+                p = [i.strip().strip(separator) for i in record["pages"].split(separator)]
+                record["pages"] = p[0] + '--' + p[-1]
     return record
 
 

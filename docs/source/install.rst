@@ -4,8 +4,8 @@ How to install?
 Requirements
 ------------
 
-* python **2.7** or later
-* python **3.2** or later
+* python **2.7**
+* python **3.3** or newer
 
 Package manager
 ---------------

@@ -1,4 +1,11 @@
 from collections import OrderedDict
+import sys
+
+
+if sys.version_info.major == 2:
+    TEXT_TYPE = unicode
+else:
+    TEXT_TYPE = str
 
 
 COMMON_STRINGS = {
@@ -52,7 +59,7 @@ class BibDatabase(object):
     def entry_sort_key(entry, fields):
         result = []
         for field in fields:
-            result.append(str(entry.get(field, '')).lower())  # Sorting always as string
+            result.append(TEXT_TYPE(entry.get(field, '')).lower())  # Sorting always as string
         return tuple(result)
 
     def get_entry_dict(self):

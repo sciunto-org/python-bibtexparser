@@ -70,6 +70,60 @@ class TestBibTexWriter(unittest.TestCase):
 """
         self.assertEqual(result, expected)
 
+    def test_align(self):
+        bib_database = BibDatabase()
+        bib_database.entries = [{'ID': 'abc123',
+                                 'ENTRYTYPE': 'book',
+                                 'author': 'test',
+                                 'thisisaverylongkey': 'longvalue'}]
+        writer = BibTexWriter()
+        writer.align_values = True
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{abc123,
+ author             = {test},
+ thisisaverylongkey = {longvalue}
+}
+
+"""
+        self.assertEqual(result, expected)
+
+        with open('bibtexparser/tests/data/multiple_entries_and_comments.bib') as bibtex_file:
+            bib_database = bibtexparser.load(bibtex_file)
+        writer = BibTexWriter()
+        writer.contents = ['entries']
+        writer.align_values = True
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{Toto3000,
+ author    = {Toto, A and Titi, B},
+ title     = {A title}
+}
+
+@article{Wigner1938,
+ author    = {Wigner, E.},
+ doi       = {10.1039/TF9383400029},
+ issn      = {0014-7672},
+ journal   = {Trans. Faraday Soc.},
+ owner     = {fr},
+ pages     = {29--41},
+ publisher = {The Royal Society of Chemistry},
+ title     = {The transition state method},
+ volume    = {34},
+ year      = {1938}
+}
+
+@book{Yablon2005,
+ author    = {Yablon, A.D.},
+ publisher = {Springer},
+ title     = {Optical fiber fusion slicing},
+ year      = {2005}
+}
+
+"""
+        self.assertEqual(result, expected)
+
+
     def test_entry_separator(self):
         bib_database = BibDatabase()
         bib_database.entries = [{'ID': 'abc123',
@@ -82,6 +136,42 @@ class TestBibTexWriter(unittest.TestCase):
 """@book{abc123,
  author = {test}
 }
+"""
+        self.assertEqual(result, expected)
+
+    def test_display_order(self):
+        with open('bibtexparser/tests/data/multiple_entries_and_comments.bib') as bibtex_file:
+            bib_database = bibtexparser.load(bibtex_file)
+        writer = BibTexWriter()
+        writer.contents = ['entries']
+        writer.display_order = ['year', 'publisher', 'title']
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{Toto3000,
+ title = {A title},
+ author = {Toto, A and Titi, B}
+}
+
+@article{Wigner1938,
+ year = {1938},
+ publisher = {The Royal Society of Chemistry},
+ title = {The transition state method},
+ author = {Wigner, E.},
+ doi = {10.1039/TF9383400029},
+ issn = {0014-7672},
+ journal = {Trans. Faraday Soc.},
+ owner = {fr},
+ pages = {29--41},
+ volume = {34}
+}
+
+@book{Yablon2005,
+ year = {2005},
+ publisher = {Springer},
+ title = {Optical fiber fusion slicing},
+ author = {Yablon, A.D.}
+}
+
 """
         self.assertEqual(result, expected)
 
@@ -143,5 +233,4 @@ class TestEntrySorting(unittest.TestCase):
         result = bibtexparser.dumps(bib_database, writer)
         expected = "@book{a\n}\n\n@article{b,\n year = {2000}\n}\n\n@book{c,\n year = {2010}\n}\n\n"
         self.assertEqual(result, expected)
-
 

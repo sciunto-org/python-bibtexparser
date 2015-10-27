@@ -1,11 +1,10 @@
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=fboulogne&url=https://github.com/sciunto/python-bibtexparser&title=python-bibtexparser&language=&tags=github&category=software)
 [![Build Status](https://secure.travis-ci.org/sciunto-org/python-bibtexparser.png)](http://travis-ci.org/sciunto-org/python-bibtexparser)
 [![Coverage Status](https://coveralls.io/repos/sciunto-org/python-bibtexparser/badge.png)](https://coveralls.io/r/sciunto-org/python-bibtexparser)
 
 python-bibtexparser
 ===================
 
-Bibtex parser in Python 2.7 and 3.
+Bibtex parser in Python 2.7 and 3.3 or newer
 
 The original source code was part of bibserver from okfn
 http://github.com/okfn/bibserver
