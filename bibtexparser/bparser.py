@@ -9,7 +9,6 @@
 
 import sys
 import logging
-import io
 import pyparsing as pp
 from .bibdatabase import BibDatabase, BibDataString
 
@@ -116,6 +115,9 @@ class BibTexParser(object):
         self._init_expressions()
 
     def _init_expressions(self):
+        """
+        Defines all parser expressions used internally.
+        """
 
         def first_token(s, l, t):
             # TODO Handle this case correctly!
@@ -135,6 +137,9 @@ class BibTexParser(object):
         comment_line_start = pp.CaselessKeyword('@comment')
 
         def in_braces_or_pars(exp):
+            """
+            exp -> (exp)|{exp}
+            """
             return ((pp.Suppress('{') + exp + pp.Suppress('}')) |
                     (pp.Suppress('(') + exp + pp.Suppress(')')))
 
@@ -194,6 +199,10 @@ class BibTexParser(object):
             return '\n'.join(lines)
 
         def field_to_pair(s, l, t):
+            """
+            Looks for parsed element named 'Field'.
+            :returns: (name, value).
+            """
             f = t.get('Field')
             return (f.get('FieldName'),
                     strip_after_new_lines(f.get('Value')))
@@ -356,6 +365,17 @@ class BibTexParser(object):
         return key
 
     def _add_entry(self, entry_type, entry_id, fields):
+        """ Adds a parsed entry.
+        Includes checking type and fields, cleaning, applying customizations.
+
+        :param entry_type: the entry type
+        :type entry_type: string
+        :param entry_id: the entry bibid
+        :type entry_id: string
+        :param fields: the fileds and values
+        :type fields: dictionary
+        :returns: string -- value
+        """
         d = {}
         entry_type = self._clean_key(entry_type)
         if self.ignore_nonstandard_types and entry_type not in STANDARD_TYPES:
@@ -373,10 +393,24 @@ class BibTexParser(object):
         self.bib_database.entries.append(d)
 
     def _add_comment(self, comment):
+        """
+        Stores a comment in the list of comment.
+
+        :param comment: the parsed comment
+        :type comment: string
+        """
         logger.debug('Store comment in list of comments')
         self.bib_database.comments.append(comment)
 
     def _add_string(self, string_key, string):
+        """
+        Stores a new string in the string dictionary.
+
+        :param string_key: the string key
+        :type string_key: string
+        :param string: the string value
+        :type string: string
+        """
         if string_key in self.bib_database.strings:
             logger.warning('Overwritting existing string for key: %s.',
                            string_key)
@@ -384,14 +418,33 @@ class BibTexParser(object):
         self.bib_database.strings[string_key] = self._clean_val(string)
 
     def _interpolate_string_expression(self, string_expr):
+        """
+        Replaces bibdatastrings by their values in an expression.
+
+        :param string_expr: the parsed string as a list
+        :type string_expr: list
+        """
         return ''.join([self._expand_string(s) for s in string_expr])
 
     def _expand_string(self, string_or_bibdatastring):
+        """
+        Eventually replaces a bibdatastring by its value.
+
+        :param string_or_bibdatastring: the parsed token
+        :type string_expr: string or BibDataString
+        :returns: string
+        """
         if isinstance(string_or_bibdatastring, BibDataString):
             return string_or_bibdatastring.get_value()
         else:
             return string_or_bibdatastring
 
     def _add_preamble(self, preamble):
+        """
+        Stores a preamble.
+
+        :param preamble: the parsed preamble
+        :type preamble: string
+        """
         logger.debug('Store preamble in list of preambles')
         self.bib_database.preambles.append(preamble)

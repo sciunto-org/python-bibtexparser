@@ -23,6 +23,7 @@ COMMON_STRINGS = {
         'dec': 'December',
         }
 
+
 class BibDatabase(object):
     """
     A bibliographic database object following the data structure of a BibTeX file.
@@ -82,10 +83,21 @@ class BibDatabase(object):
 
 
 class BibDataString(object):
+    """
+    Represents a bibtex string.
+
+    This object enables mainting string expressions as list of strings
+    and BibDataString. Can be interpolated from Bibdatabase.
+    """
 
     def __init__(self, bibdatabase, name):
         self._bibdatabase = bibdatabase
         self.name = name.lower()
 
     def get_value(self):
+        """
+        Query value from string name.
+
+        :returns: string
+        """
         return self._bibdatabase.expand_string(self.name)
