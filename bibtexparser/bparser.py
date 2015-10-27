@@ -10,28 +10,11 @@
 import sys
 import logging
 import pyparsing as pp
-from .bibdatabase import BibDatabase, BibDataString
+from .bibdatabase import BibDatabase, BibDataString, STANDARD_TYPES
 
 logger = logging.getLogger(__name__)
 
 __all__ = ['BibTexParser']
-
-
-STANDARD_TYPES = set([
-    'article',
-    'book',
-    'booklet',
-    'conference',
-    'inbook',
-    'incollection',
-    'inproceedings',
-    'manual',
-    'mastersthesis',
-    'misc',
-    'phdthesis',
-    'proceedings',
-    'techreport',
-    'unpublished'])
 
 
 if sys.version_info >= (3, 0):

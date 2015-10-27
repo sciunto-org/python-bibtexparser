@@ -8,20 +8,35 @@ else:
     TEXT_TYPE = str
 
 
+STANDARD_TYPES = set([
+    'article',
+    'book',
+    'booklet',
+    'conference',
+    'inbook',
+    'incollection',
+    'inproceedings',
+    'manual',
+    'mastersthesis',
+    'misc',
+    'phdthesis',
+    'proceedings',
+    'techreport',
+    'unpublished'])
 COMMON_STRINGS = {
-        'jan': 'January',
-        'feb': 'February',
-        'mar': 'March',
-        'apr': 'April',
-        'may': 'May',
-        'jun': 'June',
-        'jul': 'July',
-        'aug': 'August',
-        'sep': 'September',
-        'oct': 'October',
-        'nov': 'November',
-        'dec': 'December',
-        }
+    'jan': 'January',
+    'feb': 'February',
+    'mar': 'March',
+    'apr': 'April',
+    'may': 'May',
+    'jun': 'June',
+    'jul': 'July',
+    'aug': 'August',
+    'sep': 'September',
+    'oct': 'October',
+    'nov': 'November',
+    'dec': 'December',
+    }
 
 
 class BibDatabase(object):
