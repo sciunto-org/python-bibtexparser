@@ -109,6 +109,9 @@ class BibDataString(object):
         self._bibdatabase = bibdatabase
         self.name = name.lower()
 
+    def __repr__(self):
+        return "BibDataString({})".format(self.name.__repr__())
+
     def get_value(self):
         """
         Query value from string name.
