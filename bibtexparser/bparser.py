@@ -9,8 +9,8 @@
 
 import sys
 import logging
-import pyparsing as pp
 from .bibdatabase import BibDatabase, BibDataString, STANDARD_TYPES
+from .bibtexexpression import BibtexExpression
 
 logger = logging.getLogger(__name__)
 
@@ -101,159 +101,38 @@ class BibTexParser(object):
         """
         Defines all parser expressions used internally.
         """
+        self._expr = BibtexExpression()
 
-        def first_token(s, l, t):
-            # TODO Handle this case correctly!
-            assert(len(t) == 1)
-            return t[0]
+        # DEBUG: This is not working, to be fixed
+        # Handle string as BibDataString object
+        self._expr.set_string_name_parse_action(
+            lambda s, l, t:
+                BibDataString(self.bib_database, t[0]))
+        self._expr.set_string_expression_parse_action(
+            lambda s, l, t:
+                self._interpolate_string_expression(t))
 
-        def remove_trailing_newlines(s, l, t):
-            if t[0]:
-                return t[0].rstrip('\n')
-
-        def remove_braces(s, l, t):
-            if len(t[0]) < 1:
-                return ''
-            else:
-                start = 1 if t[0][0] == '{' else 0
-                end = -1 if t[0][-1] == '}' else None
-                return t[0][start:end]
-
-        string_def_start = pp.CaselessKeyword("@string")
-        preamble_start = pp.CaselessKeyword("@preamble")
-        comment_line_start = pp.CaselessKeyword('@comment')
-
-        def in_braces_or_pars(exp):
-            """
-            exp -> (exp)|{exp}
-            """
-            return ((pp.Suppress('{') + exp + pp.Suppress('}')) |
-                    (pp.Suppress('(') + exp + pp.Suppress(')')))
-
-        # Values
-
-        integer = pp.Word(pp.nums)('Integer')
-
-        braced_value_content = pp.CharsNotIn('{}')
-        braced_value = pp.Forward()
-        braced_value <<= pp.originalTextFor(
-            '{' + pp.ZeroOrMore(braced_value | braced_value_content) + '}'
-            )('BracedValue')
-        braced_value.setParseAction(remove_braces)
-        # TODO add ignore for "\}" and "\{" ?
-        # TODO @ are not parsed by bibtex in braces
-
-        brace_in_quoted = pp.nestedExpr('{', '}')
-        text_in_quoted = pp.Word(pp.printables, excludeChars='"{}')
-        quoted_value = pp.originalTextFor(
-            '"' +
-            pp.ZeroOrMore(text_in_quoted | brace_in_quoted) +
-            '"')('QuotedValue')
-        quoted_value.addParseAction(pp.removeQuotes)
-        # TODO Make sure that content is escaped with quotes when contains '@'
-
-        string_name = pp.Word(pp.alphanums + '_')('StringName')
-        string_name.setParseAction(lambda s, l, t:
-            BibDataString(self.bib_database, t[0]))
-        string_expr = pp.delimitedList(
-            (quoted_value | braced_value | string_name), delim='#'
-            )('StringExpression')
-        # TODO Rather return an object to represent values and string
-        # interpolation
-        string_expr.setParseAction(lambda s, l, t:
-            self._interpolate_string_expression(t))
-
-        value = (integer | string_expr)('Value')
-
-        # Entries
-
-        entry_type = (pp.Suppress('@') + pp.Word(pp.alphas))('EntryType')
-        entry_type.setParseAction(first_token)
-
-        key = pp.SkipTo(',')('Key')  # Exclude @',\#}{~%
-        key.setParseAction(lambda s, l, t: first_token(s, l, t).strip())
-
-        field_name = pp.Word(pp.alphas)('FieldName')
-        field_name.setParseAction(first_token)
-        field = pp.Group(field_name + pp.Suppress('=') + value)('Field')
-
-        # Not sure this is desirable but it is for conformance to previous
-        # implementation
-        def strip_after_new_lines(s):
-            lines = s.splitlines()
-            if len(lines) > 1:
-                lines = [lines[0]] + [l.lstrip() for l in lines[1:]]
-            return '\n'.join(lines)
-
-        def field_to_pair(s, l, t):
-            """
-            Looks for parsed element named 'Field'.
-            :returns: (name, value).
-            """
-            f = t.get('Field')
-            return (f.get('FieldName'),
-                    strip_after_new_lines(f.get('Value')))
-
-        field.setParseAction(field_to_pair)
-
-        field_list = (pp.delimitedList(field) + pp.Suppress(pp.Optional(','))
-                      )('Fields')
-        field_list.setParseAction(
-            lambda s, l, t: {k: v for (k, v) in reversed(t.get('Fields'))})
-
-        entry = (entry_type +
-                 in_braces_or_pars(key + pp.Suppress(',') + field_list)
-                 )('Entry')
-
-        # Other stuff
-        not_an_implicit_comment = (pp.LineStart() + pp.Literal('@')
-                                   ) | pp.stringEnd()
-        explicit_comment = (pp.Suppress(comment_line_start) +
-            pp.originalTextFor(pp.SkipTo(not_an_implicit_comment),
-                               asString=True))('ExplicitComment')
-        explicit_comment.addParseAction(remove_trailing_newlines)
-        explicit_comment.addParseAction(remove_braces)
-        # Previous implementation included comment until next '}'.
-        # This is however not inline with bibtex behavior that is to only
-        # ignore until EOL. Brace stipping is arbitrary here but avoids
-        # duplication on bibtex write.
-
-        # Empty implicit_comments lead to infinite loop of zeroOrMore
-        def mustNotBeEmpty(t):
-            if not t[0]:
-                raise pp.ParseException("Match must not be empty.")
-
-        implicit_comment = pp.originalTextFor(
-            pp.SkipTo(not_an_implicit_comment).setParseAction(mustNotBeEmpty),
-            asString=True)('ImplicitComment')
-        implicit_comment.addParseAction(remove_trailing_newlines)
-
-        string_def = (pp.Suppress(string_def_start) + in_braces_or_pars(
-            string_name + pp.Suppress('=') + string_expr('StringValue')
-            ))('StringDefinition')
-        preamble_decl = (pp.Suppress(preamble_start) +
-                         in_braces_or_pars(value))('PreambleDeclaration')
-
-        # Main bibtex expression
-        self._bibfile_expression = pp.ZeroOrMore(
-                string_def |
-                preamble_decl |
-                explicit_comment |
-                entry |
-                implicit_comment)
+        # Add notice to logger on entry, comment, preamble, string definitions
+        self._expr.add_log_function(logger.debug)
 
         # Set actions
-        entry.addParseAction(lambda s, l, t: self._add_entry(
-            t.get('EntryType'), t.get('Key'), t.get('Fields')))
-        implicit_comment.addParseAction(lambda s, l, t:
-                                        self._add_comment(t[0]))
-        explicit_comment.addParseAction(lambda s, l, t:
-                                        self._add_comment(t[0]))
-        preamble_decl.addParseAction(lambda s, l, t:
-                                     self._add_preamble(t[0]))
-        string_def.addParseAction(lambda s, l, t:
-                                  self._add_string(t['StringName'].name,
-                                                   t['StringValue']))
+        self._expr.entry.addParseAction(
+            lambda s, l, t: self._add_entry(
+                t.get('EntryType'), t.get('Key'), t.get('Fields'))
+            )
+        self._expr.implicit_comment.addParseAction(
+            lambda s, l, t: self._add_comment(t[0])
+            )
+        self._expr.explicit_comment.addParseAction(
+            lambda s, l, t: self._add_comment(t[0])
+            )
+        self._expr.preamble_decl.addParseAction(
+            lambda s, l, t: self._add_preamble(t[0])
+            )
+        self._expr.string_def.addParseAction(
+            lambda s, l, t: self._add_string(t['StringName'].name,
+                                             t['StringValue'])
+            )
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
@@ -276,8 +155,8 @@ class BibTexParser(object):
         """
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         try:
-            self._bibfile_expression.parseFile(bibtex_file_obj, parseAll=True)
-        except pp.ParseException as exc:
+            self._expr.parseFile(bibtex_file_obj)
+        except self._expr.ParseException as exc:
             logger.warning("Could not parse full file or string.")
             if not partial:
                 raise exc
