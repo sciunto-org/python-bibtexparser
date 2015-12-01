@@ -8,7 +8,9 @@
 # Francois Boulogne <fboulogne at april dot org>
 
 import sys
+import io
 import logging
+
 from .bibdatabase import BibDatabase, BibDataString, STANDARD_TYPES
 from .bibtexexpression import BibtexExpression
 
@@ -18,10 +20,8 @@ __all__ = ['BibTexParser']
 
 
 if sys.version_info >= (3, 0):
-    from io import StringIO
     ustr = str
 else:
-    from StringIO import StringIO
     ustr = unicode
 
 
@@ -138,10 +138,12 @@ class BibTexParser(object):
         # Some files have Byte-order marks inserted at the start
         byte = '\xef\xbb\xbf'
         if not isinstance(byte, ustr):
-            byte = ustr('\xef\xbb\xbf', self.encoding, 'ignore')
+            byte = ustr(byte, self.encoding, 'ignore')
         if bibtex_str[:3] == byte:
             bibtex_str = bibtex_str[3:]
-        return StringIO(bibtex_str)
+        if not isinstance(bibtex_str, ustr):
+            bibtex_str = bibtex_str.decode(encoding=self.encoding)
+        return io.StringIO(bibtex_str)
 
     def parse(self, bibtex_str, partial=True):
         """Parse a BibTeX string into an object
