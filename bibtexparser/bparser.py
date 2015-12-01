@@ -107,6 +107,10 @@ class BibTexParser(object):
             assert(len(t) == 1)
             return t[0]
 
+        def remove_trailing_newlines(s, l, t):
+            if t[0]:
+                return t[0].rstrip('\n')
+
         def remove_braces(s, l, t):
             if len(t[0]) < 1:
                 return ''
@@ -202,16 +206,27 @@ class BibTexParser(object):
                  )('Entry')
 
         # Other stuff
-
-        implicit_comment_line = pp.originalTextFor(pp.SkipTo('\n'),
-                                                   asString=True)
-        explicit_comment_line = (pp.Suppress(comment_line_start) +
-                                 implicit_comment_line)('Comment')
-        explicit_comment_line.setParseAction(remove_braces)
+        not_an_implicit_comment = (pp.LineStart() + pp.Literal('@')
+                                   ) | pp.stringEnd()
+        explicit_comment = (pp.Suppress(comment_line_start) +
+            pp.originalTextFor(pp.SkipTo(not_an_implicit_comment),
+                               asString=True))('ExplicitComment')
+        explicit_comment.addParseAction(remove_trailing_newlines)
+        explicit_comment.addParseAction(remove_braces)
         # Previous implementation included comment until next '}'.
         # This is however not inline with bibtex behavior that is to only
         # ignore until EOL. Brace stipping is arbitrary here but avoids
         # duplication on bibtex write.
+
+        # Empty implicit_comments lead to infinite loop of zeroOrMore
+        def mustNotBeEmpty(t):
+            if not t[0]:
+                raise pp.ParseException("Match must not be empty.")
+
+        implicit_comment = pp.originalTextFor(
+            pp.SkipTo(not_an_implicit_comment).setParseAction(mustNotBeEmpty),
+            asString=True)('ImplicitComment')
+        implicit_comment.addParseAction(remove_trailing_newlines)
 
         string_def = (pp.Suppress(string_def_start) + in_braces_or_pars(
             string_name + pp.Suppress('=') + string_expr('StringValue')
@@ -219,23 +234,24 @@ class BibTexParser(object):
         preamble_decl = (pp.Suppress(preamble_start) +
                          in_braces_or_pars(value))('PreambleDeclaration')
 
+        # Main bibtex expression
         self._bibfile_expression = pp.ZeroOrMore(
                 string_def |
                 preamble_decl |
-                explicit_comment_line |
+                explicit_comment |
                 entry |
-                implicit_comment_line)
+                implicit_comment)
 
         # Set actions
-        entry.setParseAction(lambda s, l, t: self._add_entry(
+        entry.addParseAction(lambda s, l, t: self._add_entry(
             t.get('EntryType'), t.get('Key'), t.get('Fields')))
-        implicit_comment_line.addParseAction(lambda s, l, t:
-                                             self._add_comment(t[0]))
-        explicit_comment_line.addParseAction(lambda s, l, t:
-                                             self._add_comment(t[0]))
-        preamble_decl.setParseAction(lambda s, l, t:
+        implicit_comment.addParseAction(lambda s, l, t:
+                                        self._add_comment(t[0]))
+        explicit_comment.addParseAction(lambda s, l, t:
+                                        self._add_comment(t[0]))
+        preamble_decl.addParseAction(lambda s, l, t:
                                      self._add_preamble(t[0]))
-        string_def.setParseAction(lambda s, l, t:
+        string_def.addParseAction(lambda s, l, t:
                                   self._add_string(t['StringName'].name,
                                                    t['StringValue']))
 
@@ -392,7 +408,8 @@ class BibTexParser(object):
         :param comment: the parsed comment
         :type comment: string
         """
-        logger.debug('Store comment in list of comments')
+        logger.debug('Store comment in list of comments: ' +
+                     comment.__repr__())
         self.bib_database.comments.append(comment)
 
     def _add_string(self, string_key, string):
