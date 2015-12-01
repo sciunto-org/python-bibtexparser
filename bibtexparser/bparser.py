@@ -248,27 +248,37 @@ class BibTexParser(object):
             bibtex_str = bibtex_str[3:]
         return StringIO(bibtex_str)
 
-    def parse(self, bibtex_str):
+    def parse(self, bibtex_str, partial=True):
         """Parse a BibTeX string into an object
 
         :param bibtex_str: BibTeX string
         :type: str or unicode
+        :param partial: if False fails on incomplete parse
+        :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
         """
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
-        self._bibfile_expression.parseFile(bibtex_file_obj)
+        try:
+            self._bibfile_expression.parseFile(bibtex_file_obj, parseAll=True)
+        except pp.ParseException as exc:
+            logger.warning("Could not parse full file or string.")
+            if not partial:
+                raise exc
         return self.bib_database
 
-    def parse_file(self, file):
+    def parse_file(self, file, partial=True):
         """Parse a BibTeX file into an object
 
         :param file: BibTeX file or file-like object
         :type: file
+        :param partial: if False fails on incomplete parse
+        :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
         """
-        return self.parse(file.read())
+        return self.parse(file.read(), partial=partial)
+
 
     def _strip_quotes(self, val):
         """Strip double quotes enclosing string

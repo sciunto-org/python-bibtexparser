@@ -45,7 +45,8 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
 
     def test_multiple_entries(self):
         with open('bibtexparser/tests/data/multiple_entries_and_comments.bib') as bibfile:
-            bib = BibTexParser(bibfile.read())
+            bparser = BibTexParser()
+            bib = bparser.parse_file(bibfile, partial=False)
         expected = ["",
                     "A comment"]
         self.assertEqual(bib.comments, expected)
