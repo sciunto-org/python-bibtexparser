@@ -103,7 +103,6 @@ class BibTexParser(object):
         """
         self._expr = BibtexExpression()
 
-        # DEBUG: This is not working, to be fixed
         # Handle string as BibDataString object
         self._expr.set_string_name_parse_action(
             lambda s, l, t:
