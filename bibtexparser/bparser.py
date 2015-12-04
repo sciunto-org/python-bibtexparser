@@ -41,26 +41,24 @@ class BibTexParser(object):
         bib_database = bibtexparser.loads(bibtex_str, parser)
     """
 
-    def __new__(cls, data=None,
-                customization=None,
-                ignore_nonstandard_types=True,
-                homogenise_fields=True):
+    def __new__(cls, data=None, **args):
         """
         To catch the old API structure in which creating the parser would immediately parse and return data.
         """
 
         if data is None:
-            return super(BibTexParser, cls).__new__(cls)
+            return super(BibTexParser, cls).__new__(cls, **args)
         else:
             # For backwards compatibility: if data is given, parse and return the `BibDatabase` object instead of the
             # parser.
-            parser = BibTexParser()
-            parser.customization = customization
-            parser.ignore_nonstandard_types = ignore_nonstandard_types
-            parser.homogenise_fields = homogenise_fields
+            parser = BibTexParser(**args)
             return parser.parse(data)
 
-    def __init__(self):
+    def __init__(self,
+                 customization=None,
+                 ignore_nonstandard_types=True,
+                 homogenise_fields=True,
+                 common_strings=False):
         """
         Creates a parser for rading BibTeX files
 
@@ -68,16 +66,20 @@ class BibTexParser(object):
         :rtype: `BibTexParser`
         """
         self.bib_database = BibDatabase()
+        if common_strings:
+            #: Load common strings such as months abbreviation
+            self.bib_database.load_common_strings()
+
         #: Callback function to process BibTeX entries after parsing, for example to create a list from a string with
         #: multiple values. By default all BibTeX values are treated as simple strings. Default: `None`.
-        self.customization = None
+        self.customization = customization
 
         #: Ignore non-standard BibTeX types (`book`, `article`, etc). Default: `True`.
-        self.ignore_nonstandard_types = True
+        self.ignore_nonstandard_types = ignore_nonstandard_types
 
         #: Sanitise BibTeX field names, for example change `url` to `link` etc. Field names are always converted to
         #: lowercase names. Default: `True`.
-        self.homogenise_fields = True
+        self.homogenise_fields = homogenise_fields
 
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
@@ -95,7 +97,39 @@ class BibTexParser(object):
             'subjects': u'subject'
         }
 
+        # Setup the parser expression
         self._init_expressions()
+
+    def parse(self, bibtex_str, partial=True):
+        """Parse a BibTeX string into an object
+
+        :param bibtex_str: BibTeX string
+        :type: str or unicode
+        :param partial: if False fails on incomplete parse
+        :type: boolean
+        :return: bibliographic database
+        :rtype: BibDatabase
+        """
+        bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
+        try:
+            self._expr.parseFile(bibtex_file_obj)
+        except self._expr.ParseException as exc:
+            logger.warning("Could not parse full file or string.")
+            if not partial:
+                raise exc
+        return self.bib_database
+
+    def parse_file(self, file, partial=True):
+        """Parse a BibTeX file into an object
+
+        :param file: BibTeX file or file-like object
+        :type: file
+        :param partial: if False fails on incomplete parse
+        :type: boolean
+        :return: bibliographic database
+        :rtype: BibDatabase
+        """
+        return self.parse(file.read(), partial=partial)
 
     def _init_expressions(self):
         """
@@ -143,38 +177,6 @@ class BibTexParser(object):
         if not isinstance(bibtex_str, ustr):
             bibtex_str = bibtex_str.decode(encoding=self.encoding)
         return io.StringIO(bibtex_str)
-
-    def parse(self, bibtex_str, partial=True):
-        """Parse a BibTeX string into an object
-
-        :param bibtex_str: BibTeX string
-        :type: str or unicode
-        :param partial: if False fails on incomplete parse
-        :type: boolean
-        :return: bibliographic database
-        :rtype: BibDatabase
-        """
-        bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
-        try:
-            self._expr.parseFile(bibtex_file_obj)
-        except self._expr.ParseException as exc:
-            logger.warning("Could not parse full file or string.")
-            if not partial:
-                raise exc
-        return self.bib_database
-
-    def parse_file(self, file, partial=True):
-        """Parse a BibTeX file into an object
-
-        :param file: BibTeX file or file-like object
-        :type: file
-        :param partial: if False fails on incomplete parse
-        :type: boolean
-        :return: bibliographic database
-        :rtype: BibDatabase
-        """
-        return self.parse(file.read(), partial=partial)
-
 
     def _strip_quotes(self, val):
         """Strip double quotes enclosing string
