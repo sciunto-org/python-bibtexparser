@@ -121,7 +121,7 @@ class BibtexExpression(object):
         key = pp.SkipTo(',')('Key')  # Exclude @',\#}{~%
         key.setParseAction(lambda s, l, t: first_token(s, l, t).strip())
 
-        field_name = pp.Word(pp.alphas)('FieldName')
+        field_name = pp.Word(pp.alphas + '_')('FieldName')
         field_name.setParseAction(first_token)
         field = pp.Group(field_name + pp.Suppress('=') + value)('Field')
 

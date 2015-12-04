@@ -429,6 +429,26 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
+    def test_field_name_with_underscore(self):
+        with open('bibtexparser/tests/data/article_field_name_with_underscore.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+        res = bib.get_entry_list()
+        expected = [{
+            'keyword': 'keyword1, keyword2',
+            'ENTRYTYPE': 'article',
+            'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+            'year': '2013',
+            'journal': 'Nice Journal',
+            'ID': 'Cesar2013',
+            'pages': '12-23',
+            'title': 'An amazing title',
+            'comments': 'A comment',
+            'author': 'Jean César',
+            'volume': '12',
+            'month': 'jan',
+            'strange_field_name': 'val',
+            }]
+        self.assertEqual(res, expected)
 
 if __name__ == '__main__':
     unittest.main()
