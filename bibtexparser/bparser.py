@@ -25,11 +25,16 @@ else:
     ustr = unicode
 
 
+def parse(data, *args, **kwargs):
+    parser = BibTexParser(*args, **kwargs)
+    return parser.parse(data)
+
+
 class BibTexParser(object):
     """
     A parser for reading BibTeX bibliographic data files.
 
-    Example::
+    Example:
 
         from bibtexparser.bparser import BibTexParser
 
@@ -47,14 +52,13 @@ class BibTexParser(object):
         """
 
         if data is None:
-            return super(BibTexParser, cls).__new__(cls, **args)
+            return super(BibTexParser, cls).__new__(cls)
         else:
             # For backwards compatibility: if data is given, parse and return the `BibDatabase` object instead of the
             # parser.
-            parser = BibTexParser(**args)
-            return parser.parse(data)
+            return parse(data, **args)
 
-    def __init__(self,
+    def __init__(self, data=None,
                  customization=None,
                  ignore_nonstandard_types=True,
                  homogenise_fields=True,
