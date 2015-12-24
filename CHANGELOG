@@ -1,6 +1,7 @@
 v0.XXX
 ======
 
+* ENH: we use pyparsing (#64) by Olivier Magin.
 
 v0.6.2
 ======
