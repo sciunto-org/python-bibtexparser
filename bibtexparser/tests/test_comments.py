@@ -94,7 +94,6 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                      }]
         self.assertEqual(res, expected)
 
-    @unittest.skip('Bug #45')
     def test_comments_percentage_nocoma(self):
         with open('bibtexparser/tests/data/comments_percentage_nolastcoma.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
