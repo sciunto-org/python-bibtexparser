@@ -224,7 +224,7 @@ class BibTexParser(object):
         # if a string record, put it in the replace_dict
         if record.lower().startswith('@string'):
             logger.debug('The record startswith @string')
-            key, val = [i.strip().strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('\n').strip(',').strip('}').split('=')]
+            key, val = [i.strip().strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('}').strip('\n').strip(',').split('=')]
             key = key.lower()  # key is case insensitive
             val = self._string_subst_partial(val)
             if val.startswith('"') or val.lower() not in self.bib_database.strings:
