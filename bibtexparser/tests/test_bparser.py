@@ -220,6 +220,7 @@ class TestBibtexParserList(unittest.TestCase):
                      }]
         self.assertEqual(res, expected)
 
+    @unittest.skip('Bug #69')
     def test_oneline(self):
         with open('bibtexparser/tests/data/article_oneline.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
