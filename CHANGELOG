@@ -8,6 +8,7 @@ the dictionnary are now ENTRYTYPE and ID, respectively (#42).
 * ENH: writer: all values according to this maximal key width (#83).
 * END: writer: display_order allows to have custom ordering of the fields of
 each entry instead of just alphabetical (#83) by cschaffner.
+* FIX: bad support of braces in string (#90) by sangkilc.
 
 v0.6.0
 ======
