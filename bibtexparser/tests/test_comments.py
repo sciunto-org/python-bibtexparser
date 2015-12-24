@@ -50,6 +50,60 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                     "A comment"]
         self.assertEqual(bib.comments, expected)
 
+    def test_comments_percentage(self):
+        with open('bibtexparser/tests/data/comments_percentage.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            res = bib.get_entry_list()
+        expected = [{'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'ID': 'Cesar2013',
+                     'year': '2013',
+                     'author': 'Jean Cesar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     },
+                    {'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'ID': 'Baltazar2013',
+                     'year': '2013',
+                     'author': 'Jean Baltazar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     }]
+        self.assertEqual(res, expected)
+
+    @unittest.skip('Bug #45')
+    def test_comments_percentage_nocoma(self):
+        with open('bibtexparser/tests/data/comments_percentage_nolastcoma.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            res = bib.get_entry_list()
+        expected = [{'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'ID': 'Cesar2013',
+                     'year': '2013',
+                     'author': 'Jean Cesar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     },
+                    {'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'ID': 'Baltazar2013',
+                     'year': '2013',
+                     'author': 'Jean Baltazar',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     }]
+        self.assertEqual(res, expected)
+
+
 
 class TestWriteComment(unittest.TestCase):
     def test_comment_write(self):
