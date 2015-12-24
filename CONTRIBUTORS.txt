@@ -30,3 +30,6 @@
 
 - Cschaffner
   New features in bwriter
+
+- Olivier Mangin
+  Pyparsing implementation of the parser.

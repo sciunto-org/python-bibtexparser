@@ -15,7 +15,7 @@ install:
   - if [[ $TEST_SUITE == suite_3_5 ]]; then
         pip install sphinx;
     fi;
-  - pip install coverage
+  - pip install coverage pyparsing
   - python setup.py install
 script:
   - nosetests --with-coverage  --cover-erase --cover-package=bibtexparser
