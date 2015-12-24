@@ -109,12 +109,12 @@ class BibTexParser(object):
         # Setup the parser expression
         self._init_expressions()
 
-    def parse(self, bibtex_str, partial=True):
+    def parse(self, bibtex_str, partial=False):
         """Parse a BibTeX string into an object
 
         :param bibtex_str: BibTeX string
         :type: str or unicode
-        :param partial: if False fails on incomplete parse
+        :param partial: if True, warn only on parsing failures
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
@@ -128,12 +128,12 @@ class BibTexParser(object):
                 raise exc
         return self.bib_database
 
-    def parse_file(self, file, partial=True):
+    def parse_file(self, file, partial=False):
         """Parse a BibTeX file into an object
 
         :param file: BibTeX file or file-like object
         :type: file
-        :param partial: if False fails on incomplete parse
+        :param partial: if True, warn only on parsing failures
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
