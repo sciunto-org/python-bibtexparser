@@ -180,6 +180,10 @@ class BibtexExpression(object):
                 self.implicit_comment)
 
     def add_log_function(self, log_fun):
+        """Add notice to logger on entry, comment, preamble, string definitions.
+
+        :param log_fun: logger function
+        """
         for e in [self.entry,
                   self.implicit_comment,
                   self.explicit_comment,
@@ -190,10 +194,11 @@ class BibtexExpression(object):
     def set_string_name_parse_action(self, fun):
         """Set the parseAction for string name expression.
 
-        Note: for some reason pyparsing duplicates the string_name
-        expression so setting its parseAction a posteriori has no effect
-        in the context of a string expression. This is why this function
-        should be used instead.
+        Note:
+            For some reason pyparsing duplicates the string_name
+            expression so setting its parseAction a posteriori has no effect
+            in the context of a string expression. This is why this function
+            should be used instead.
         """
         self._string_name_parse_action_fun = fun
 

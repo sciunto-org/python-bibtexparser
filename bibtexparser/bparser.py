@@ -154,7 +154,7 @@ class BibTexParser(object):
             lambda s, l, t:
                 self._interpolate_string_expression(t))
 
-        # Add notice to logger on entry, comment, preamble, string definitions
+        # Add notice to logger
         self._expr.add_log_function(logger.debug)
 
         # Set actions
