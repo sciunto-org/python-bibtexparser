@@ -3,6 +3,9 @@ import pyparsing as pp
 
 # General helpers
 
+# In pyparsing wording,
+# s, l, t, stand for string, location, token
+
 def strip_after_new_lines(s):
     lines = s.splitlines()
     if len(lines) > 1:
@@ -185,7 +188,7 @@ class BibtexExpression(object):
             add_logger_parse_action(e, log_fun)
 
     def set_string_name_parse_action(self, fun):
-        """Set the paseAction for string name expression.
+        """Set the parseAction for string name expression.
 
         Note: for some reason pyparsing duplicates the string_name
         expression so setting its parseAction a posteriori has no effect

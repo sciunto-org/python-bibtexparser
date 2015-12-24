@@ -48,14 +48,15 @@ class BibTexParser(object):
 
     def __new__(cls, data=None, **args):
         """
-        To catch the old API structure in which creating the parser would immediately parse and return data.
+        To catch the old API structure in which creating the parser would
+        immediately parse and return data.
         """
 
         if data is None:
             return super(BibTexParser, cls).__new__(cls)
         else:
-            # For backwards compatibility: if data is given, parse and return the `BibDatabase` object instead of the
-            # parser.
+            # For backwards compatibility: if data is given, parse
+            # and return the `BibDatabase` object instead of the parser.
             return parse(data, **args)
 
     def __init__(self, data=None,
@@ -74,15 +75,19 @@ class BibTexParser(object):
             #: Load common strings such as months abbreviation
             self.bib_database.load_common_strings()
 
-        #: Callback function to process BibTeX entries after parsing, for example to create a list from a string with
-        #: multiple values. By default all BibTeX values are treated as simple strings. Default: `None`.
+        #: Callback function to process BibTeX entries after parsing,
+        #: for example to create a list from a string with multiple values.
+        #: By default all BibTeX values are treated as simple strings.
+        #: Default: `None`.
         self.customization = customization
 
-        #: Ignore non-standard BibTeX types (`book`, `article`, etc). Default: `True`.
+        #: Ignore non-standard BibTeX types (`book`, `article`, etc).
+        #: Default: `True`.
         self.ignore_nonstandard_types = ignore_nonstandard_types
 
-        #: Sanitise BibTeX field names, for example change `url` to `link` etc. Field names are always converted to
-        #: lowercase names. Default: `True`.
+        #: Sanitise BibTeX field names, for example change `url` to `link` etc.
+        #: Field names are always converted to lowercase names.
+        #: Default: `True`.
         self.homogenise_fields = homogenise_fields
 
         # On some sample data files, the character encoding detection simply
