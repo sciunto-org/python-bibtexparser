@@ -189,10 +189,10 @@ In the first section we prepared a BibTeX sample file, we can prepare the same f
          'title': 'An amazing title',
          'year': '2013',
          'volume': '12',
-         'id': 'Cesar2013',
+         'ID': 'Cesar2013',
          'author': 'Jean César',
          'keyword': 'keyword1, keyword2',
-         'type': 'article'}]
+         'ENTRYTYPE': 'article'}]
 
     writer = BibTexWriter()
     with open('bibtex.bib', 'w') as bibfile:
@@ -234,10 +234,10 @@ For example we can use ``indent`` and ``comma_first`` to customize the previous 
          'title': 'An amazing title',
          'year': '2013',
          'volume': '12',
-         'id': 'Cesar2013',
+         'ID': 'Cesar2013',
          'author': 'Jean César',
          'keyword': 'keyword1, keyword2',
-         'type': 'article'}]
+         'ENTRYTYPE': 'article'}]
 
     writer = BibTexWriter()
     writer.indent = '    '     # indent entries with 4 spaces instead of one
