@@ -12,7 +12,8 @@ Requirements
 Package manager
 ---------------
 
-* [Archlinux](https://aur.archlinux.org/packages/python-bibtexparser/)
+* `Archlinux <https://aur.archlinux.org/packages/python-bibtexparser/>`_
+* `Debian <https://packages.debian.org/en/sid/main/python-bibtexparser>`_
 
 PyPI
 ----
