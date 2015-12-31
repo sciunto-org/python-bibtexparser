@@ -4,7 +4,7 @@
 # License:
 
 import logging
-from .bibdatabase import BibDatabase
+from bibtexparser.bibdatabase import BibDatabase
 
 logger = logging.getLogger(__name__)
 
