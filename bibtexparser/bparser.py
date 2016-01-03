@@ -96,7 +96,7 @@ class BibTexParser(object):
             'subjects': 'subject'
         }
 
-        self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
+        self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\000-\037 "#%\'(),={}][^\000-\037 "#%\'(),={}]*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
