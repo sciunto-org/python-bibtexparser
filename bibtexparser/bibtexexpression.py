@@ -111,7 +111,7 @@ class BibtexExpression(object):
 
         # Quoted values: may contain braced content with balanced braces
         brace_in_quoted = pp.nestedExpr('{', '}')
-        text_in_quoted = pp.Word(pp.printables, excludeChars='"{}')
+        text_in_quoted = pp.CharsNotIn('"{}')
         # (quotes should be escaped in quoted value)
         quoted_value = pp.originalTextFor(
             '"' +

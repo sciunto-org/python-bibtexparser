@@ -299,7 +299,6 @@ class TestBibtexParserList(unittest.TestCase):
                      }]
         self.assertEqual(res, expected)
 
-    @unittest.skip('Pyparser fails on that')
     def test_article_no_braces(self):
         with open('bibtexparser/tests/data/article_no_braces.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -307,12 +306,15 @@ class TestBibtexParserList(unittest.TestCase):
         expected = [{'ENTRYTYPE': 'article',
                      'journal': 'Nice Journal',
                      'volume': '12',
+                     'pages': '12-23',
                      'ID': 'Cesar2013',
                      'year': '2013',
-                     'author': 'Jean Cesar',
+                     'month': 'jan',
+                     'author': 'Jean César',
                      'comments': 'A comment',
                      'keyword': 'keyword1, keyword2',
-                     'title': 'An amazing title'
+                     'title': 'An amazing title',
+                     'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
                      },
                      ]
         self.assertEqual(res, expected)
