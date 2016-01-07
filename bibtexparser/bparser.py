@@ -11,8 +11,8 @@ import sys
 import io
 import logging
 
-from .bibdatabase import BibDatabase, BibDataString, STANDARD_TYPES
-from .bibtexexpression import BibtexExpression
+from bibtexparser.bibdatabase import BibDatabase, BibDataString, STANDARD_TYPES
+from bibtexparser.bibtexexpression import BibtexExpression
 
 logger = logging.getLogger(__name__)
 
