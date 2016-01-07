@@ -15,6 +15,12 @@ bibtexparser: API
 .. autoclass:: bibdatabase.BibDatabase
     :members: entries, entries_dict, comments, strings, preambles
 
+:mod:`bibtexparser.bibtexexpression` --- core (pyparsing)
+---------------------------------------------------------
+
+.. automodule:: bibtexexpression
+    :members:
+
 :mod:`bibtexparser.bparser` --- Modifying the default parser
 ------------------------------------------------------------
 
@@ -26,9 +32,6 @@ bibtexparser: API
 
 .. automodule:: customization
     :members:
-    :inherited-members:
-    :show-inheritance:
-
 
 :mod:`bibtexparser.bwriter` --- Modifying the default writer
 ------------------------------------------------------------

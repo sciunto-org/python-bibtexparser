@@ -48,14 +48,15 @@ class BibTexParser(object):
 
     def __new__(cls, data=None, **args):
         """
-        To catch the old API structure in which creating the parser would immediately parse and return data.
+        To catch the old API structure in which creating the parser would
+        immediately parse and return data.
         """
 
         if data is None:
             return super(BibTexParser, cls).__new__(cls)
         else:
-            # For backwards compatibility: if data is given, parse and return the `BibDatabase` object instead of the
-            # parser.
+            # For backwards compatibility: if data is given, parse
+            # and return the `BibDatabase` object instead of the parser.
             return parse(data, **args)
 
     def __init__(self, data=None,
@@ -74,15 +75,19 @@ class BibTexParser(object):
             #: Load common strings such as months abbreviation
             self.bib_database.load_common_strings()
 
-        #: Callback function to process BibTeX entries after parsing, for example to create a list from a string with
-        #: multiple values. By default all BibTeX values are treated as simple strings. Default: `None`.
+        #: Callback function to process BibTeX entries after parsing,
+        #: for example to create a list from a string with multiple values.
+        #: By default all BibTeX values are treated as simple strings.
+        #: Default: `None`.
         self.customization = customization
 
-        #: Ignore non-standard BibTeX types (`book`, `article`, etc). Default: `True`.
+        #: Ignore non-standard BibTeX types (`book`, `article`, etc).
+        #: Default: `True`.
         self.ignore_nonstandard_types = ignore_nonstandard_types
 
-        #: Sanitise BibTeX field names, for example change `url` to `link` etc. Field names are always converted to
-        #: lowercase names. Default: `True`.
+        #: Sanitise BibTeX field names, for example change `url` to `link` etc.
+        #: Field names are always converted to lowercase names.
+        #: Default: `True`.
         self.homogenise_fields = homogenise_fields
 
         # On some sample data files, the character encoding detection simply
@@ -104,12 +109,12 @@ class BibTexParser(object):
         # Setup the parser expression
         self._init_expressions()
 
-    def parse(self, bibtex_str, partial=True):
+    def parse(self, bibtex_str, partial=False):
         """Parse a BibTeX string into an object
 
         :param bibtex_str: BibTeX string
         :type: str or unicode
-        :param partial: if False fails on incomplete parse
+        :param partial: if True, warn only on parsing failures
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
@@ -123,12 +128,12 @@ class BibTexParser(object):
                 raise exc
         return self.bib_database
 
-    def parse_file(self, file, partial=True):
+    def parse_file(self, file, partial=False):
         """Parse a BibTeX file into an object
 
         :param file: BibTeX file or file-like object
         :type: file
-        :param partial: if False fails on incomplete parse
+        :param partial: if True, warn only on parsing failures
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
@@ -149,7 +154,7 @@ class BibTexParser(object):
             lambda s, l, t:
                 self._interpolate_string_expression(t))
 
-        # Add notice to logger on entry, comment, preamble, string definitions
+        # Add notice to logger
         self._expr.add_log_function(logger.debug)
 
         # Set actions

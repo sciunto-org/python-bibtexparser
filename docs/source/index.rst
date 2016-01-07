@@ -14,7 +14,7 @@ Welcome to BibtexParser's documentation!
 :License: LGPL v3 or BSD
 :Version: |release|
 
-BibtexParser is a python library to parse bibtex files. The code is tested with unittests.
+BibtexParser is a python library to parse bibtex files. The code relies on `pyparsing <http://pyparsing.wikispaces.com/>`_ and is tested with unittests.
 
 If you use BibtexParser for your project, feel free to send me an email. I would be happy to hear that and to mention your project in the documentation.
 

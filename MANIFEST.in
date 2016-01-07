@@ -1,1 +1,4 @@
+include requirements.txt
 include *.md
+include docs/Makefile
+include docs/source/*

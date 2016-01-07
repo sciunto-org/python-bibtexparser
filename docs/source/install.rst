@@ -7,10 +7,13 @@ Requirements
 * python **2.7**
 * python **3.3** or newer
 
+* pyparsing
+
 Package manager
 ---------------
 
-* [Archlinux](https://aur.archlinux.org/packages/python-bibtexparser/)
+* `Archlinux <https://aur.archlinux.org/packages/python-bibtexparser/>`_
+* `Debian <https://packages.debian.org/en/sid/main/python-bibtexparser>`_
 
 PyPI
 ----
