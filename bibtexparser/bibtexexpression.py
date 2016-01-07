@@ -3,10 +3,8 @@ import pyparsing as pp
 
 # General helpers
 
-# In pyparsing wording,
-# s, l, t, stand for string, location, token
-
 def strip_after_new_lines(s):
+    """Removes leading and trailing whitespaces in all but first line."""
     lines = s.splitlines()
     if len(lines) > 1:
         lines = [lines[0]] + [l.lstrip() for l in lines[1:]]
@@ -14,12 +12,16 @@ def strip_after_new_lines(s):
 
 
 def add_logger_parse_action(expr, log_func):
+    """Register a callback on expression parsing with the adequate message."""
     def action(s, l, t):
         log_func("Found {}: {}".format(expr.resultsName, t))
     expr.addParseAction(action)
 
 
 # Parse action helpers
+# Helpers for returning values from the parsed tokens. Shaped as pyparsing's
+# parse actions. In pyparsing wording:
+# s, l, t, stand for string, location, token
 
 def first_token(s, l, t):
     # TODO Handle this case correctly!
@@ -78,16 +80,28 @@ class BibtexExpression(object):
     ParseException = pp.ParseException
 
     def __init__(self):
+
+        # Bibtex keywords
+
         string_def_start = pp.CaselessKeyword("@string")
         preamble_start = pp.CaselessKeyword("@preamble")
         comment_line_start = pp.CaselessKeyword('@comment')
 
-        # Values
+        # String names
+        string_name = pp.Word(pp.alphanums + '_')('StringName')
+        self.set_string_name_parse_action(lambda s, l, t: None)
+        string_name.addParseAction(self._string_name_parse_action)
 
+        # Values inside bibtex fields
+        # Values can be integer or string expressions. The latter may use
+        # quoted or braced values.
+
+        # Integer values
         integer = pp.Word(pp.nums)('Integer')
 
+        # Braced values: braced values can contain nested (but balanced) braces
         braced_value_content = pp.CharsNotIn('{}')
-        braced_value = pp.Forward()
+        braced_value = pp.Forward()  # Recursive definition for nested braces
         braced_value <<= pp.originalTextFor(
             '{' + pp.ZeroOrMore(braced_value | braced_value_content) + '}'
             )('BracedValue')
@@ -95,19 +109,17 @@ class BibtexExpression(object):
         # TODO add ignore for "\}" and "\{" ?
         # TODO @ are not parsed by bibtex in braces
 
+        # Quoted values: may contain braced content with balanced braces
         brace_in_quoted = pp.nestedExpr('{', '}')
         text_in_quoted = pp.Word(pp.printables, excludeChars='"{}')
+        # (quotes should be escaped in quoted value)
         quoted_value = pp.originalTextFor(
             '"' +
             pp.ZeroOrMore(text_in_quoted | brace_in_quoted) +
             '"')('QuotedValue')
         quoted_value.addParseAction(pp.removeQuotes)
-        # TODO Make sure that content is escaped with quotes when contains '@'
 
-        string_name = pp.Word(pp.alphanums + '_')('StringName')
-        self.set_string_name_parse_action(lambda s, l, t: None)
-        string_name.addParseAction(self._string_name_parse_action)
-
+        # String expressions
         string_expr = pp.delimitedList(
             (quoted_value | braced_value | string_name), delim='#'
             )('StringExpression')
@@ -118,28 +130,38 @@ class BibtexExpression(object):
 
         # Entries
 
+        # @EntryType { ...
         entry_type = (pp.Suppress('@') + pp.Word(pp.alphas))('EntryType')
         entry_type.setParseAction(first_token)
 
+        # Entry key: any character up to a ',' without leading and trailing
+        # spaces.
         key = pp.SkipTo(',')('Key')  # Exclude @',\#}{~%
         key.setParseAction(lambda s, l, t: first_token(s, l, t).strip())
 
+        # Field name: word of letters and underscores
         field_name = pp.Word(pp.alphas + '_')('FieldName')
         field_name.setParseAction(first_token)
-        field = pp.Group(field_name + pp.Suppress('=') + value)('Field')
 
+        # Field: field_name = value
+        field = pp.Group(field_name + pp.Suppress('=') + value)('Field')
         field.setParseAction(field_to_pair)
 
+        # List of fields: comma separeted fields
         field_list = (pp.delimitedList(field) + pp.Suppress(pp.Optional(','))
                       )('Fields')
         field_list.setParseAction(
             lambda s, l, t: {k: v for (k, v) in reversed(t.get('Fields'))})
 
+        # Entry: type, key, and fields
         self.entry = (entry_type +
                       in_braces_or_pars(key + pp.Suppress(',') + field_list)
                       )('Entry')
 
-        # Other stuff
+        # Other stuff: comments, string definitions, and preamble declarations
+
+        # Explicit comments: @comment + everything up to next valid declaration
+        # starting on new line.
         not_an_implicit_comment = (pp.LineStart() + pp.Literal('@')
                                    ) | pp.stringEnd()
         self.explicit_comment = (
@@ -158,20 +180,25 @@ class BibtexExpression(object):
             if not t[0]:
                 raise pp.ParseException("Match must not be empty.")
 
+        # Implicit comments: not anything else
         self.implicit_comment = pp.originalTextFor(
             pp.SkipTo(not_an_implicit_comment).setParseAction(mustNotBeEmpty),
             asString=True)('ImplicitComment')
         self.implicit_comment.addParseAction(remove_trailing_newlines)
 
+        # String definition
         self.string_def = (pp.Suppress(string_def_start) + in_braces_or_pars(
             string_name +
             pp.Suppress('=') +
             string_expr('StringValue')
             ))('StringDefinition')
+
+        # Preamble declaration
         self.preamble_decl = (pp.Suppress(preamble_start) +
                               in_braces_or_pars(value))('PreambleDeclaration')
 
         # Main bibtex expression
+
         self.main_expression = pp.ZeroOrMore(
                 self.string_def |
                 self.preamble_decl |
