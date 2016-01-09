@@ -65,17 +65,10 @@ It prints a list of dictionaries for reference entries, for example books, artic
 
 Note that, by convention, uppercase keys are auto-generated data, while lowercase keys come from the original bibtex file.
 
-Some options
-------------
-
-In the previous snippet, several default options are used.
-
-
-
 Parse a stream
 --------------
 
-You don't necessarely have to first read the file and then parse it. You can parse directly a stream like this:
+You don't necessarily have to first read the file and then parse it. You can parse directly a stream like this:
 
 .. code-block:: python
 
@@ -84,6 +77,22 @@ You don't necessarely have to first read the file and then parse it. You can par
     with open('bibtex.bib') as bibtex_file:
         bib_database = bibtexparser.load(bibtex_file)
 
+
+Some options
+------------
+
+In the previous snippet, several default options are used.
+
+.. code-block:: python
+
+    import bibtexparser
+    from bibtexparser.bparser import BibTexParser
+
+	parser = BibTexParser()
+	parser.ignore_nonstandard_types = False
+	parser.homogenise_fields = False
+	parser.common_strings = False
+	bib_database = bibtexparser.loads(bibtex_str, parser)
 
 
 Step 3: Export

@@ -43,6 +43,7 @@ class BibTexParser(object):
         parser = BibTexParser()
         parser.ignore_nonstandard_types = False
         parser.homogenize_fields = False
+        parser.common_strings = False
         bib_database = bibtexparser.loads(bibtex_str, parser)
 
     """
@@ -72,8 +73,11 @@ class BibTexParser(object):
         :rtype: `BibTexParser`
         """
         self.bib_database = BibDatabase()
-        if common_strings:
-            #: Load common strings such as months abbreviation
+
+        #: Load common strings such as months abbreviation
+        #: Default: `False`.
+        self.common_strings = common_strings
+        if self.common_strings:
             self.bib_database.load_common_strings()
 
         #: Callback function to process BibTeX entries after parsing,
