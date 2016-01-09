@@ -398,7 +398,7 @@ class TestBibtexParserList(unittest.TestCase):
         with codecs.open('bibtexparser/tests/data/traps.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
-            expected = [{'keyword': 'keyword1, keyword2',
+            expected = [{'keywords': 'keyword1, keyword2',
                          'ENTRYTYPE': 'article',
                          'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
                          'year': '2013',
@@ -463,18 +463,18 @@ class TestBibtexParserList(unittest.TestCase):
         with codecs.open('bibtexparser/tests/data/encoding.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
-            expected = [{'keyword': 'keyword1, keyword2',
-                              'ENTRYTYPE': 'article',
-                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
-                              'year': '2013',
-                              'journal': 'Elémentaire',
-                              'ID': 'Cesar_2013',
-                              'pages': '12-23',
-                              'title': 'An amazing title: à',
-                              'comments': 'A comment',
-                              'author': 'Jean César',
-                              'volume': '12',
-                              'month': 'jan'
+            expected = [{'keywords': 'keyword1, keyword2',
+                         'ENTRYTYPE': 'article',
+                         'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                         'year': '2013',
+                         'journal': 'Elémentaire',
+                         'ID': 'Cesar_2013',
+                         'pages': '12-23',
+                         'title': 'An amazing title: à',
+                         'comments': 'A comment',
+                         'author': 'Jean César',
+                         'volume': '12',
+                         'month': 'jan'
                          }]
         self.assertEqual(res, expected)
 
@@ -482,18 +482,18 @@ class TestBibtexParserList(unittest.TestCase):
         with codecs.open('bibtexparser/tests/data/encoding.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=homogenize_latex_encoding)
             res = bib.get_entry_list()
-            expected = [{'keyword': 'keyword1, keyword2',
-                              'ENTRYTYPE': 'article',
-                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
-                              'year': '2013',
-                              'journal': 'El{\\\'e}mentaire',
-                              'ID': 'Cesar_2013',
-                              'pages': '12-23',
-                              'title': '{A}n amazing title: {\\`a}',
-                              'comments': 'A comment',
-                              'author': 'Jean C{\\\'e}sar',
-                              'volume': '12',
-                              'month': 'jan'
+            expected = [{'keywords': 'keyword1, keyword2',
+                         'ENTRYTYPE': 'article',
+                         'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
+                         'year': '2013',
+                         'journal': 'El{\\\'e}mentaire',
+                         'ID': 'Cesar_2013',
+                         'pages': '12-23',
+                         'title': '{A}n amazing title: {\\`a}',
+                         'comments': 'A comment',
+                         'author': 'Jean C{\\\'e}sar',
+                         'volume': '12',
+                         'month': 'jan'
                          }]
         self.assertEqual(res, expected)
 

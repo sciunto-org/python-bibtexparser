@@ -5,6 +5,7 @@ v0.XXX
 * DOC: fix typos in tutorial
 * DOC: include docs/ in manifest
 * API: fix spelling "homogenize". Affects customization and bparser
+* API: BibtexParser: homogenize_fields is now False by default (#94)
 
 v0.6.2
 ======

@@ -63,7 +63,7 @@ class BibTexParser(object):
     def __init__(self, data=None,
                  customization=None,
                  ignore_nonstandard_types=True,
-                 homogenize_fields=True,
+                 homogenize_fields=False,
                  common_strings=False):
         """
         Creates a parser for rading BibTeX files
@@ -86,9 +86,9 @@ class BibTexParser(object):
         #: Default: `True`.
         self.ignore_nonstandard_types = ignore_nonstandard_types
 
-        #: Sanitise BibTeX field names, for example change `url` to `link` etc.
+        #: Sanitize BibTeX field names, for example change `url` to `link` etc.
         #: Field names are always converted to lowercase names.
-        #: Default: `True`.
+        #: Default: `False`.
         self.homogenize_fields = homogenize_fields
 
         # On some sample data files, the character encoding detection simply
