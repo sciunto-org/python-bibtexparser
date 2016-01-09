@@ -5,7 +5,7 @@ Tutorial
 Step 1: Prepare a BibTeX file
 =============================
 
-First, we prepare a BibTeX sample file. This is just for illustration purpose:
+First, we prepare a BibTeX sample file. This is just for the purpose of illustration:
 
 .. code-block:: python
 
@@ -65,10 +65,17 @@ It prints a list of dictionaries for reference entries, for example books, artic
 
 Note that, by convention, uppercase keys are auto-generated data, while lowercase keys come from the original bibtex file.
 
+Some options
+------------
+
+In the previous snippet, several default options are used.
+
+
+
 Parse a stream
 --------------
 
-Alternatively, you can parse directly a stream like this:
+You don't necessarely have to first read the file and then parse it. You can parse directly a stream like this:
 
 .. code-block:: python
 
@@ -81,6 +88,8 @@ Alternatively, you can parse directly a stream like this:
 
 Step 3: Export
 ==============
+
+Once you worked on your parsed database, you may want to export the result. This library provides some functions to help on that. However, you can write your own functions if you have specific requirements.
 
 Create a BibTeX file or string
 --------------------------------
