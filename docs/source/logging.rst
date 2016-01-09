@@ -1,5 +1,20 @@
+How to report a bug?
+====================
+
+Bugs can be reported on github or via private communications.
+
+Steps
+-----
+
+1. Make a minimal code, which reproduces the problem.
+2. Provide the code, the bibtex (if necessary), the output.
+3. For a parsing error, provide the expected output.
+4. For a crash, set the logger to the debug level (see below).
+
+If you want to provide a patch (that's wonderful! thank you), please, take few minutes to write a unittest that fails without your contribution.
+
 Logging module to understand failures
-=====================================
+-------------------------------------
 
 Syntax of bibtex files is simple but there are many possible variations. This library probably fails for some of them.
 

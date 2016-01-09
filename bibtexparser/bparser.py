@@ -44,6 +44,7 @@ class BibTexParser(object):
         parser.ignore_nonstandard_types = False
         parser.homogenise_fields = False
         bib_database = bibtexparser.loads(bibtex_str, parser)
+
     """
 
     def __new__(cls, data=None, **args):

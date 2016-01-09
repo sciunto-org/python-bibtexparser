@@ -1,8 +1,11 @@
-Bibtex tips and conventions
-===========================
+===============================================
+Bibtex tips, conventions and unrelated projects
+===============================================
+
+This page presents various resources about bibtex in general.
 
 Format
-------
+======
 
 http://maverick.inria.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
 
@@ -10,11 +13,6 @@ http://maverick.inria.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
 * Variable
 * @preamble
 * Name convention
-
-Display your bibliography in html pages
----------------------------------------
-
-Have a look to this project: http://www.monperrus.net/martin/bibtexbrowser/
 
 Upper case letters in titles
 ----------------------------
@@ -42,4 +40,15 @@ Common abbreviations for journals
 ---------------------------------
 
 * Jabref list http://jabref.sourceforge.net/resources.php#downloadlists
+
+
+Projects
+========
+
+Here are some interesting projects using bibtex but not necessarily this parser.
+
+Display your bibliography in html pages
+---------------------------------------
+
+* http://www.monperrus.net/martin/bibtexbrowser/
 
