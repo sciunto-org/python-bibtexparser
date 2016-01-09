@@ -27,8 +27,8 @@ First, we prepare a BibTeX sample file. This is just for the purpose of illustra
     with open('bibtex.bib', 'w') as bibfile:
         bibfile.write(bibtex)
 
-Step 2: Parse this file into a bibliographic database object
-============================================================
+Step 2: Parse it!
+=================
 
 Simplest call
 -------------
@@ -200,8 +200,8 @@ Flags to the writer object can modify not only how an entry is printed but how s
 See the :ref:`bibtexparser_api` for the full list of flags.
 
 
-Step 4: Salt and pepper
-=======================
+Step 4: Add salt and pepper
+===========================
 
 In this section, we discuss about some customizations and details.
 
@@ -288,6 +288,8 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
         print(bib_database.entries)
 
 
-Note: if you want to mix different customization functions, you can write your own function.
+.. Note::
+
+    If you want to mix different customization functions, you can write your own function.
 
 

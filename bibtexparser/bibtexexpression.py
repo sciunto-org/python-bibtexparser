@@ -46,6 +46,7 @@ def remove_braces(s, l, t):
 def field_to_pair(s, l, t):
     """
     Looks for parsed element named 'Field'.
+
     :returns: (name, value).
     """
     f = t.get('Field')
@@ -222,7 +223,8 @@ class BibtexExpression(object):
     def set_string_name_parse_action(self, fun):
         """Set the parseAction for string name expression.
 
-        Note:
+        .. Note::
+
             For some reason pyparsing duplicates the string_name
             expression so setting its parseAction a posteriori has no effect
             in the context of a string expression. This is why this function
@@ -234,9 +236,11 @@ class BibtexExpression(object):
         return self._string_name_parse_action_fun(s, l, t)
 
     def set_string_expression_parse_action(self, fun):
-        """Set the paseAction for string_expression expression.
+        """Set the parseAction for string_expression expression.
 
-        Note: see set_string_name_parse_action.
+        .. Note::
+
+            See set_string_name_parse_action.
         """
         self._string_expr_parse_action_fun = fun
 
