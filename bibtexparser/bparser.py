@@ -34,7 +34,7 @@ class BibTexParser(object):
     """
     A parser for reading BibTeX bibliographic data files.
 
-    Example:
+    Example::
 
         from bibtexparser.bparser import BibTexParser
 
