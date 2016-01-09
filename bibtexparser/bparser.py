@@ -134,7 +134,7 @@ class BibTexParser(object):
 
         :param customization: a function
         """
-        def _add_parsed_record(record, records):
+        def _add_parsed_record(record, records, raw_records):
             """
             Atomic function to parse a record
             and append the result in records
@@ -145,6 +145,7 @@ class BibTexParser(object):
                 if parsed:
                     logger.debug('Store the result of the parsed record')
                     records.append(parsed)
+                    raw_records[parsed['ID']] = record
                 else:
                     logger.debug('Nothing returned from the parsed record!')
             else:
@@ -152,6 +153,7 @@ class BibTexParser(object):
 
         records = []
         record = ""
+        raw_records = {}
         # read each line, bundle them up until they form an object, then send for parsing
         for linenumber, line in enumerate(self.bibtex_file_obj):
             logger.debug('Inspect line %s', linenumber)
@@ -160,7 +162,7 @@ class BibTexParser(object):
                 line = line.lstrip()
                 logger.debug('Line starts with @')
                 # Parse previous record
-                _add_parsed_record(record, records)
+                _add_parsed_record(record, records, raw_records)
                 # Start new record
                 logger.debug('The record is set to empty')
                 record = ""
@@ -168,9 +170,10 @@ class BibTexParser(object):
             record += line
 
         # catch any remaining record and send it for parsing
-        _add_parsed_record(record, records)
+        _add_parsed_record(record, records, raw_records)
         logger.debug('Set the list of entries')
         self.bib_database.entries = records
+        self.bib_database.raw_entries_dict = raw_records
 
     def _parse_record(self, record, customization=None):
         """Parse a record.

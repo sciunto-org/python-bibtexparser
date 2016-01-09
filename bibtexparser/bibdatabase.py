@@ -20,6 +20,7 @@ class BibDatabase(object):
         #:  - `ENTRYTYPE` (entry type in lowercase, e.g. `book`, `article` etc.)
         self.entries = []
         self._entries_dict = {}
+        self.raw_entries_dict = {}
         #: List of BibTeX comment (`@comment{...}`) blocks.
         self.comments = []
         #: OrderedDict of BibTeX string definitions (`@string{...}`). In order of definition.
