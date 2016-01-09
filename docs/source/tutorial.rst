@@ -263,11 +263,11 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 
     import bibtexparser
     from bibtexparser.bparser import BibTexParser
-    from bibtexparser.customization import homogeneize_latex_encoding
+    from bibtexparser.customization import homogenize_latex_encoding
 
     with open('bibtex.bib') as bibtex_file:
         parser = BibTexParser()
-        parser.customization = homogeneize_latex_encoding
+        parser.customization = homogenize_latex_encoding
         bib_database = bibtexparser.load(bibtex_file, parser=parser)
         print(bib_database.entries)
 

@@ -4,6 +4,7 @@ v0.XXX
 * ENH: we use pyparsing (#64) by Olivier Magin.
 * DOC: fix typos in tutorial
 * DOC: include docs/ in manifest
+* API: fix spelling "homogenize". Affects customization and bparser
 
 v0.6.2
 ======

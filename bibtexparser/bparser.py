@@ -42,7 +42,7 @@ class BibTexParser(object):
 
         parser = BibTexParser()
         parser.ignore_nonstandard_types = False
-        parser.homogenise_fields = False
+        parser.homogenize_fields = False
         bib_database = bibtexparser.loads(bibtex_str, parser)
 
     """
@@ -63,7 +63,7 @@ class BibTexParser(object):
     def __init__(self, data=None,
                  customization=None,
                  ignore_nonstandard_types=True,
-                 homogenise_fields=True,
+                 homogenize_fields=True,
                  common_strings=False):
         """
         Creates a parser for rading BibTeX files
@@ -89,7 +89,7 @@ class BibTexParser(object):
         #: Sanitise BibTeX field names, for example change `url` to `link` etc.
         #: Field names are always converted to lowercase names.
         #: Default: `True`.
-        self.homogenise_fields = homogenise_fields
+        self.homogenize_fields = homogenize_fields
 
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
@@ -253,14 +253,14 @@ class BibTexParser(object):
             return key
 
     def _clean_field_key(self, key):
-        """ Clean a bibtex field key and homogeneize alternative forms.
+        """ Clean a bibtex field key and homogenize alternative forms.
 
         :param key: a key
         :type key: string
         :returns: string -- value
         """
         key = self._clean_key(key)
-        if self.homogenise_fields:
+        if self.homogenize_fields:
             if key in list(self.alt_dict.keys()):
                 key = self.alt_dict[key]
         return key
@@ -273,7 +273,7 @@ class BibTexParser(object):
         :type entry_type: string
         :param entry_id: the entry bibid
         :type entry_id: string
-        :param fields: the fileds and values
+        :param fields: the fields and values
         :type fields: dictionary
         :returns: string -- value
         """

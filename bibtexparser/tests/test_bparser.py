@@ -38,7 +38,7 @@ def customizations_latex(record):
     :returns: -- customized record
     """
 
-    record = homogeneize_latex_encoding(record)
+    record = homogenize_latex_encoding(record)
     record = type(record)
     record = author(record)
     record = editor(record)
@@ -176,14 +176,14 @@ class TestBibtexParserList(unittest.TestCase):
     def test_article_cust_order(self):
         def cust(record):
             record = customization.page_double_hyphen(record)
-            record = customization.homogeneize_latex_encoding(record)
+            record = customization.homogenize_latex_encoding(record)
             record = customization.author(record)
             return record
 
         def cust2(record):
             record = customization.author(record)
             record = customization.page_double_hyphen(record)
-            record = customization.homogeneize_latex_encoding(record)
+            record = customization.homogenize_latex_encoding(record)
             return record
 
         with open('bibtexparser/tests/data/multiple_entries.bib', 'r') as bibfile:
@@ -478,9 +478,9 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
-    def test_encoding_with_homogeneize(self):
+    def test_encoding_with_homogenize(self):
         with codecs.open('bibtexparser/tests/data/encoding.bib', 'r', 'utf-8') as bibfile:
-            bib = BibTexParser(bibfile.read(), customization=homogeneize_latex_encoding)
+            bib = BibTexParser(bibfile.read(), customization=homogenize_latex_encoding)
             res = bib.get_entry_list()
             expected = [{'keyword': 'keyword1, keyword2',
                               'ENTRYTYPE': 'article',
