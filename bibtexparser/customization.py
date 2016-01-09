@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
            'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
-           'homogeneize_latex_encoding']
+           'homogenize_latex_encoding']
 
 
 def getnames(names):
@@ -230,9 +230,9 @@ def convert_to_unicode(record):
     return record
 
 
-def homogeneize_latex_encoding(record):
+def homogenize_latex_encoding(record):
     """
-    Homogeneize the latex enconding style for bibtex
+    Homogenize the latex enconding style for bibtex
 
     This function is experimental.
 
