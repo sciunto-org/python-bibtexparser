@@ -1,21 +1,21 @@
 """
-BibTeX <http://en.wikipedia.org/wiki/BibTeX> is a bibliographic data file format.
+`BibTeX <http://en.wikipedia.org/wiki/BibTeX>`_ is a bibliographic data file format.
 
 The :mod:`bibtexparser` module provides parsing and writing of BibTeX files functionality. The API is similar to the
 :mod:`json` module. The parsed data is returned as a simple :class:`BibDatabase` object with the main attribute being
 :attr:`entries` representing bibliographic sources such as books and journal articles.
 
-Parsing is a simple as::
+Parsing is as simple as::
 
-    >>>> import bibtexparser
-    >>>> with open('bibtex.bib') as bibtex_file:
-    >>>>    bibtex_database = bibtexparser.load(bibtex_file)
+    import bibtexparser
+    with open('bibtex.bib') as bibtex_file:
+       bibtex_database = bibtexparser.load(bibtex_file)
 
 And writing::
 
-    >>>> import bibtexparser
-    >>>> with open('bibtex.bib', 'w') as bibtex_file:
-    >>>>     bibtexparser.dump(bibtex_database, bibtex_file)
+    import bibtexparser
+    with open('bibtex.bib', 'w') as bibtex_file:
+        bibtexparser.dump(bibtex_database, bibtex_file)
 
 """
 __all__ = [
@@ -35,7 +35,7 @@ def loads(bibtex_str, parser=None):
     :type bibtex_str: str or unicode
     :param parser: custom parser to use (optional)
     :type parser: BibTexParser
-    :return: bibliographic database object
+    :returns: bibliographic database object
     :rtype: BibDatabase
     """
     if parser is None:
@@ -51,7 +51,7 @@ def load(bibtex_file, parser=None):
     :type bibtex_file: file
     :param parser: custom parser to use (optional)
     :type parser: BibTexParser
-    :return: bibliographic database object
+    :returns: bibliographic database object
     :rtype: BibDatabase
     """
     if parser is None:
@@ -67,7 +67,7 @@ def dumps(bib_database, writer=None):
     :type bib_database: BibDatabase
     :param writer: custom writer to use (optional) (not yet implemented)
     :type writer: BibTexWriter
-    :return: BibTeX string
+    :returns: BibTeX string
     :rtype: unicode
     """
     if writer is None:

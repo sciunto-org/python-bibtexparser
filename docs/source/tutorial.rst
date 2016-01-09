@@ -27,8 +27,8 @@ First, we prepare a BibTeX sample file. This is just for the purpose of illustra
     with open('bibtex.bib', 'w') as bibfile:
         bibfile.write(bibtex)
 
-Step 2: Parse this file into a bibliographic database object
-============================================================
+Step 2: Parse it!
+=================
 
 Simplest call
 -------------
@@ -65,17 +65,10 @@ It prints a list of dictionaries for reference entries, for example books, artic
 
 Note that, by convention, uppercase keys are auto-generated data, while lowercase keys come from the original bibtex file.
 
-Some options
-------------
-
-In the previous snippet, several default options are used.
-
-
-
 Parse a stream
 --------------
 
-You don't necessarely have to first read the file and then parse it. You can parse directly a stream like this:
+You don't necessarily have to first read the file and then parse it. You can parse directly a stream like this:
 
 .. code-block:: python
 
@@ -84,6 +77,22 @@ You don't necessarely have to first read the file and then parse it. You can par
     with open('bibtex.bib') as bibtex_file:
         bib_database = bibtexparser.load(bibtex_file)
 
+
+Some options
+------------
+
+In the previous snippet, several default options are used.
+
+.. code-block:: python
+
+    import bibtexparser
+    from bibtexparser.bparser import BibTexParser
+
+	parser = BibTexParser()
+	parser.ignore_nonstandard_types = False
+	parser.homogenise_fields = False
+	parser.common_strings = False
+	bib_database = bibtexparser.loads(bibtex_str, parser)
 
 
 Step 3: Export
@@ -200,8 +209,8 @@ Flags to the writer object can modify not only how an entry is printed but how s
 See the :ref:`bibtexparser_api` for the full list of flags.
 
 
-Step 4: Salt and pepper
-=======================
+Step 4: Add salt and pepper
+===========================
 
 In this section, we discuss about some customizations and details.
 
@@ -288,6 +297,8 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
         print(bib_database.entries)
 
 
-Note: if you want to mix different customization functions, you can write your own function.
+.. Note::
+
+    If you want to mix different customization functions, you can write your own function.
 
 

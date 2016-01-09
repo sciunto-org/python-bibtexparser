@@ -2,7 +2,7 @@ v0.XXX
 ======
 
 * ENH: we use pyparsing (#64) by Olivier Magin.
-* DOC: fix typos in tutorial
+* DOC: Refactoring of the tutorial
 * DOC: include docs/ in manifest
 * API: fix spelling "homogenize". Affects customization and bparser
 * API: BibtexParser: homogenize_fields is now False by default (#94)
