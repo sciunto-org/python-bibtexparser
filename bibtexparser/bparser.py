@@ -8,10 +8,11 @@
 # Francois Boulogne <fboulogne at april dot org>
 
 import sys
-import logging
 import io
-import re
-from bibtexparser.bibdatabase import BibDatabase
+import logging
+
+from bibtexparser.bibdatabase import BibDatabase, BibDataString, STANDARD_TYPES
+from bibtexparser.bibtexexpression import BibtexExpression
 
 logger = logging.getLogger(__name__)
 
@@ -19,18 +20,21 @@ __all__ = ['BibTexParser']
 
 
 if sys.version_info >= (3, 0):
-    from io import StringIO
     ustr = str
 else:
-    from StringIO import StringIO
     ustr = unicode
+
+
+def parse(data, *args, **kwargs):
+    parser = BibTexParser(*args, **kwargs)
+    return parser.parse(data)
 
 
 class BibTexParser(object):
     """
     A parser for reading BibTeX bibliographic data files.
 
-    Example::
+    Example:
 
         from bibtexparser.bparser import BibTexParser
 
@@ -42,26 +46,24 @@ class BibTexParser(object):
         bib_database = bibtexparser.loads(bibtex_str, parser)
     """
 
-    def __new__(cls, data=None,
-                customization=None,
-                ignore_nonstandard_types=True,
-                homogenise_fields=True):
+    def __new__(cls, data=None, **args):
         """
-        To catch the old API structure in which creating the parser would immediately parse and return data.
+        To catch the old API structure in which creating the parser would
+        immediately parse and return data.
         """
 
         if data is None:
             return super(BibTexParser, cls).__new__(cls)
         else:
-            # For backwards compatibility: if data is given, parse and return the `BibDatabase` object instead of the
-            # parser.
-            parser = BibTexParser()
-            parser.customization = customization
-            parser.ignore_nonstandard_types = ignore_nonstandard_types
-            parser.homogenise_fields = homogenise_fields
-            return parser.parse(data)
+            # For backwards compatibility: if data is given, parse
+            # and return the `BibDatabase` object instead of the parser.
+            return parse(data, **args)
 
-    def __init__(self):
+    def __init__(self, data=None,
+                 customization=None,
+                 ignore_nonstandard_types=True,
+                 homogenise_fields=True,
+                 common_strings=False):
         """
         Creates a parser for rading BibTeX files
 
@@ -69,16 +71,24 @@ class BibTexParser(object):
         :rtype: `BibTexParser`
         """
         self.bib_database = BibDatabase()
-        #: Callback function to process BibTeX entries after parsing, for example to create a list from a string with
-        #: multiple values. By default all BibTeX values are treated as simple strings. Default: `None`.
-        self.customization = None
+        if common_strings:
+            #: Load common strings such as months abbreviation
+            self.bib_database.load_common_strings()
 
-        #: Ignore non-standard BibTeX types (`book`, `article`, etc). Default: `True`.
-        self.ignore_nonstandard_types = True
+        #: Callback function to process BibTeX entries after parsing,
+        #: for example to create a list from a string with multiple values.
+        #: By default all BibTeX values are treated as simple strings.
+        #: Default: `None`.
+        self.customization = customization
 
-        #: Sanitise BibTeX field names, for example change `url` to `link` etc. Field names are always converted to
-        #: lowercase names. Default: `True`.
-        self.homogenise_fields = True
+        #: Ignore non-standard BibTeX types (`book`, `article`, etc).
+        #: Default: `True`.
+        self.ignore_nonstandard_types = ignore_nonstandard_types
+
+        #: Sanitise BibTeX field names, for example change `url` to `link` etc.
+        #: Field names are always converted to lowercase names.
+        #: Default: `True`.
+        self.homogenise_fields = homogenise_fields
 
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
@@ -86,228 +96,96 @@ class BibTexParser(object):
 
         # pre-defined set of key changes
         self.alt_dict = {
-            'keyw': 'keyword',
-            'keywords': 'keyword',
-            'authors': 'author',
-            'editors': 'editor',
-            'url': 'link',
-            'urls': 'link',
-            'links': 'link',
-            'subjects': 'subject'
+            'keyw': u'keyword',
+            'keywords': u'keyword',
+            'authors': u'author',
+            'editors': u'editor',
+            'url': u'link',
+            'urls': u'link',
+            'links': u'link',
+            'subjects': u'subject'
         }
 
-        self.replace_all_re = re.compile(r'((?P<pre>"?)\s*(#|^)\s*(?P<id>[^\d\W]\w*)\s*(#|$)\s*(?P<post>"?))', re.UNICODE)
+        # Setup the parser expression
+        self._init_expressions()
+
+    def parse(self, bibtex_str, partial=False):
+        """Parse a BibTeX string into an object
+
+        :param bibtex_str: BibTeX string
+        :type: str or unicode
+        :param partial: if True, warn only on parsing failures
+        :type: boolean
+        :return: bibliographic database
+        :rtype: BibDatabase
+        """
+        bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
+        try:
+            self._expr.parseFile(bibtex_file_obj)
+        except self._expr.ParseException as exc:
+            logger.warning("Could not parse full file or string.")
+            if not partial:
+                raise exc
+        return self.bib_database
+
+    def parse_file(self, file, partial=False):
+        """Parse a BibTeX file into an object
+
+        :param file: BibTeX file or file-like object
+        :type: file
+        :param partial: if True, warn only on parsing failures
+        :type: boolean
+        :return: bibliographic database
+        :rtype: BibDatabase
+        """
+        return self.parse(file.read(), partial=partial)
+
+    def _init_expressions(self):
+        """
+        Defines all parser expressions used internally.
+        """
+        self._expr = BibtexExpression()
+
+        # Handle string as BibDataString object
+        self._expr.set_string_name_parse_action(
+            lambda s, l, t:
+                BibDataString(self.bib_database, t[0]))
+        self._expr.set_string_expression_parse_action(
+            lambda s, l, t:
+                self._interpolate_string_expression(t))
+
+        # Add notice to logger
+        self._expr.add_log_function(logger.debug)
+
+        # Set actions
+        self._expr.entry.addParseAction(
+            lambda s, l, t: self._add_entry(
+                t.get('EntryType'), t.get('Key'), t.get('Fields'))
+            )
+        self._expr.implicit_comment.addParseAction(
+            lambda s, l, t: self._add_comment(t[0])
+            )
+        self._expr.explicit_comment.addParseAction(
+            lambda s, l, t: self._add_comment(t[0])
+            )
+        self._expr.preamble_decl.addParseAction(
+            lambda s, l, t: self._add_preamble(t[0])
+            )
+        self._expr.string_def.addParseAction(
+            lambda s, l, t: self._add_string(t['StringName'].name,
+                                             t['StringValue'])
+            )
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
         byte = '\xef\xbb\xbf'
         if not isinstance(byte, ustr):
-            byte = ustr('\xef\xbb\xbf', self.encoding, 'ignore')
+            byte = ustr(byte, self.encoding, 'ignore')
         if bibtex_str[:3] == byte:
             bibtex_str = bibtex_str[3:]
-        return StringIO(bibtex_str)
-
-    def parse(self, bibtex_str):
-        """Parse a BibTeX string into an object
-
-        :param bibtex_str: BibTeX string
-        :type: str or unicode
-        :return: bibliographic database
-        :rtype: BibDatabase
-        """
-        self.bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
-        self._parse_records(customization=self.customization)
-        return self.bib_database
-
-    def parse_file(self, file):
-        """Parse a BibTeX file into an object
-
-        :param file: BibTeX file or file-like object
-        :type: file
-        :return: bibliographic database
-        :rtype: BibDatabase
-        """
-        return self.parse(file.read())
-
-    def _parse_records(self, customization=None):
-        """Parse the bibtex into a list of records.
-
-        :param customization: a function
-        """
-        def _add_parsed_record(record, records):
-            """
-            Atomic function to parse a record
-            and append the result in records
-            """
-            if record != "":
-                logger.debug('The record is not empty. Let\'s parse it.')
-                parsed = self._parse_record(record, customization=customization)
-                if parsed:
-                    logger.debug('Store the result of the parsed record')
-                    records.append(parsed)
-                else:
-                    logger.debug('Nothing returned from the parsed record!')
-            else:
-                logger.debug('The record is empty')
-
-        records = []
-        record = ""
-        # read each line, bundle them up until they form an object, then send for parsing
-        for linenumber, line in enumerate(self.bibtex_file_obj):
-            logger.debug('Inspect line %s', linenumber)
-            if line.strip().startswith('@'):
-                # Remove leading whitespaces
-                line = line.lstrip()
-                logger.debug('Line starts with @')
-                # Parse previous record
-                _add_parsed_record(record, records)
-                # Start new record
-                logger.debug('The record is set to empty')
-                record = ""
-            # Keep adding lines to the record
-            record += line
-
-        # catch any remaining record and send it for parsing
-        _add_parsed_record(record, records)
-        logger.debug('Set the list of entries')
-        self.bib_database.entries = records
-
-    def _parse_record(self, record, customization=None):
-        """Parse a record.
-
-        * tidy whitespace and other rubbish
-        * parse out the bibtype and citekey
-        * find all the key-value pairs it contains
-
-        :param record: a record
-        :param customization: a function
-
-        :returns: dict --
-        """
-        d = {}
-
-        if not record.startswith('@'):
-            logger.debug('The record does not start with @. Return empty dict.')
-            return {}
-
-        # if a comment record, add to bib_database.comments
-        if record.lower().startswith('@comment'):
-            logger.debug('The record startswith @comment')
-            logger.debug('Store comment in list of comments')
-
-            self.bib_database.comments.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
-
-            logger.debug('Return an empty dict')
-            return {}
-
-        # if a preamble record, add to bib_database.preambles
-        if record.lower().startswith('@preamble'):
-            logger.debug('The record startswith @preamble')
-            logger.debug('Store preamble in list of preambles')
-
-            self.bib_database.preambles.append(re.search('\{(.*)\}', record, re.DOTALL).group(1))
-
-            logger.debug('Return an empty dict')
-            return {}
-
-        # prepare record
-        record = '\n'.join([i.strip() for i in record.split('\n')])
-        if '}\n' in record:
-            logger.debug('}\\n detected in the record. Clean up.')
-            record = record.replace('\r\n', '\n').replace('\r', '\n').rstrip('\n')
-            # treat the case for which the last line of the record
-            # does not have a coma
-            if record.endswith('}\n}') or record.endswith('}}'):
-                logger.debug('Missing coma in the last line of the record. Fix it.')
-                record = re.sub('}(\n|)}$', '},\n}', record)
-
-        # if a string record, put it in the replace_dict
-        if record.lower().startswith('@string'):
-            logger.debug('The record startswith @string')
-            key, val = [i.strip().strip('{').strip('}').replace('\n', ' ') for i in record.split('{', 1)[1].strip('}').strip('\n').strip(',').split('=')]
-            key = key.lower()  # key is case insensitive
-            val = self._string_subst_partial(val)
-            if val.startswith('"') or val.lower() not in self.bib_database.strings:
-                self.bib_database.strings[key] = val.strip('"')
-            else:
-                self.bib_database.strings[key] = self.bib_database.strings[val.lower()]
-            logger.debug('Return a dict')
-            return d
-
-        # for each line in record
-        logger.debug('Split the record of its lines and treat them')
-        kvs = [i.strip() for i in re.split(',\s*\n|\n\s*,', record)]
-        inkey = ""
-        inval = ""
-        for kv in kvs:
-            logger.debug('Inspect: %s', kv)
-            # TODO: We may check that the keyword belongs to a known type
-            if kv.startswith('@') and not inkey:
-                # it is the start of the record - set the bibtype and citekey (id)
-                logger.debug('Line starts with @ and the key is not stored yet.')
-                bibtype, id = kv.split('{', 1)
-                bibtype = self._add_key(bibtype)
-                id = id.lstrip().strip('}').strip(',')
-                logger.debug('bibtype = %s', bibtype)
-                logger.debug('id = %s', id)
-                if self.ignore_nonstandard_types and bibtype not in ('article',
-                                                                     'book',
-                                                                     'booklet',
-                                                                     'conference',
-                                                                     'inbook',
-                                                                     'incollection',
-                                                                     'inproceedings',
-                                                                     'manual',
-                                                                     'mastersthesis',
-                                                                     'misc',
-                                                                     'phdthesis',
-                                                                     'proceedings',
-                                                                     'techreport',
-                                                                     'unpublished'):
-                    logger.warning('Entry type %s not standard. Not considered.', bibtype)
-                    break
-            elif '=' in kv and not inkey:
-                # it is a line with a key value pair on it
-                logger.debug('Line contains a key-pair value and the key is not stored yet.')
-                key, val = [i.strip() for i in kv.split('=', 1)]
-                key = self._add_key(key)
-                val = self._string_subst_partial(val)
-                # if it looks like the value spans lines, store details for next loop
-                if (val.count('{') != val.count('}')) or (val.startswith('"') and not val.replace('}', '').endswith('"')):
-                    logger.debug('The line is not ending the record.')
-                    inkey = key
-                    inval = val
-                else:
-                    logger.debug('The line is the end of the record.')
-                    d[key] = self._add_val(val)
-            elif inkey:
-                logger.debug('Continues the previous line to complete the key pair value...')
-                # if this line continues the value from a previous line, append
-                inval += ', ' + kv
-                # if it looks like this line finishes the value, store it and clear for next loop
-                if (inval.startswith('{') and inval.endswith('}')) or (inval.startswith('"') and inval.endswith('"')):
-                    logger.debug('This line represents the end of the current key-pair value')
-                    d[inkey] = self._add_val(inval)
-                    inkey = ""
-                    inval = ""
-                else:
-                    logger.debug('This line does NOT represent the end of the current key-pair value')
-
-        logger.debug('All lines have been treated')
-        if not d:
-            logger.debug('The dict is empty, return it.')
-            return d
-
-        d['ENTRYTYPE'] = bibtype
-        d['ID'] = id
-
-        if customization is None:
-            logger.debug('No customization to apply, return dict')
-            return d
-        else:
-            # apply any customizations to the record object then return it
-            logger.debug('Apply customizations and return dict')
-            return customization(d)
+        if not isinstance(bibtex_str, ustr):
+            bibtex_str = bibtex_str.decode(encoding=self.encoding)
+        return io.StringIO(bibtex_str)
 
     def _strip_quotes(self, val):
         """Strip double quotes enclosing string
@@ -349,48 +227,7 @@ class BibTexParser(object):
         else:
                 return False
 
-    def _string_subst(self, val):
-        """ Substitute string definitions
-
-        :param val: a value
-        :type val: string
-        :returns: string -- value
-        """
-        logger.debug('Substitute string definitions')
-        if not val:
-            return ''
-        for k in list(self.bib_database.strings.keys()):
-            if val.lower() == k:
-                val = self.bib_database.strings[k]
-        if not isinstance(val, ustr):
-            val = ustr(val, self.encoding, 'ignore')
-
-        return val
-
-    def _string_subst_partial(self, val):
-        """ Substitute string definitions inside larger expressions
-
-        :param val: a value
-        :type val: string
-        :returns: string -- value
-        """
-        def repl(m):
-            k = m.group('id')
-            replacement = self.bib_database.strings[k.lower()] if k.lower() in self.bib_database.strings else k
-            pre = '"' if m.group('pre') != '"' else ''
-            post = '"' if m.group('post') != '"' else ''
-            return pre + replacement + post
-
-        logger.debug('Substitute string definitions inside larger expressions')
-        if '#' not in val:
-            return val
-
-        # TODO?: Does not match two subsequent variables or strings, such as  "start" # foo # bar # "end"  or  "start" # "end".
-        # TODO:  Does not support braces instead of quotes, e.g.: {start} # foo # {bar}
-        # TODO:  Does not support strings like: "te#s#t"
-        return self.replace_all_re.sub(repl, val)
-
-    def _add_val(self, val):
+    def _clean_val(self, val):
         """ Clean instring before adding to dictionary
 
         :param val: a value
@@ -399,24 +236,116 @@ class BibTexParser(object):
         """
         if not val or val == "{}":
             return ''
-        val = self._strip_braces(val)
-        val = self._strip_quotes(val)
-        val = self._strip_braces(val)
-        val = self._string_subst(val)
         return val
 
-    def _add_key(self, key):
-        """ Add a key and homogeneize alternative forms.
+    def _clean_key(self, key):
+        """ Lowercase a key and return as unicode.
+
+        :param key: a key
+        :type key: string
+        :returns: (unicode) string -- value
+        """
+        key = key.lower()
+        if not isinstance(key, ustr):
+            return ustr(key, 'utf-8')
+        else:
+            return key
+
+    def _clean_field_key(self, key):
+        """ Clean a bibtex field key and homogeneize alternative forms.
 
         :param key: a key
         :type key: string
         :returns: string -- value
         """
-        key = key.strip().strip('@').lower()
+        key = self._clean_key(key)
         if self.homogenise_fields:
             if key in list(self.alt_dict.keys()):
                 key = self.alt_dict[key]
-        if not isinstance(key, ustr):
-            return ustr(key, 'utf-8')
+        return key
+
+    def _add_entry(self, entry_type, entry_id, fields):
+        """ Adds a parsed entry.
+        Includes checking type and fields, cleaning, applying customizations.
+
+        :param entry_type: the entry type
+        :type entry_type: string
+        :param entry_id: the entry bibid
+        :type entry_id: string
+        :param fields: the fileds and values
+        :type fields: dictionary
+        :returns: string -- value
+        """
+        d = {}
+        entry_type = self._clean_key(entry_type)
+        if self.ignore_nonstandard_types and entry_type not in STANDARD_TYPES:
+            logger.warning('Entry type %s not standard. Not considered.',
+                           entry_type)
+            return
+        for key in fields:
+            d[self._clean_field_key(key)] = self._clean_val(fields[key])
+        d['ENTRYTYPE'] = entry_type
+        d['ID'] = entry_id
+        if self.customization is not None:
+            # apply any customizations to the record object then return it
+            logger.debug('Apply customizations and return dict')
+            d = self.customization(d)
+        self.bib_database.entries.append(d)
+
+    def _add_comment(self, comment):
+        """
+        Stores a comment in the list of comment.
+
+        :param comment: the parsed comment
+        :type comment: string
+        """
+        logger.debug('Store comment in list of comments: ' +
+                     comment.__repr__())
+        self.bib_database.comments.append(comment)
+
+    def _add_string(self, string_key, string):
+        """
+        Stores a new string in the string dictionary.
+
+        :param string_key: the string key
+        :type string_key: string
+        :param string: the string value
+        :type string: string
+        """
+        if string_key in self.bib_database.strings:
+            logger.warning('Overwritting existing string for key: %s.',
+                           string_key)
+        logger.debug('Store string: {} -> {}'.format(string_key, string))
+        self.bib_database.strings[string_key] = self._clean_val(string)
+
+    def _interpolate_string_expression(self, string_expr):
+        """
+        Replaces bibdatastrings by their values in an expression.
+
+        :param string_expr: the parsed string as a list
+        :type string_expr: list
+        """
+        return ''.join([self._expand_string(s) for s in string_expr])
+
+    def _expand_string(self, string_or_bibdatastring):
+        """
+        Eventually replaces a bibdatastring by its value.
+
+        :param string_or_bibdatastring: the parsed token
+        :type string_expr: string or BibDataString
+        :returns: string
+        """
+        if isinstance(string_or_bibdatastring, BibDataString):
+            return string_or_bibdatastring.get_value()
         else:
-            return key
+            return string_or_bibdatastring
+
+    def _add_preamble(self, preamble):
+        """
+        Stores a preamble.
+
+        :param preamble: the parsed preamble
+        :type preamble: string
+        """
+        logger.debug('Store preamble in list of preambles')
+        self.bib_database.preambles.append(preamble)

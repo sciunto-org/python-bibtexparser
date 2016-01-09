@@ -128,7 +128,7 @@ class BibTexWriter(object):
                         for comment in bib_database.comments])
 
     def _preambles_to_bibtex(self, bib_database):
-        return ''.join(['@preamble{{{0}}}\n{1}'.format(preamble, self.entry_separator)
+        return ''.join(['@preamble{{"{0}"}}\n{1}'.format(preamble, self.entry_separator)
                         for preamble in bib_database.preambles])
 
     def _strings_to_bibtex(self, bib_database):

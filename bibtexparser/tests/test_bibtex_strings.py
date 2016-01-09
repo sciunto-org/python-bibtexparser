@@ -39,7 +39,7 @@ class TestStringParse(unittest.TestCase):
 		     'ID': 'cha:oakland15',
 		     'year': '2015',
 		     'booktitle': 'Proceedings of the {IEEE} Symposium on Security and Privacy',
-		     'title': 'Program-Adaptive Mutational Fuzzing',
+		     'title': '{Program-Adaptive Mutational Fuzzing}',
 	             'ENTRYTYPE': 'inproceedings',
 		     'pages': '725--741'
                      }]

@@ -1,6 +1,7 @@
 v0.XXX
 ======
 
+* ENH: we use pyparsing (#64) by Olivier Magin.
 * DOC: fix typos in tutorial
 * DOC: include docs/ in manifest
 

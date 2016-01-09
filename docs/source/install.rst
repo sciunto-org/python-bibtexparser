@@ -7,6 +7,8 @@ Requirements
 * python **2.7**
 * python **3.3** or newer
 
+* pyparsing
+
 Package manager
 ---------------
 

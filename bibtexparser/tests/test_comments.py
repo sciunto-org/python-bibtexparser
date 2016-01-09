@@ -3,7 +3,24 @@ from bibtexparser.bparser import BibTexParser
 from bibtexparser.bwriter import to_bibtex
 
 
+""" The code is supposed to treat comments the following way:
+    Each @Comment opens a comment that ends when something
+    that is not a comment is encountered. More precisely
+    this means a line starting with an @. Lines that are not
+    parsed as anything else are also considered comments.
+    If the comment starts and ends with braces, they are removed.
+
+    Current issues:
+        - a comment followed by a line starting with @smthing
+        that is not a valid bibtex element are parsed separately,
+        that is as two comments.
+        - braces are either ignored or removed which is not easily
+        predictable.
+"""
+
+
 class TestParseComment(unittest.TestCase):
+
     def test_comment_count(self):
         with open('bibtexparser/tests/data/features.bib') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -45,7 +62,8 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
 
     def test_multiple_entries(self):
         with open('bibtexparser/tests/data/multiple_entries_and_comments.bib') as bibfile:
-            bib = BibTexParser(bibfile.read())
+            bparser = BibTexParser()
+            bib = bparser.parse_file(bibfile)
         expected = ["",
                     "A comment"]
         self.assertEqual(bib.comments, expected)
@@ -76,7 +94,6 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                      }]
         self.assertEqual(res, expected)
 
-    @unittest.skip('Bug #45')
     def test_comments_percentage_nocoma(self):
         with open('bibtexparser/tests/data/comments_percentage_nolastcoma.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -103,6 +120,30 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                      }]
         self.assertEqual(res, expected)
 
+    def test_no_newline(self):
+        comments = """This is a comment."""
+        expected = ["This is a comment."]
+        bib = BibTexParser(comments)
+        self.assertEqual(bib.comments, expected)
+
+    def test_43(self):
+        comment = "@STRING{foo = \"bar\"}\n" \
+                  "This is a comment\n" \
+                  "This is a second comment."
+        expected = "This is a comment\nThis is a second comment."
+        bib = BibTexParser(comment)
+        self.assertEqual(bib.comments, [expected])
+        self.assertEqual(bib.strings, {'foo': 'bar'})
+
+    def test_43_bis(self):
+        comment = "@STRING{foo = \"bar\"}\n" \
+                  "This is a comment\n" \
+                  "STRING{Baz = \"This should be interpreted as comment.\"}"
+        expected = "This is a comment\n" \
+                   "STRING{Baz = \"This should be interpreted as comment.\"}"
+        bib = BibTexParser(comment)
+        self.assertEqual(bib.comments, [expected])
+        self.assertEqual(bib.strings, {'foo': 'bar'})
 
 
 class TestWriteComment(unittest.TestCase):

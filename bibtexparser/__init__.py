@@ -20,11 +20,11 @@ And writing::
 """
 __all__ = [
     'loads', 'load', 'dumps', 'dump', 'bibdatabase',
-    'bparser', 'bwriter', 'latexenc', 'customization',
+    'bparser', 'bwriter', 'bibtexexpression', 'latexenc', 'customization',
 ]
 __version__ = '0.6.2'
 
-from . import bibdatabase, bparser, bwriter, latexenc, customization
+from . import bibdatabase, bibtexexpression, bparser, bwriter, latexenc, customization
 
 
 def loads(bibtex_str, parser=None):
