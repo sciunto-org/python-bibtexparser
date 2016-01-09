@@ -69,12 +69,13 @@ class BibtexExpression(object):
     """Gives access to pyparsing expressions.
 
     Attributes are pyparsing expressions for the following elements:
-        main_expression: the bibtex file
-        string_def: a string definition
-        preamble_decl: a preamble declaration
-        explicit_comment: an explicit comment
-        entry: an entry definition
-        implicit_comment: an implicit comment
+
+    * main_expression: the bibtex file
+    * string_def: a string definition
+    * preamble_decl: a preamble declaration
+    * explicit_comment: an explicit comment
+    * entry: an entry definition
+    * implicit_comment: an implicit comment
     """
 
     ParseException = pp.ParseException
