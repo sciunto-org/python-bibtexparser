@@ -65,6 +65,18 @@ def in_braces_or_pars(exp):
     return ((pp.Suppress('{') + exp + pp.Suppress('}')) |
             (pp.Suppress('(') + exp + pp.Suppress(')')))
 
+# add raw matched text at begin of all token
+def rawExtraction(expr):
+    locMarker = pp.Empty().setParseAction(lambda s,loc,t: loc)
+    endlocMarker = locMarker.copy()
+    endlocMarker.callPreparse = False
+    matchExpr = locMarker("_original_start") + expr + endlocMarker("_original_end")
+    def addRawText(s,l,t):
+        t['RAW'] = s[t._original_start:t._original_end]
+        del t["_original_start"]
+        del t["_original_end"]
+    matchExpr.setParseAction(addRawText)
+    return matchExpr
 
 class BibtexExpression(object):
     """Gives access to pyparsing expressions.
@@ -156,9 +168,9 @@ class BibtexExpression(object):
             lambda s, l, t: {k: v for (k, v) in reversed(t.get('Fields'))})
 
         # Entry: type, key, and fields
-        self.entry = (entry_type +
+        self.entry = (rawExtraction(entry_type +
                       in_braces_or_pars(key + pp.Suppress(',') + field_list)
-                      )('Entry')
+                      ))('Entry')
 
         # Other stuff: comments, string definitions, and preamble declarations
 
