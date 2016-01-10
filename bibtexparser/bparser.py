@@ -165,7 +165,7 @@ class BibTexParser(object):
         # Set actions
         self._expr.entry.addParseAction(
             lambda s, l, t: self._add_entry(
-                t.get('EntryType'), t.get('Key'), t.get('Fields'))
+                t.get('EntryType'), t.get('Key'), t.get('Fields'), t.get('RAW'))
             )
         self._expr.implicit_comment.addParseAction(
             lambda s, l, t: self._add_comment(t[0])
@@ -269,7 +269,7 @@ class BibTexParser(object):
                 key = self.alt_dict[key]
         return key
 
-    def _add_entry(self, entry_type, entry_id, fields):
+    def _add_entry(self, entry_type, entry_id, fields, raw):
         """ Adds a parsed entry.
         Includes checking type and fields, cleaning, applying customizations.
 
@@ -291,6 +291,7 @@ class BibTexParser(object):
             d[self._clean_field_key(key)] = self._clean_val(fields[key])
         d['ENTRYTYPE'] = entry_type
         d['ID'] = entry_id
+        d['RAW'] = raw
         if self.customization is not None:
             # apply any customizations to the record object then return it
             logger.debug('Apply customizations and return dict')
