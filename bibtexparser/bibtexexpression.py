@@ -142,7 +142,7 @@ class BibtexExpression(object):
         key.setParseAction(lambda s, l, t: first_token(s, l, t).strip())
 
         # Field name: word of letters and underscores
-        field_name = pp.Word(pp.alphas + '_')('FieldName')
+        field_name = pp.Word(pp.alphas + '_-')('FieldName')
         field_name.setParseAction(first_token)
 
         # Field: field_name = value
