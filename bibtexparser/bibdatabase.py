@@ -1,6 +1,9 @@
 from collections import OrderedDict
 import sys
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 if sys.version_info.major == 2:
     TEXT_TYPE = unicode
@@ -84,14 +87,17 @@ class BibDatabase(object):
             result.append(TEXT_TYPE(entry.get(field, '')).lower())  # Sorting always as string
         return tuple(result)
 
+    def _make_entries_dict(self):
+        for entry in self.entries:
+            self._entries_dict[entry['ID']] = entry
+
     def get_entry_dict(self):
         """Return a dictionary of BibTeX entries.
         The dict key is the BibTeX entry key
         """
         # If the hash has never been made, make it
         if not self._entries_dict:
-            for entry in self.entries:
-                self._entries_dict[entry['ID']] = entry
+            self._make_entries_dict()
         return self._entries_dict
 
     entries_dict = property(get_entry_dict)
@@ -102,6 +108,37 @@ class BibDatabase(object):
                 self.strings[name])
         except KeyError:
             raise(UndefinedString(name))
+
+    # TODO: (?) crossref is a single string of *one* bibtex key? or could-it be a list of bibtex key?
+    # For now, *one* bibkey
+    def _add_missing_field_from_crossref_entry(self, entry, dependance = []):
+        if entry["ID"] in self._crossref_updated:
+            return
+        if entry["crossref"] not in self._entries_dict:
+            logger.error("Crossref reference %s for %s is missing.", entry["crossref"], entry["ID"])
+            return
+        if entry["crossref"] in dependance:
+            logger.error("Circular crossref dependance : %s.", "->".join())
+            return
+        crossref_entry = self._entries_dict[entry["crossref"]]
+        if "crossref" in crossref_entry:
+            # update cross-ref for the cross-referenced entry
+            dependance.append(self.entry["ID"])
+            self._add_missing_field_from_crossref_entry(crossref_entry, dependance)
+            # Not really needed by it's cleaner
+            dependance.pop()
+
+        missing_field = ((bibfield,bibvalue) for (bibfield,bibvalue) in crossref_entry.items() if bibfield not in entry.keys())
+        for bibfield,bibvalue in missing_field:
+            entry[bibfield] = bibvalue
+        self._crossref_updated.append(entry["ID"])
+
+    def _add_missing_field_from_crossref(self):
+        self._make_entries_dict()
+        self._crossref_updated = []
+        for entry in self.entries:
+            if "crossref" in entry:
+                self._add_missing_field_from_crossref_entry(entry)
 
 
 class BibDataString(object):
