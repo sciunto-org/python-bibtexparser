@@ -65,7 +65,8 @@ class BibTexParser(object):
                  customization=None,
                  ignore_nonstandard_types=True,
                  homogenize_fields=False,
-                 common_strings=False):
+                 common_strings=False,
+                 add_missing_field_from_crossref=False):
         """
         Creates a parser for rading BibTeX files
 
@@ -99,6 +100,9 @@ class BibTexParser(object):
         # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
 
+        # Add missing field from cross-ref
+        self.add_missing_field_from_crossref=add_missing_field_from_crossref
+
         # pre-defined set of key changes
         self.alt_dict = {
             'keyw': u'keyword',
@@ -131,6 +135,8 @@ class BibTexParser(object):
             logger.warning("Could not parse full file or string.")
             if not partial:
                 raise exc
+        if self.add_missing_field_from_crossref:
+            self.bib_database._add_missing_field_from_crossref()
         return self.bib_database
 
     def parse_file(self, file, partial=False):
