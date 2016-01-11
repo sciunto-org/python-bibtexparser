@@ -62,3 +62,6 @@ class TestStringWrite(unittest.TestCase):
         result = bibtexparser.dumps(bib_database)
         expected = '@string{name1 = "value1"}\n\n@string{name2 = "value2"}\n\n'
         self.assertEqual(result, expected)
+
+if __name__ == '__main__':
+    unittest.main()

@@ -42,3 +42,6 @@ class TestPreambleWrite(unittest.TestCase):
         result = bibtexparser.dumps(bib_database)
         expected = '@preamble{" a "}\n\n@preamble{"b"}\n\n'
         self.assertEqual(result, expected)
+
+if __name__ == '__main__':
+    unittest.main()

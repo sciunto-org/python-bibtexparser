@@ -23,3 +23,6 @@ class TestHomogenizeFields(unittest.TestCase):
             entries = bib.get_entry_list()
             self.assertNotIn('link', entries[0])
             self.assertIn('url', entries[0])
+
+if __name__ == '__main__':
+    unittest.main()

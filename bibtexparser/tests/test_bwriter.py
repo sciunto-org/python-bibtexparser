@@ -81,3 +81,5 @@ class TestBibtexWriterList(unittest.TestCase):
             bib = BibTexParser(bibfile.read(), customization=author)
         self.assertRaises(TypeError, to_bibtex, bib)
 
+if __name__ == '__main__':
+    unittest.main()

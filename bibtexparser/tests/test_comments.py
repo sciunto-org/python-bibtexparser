@@ -171,3 +171,6 @@ class TestWriteComment(unittest.TestCase):
             expected = bibfile.read()
         result = to_bibtex(bib)
         self.assertEqual(result, expected)
+
+if __name__ == '__main__':
+    unittest.main()

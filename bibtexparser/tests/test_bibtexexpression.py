@@ -110,3 +110,6 @@ class TestBibtexExpressionWithRawEntry(unittest.TestCase):
             '@journal{key, name = "àbcđéf" }')
         self.assertEqual(result.get('Fields'), {'name': 'àbcđéf'})
         self.assertEqual(result.get('RAW'), '@journal{key, name = "àbcđéf" }')
+
+if __name__ == '__main__':
+    unittest.main()
