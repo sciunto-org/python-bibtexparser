@@ -93,7 +93,7 @@ class BibtexExpression(object):
 
     ParseException = pp.ParseException
 
-    def __init__(self):
+    def __init__(self, add_raw_bibtex_entry=False):
 
         # Bibtex keywords
 
@@ -168,10 +168,15 @@ class BibtexExpression(object):
             lambda s, l, t: {k: v for (k, v) in reversed(t.get('Fields'))})
 
         # Entry: type, key, and fields
-        self.entry = (rawExtraction(entry_type +
-                      in_braces_or_pars(key + pp.Suppress(',') + field_list)
-                      ))('Entry')
-
+        if add_raw_bibtex_entry:
+            self.entry = (rawExtraction(entry_type +
+                                        in_braces_or_pars(key + pp.Suppress(',') + field_list)
+            ))('Entry')
+        else:
+            self.entry = (entry_type +
+                          in_braces_or_pars(key + pp.Suppress(',') + field_list)
+            )('Entry')
+        
         # Other stuff: comments, string definitions, and preamble declarations
 
         # Explicit comments: @comment + everything up to next valid declaration

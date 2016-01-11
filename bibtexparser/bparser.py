@@ -65,7 +65,8 @@ class BibTexParser(object):
                  customization=None,
                  ignore_nonstandard_types=True,
                  homogenize_fields=False,
-                 common_strings=False):
+                 common_strings=False,
+                 add_raw_bibtex_entry=False):
         """
         Creates a parser for rading BibTeX files
 
@@ -98,6 +99,9 @@ class BibTexParser(object):
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
+
+        # Add RAW element in bibentry corresponding to the raw bibtex entry as string
+        self.add_raw_bibtex_entry=add_raw_bibtex_entry
 
         # pre-defined set of key changes
         self.alt_dict = {
@@ -149,7 +153,7 @@ class BibTexParser(object):
         """
         Defines all parser expressions used internally.
         """
-        self._expr = BibtexExpression()
+        self._expr = BibtexExpression(add_raw_bibtex_entry=self.add_raw_bibtex_entry)
 
         # Handle string as BibDataString object
         self._expr.set_string_name_parse_action(
@@ -163,10 +167,16 @@ class BibTexParser(object):
         self._expr.add_log_function(logger.debug)
 
         # Set actions
-        self._expr.entry.addParseAction(
-            lambda s, l, t: self._add_entry(
-                t.get('EntryType'), t.get('Key'), t.get('Fields'), t.get('RAW'))
-            )
+        if self.add_raw_bibtex_entry:
+            self._expr.entry.addParseAction(
+                lambda s, l, t: self._add_entry(
+                    t.get('EntryType'), t.get('Key'), t.get('Fields'), t.get('RAW'))
+                )
+        else:
+            self._expr.entry.addParseAction(
+                lambda s, l, t: self._add_entry(
+                    t.get('EntryType'), t.get('Key'), t.get('Fields'))
+                )
         self._expr.implicit_comment.addParseAction(
             lambda s, l, t: self._add_comment(t[0])
             )
@@ -269,7 +279,7 @@ class BibTexParser(object):
                 key = self.alt_dict[key]
         return key
 
-    def _add_entry(self, entry_type, entry_id, fields, raw):
+    def _add_entry(self, entry_type, entry_id, fields, raw=None):
         """ Adds a parsed entry.
         Includes checking type and fields, cleaning, applying customizations.
 
@@ -291,7 +301,8 @@ class BibTexParser(object):
             d[self._clean_field_key(key)] = self._clean_val(fields[key])
         d['ENTRYTYPE'] = entry_type
         d['ID'] = entry_id
-        d['RAW'] = raw
+        if raw is not None:
+            d['RAW'] = raw
         if self.customization is not None:
             # apply any customizations to the record object then return it
             logger.debug('Apply customizations and return dict')
