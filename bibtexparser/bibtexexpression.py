@@ -141,8 +141,8 @@ class BibtexExpression(object):
         key = pp.SkipTo(',')('Key')  # Exclude @',\#}{~%
         key.setParseAction(lambda s, l, t: first_token(s, l, t).strip())
 
-        # Field name: word of letters and underscores
-        field_name = pp.Word(pp.alphas + '_-')('FieldName')
+        # Field name: word of letters, digits, dashes and underscores
+        field_name = pp.Word(pp.alphanums + '_-')('FieldName')
         field_name.setParseAction(first_token)
 
         # Field: field_name = value
