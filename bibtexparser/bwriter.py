@@ -111,7 +111,7 @@ class BibTexWriter(object):
         display_order += [i for i in sorted(entry) if i not in self.display_order]
 
         # Write field = value lines
-        for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
+        for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID', 'RAW']]:
             try:
                 if self.comma_first:
                     bibtex += "\n" + self.indent + ", " + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
