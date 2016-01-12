@@ -408,7 +408,7 @@ class TestBibtexParserList(unittest.TestCase):
                          'title': '{An} amazing {title}',
                          'comments': 'A comment',
                          'author': 'Jean Laid{\\\'e},\nBen Loaeb',
-                         'volume': '12',
+                         'volume': 'n.s.~2',
                          'month': 'jan'
                          }]
         self.assertEqual(res, expected)
