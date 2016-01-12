@@ -1,5 +1,7 @@
 [run]
+branch = True
 source = bibtexparser
 
 [report]
-omit = bibtexparser/test*
+exclude_lines =
+    if __name__ == .__main__.:
