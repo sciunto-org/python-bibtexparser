@@ -121,10 +121,14 @@ class BibDatabase(object):
             # Not really needed by it's cleaner
             dependance.pop()
             
-        missing_field = ((bibfield,bibvalue) for (bibfield,bibvalue) in crossref_entry.items() if bibfield not in entry.keys())
-        for bibfield,bibvalue in missing_field:
+        missing_field = { bibfield:bibvalue for (bibfield,bibvalue) in crossref_entry.items() if bibfield not in entry.keys()}
+        for bibfield,bibvalue in missing_field.items():
             entry[bibfield] = bibvalue
+        
         self._crossref_updated.append(entry["ID"])
+        # Add fields from crossref resolving ordered
+        entry["_FROM_CROSSREF"]=sorted(missing_field.keys())
+
         del entry["_crossref"]
         
     def _add_missing_field_from_crossref(self):
