@@ -50,44 +50,6 @@ def customizations_latex(record):
     return record
 
 
-class TestBibtexParserFunc(unittest.TestCase):
-    def test_strip_quotes(self):
-        parser = BibTexParser()
-        result = parser._strip_quotes('"before remove after"')
-        expected = 'before remove after'
-        self.assertEqual(result, expected)
-
-    def test_strip_quotes_n(self):
-        parser = BibTexParser()
-        result = parser._strip_quotes('"before remove after"\n')
-        expected = 'before remove after'
-        self.assertEqual(result, expected)
-
-    def test_strip_quotes2(self):
-        parser = BibTexParser()
-        result = parser._strip_quotes('before "remove" after')
-        expected = 'before "remove" after'
-        self.assertEqual(result, expected)
-
-    def test_strip_braces(self):
-        parser = BibTexParser()
-        result = parser._strip_braces('{before remove after}')
-        expected = 'before remove after'
-        self.assertEqual(result, expected)
-
-    def test_strip_braces2(self):
-        parser = BibTexParser()
-        result = parser._strip_braces('before {remove} after')
-        expected = 'before {remove} after'
-        self.assertEqual(result, expected)
-
-    def test_strip_braces_n(self):
-        parser = BibTexParser()
-        result = parser._strip_braces('{before remove after}\n')
-        expected = 'before remove after'
-        self.assertEqual(result, expected)
-
-
 class TestBibtexParserList(unittest.TestCase):
 
     def test_wrong(self):

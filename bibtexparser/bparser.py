@@ -192,46 +192,6 @@ class BibTexParser(object):
             bibtex_str = bibtex_str.decode(encoding=self.encoding)
         return io.StringIO(bibtex_str)
 
-    def _strip_quotes(self, val):
-        """Strip double quotes enclosing string
-
-        :param val: a value
-        :type val: string
-        :returns: string -- value
-        """
-        logger.debug('Strip quotes')
-        val = val.strip()
-        if val.startswith('"') and val.endswith('"'):
-            return val[1:-1]
-        return val
-
-    def _strip_braces(self, val):
-        """Strip braces enclosing string
-
-        :param val: a value
-        :type val: string
-        :returns: string -- value
-        """
-        logger.debug('Strip braces')
-        val = val.strip()
-        if val.startswith('{') and val.endswith('}') and self._full_span(val):
-            return val[1:-1]
-        return val
-
-    def _full_span(self, val):
-        cnt = 0
-        for i in range(0, len(val)):
-                if val[i] == '{':
-                        cnt += 1
-                elif val[i] == '}':
-                        cnt -= 1
-                if cnt == 0:
-                        break
-        if i == len(val) - 1:
-                return True
-        else:
-                return False
-
     def _clean_val(self, val):
         """ Clean instring before adding to dictionary
 
