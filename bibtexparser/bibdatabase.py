@@ -107,14 +107,14 @@ class BibDatabase(object):
     def _add_missing_field_from_crossref_entry(self, entry, dependance = []):
         if entry["ID"] in self._crossref_updated:
             return
-        if entry["crossref"] not in self._entries_dict:
-            logger.error("Crossref reference %s for %s is missing.", entry["crossref"], entry["ID"])
+        if entry["_crossref"] not in self._entries_dict:
+            logger.error("Crossref reference %s for %s is missing.", entry["_crossref"], entry["ID"])
             return
-        if entry["crossref"] in dependance:
+        if entry["_crossref"] in dependance:
             logger.error("Circular crossref dependance : %s.", "->".join())
             return
-        crossref_entry = self._entries_dict[entry["crossref"]]
-        if "crossref" in crossref_entry:
+        crossref_entry = self._entries_dict[entry["_crossref"]]
+        if "_crossref" in crossref_entry:
             # update cross-ref for the cross-referenced entry
             dependance.append(self.entry["ID"])
             self._add_missing_field_from_crossref_entry(crossref_entry, dependance)
@@ -130,7 +130,7 @@ class BibDatabase(object):
         self._make_entries_dict()
         self._crossref_updated = []
         for entry in self.entries:
-            if "crossref" in entry:
+            if "_crossref" in entry:
                 self._add_missing_field_from_crossref_entry(entry)
 
     
