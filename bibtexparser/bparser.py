@@ -301,7 +301,7 @@ class BibTexParser(object):
         d['ID'] = entry_id
         # Copy untouch cross-ref
         crossref = d.get('crossref', None)
-        if self.customization is not None and not :
+        if self.customization is not None:
             # apply any customizations to the record object
             # if we didn't use crossref then return it
             logger.debug('Apply customizations and return dict')
