@@ -101,7 +101,7 @@ class BibTexParser(object):
         self.encoding = 'utf8'
 
         # Add missing field from cross-ref
-        self.add_missing_field_from_crossref=add_missing_field_from_crossref
+        self.add_missing_field_from_crossref = add_missing_field_from_crossref
 
         # pre-defined set of key changes
         self.alt_dict = {
@@ -308,7 +308,7 @@ class BibTexParser(object):
             d = self.customization(d)
         if self.add_missing_field_from_crossref and crossref is not None:
             d['_crossref'] = crossref
-    
+
         self.bib_database.entries.append(d)
 
     def _add_comment(self, comment):
