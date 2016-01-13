@@ -130,6 +130,7 @@ class BibTexParser(object):
             'link': u'url',
             'links': u'url',
             'subjects': u'subject'
+            'xref': u'crossref'
         }
 
         # Setup the parser expression
