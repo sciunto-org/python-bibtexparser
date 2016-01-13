@@ -100,8 +100,9 @@ class BibTexParser(object):
         # hangs We are going to default to utf8, and mandate it.
         self.encoding = 'utf8'
 
-        # Add RAW element in bibentry corresponding to the raw bibtex entry as string
-        self.add_raw_bibtex_entry=add_raw_bibtex_entry
+        # Add RAW element in bibentry corresponding
+        # to the raw bibtex entry as string
+        self.add_raw_bibtex_entry = add_raw_bibtex_entry
 
         # pre-defined set of key changes
         self.alt_dict = {
@@ -153,7 +154,9 @@ class BibTexParser(object):
         """
         Defines all parser expressions used internally.
         """
-        self._expr = BibtexExpression(add_raw_bibtex_entry=self.add_raw_bibtex_entry)
+        self._expr = BibtexExpression(
+            add_raw_bibtex_entry=self.add_raw_bibtex_entry
+        )
 
         # Handle string as BibDataString object
         self._expr.set_string_name_parse_action(
@@ -170,7 +173,8 @@ class BibTexParser(object):
         if self.add_raw_bibtex_entry:
             self._expr.entry.addParseAction(
                 lambda s, l, t: self._add_entry(
-                    t.get('EntryType'), t.get('Key'), t.get('Fields'), t.get('RAW'))
+                    t.get('EntryType'), t.get('Key'),
+                    t.get('Fields'), t.get('RAW'))
                 )
         else:
             self._expr.entry.addParseAction(

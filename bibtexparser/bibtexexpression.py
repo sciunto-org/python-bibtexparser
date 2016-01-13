@@ -65,27 +65,33 @@ def in_braces_or_pars(exp):
     return ((pp.Suppress('{') + exp + pp.Suppress('}')) |
             (pp.Suppress('(') + exp + pp.Suppress(')')))
 
+
 # add raw matched text at begin of all token
 def rawExtraction(expr):
-    """ 
-    Put markers on an pyparsing expression to locate start/end of the expression
-    Set the ParseAction to a function which extrat the initial text between the
+    """
+    Put markers on an pyparsing expression to
+    locate start/end of the expression
+    Set the ParseAction to a function which extrat
+    the initial text between the
     two markers and deletes markers.
     The extracted text is put in the "RAW" py-parsing Field
 
     argument:
     an py-parsing expression
     """
-    locMarker = pp.Empty().setParseAction(lambda s,loc,t: loc)
+    locMarker = pp.Empty().setParseAction(lambda s, loc, t: loc)
     endlocMarker = locMarker.copy()
     endlocMarker.callPreparse = False
-    matchExpr = locMarker("_original_start") + expr + endlocMarker("_original_end")
-    def addRawText(s,l,t):
+    matchExpr = locMarker("_original_start") + expr +
+    endlocMarker("_original_end")
+
+    def addRawText(s, l, t):
         t['RAW'] = s[t._original_start:t._original_end]
         del t["_original_start"]
         del t["_original_end"]
     matchExpr.setParseAction(addRawText)
     return matchExpr
+
 
 class BibtexExpression(object):
     """Gives access to pyparsing expressions.
@@ -179,13 +185,15 @@ class BibtexExpression(object):
         # Entry: type, key, and fields
         if add_raw_bibtex_entry:
             self.entry = (rawExtraction(entry_type +
-                                        in_braces_or_pars(key + pp.Suppress(',') + field_list)
-            ))('Entry')
+                                        in_braces_or_pars(key +
+                                                          pp.Suppress(',') +
+                                                          field_list))
+                          )('Entry')
         else:
             self.entry = (entry_type +
-                          in_braces_or_pars(key + pp.Suppress(',') + field_list)
-            )('Entry')
-        
+                          in_braces_or_pars(key + pp.Suppress(',') +
+                                            field_list))('Entry')
+
         # Other stuff: comments, string definitions, and preamble declarations
 
         # Explicit comments: @comment + everything up to next valid declaration
