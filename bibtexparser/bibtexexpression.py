@@ -67,6 +67,15 @@ def in_braces_or_pars(exp):
 
 # add raw matched text at begin of all token
 def rawExtraction(expr):
+    """ 
+    Put markers on an pyparsing expression to locate start/end of the expression
+    Set the ParseAction to a function which extrat the initial text between the
+    two markers and deletes markers.
+    The extracted text is put in the "RAW" py-parsing Field
+
+    argument:
+    an py-parsing expression
+    """
     locMarker = pp.Empty().setParseAction(lambda s,loc,t: loc)
     endlocMarker = locMarker.copy()
     endlocMarker.callPreparse = False
