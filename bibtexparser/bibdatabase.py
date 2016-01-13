@@ -125,6 +125,7 @@ class BibDatabase(object):
         for bibfield,bibvalue in missing_field:
             entry[bibfield] = bibvalue
         self._crossref_updated.append(entry["ID"])
+        del entry["_crossref"]
         
     def _add_missing_field_from_crossref(self):
         self._make_entries_dict()
