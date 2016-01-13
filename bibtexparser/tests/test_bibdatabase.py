@@ -1,5 +1,6 @@
 import unittest
-from bibtexparser.bibdatabase import BibDatabase
+from bibtexparser.bibdatabase import (BibDatabase, BibDataString,
+                                      BibDataStringExpression)
 
 
 class TestBibDatabase(unittest.TestCase):
@@ -22,6 +23,51 @@ class TestBibDatabase(unittest.TestCase):
         bib_db = BibDatabase()
         bib_db.entries = self.entries
         self.assertEqual(bib_db.entries_dict, bib_db.get_entry_dict())
+
+
+class TestBibDataString(unittest.TestCase):
+
+    def setUp(self):
+        self.bd = BibDatabase()
+
+    def test_name_is_lower(self):
+        bds = BibDataString(self.bd, 'nAmE')
+        self.assertTrue(bds.name.islower())
+
+    def test_raises_KeyError(self):
+        bds = BibDataString(self.bd, 'name')
+        with self.assertRaises(KeyError):
+            bds.get_value()
+
+    def test_get_value(self):
+        bds = BibDataString(self.bd, 'name')
+        self.bd.strings['name'] = 'value'
+        self.assertEqual(bds.get_value(), 'value')
+
+    def test_expand_string(self):
+        bds = BibDataString(self.bd, 'name')
+        self.bd.strings['name'] = 'value'
+        self.assertEqual(BibDataString.expand_string('name'), 'name')
+        self.assertEqual(BibDataString.expand_string(bds), 'value')
+
+
+class TestBibDataStringExpression(unittest.TestCase):
+
+    def setUp(self):
+        self.bd = BibDatabase()
+        self.bd.strings['name'] = 'value'
+        self.bds = BibDataString(self.bd, 'name')
+
+    def test_get_value(self):
+        exp = BibDataStringExpression(
+            ["The string has value: ", self.bds, '.'])
+        self.assertEqual(exp.get_value(), 'The string has value: value.')
+
+    def test_raises_KeyError(self):
+        bds = BibDataString(self.bd, 'unknown')
+        exp = BibDataStringExpression([bds, self.bds, 'text'])
+        with self.assertRaises(KeyError):
+            exp.get_value()
 
 
 if __name__ == '__main__':

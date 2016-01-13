@@ -11,7 +11,8 @@ import sys
 import io
 import logging
 
-from bibtexparser.bibdatabase import BibDatabase, BibDataString, STANDARD_TYPES
+from bibtexparser.bibdatabase import (BibDatabase, BibDataString,
+                                      BibDataStringExpression, STANDARD_TYPES)
 from bibtexparser.bibtexexpression import BibtexExpression
 
 logger = logging.getLogger(__name__)
@@ -159,7 +160,7 @@ class BibTexParser(object):
                 BibDataString(self.bib_database, t[0]))
         self._expr.set_string_expression_parse_action(
             lambda s, l, t:
-                self._interpolate_string_expression(t))
+                BibDataStringExpression(t).get_value())
 
         # Add notice to logger
         self._expr.add_log_function(logger.debug)
@@ -284,28 +285,6 @@ class BibTexParser(object):
                            string_key)
         logger.debug('Store string: {} -> {}'.format(string_key, string))
         self.bib_database.strings[string_key] = self._clean_val(string)
-
-    def _interpolate_string_expression(self, string_expr):
-        """
-        Replaces bibdatastrings by their values in an expression.
-
-        :param string_expr: the parsed string as a list
-        :type string_expr: list
-        """
-        return ''.join([self._expand_string(s) for s in string_expr])
-
-    def _expand_string(self, string_or_bibdatastring):
-        """
-        Eventually replaces a bibdatastring by its value.
-
-        :param string_or_bibdatastring: the parsed token
-        :type string_expr: string or BibDataString
-        :returns: string
-        """
-        if isinstance(string_or_bibdatastring, BibDataString):
-            return string_or_bibdatastring.get_value()
-        else:
-            return string_or_bibdatastring
 
     def _add_preamble(self, preamble):
         """

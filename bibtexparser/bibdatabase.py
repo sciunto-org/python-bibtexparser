@@ -102,7 +102,7 @@ class BibDataString(object):
     """
     Represents a bibtex string.
 
-    This object enables mainting string expressions as list of strings
+    This object enables maintaining string expressions as list of strings
     and BibDataString. Can be interpolated from Bibdatabase.
     """
 
@@ -120,3 +120,46 @@ class BibDataString(object):
         :returns: string
         """
         return self._bibdatabase.expand_string(self.name)
+
+    @staticmethod
+    def expand_string(string_or_bibdatastring):
+        """
+        Eventually replaces a bibdatastring by its value.
+
+        :param string_or_bibdatastring: the parsed token
+        :type string_expr: string or BibDataString
+        :returns: string
+        """
+        if isinstance(string_or_bibdatastring, BibDataString):
+            return string_or_bibdatastring.get_value()
+        else:
+            return string_or_bibdatastring
+
+
+class BibDataStringExpression(object):
+    """
+    Represents a bibtex string expression.
+
+    String expressions are sequences of regular strings and bibtex strings.
+    This object enables maintaining string expressions as list of strings.
+    The expression are represented as lists of regular strings and
+    BibDataStrings. They can be interpolated from Bibdatabase.
+
+    BibDataStringExpression(e)
+
+    :param e: list of strings and BibDataStrings
+    """
+
+    def __init__(self, expression):
+        self.expr = expression
+
+    def __repr__(self):
+        return "BibDataStringExpression({})".format(self.expr.__repr__())
+
+    def get_value(self):
+        """
+        Replaces bibdatastrings by their values in the expression.
+
+        :returns: string
+        """
+        return ''.join([BibDataString.expand_string(s) for s in self.expr])
