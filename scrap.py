@@ -1,5 +1,5 @@
 
-from compare_names import *
+from bibtexparser.compare_names import *
 
 file = 'bibtexparser/tests/data/random.bib'
 
