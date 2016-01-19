@@ -17,7 +17,6 @@ def levenshtein(s1, s2):
     if len(s1) < len(s2):
         return levenshtein(s2, s1)
 
-    # len(s1) >= len(s2)
     if len(s2) == 0:
         return len(s1)
 
@@ -41,7 +40,6 @@ def replace_all(file, search, replace):
 
 class AuthorOrganizer(object):
     """
-
     Organizes the authors in a BibTex file. The self.clean_authors function checks a file
     for author names that may look similar for the following reasons:
     - absent/different accents
@@ -60,7 +58,6 @@ class AuthorOrganizer(object):
         cleaner = AuthorOrganizer(file)
 
         cleaner.clean_authors()
-
     """
 
     def __init__(self, file):
@@ -172,9 +169,7 @@ class AuthorOrganizer(object):
                 if (levenshtein(author1["last"], author2["last"]) == 0) and ((author1["changed"] == True) or (author2["changed"] == True)):
                     if (author1["initials"] == False) and (author2["initials"] == False):
                         if 0 <= levenshtein(author1["first"], author2["first"]) <= 2:
-
                             self.similar_authors(author1, author2)
-
                     if (author1["initials"] == True) and (author2["initials"] == True):
                         if 0 <= levenshtein(author1["first"], author2["first"]) <= 2:
                             self.similar_authors(author1, author2)
