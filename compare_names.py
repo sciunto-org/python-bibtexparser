@@ -130,7 +130,6 @@ class AuthorOrganizer(object):
                 else:
                     authors_entry = getnames([i.strip() for i in entry["author"].replace('\n', ' ').split(" and ")])
 
-
             for author in authors_entry:
 
                 author_split = author.split(',', 1)
