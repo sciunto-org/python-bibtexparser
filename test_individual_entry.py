@@ -32,7 +32,7 @@ def key(record):
     record = citation_key(record)
     return record
 
-with open('random.bib') as bibtex_file:
+with open('file.bib') as bibtex_file:
 
     parser = BibTexParser()
     parser.customization = key
