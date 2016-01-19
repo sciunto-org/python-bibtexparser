@@ -10,6 +10,8 @@ Each of them takes a record and return the modified record.
 import itertools
 import re
 import logging
+import string
+
 
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
 
@@ -18,8 +20,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
            'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
-           'homogeneize_latex_encoding']
-
+           'homogeneize_latex_encoding', 'citation_key']
 
 def getnames(names):
     """Make people names as surname, firstnames
@@ -27,7 +28,7 @@ def getnames(names):
 
     :param names: a list of names
     :type names: list
-    :returns: list -- Correctly formated names
+    :returns: list -- Correctly formatted names
     """
     tidynames = []
     for namestring in names:
@@ -50,6 +51,108 @@ def getnames(names):
         tidynames.append(last + ", " + ' '.join(firsts))
     return tidynames
 
+def citation_key(record):
+    """
+    Generates citation key for a record.
+
+    :param record: the record
+    :return: modified record, i.e. with citation key
+    """
+
+    # add arxiv to entries without doi?
+    # not consistent: cf @InProceedings{ABDR04} in quantum bib
+
+    record_copy = dict()
+    for key in record:
+        record_copy[key] = record[key]
+
+    # handle special characters correctly for citation key without affecting author field
+    record_copy = convert_to_unicode(record_copy)
+
+    names = []
+    if "author" in record_copy:
+        if isinstance(record_copy["author"], list):
+            names = record_copy["author"]
+        else:
+            names = getnames([i.strip() for i in record_copy["author"].replace('\n', ' ').split(" and ")])
+
+    lastnames = []
+
+    # from getnames function
+    for namestring in names:
+        namestring = namestring.strip()
+        namestring = re.sub('[{}\/]', '', namestring)
+        if len(namestring) < 1:
+            continue
+        if ',' in namestring:
+            namesplit = namestring.split(',', 1)
+            last = namesplit[0].strip()
+            firsts = [i.strip() for i in namesplit[1].split()]
+        else:
+            namesplit = namestring.split()
+            last = namesplit.pop()
+            firsts = [i.replace('.', '. ').strip() for i in namesplit]
+        if last in ['jnr', 'jr', 'junior']:
+            last = firsts.pop()
+        for item in firsts:
+            if item in ['ben', 'van', 'der', 'de', 'la', 'le']:
+                last = firsts.pop() + ' ' + last
+        lastnames.append(last)
+
+    letters_accent = ['á', 'ä', 'â', 'à', 'é', 'ë', 'ê', 'è',
+                      'í', 'ï', 'ì', 'ó', 'ö', 'ô', 'ò', 'ú', 'ü', 'û', 'ù']
+
+    # generate citation key
+    if "year" in record_copy:
+        year = record_copy["year"]
+        years = year[2:]
+
+        def get_initials(name, one_author):
+            """
+            name is a string, one_author boolean
+            """
+
+            name = name.split(' ')
+            initials = ''
+            i = 0
+
+            # handle van/von/der etc. correctly
+            while name[i][0] in string.ascii_lowercase:
+                initials += name[i][0]
+                i += 1
+            if one_author == True:
+                beginning_name = ''
+                letter_count = 0
+                j = 0
+                # make sure that citation key only contains alphabetic characters, so no accents,
+                # and that it always contains three characters in case of single author
+                while letter_count < 3:
+                    beginning_name += name[i][j]
+                    if (name[i][j] in string.ascii_letters) or (name[i][j] in letters_accent):
+                        letter_count += 1
+                    j += 1
+                initials += beginning_name
+            else:
+                initials += name[i][0]
+            return initials
+
+        if len(lastnames) == 1:
+            author = lastnames[0]
+            beginning = get_initials(author, True)
+            key = beginning + years
+        else:
+            initials = ''
+            if len(lastnames) <= 4:
+                for name in lastnames:
+                    initials += get_initials(name, False)
+            else:
+                for i in [0, 1, 2]:
+                    initials += get_initials(lastnames[i][0], False)
+                initials += '+'
+            key = initials + years
+
+        record["alphakey"] = key
+    return record
 
 def author(record):
     """
@@ -66,7 +169,6 @@ def author(record):
         else:
             del record["author"]
     return record
-
 
 def editor(record):
     """
@@ -178,7 +280,6 @@ def link(record):
                 record["link"].append(linkobj)
 
     return record
-
 
 def doi(record):
     """
