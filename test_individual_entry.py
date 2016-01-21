@@ -32,10 +32,14 @@ def key(record):
     record = citation_key(record)
     return record
 
-with open('file.bib') as bibtex_file:
+def arxiv(record):
+    record = arxiv_pdf(record)
+    return record
+
+with open('scrap.bib') as bibtex_file:
 
     parser = BibTexParser()
-    parser.customization = key
+    parser.customization = arxiv
     bib_database = bibtexparser.load(bibtex_file, parser=parser)
     print(bib_database.entries)
 

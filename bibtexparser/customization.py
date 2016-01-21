@@ -11,7 +11,8 @@ import itertools
 import re
 import logging
 import string
-
+import requests
+import feedparser
 
 from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
 
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
            'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
-           'homogeneize_latex_encoding', 'citation_key']
+           'homogeneize_latex_encoding', 'citation_key', 'arxiv_pdf']
 
 def getnames(names):
     """Make people names as surname, firstnames
@@ -355,3 +356,79 @@ def homogeneize_latex_encoding(record):
                 record[val] = protect_uppercase(record[val])
                 logger.debug('After: %s', record[val])
     return record
+
+def arxiv_pdf(record):
+    """
+    Retrieve link to Arxiv pdf, if available. Uses Arxiv API.
+
+    :param record:
+    :return: record with link to arxiv pdf, if available
+    """
+
+    query = ''
+    if 'title' in record:
+        title = record['title']
+        title_convert = title.replace ("-", " ")
+        title_convert = title_convert.replace("+", " ")
+
+        for word in title_convert.split():
+            word = word.lower()
+
+            if word not in ['and', 'not', 'or']:
+                query += word
+                query += '+AND+'
+
+        if 'author' in record:
+            author = record['author']
+
+            author = author.replace("and", "").replace("\\", "").replace("'", "").replace("\"", "")
+            author = re.sub('[{}\/]', '', author)
+            author = author.split()
+
+            for name in author:
+                query += name
+                query += '+AND+'
+            length = len(query)
+            end = length - 5
+
+            # remove final '+'
+            query = query[0:end]
+
+            result = requests.get('http://export.arxiv.org/api/'
+                                  'query?search_query=all:' + query +
+                                  '&start=0&max_results=1')
+
+            result = result.text
+            #result = str(result)
+            feed = feedparser.parse(result)
+            title_found = ''
+            for entry in feed.entries:
+                title_found = entry.title
+            title_found = title_found.replace("  ", " ")
+            title_found = title_found.replace("\n", "")
+            if (title_found == title):
+                print('found')
+                for link in entry.links:
+                    if link.type == 'application/pdf':
+                        pdf_link = link.href
+                        record["arxiv_pdf"] = pdf_link
+    return record
+
+def get_editors(record):
+    """
+    Retrieve authors of an edited publication.
+
+    :param record:
+    :return:
+    """
+
+    if 'doi' in record:
+        doi = record['doi']
+
+        link = 'http://api.crossref.org/works/works/' + doi
+        r = requests.get(link)
+
+        info = r.json()
+
+        # get editors, but is this necessary? 
+
