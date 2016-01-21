@@ -19,7 +19,7 @@ from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, un
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
+__all__ = ['getnames', 'author', 'author_order', 'editor', 'journal', 'keyword', 'link',
            'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
            'homogeneize_latex_encoding', 'citation_key', 'arxiv_pdf']
 
@@ -169,6 +169,28 @@ def author(record):
             record["author"] = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
         else:
             del record["author"]
+    return record
+
+def author_order(record):
+    """
+    Writes authors as 'Surname, Name' without changing type (string).
+
+    :param record: the record
+    :return: modified record
+    """
+    names = []
+    if "author" in record:
+        if isinstance(record["author"], list):
+            names = record["author"]
+        else:
+            names = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
+
+    new_name = ''
+    for name in names:
+        new_name += name + ' and '
+    length = len(new_name)
+    new_name = new_name[0:length-5]
+    record['author'] = new_name
     return record
 
 def editor(record):
@@ -430,5 +452,5 @@ def get_editors(record):
 
         info = r.json()
 
-        # get editors, but is this necessary? 
+        # get editors, but is this necessary?
 

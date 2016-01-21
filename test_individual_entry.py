@@ -36,10 +36,14 @@ def arxiv(record):
     record = arxiv_pdf(record)
     return record
 
+def order(record):
+    record = author_order(record)
+    return record
+
 with open('scrap.bib') as bibtex_file:
 
     parser = BibTexParser()
-    parser.customization = arxiv
+    parser.customization = order
     bib_database = bibtexparser.load(bibtex_file, parser=parser)
     print(bib_database.entries)
 
