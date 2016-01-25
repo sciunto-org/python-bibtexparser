@@ -408,8 +408,10 @@ def arxiv_pdf(record):
             author = author.split()
 
             for name in author:
-                query += name
-                query += '+AND+'
+                length_name = len(name)
+                if name[length_name-1] != '.':
+                    query += name
+                    query += '+AND+'
             length = len(query)
             end = length - 5
 
@@ -421,7 +423,6 @@ def arxiv_pdf(record):
                                   '&start=0&max_results=1')
 
             result = result.text
-            #result = str(result)
             feed = feedparser.parse(result)
             title_found = ''
             for entry in feed.entries:
@@ -429,7 +430,6 @@ def arxiv_pdf(record):
             title_found = title_found.replace("  ", " ")
             title_found = title_found.replace("\n", "")
             if (title_found == title):
-                print('found')
                 for link in entry.links:
                     if link.type == 'application/pdf':
                         pdf_link = link.href
