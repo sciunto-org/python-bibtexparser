@@ -446,39 +446,65 @@ def arxiv_pdf(record):
 
 def get_editors(record):
     """
-    Retrieve authors of an edited publication.
-
-    Currently only gives full doi info
+    Retrieve editors of an edited publication.
 
     :param record:
     :return:
     """
 
-    # for some entries i fail to find any editors, e.g. ieee proceedings
-    # only program chairs/conference chairs mentioned, e.g.
-    # http://dl.acm.org/citation.cfm?id=2213977
+    if record['ENTRYTYPE'] == 'inproceedings':
+        if 'title' in record:
+            title = record['title']
+            search_title = ''
+            for word in title.split():
+                search_title += word + '%20'
 
-    #TODO: use dblp api, which does mention editors for proceedings!
+            if 'author' in record:
+                author = record['author']
+                author = re.sub('\\\\v', '', author)
+                weird_characters = ['\\', '\'', '{', '}', '"', ',']
+                for item in weird_characters:
+                    author = author.replace(item, '')
 
-    if 'doi' in record:
-        doi = record['doi']
+                search_author = ''
+                for word in author.split():
+                    if word != 'and':
+                        if word[len(word)-1] != '.':
+                            search_author += word + '%20'
 
-        link = 'http://api.crossref.org/works/works/' + doi
+                query = search_title + search_author
+                url = 'http://www.dblp.org/search/api/?q=' + query + '&format=json'
+                print(url)
+                result = requests.get(url)
+                info = result.json()
+                hits = info['result']['hits']['hit']
 
-        link = link.replace("\\", "")
-        #print(link)
+                for item in hits:
+                    if '@conference' in item['info']['venue'].keys():
+                        conference = item['info']['venue']['@conference'].lower()
+                        year = item['info']['year']
 
-        # if editor is not listed, sometimes doi of full volume is the same
-        # minus last segment (behind . or/ or \)
-        # but still not always author or even editor mentioned...
+                search_conference = ''
+                for word in conference.split():
+                    if word != 'and':
+                        search_conference += word + '*%20'
 
-        r = requests.get(link)
+                url = 'http://dblp.org/search/api/?q=ce:venue:' + search_conference + '*%20' + year + '*&h=1&format=json'
+                print(url)
+                result = requests.get(url)
+                info = result.json()
 
-        info = r.json()
+                if 'authors' in info['result']['hits']['hit'][0]['info'].keys():
 
-        record['doi_info'] = info
+                    editors = info['result']['hits']['hit'][0]['info']['authors']['author']
+                    editors_string = ''
 
-        # get editors, but is this necessary?
+                    for name in editors:
+                        editors_string += name + ' and '
+
+                    length = len(editors_string)
+                    editors_string = editors_string[:length-5]
+                    record['editors'] = editors_string
 
     return record
 

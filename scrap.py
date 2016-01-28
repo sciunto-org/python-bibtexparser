@@ -28,7 +28,6 @@ with open('scrap.bib') as bibtex_file:
     print(bib_database.entries)
 
 
-
 """
 
 db = BibDatabase()
