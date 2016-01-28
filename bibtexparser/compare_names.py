@@ -5,6 +5,7 @@ import fileinput
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
+from tkinter import *
 
 def levenshtein(s1, s2):
     """
@@ -60,8 +61,38 @@ class AuthorOrganizer(object):
         cleaner.clean_authors()
     """
 
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, file_in):
+        self.file_in = file_in
+        self.file_out = file_in[:len(file_in)-4] + '_authors_cleaned.bib'
+
+        with open(self.file_in, 'r') as infile:
+            with open(self.file_out, 'w') as outfile:
+                for line in infile:
+                    outfile.write(line)
+            outfile.close()
+        infile.close()
+
+        self.take_longest_option = False
+
+    def replace(self, author1, author2):
+        """
+        replace occurrences of name1 by name2
+
+        :param name1:
+        :param name2:
+        :return:
+        """
+
+        file = self.file_out
+
+        name1_first = author1["original_first"].strip() + ' ' + author1["original_last"].strip()
+        name2_first = author2["original_first"].strip() + ' ' + author2["original_last"].strip()
+
+        name1_last = author1["original_last"].strip() + ', ' + author1["original_first"].strip()
+        name2_last = author2["original_last"].strip() + ', ' + author2["original_first"].strip()
+
+        replace_all(file, name1_first, name2_first)
+        replace_all(file, name1_last, name2_last)
 
     def similar_authors(self, author1, author2):
         """
@@ -70,49 +101,68 @@ class AuthorOrganizer(object):
         :param author2: dict
         :return:
         """
+        if self.take_longest_option == True:
+            name1 = author1["original_first"] + author1["original_last"]
+            name2 = author2["original_first"] + author2["original_last"]
+            if len(author1) > len(author2):
+                self.replace(author1, author2)
+            else:
+                self.replace(author2, author1)
 
-        menu_1 = '\nAre%s %s and%s %s the same author?\n' \
-                 '\nPlease insert the number corresponding to your answer:' \
-                 '\n1. Yes \n2. No\n' \
-                 % (author1["original_first"], author1["original_last"],
-                    author2["original_first"], author2["original_last"])
+        else:
+            menu_1 = '\nAre%s %s and%s %s the same author?\n' \
+                     '\nPlease insert the number corresponding to your answer:' \
+                     '\n1. Yes \n2. No\n' \
+                     % (author1["original_first"], author1["original_last"],
+                        author2["original_first"], author2["original_last"])
 
-        menu_2 = '\nPlease choose one of the actions below by inserting the corresponding number:' \
-                 '\n1. Ignore\n2. Replace occurrences of %s %s by %s %s.\n' \
-                 '3. Replace occurrences of %s %s by %s %s.\n' % \
-                 (author1["original_first"], author1["original_last"],
-                    author2["original_first"], author2["original_last"],
-                    author2["original_first"], author2["original_last"],
-                    author1["original_first"], author1["original_last"])
+            menu_2 = '\nPlease choose one of the actions below by inserting the corresponding number:' \
+                     '\n1. Ignore\n2. Replace occurrences of %s %s by %s %s.\n' \
+                     '3. Replace occurrences of %s %s by %s %s.\n' % \
+                     (author1["original_first"], author1["original_last"],
+                        author2["original_first"], author2["original_last"],
+                        author2["original_first"], author2["original_last"],
+                        author1["original_first"], author1["original_last"])
 
-        answer = input(menu_1)
-
-        while (not answer in ['1','2']):
-            print('Invalid answer.')
             answer = input(menu_1)
 
-        if answer == '1':
-            action = input(menu_2)
-            while (not action in ['1', '2', '3']):
+            while (not answer in ['1','2']):
                 print('Invalid answer.')
+                answer = input(menu_1)
+
+            if answer == '1':
                 action = input(menu_2)
-            if action != '1':
-                file = self.file
+                while (not action in ['1', '2', '3']):
+                    print('Invalid answer.')
+                    action = input(menu_2)
+                if action != '1':
+                    #file = self.file_out
 
-                name1_first = author1["original_first"].strip() + ' ' + author1["original_last"].strip()
-                name2_first = author2["original_first"].strip() + ' ' + author2["original_last"].strip()
-                name1_last = author1["original_last"].strip() + ', ' + author1["original_first"].strip()
-                name2_last = author2["original_last"].strip() + ', ' + author2["original_first"].strip()
+    #                name1_first = author1["original_first"].strip() + ' ' + author1["original_last"].strip()
+     #               name2_first = author2["original_first"].strip() + ' ' + author2["original_last"].strip()
+      #              name1_last = author1["original_last"].strip() + ', ' + author1["original_first"].strip()
+       #             name2_last = author2["original_last"].strip() + ', ' + author2["original_first"].strip()
 
-                if action == '2':
-                    replace_all(file, name1_first, name2_first)
-                    replace_all(file, name1_last, name2_last)
-                if action == '3':
-                    replace_all(file, name2_first, name1_first)
-                    replace_all(file, name2_last, name1_last)
+                    if action == '2':
+                        self.replace(author1, author2)
 
-    def clean_authors(self):
-        with open(self.file, 'r') as bibtex_file:
+                        #replace_all(file, name1_first, name2_first)
+                        #replace_all(file, name1_last, name2_last)
+                    if action == '3':
+                        self.replace(author2, author1)
+
+                        #replace_all(file, name2_first, name1_first)
+                        #replace_all(file, name2_last, name1_last)
+
+    def combine_authors(self):
+        """
+        automatically replace author names by one with most information (longest?)
+
+        :return:
+        """
+
+    def read_file(self):
+        with open(self.file_out, 'r') as bibtex_file:
             parser = BibTexParser()
             bib_database = bibtexparser.load(bibtex_file, parser=parser)
 
@@ -120,7 +170,6 @@ class AuthorOrganizer(object):
         weird_characters = ['\\', '\'', '{', '}', '"']
 
         for entry in bib_database.entries:
-
             if "author" in entry:
                 if isinstance(entry["author"], list):
                     authors_entry = entry["author"]
@@ -159,7 +208,10 @@ class AuthorOrganizer(object):
                         author_dict["changed"] = False
 
                     authors.append(author_dict)
+        return authors
 
+    def clean_authors(self):
+        authors = self.read_file()
         authors_updated = authors
         for author1 in authors:
             authors_updated = [x for x in authors_updated if x != author1]

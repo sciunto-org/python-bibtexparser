@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ['getnames', 'author', 'author_order', 'editor', 'journal', 'keyword', 'link',
            'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
-           'homogeneize_latex_encoding', 'citation_key', 'arxiv_pdf']
+           'homogeneize_latex_encoding', 'citation_key', 'arxiv_pdf', 'get_editors']
 
 def getnames(names):
     """Make people names as surname, firstnames
@@ -62,6 +62,10 @@ def citation_key(record):
 
     # add arxiv to entries without doi?
     # not consistent: cf @InProceedings{ABDR04} in quantum bib
+
+    #TODO: compare to citation keys as displayed in Latex,
+    # perhaps omit special characters from keys, especially if you also
+    # want to use them as in-text reference labels
 
     record_copy = dict()
     for key in record:
@@ -171,26 +175,31 @@ def author(record):
             del record["author"]
     return record
 
+
+# rename
+# format names oid
 def author_order(record):
     """
     Writes authors as 'Surname, Name' without changing type (string).
+    Uses the same functionality as author function, so relies on the same tests.
 
-    :param record: the record
-    :return: modified record
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
+
     """
-    names = []
     if "author" in record:
-        if isinstance(record["author"], list):
-            names = record["author"]
+        if record["author"]:
+            authors = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
+            new_authors = ''
+            for author in authors:
+                new_authors += author + ' and '
+            length = len(new_authors)
+            end = length - 5
+            new_authors = new_authors[:end]
+            record["author"] = new_authors
         else:
-            names = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
-
-    new_name = ''
-    for name in names:
-        new_name += name + ' and '
-    length = len(new_name)
-    new_name = new_name[0:length-5]
-    record['author'] = new_name
+            del record["author"]
     return record
 
 def editor(record):
@@ -211,7 +220,6 @@ def editor(record):
         else:
             del record["editor"]
     return record
-
 
 def page_double_hyphen(record):
     """
@@ -440,17 +448,38 @@ def get_editors(record):
     """
     Retrieve authors of an edited publication.
 
+    Currently only gives full doi info
+
     :param record:
     :return:
     """
+
+    # for some entries i fail to find any editors, e.g. ieee proceedings
+    # only program chairs/conference chairs mentioned, e.g.
+    # http://dl.acm.org/citation.cfm?id=2213977
+
+    #TODO: use dblp api, which does mention editors for proceedings!
 
     if 'doi' in record:
         doi = record['doi']
 
         link = 'http://api.crossref.org/works/works/' + doi
+
+        link = link.replace("\\", "")
+        #print(link)
+
+        # if editor is not listed, sometimes doi of full volume is the same
+        # minus last segment (behind . or/ or \)
+        # but still not always author or even editor mentioned...
+
         r = requests.get(link)
 
         info = r.json()
 
+        record['doi_info'] = info
+
         # get editors, but is this necessary?
+
+    return record
+
 

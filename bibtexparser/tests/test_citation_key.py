@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Author: Francois Boulogne
-# License:
-
 from __future__ import unicode_literals
 
 import unittest
@@ -12,7 +7,7 @@ import bibtexparser
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
 
-class TestBibtexWriterList(unittest.TestCase):
+class TestCitationKey(unittest.TestCase):
 
     ###########################
     # MORE TESTS FOR:

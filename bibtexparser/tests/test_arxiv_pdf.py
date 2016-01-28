@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Author: Francois Boulogne
-# License:
 
 from __future__ import unicode_literals
 
@@ -12,7 +8,7 @@ import bibtexparser
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
 
-class TestBibtexWriterList(unittest.TestCase):
+class TestArxivPdf(unittest.TestCase):
     # tests if arxiv_pdf in customization.py retrieves the correct
     # links to full pdf's on Arxiv as 'arxiv_pdf', if available
 
