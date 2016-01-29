@@ -4,12 +4,8 @@ from bibtexparser.customization import *
 from bibtexparser.bwriter import *
 from bibtexparser.bibdatabase import BibDatabase
 
-def arx(record):
-    record = author_order(record)
-    return record
-
 def order(record):
-    record = author_order(record)
+    record = format_names(record)
     return record
 
 def author(record):
@@ -27,8 +23,13 @@ with open('scrap.bib') as bibtex_file:
     bib_database = bibtexparser.load(bibtex_file, parser=parser)
     print(bib_database.entries)
 
-
 """
+goed:
+http://www.dblp.org/search/api/?q=interactive*%20proofs*%20for*%20quantum*%20computations*%20dorit*%20aharonov*%20michael*%20ben*.or*%20elad*%20eban*&h=1000&c=4&f=0&format=json
+
+fout:
+http://dblp.org/search/api/?q=interactive*%20proofs*%20for*%20quantum*%20computations*%20dorit*%20aharonov*%20michael*%20ben-or*%20elad*%20eban*&format=json
+
 
 db = BibDatabase()
     db.entries = bib_database.entries

@@ -19,7 +19,7 @@ from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, un
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['getnames', 'author', 'author_order', 'editor', 'journal', 'keyword', 'link',
+__all__ = ['getnames', 'author', 'format_names', 'editor', 'journal', 'keyword', 'link',
            'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
            'homogeneize_latex_encoding', 'citation_key', 'arxiv_pdf', 'get_editors']
 
@@ -156,7 +156,7 @@ def citation_key(record):
                 initials += '+'
             key = initials + years
 
-        record["alphakey"] = key
+        record["citation_key"] = key
     return record
 
 def author(record):
@@ -175,10 +175,7 @@ def author(record):
             del record["author"]
     return record
 
-
-# rename
-# format names oid
-def author_order(record):
+def format_names(record):
     """
     Writes authors as 'Surname, Name' without changing type (string).
     Uses the same functionality as author function, so relies on the same tests.
@@ -446,66 +443,71 @@ def arxiv_pdf(record):
 
 def get_editors(record):
     """
-    Retrieve editors of an edited publication.
+    (Attempt to) retrieve editors of an edited publication by using dblp api.
 
-    :param record:
-    :return:
+    :param record: the record
+    :return: the modified record, i.e. possibly with editors added
     """
+    
+    weird_characters = ['\\', '\'', '{', '}', '"', ',']
 
     if record['ENTRYTYPE'] == 'inproceedings':
         if 'title' in record:
             title = record['title']
             search_title = ''
             for word in title.split():
-                search_title += word + '%20'
+                for item in weird_characters:
+                    word = word.replace(item, '')
+                word = word.replace('-', '.')
+                search_title += word.lower() + '*%20'
 
             if 'author' in record:
                 author = record['author']
                 author = re.sub('\\\\v', '', author)
-                weird_characters = ['\\', '\'', '{', '}', '"', ',']
+
                 for item in weird_characters:
                     author = author.replace(item, '')
+                author = author.replace('-', '.')
 
                 search_author = ''
                 for word in author.split():
                     if word != 'and':
                         if word[len(word)-1] != '.':
-                            search_author += word + '%20'
-
+                            search_author += word.lower() + '*%20'
+                length = len(search_author)
+                search_author = search_author[:length-3]
                 query = search_title + search_author
-                url = 'http://www.dblp.org/search/api/?q=' + query + '&format=json'
-                print(url)
+
+                url = 'http://dblp.org/search/api/?q=' + query + '&format=json'
                 result = requests.get(url)
                 info = result.json()
-                hits = info['result']['hits']['hit']
+                if 'hit' in info['result']['hits']:
+                    hits = info['result']['hits']['hit']
 
-                for item in hits:
-                    if '@conference' in item['info']['venue'].keys():
-                        conference = item['info']['venue']['@conference'].lower()
-                        year = item['info']['year']
+                    for item in hits:
+                        if '@conference' in item['info']['venue'].keys():
+                            conference = item['info']['venue']['@conference'].lower()
+                            year = item['info']['year']
 
-                search_conference = ''
-                for word in conference.split():
-                    if word != 'and':
-                        search_conference += word + '*%20'
+                    search_conference = ''
+                    for word in conference.split():
+                        if word != 'and':
+                            search_conference += word + '*%20'
 
-                url = 'http://dblp.org/search/api/?q=ce:venue:' + search_conference + '*%20' + year + '*&h=1&format=json'
-                print(url)
-                result = requests.get(url)
-                info = result.json()
+                    length = len(search_conference)
+                    search_conference = search_conference[:length-4]
+                    url = 'http://dblp.org/search/api/?q=ce:venue:"' + search_conference + '"*%20ce:year:' + year + '*&h=1&format=json'
+                    result = requests.get(url)
+                    info = result.json()
 
-                if 'authors' in info['result']['hits']['hit'][0]['info'].keys():
-
-                    editors = info['result']['hits']['hit'][0]['info']['authors']['author']
-                    editors_string = ''
-
-                    for name in editors:
-                        editors_string += name + ' and '
-
-                    length = len(editors_string)
-                    editors_string = editors_string[:length-5]
-                    record['editors'] = editors_string
-
+                    if 'authors' in info['result']['hits']['hit'][0]['info'].keys():
+                        editors = info['result']['hits']['hit'][0]['info']['authors']['author']
+                        editors_string = ''
+                        for name in editors:
+                            editors_string += name + ' and '
+                        length = len(editors_string)
+                        editors_string = editors_string[:length-5]
+                        record['editor'] = editors_string
     return record
 
 

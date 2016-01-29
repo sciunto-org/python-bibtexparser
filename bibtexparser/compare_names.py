@@ -1,11 +1,10 @@
-import re
-import sys
 import fileinput
+import sys
+import re
 
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.customization import *
-from tkinter import *
 
 def levenshtein(s1, s2):
     """
@@ -102,13 +101,20 @@ class AuthorOrganizer(object):
         :return:
         """
         if self.take_longest_option == True:
-            name1 = author1["original_first"] + author1["original_last"]
-            name2 = author2["original_first"] + author2["original_last"]
+            # automatically replaces names by longer alternative, as this is likely
+            # the more informative version of the author name, but this will give mistakes;
+            # changes are logged and shown
+
+            name1 = author1["original_first"] + ' ' + author1["original_last"]
+            name2 = author2["original_first"] + ' ' + author2["original_last"]
             if len(author1) > len(author2):
                 self.replace(author1, author2)
+                spaces = 25 - len(name1)
+                print(name1 + spaces*' ' + 'CHANGED TO \t' + name2)
             else:
                 self.replace(author2, author1)
-
+                spaces = 25 - len(name2)
+                print(name2 + spaces*' ' + 'CHANGED TO \t' + name1)
         else:
             menu_1 = '\nAre%s %s and%s %s the same author?\n' \
                      '\nPlease insert the number corresponding to your answer:' \
@@ -136,30 +142,10 @@ class AuthorOrganizer(object):
                     print('Invalid answer.')
                     action = input(menu_2)
                 if action != '1':
-                    #file = self.file_out
-
-    #                name1_first = author1["original_first"].strip() + ' ' + author1["original_last"].strip()
-     #               name2_first = author2["original_first"].strip() + ' ' + author2["original_last"].strip()
-      #              name1_last = author1["original_last"].strip() + ', ' + author1["original_first"].strip()
-       #             name2_last = author2["original_last"].strip() + ', ' + author2["original_first"].strip()
-
                     if action == '2':
                         self.replace(author1, author2)
-
-                        #replace_all(file, name1_first, name2_first)
-                        #replace_all(file, name1_last, name2_last)
                     if action == '3':
                         self.replace(author2, author1)
-
-                        #replace_all(file, name2_first, name1_first)
-                        #replace_all(file, name2_last, name1_last)
-
-    def combine_authors(self):
-        """
-        automatically replace author names by one with most information (longest?)
-
-        :return:
-        """
 
     def read_file(self):
         with open(self.file_out, 'r') as bibtex_file:
@@ -177,7 +163,6 @@ class AuthorOrganizer(object):
                     authors_entry = getnames([i.strip() for i in entry["author"].replace('\n', ' ').split(" and ")])
 
             for author in authors_entry:
-
                 author_split = author.split(',', 1)
                 author_dict = dict()
                 author_dict["original_last"] = author_split[0]
@@ -194,9 +179,9 @@ class AuthorOrganizer(object):
                     for item in weird_characters:
                         author = author.replace(item, '')
                     author_split = author.split(',', 1)
-
                     author_dict["last"] = author_split[0]
                     author_dict["first"] = author_split[1]
+
                     if '.' in author_dict["first"]:
                         author_dict["initials"] = True
                     else:
@@ -261,7 +246,7 @@ class AuthorOrganizer(object):
                     if (initials1 == initials2) and (0 <= levenshtein(author1["last"], author2["last"]) <= 2):
                         self.similar_authors(author1, author2)
 
-    # TODO: implement all changes in one single execution
+    # TODO: suggest all possible changes in one single execution
     def clean(self):
         self.clean_authors()
         self.clean_authors()

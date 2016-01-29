@@ -2,11 +2,12 @@ import requests
 import re
 
 
-conference = 'ics'
-year = '2005'
+conference = 'focs'
+year = '2000'
 
 url = 'http://dblp.uni-trier.de/rec/bibtex/conf/' + conference + '/' + year
 
+print(url)
 result = requests.get(url)
 result = result.text
 
