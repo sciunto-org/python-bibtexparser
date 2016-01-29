@@ -448,7 +448,7 @@ def get_editors(record):
     :param record: the record
     :return: the modified record, i.e. possibly with editors added
     """
-    
+
     weird_characters = ['\\', '\'', '{', '}', '"', ',']
 
     if record['ENTRYTYPE'] == 'inproceedings':
