@@ -60,13 +60,6 @@ def citation_key(record):
     :return: modified record, i.e. with citation key
     """
 
-    # add arxiv to entries without doi?
-    # not consistent: cf @InProceedings{ABDR04} in quantum bib
-
-    #TODO: compare to citation keys as displayed in Latex,
-    # perhaps omit special characters from keys, especially if you also
-    # want to use them as in-text reference labels
-
     record_copy = dict()
     for key in record:
         record_copy[key] = record[key]
