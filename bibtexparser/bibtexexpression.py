@@ -112,13 +112,12 @@ class BibtexExpression(object):
         # TODO @ are not parsed by bibtex in braces
 
         # Quoted values: may contain braced content with balanced braces
-        brace_in_quoted = pp.nestedExpr('{', '}')
+        brace_in_quoted = pp.nestedExpr('{', '}', ignoreExpr=None)
         text_in_quoted = pp.CharsNotIn('"{}')
-        # (quotes should be escaped in quoted value)
+        # (quotes should be escaped by braces in quoted value)
         quoted_value = pp.originalTextFor(
-            '"' +
-            pp.ZeroOrMore(text_in_quoted | brace_in_quoted) +
-            '"')('QuotedValue')
+            '"' + pp.ZeroOrMore(text_in_quoted | brace_in_quoted) + '"'
+            )('QuotedValue')
         quoted_value.addParseAction(pp.removeQuotes)
 
         # String expressions
