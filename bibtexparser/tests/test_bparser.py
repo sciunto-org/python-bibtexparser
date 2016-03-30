@@ -272,7 +272,27 @@ class TestBibtexParserList(unittest.TestCase):
                      'ID': 'Cesar2013',
                      'year': '2013',
                      'month': 'jan',
-                     'author': 'Jean César',
+                     'author': 'Jean C{\\\'e}sar{\\\"u}',
+                     'comments': 'A comment',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title',
+                     'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
+                     },
+                     ]
+        self.assertEqual(res, expected)
+
+    def test_article_special_characters(self):
+        with open('bibtexparser/tests/data/article_with_special_characters.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            res = bib.get_entry_list()
+        expected = [{'ENTRYTYPE': 'article',
+                     'journal': 'Nice Journal',
+                     'volume': '12',
+                     'pages': '12-23',
+                     'ID': 'Cesar2013',
+                     'year': '2013',
+                     'month': 'jan',
+                     'author': 'Jean C{\\\'e}sar{\\\"u}',
                      'comments': 'A comment',
                      'keyword': 'keyword1, keyword2',
                      'title': 'An amazing title',
