@@ -25,7 +25,6 @@ Contents:
     :maxdepth: 2
 
     install.rst
-    test.rst
     tutorial.rst
     bibtexparser.rst
     logging.rst
