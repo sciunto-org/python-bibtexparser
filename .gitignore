@@ -36,3 +36,6 @@ nosetests.xml
 
 # Pycharm
 .idea
+
+# Vim.
+*.swp
