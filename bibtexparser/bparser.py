@@ -128,7 +128,7 @@ class BibTexParser(object):
         try:
             self._expr.parseFile(bibtex_file_obj)
         except self._expr.ParseException as exc:
-            logger.warning("Could not parse full file or string.")
+            logger.error("Could not parse near %s", exc.line)
             if not partial:
                 raise exc
         return self.bib_database
