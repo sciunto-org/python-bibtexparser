@@ -306,7 +306,7 @@ class TestBibtexParserList(unittest.TestCase):
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
         expected = [{'ENTRYTYPE': 'article',
-                     'journal': 'Nice Journal',
+                     'journal': '{Nice Journal}',
                      'volume': '12',
                      'pages': '12-23',
                      'ID': 'Cesar2013',
