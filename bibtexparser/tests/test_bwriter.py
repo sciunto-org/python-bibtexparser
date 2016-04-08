@@ -64,7 +64,7 @@ class TestBibtexWriterList(unittest.TestCase):
     # PROTECT UPPER CASE
     ###########
     def test_protect_upper_case(self):
-        with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/book2.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
 
         with open('bibtexparser/tests/data/book_protect_upper_case.bib', 'r') as bibfile:

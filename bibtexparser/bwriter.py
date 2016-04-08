@@ -4,6 +4,7 @@
 # License:
 
 import logging
+import re
 from bibtexparser.bibdatabase import BibDatabase
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class BibTexWriter(object):
         writer = BibTexWriter()
         writer.contents = ['comments', 'entries']
         writer.indent = '  '
+        writer.protect_upper_case = True
         writer.order_entries_by = ('ENTRYTYPE', 'author', 'year')
         bibtex_str = bibtexparser.dumps(bib_database, writer)
 
@@ -43,6 +45,8 @@ class BibTexWriter(object):
         self.contents = ['comments', 'preambles', 'strings', 'entries']
         #: Character(s) for indenting BibTeX field-value pairs. Default: single space.
         self.indent = ' '
+        #: Add {} around upper case letters. Default: False.
+        self.protect_upper_case = False
         #: Align values. Determines the maximal number of characters used in any fieldname and aligns all values
         #    according to that by filling up with single spaces. Default: False
         self.align_values = False
@@ -110,9 +114,25 @@ class BibTexWriter(object):
         more_fields = [i for i in sorted(entry) if i not in self.display_order]
         display_order += [i for i in sorted(entry) if i not in self.display_order]
 
+        # To protect upper case letters
+        protector = lambda pat: '{' + pat.group(1) + '}'
         # Write field = value lines
         for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
             try:
+                # Protect upper case
+                if self.protect_upper_case:
+                    if field in ('title',
+                                 'booktitle',
+                                 'editor',
+                                 'edition',
+                                 'institution',
+                                 'organization',
+                                 'school',
+                                 'series',
+                                 'publisher',):
+                        entry[field] = re.sub('([A-Z]+)', protector, entry[field])
+
+                # Comma first
                 if self.comma_first:
                     bibtex += "\n" + self.indent + ", " + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
                 else:

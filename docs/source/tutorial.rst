@@ -205,6 +205,22 @@ This code results in the following, customized, file:
     ,    year = {2013}
     }
 
+Another interesting option is the protection of upper case letters.
+
+.. code-block:: python
+
+    writer.protect_upper_case = True
+
+
+For instance, if the original title has upper case letters or words, the result looks like
+
+.. code-block:: latex
+    @article{Cesar2013,
+        title = {An {A}mazing title},
+        author = {Jean César}
+    }
+
+
 Flags to the writer object can modify not only how an entry is printed but how several BibTeX entries are sorted and separated.
 See the :ref:`bibtexparser_api` for the full list of flags.
 

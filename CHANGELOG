@@ -6,6 +6,7 @@ v0.XXX
 * DOC: include docs/ in manifest
 * API: fix spelling "homogenize". Affects customization and bparser
 * API: BibtexParser: homogenize_fields is now False by default (#94)
+* ENH: Add option to bwriter to protect uppercase letters (#126)
 
 v0.6.2
 ======
