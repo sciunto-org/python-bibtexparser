@@ -206,6 +206,7 @@ This code results in the following, customized, file:
     }
 
 Another interesting option is the protection of upper case letters.
+This could help you if your input does not have braces around upper case letters.
 
 .. code-block:: python
 
