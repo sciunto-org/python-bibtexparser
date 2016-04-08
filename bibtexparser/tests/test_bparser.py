@@ -97,6 +97,25 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res_list, expected_list)
         self.assertEqual(res_dict, expected_dict)
 
+    def test_article_start_bom(self):
+        with codecs.open('bibtexparser/tests/data/article_start_with_bom.bib', 'r', 'utf-8') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            res = bib.get_entry_list()
+        expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                     'ENTRYTYPE': 'article',
+                     'pages': '12-23',
+                     'volume': '12',
+                     'ID': 'Cesar2013',
+                     'year': '2013',
+                     'author': 'Jean César',
+                     'journal': 'Nice Journal',
+                     'comments': 'A comment',
+                     'month': 'jan',
+                     'keyword': 'keyword1, keyword2',
+                     'title': 'An amazing title'
+                     }]
+        self.assertEqual(res, expected)
+
     def test_article_cust_unicode(self):
         with codecs.open('bibtexparser/tests/data/article.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
