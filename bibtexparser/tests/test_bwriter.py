@@ -61,6 +61,22 @@ class TestBibtexWriterList(unittest.TestCase):
         self.assertEqual(expected, result)
 
     ###########
+    # PROTECT UPPER CASE
+    ###########
+    def test_protect_upper_case(self):
+        with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+
+        with open('bibtexparser/tests/data/book_protect_upper_case.bib', 'r') as bibfile:
+            expected = bibfile.read()
+        writer = BibTexWriter()
+        writer.indent = '   '
+        writer.protect_upper_case = True
+        result = writer.write(bib)
+        self.maxDiff = None
+        self.assertEqual(expected, result)
+
+    ###########
     # MULTIPLE
     ###########
     def test_multiple(self):
