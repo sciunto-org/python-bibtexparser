@@ -131,7 +131,7 @@ class TestBibtexParserList(unittest.TestCase):
                      'comments': 'A comment',
                      'month': 'jan',
                      'keyword': ['keyword1', 'keyword2'],
-                     'title': '{A}n amazing title'
+                     'title': 'An amazing title'
                      }]
         self.assertEqual(res, expected)
 
@@ -357,22 +357,6 @@ class TestBibtexParserList(unittest.TestCase):
 
         self.assertEqual(res, expected)
 
-    def test_book_cust_latex(self):
-        with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
-            bib = BibTexParser(bibfile.read(), customization=customizations_latex)
-            res = bib.get_entry_list()
-            expected = [{'ENTRYTYPE': 'book',
-                         'year': '1987',
-                         'edition': '2',
-                         'publisher': 'Wiley Edition',
-                         'ID': 'Bird1987',
-                         'volume': '1',
-                         'title': '{D}ynamics of {P}olymeric {L}iquid',
-                         'author': ['Bird, R.B.', 'Armstrong, R.C.', 'Hassager, O.']
-                         }]
-
-        self.assertEqual(res, expected)
-
     ###########
     # TRAPS
     ###########
@@ -471,7 +455,7 @@ class TestBibtexParserList(unittest.TestCase):
                          'journal': 'El{\\\'e}mentaire',
                          'ID': 'Cesar_2013',
                          'pages': '12-23',
-                         'title': '{A}n amazing title: {\\`a}',
+                         'title': 'An amazing title: {\\`a}',
                          'comments': 'A comment',
                          'author': 'Jean C{\\\'e}sar',
                          'volume': '12',
