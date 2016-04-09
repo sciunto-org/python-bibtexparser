@@ -9,7 +9,7 @@ Requirements
 ------------
 
 * python **2.7** or python **3.3** or newer
-* pyparsing
+* pyparsing **2.0.3** or newer
 
 Package manager (recommended for those OS users)
 ------------------------------------------------
@@ -17,10 +17,8 @@ Package manager (recommended for those OS users)
 * `Archlinux <https://aur.archlinux.org/packages/python-bibtexparser/>`_
 * `Debian <https://packages.debian.org/en/sid/main/python-bibtexparser>`_
 
-PyPI (recommended to other users)
+pip (recommended to other users)
 ---------------------------------
-
-`See Pypi <http://pypi.python.org/pypi/bibtexparser/>`_
 
 To install with pip:
 
@@ -32,7 +30,7 @@ To install with pip:
 Manual installation (recommended for packagers)
 -----------------------------------------------
 
-`Download <http://source.sciunto.org/bibtexparser/>`_ the archive.
+Download the archive on `Pypi <http://pypi.python.org/pypi/bibtexparser/>`_.
 
 .. code-block:: sh
 
@@ -42,7 +40,7 @@ Manual installation (recommended for packagers)
 How to run the test suite?
 ==========================
 
-This page briefly describes how to run the test suite.
+This paragraph briefly describes how to run the test suite.
 This is useful for contributors, for packagers but also for users who wants to check their environment.
 
 
