@@ -20,10 +20,11 @@ Upper case letters in titles
 Put the letter/word in curly braces like {this}.
 
 
-How to handle accents and special characters?
----------------------------------------------
+General references
+------------------
 
-TODO
+* http://tug.ctan.org/tex-archive/info/bibtex/tamethebeast/ttb_en.pdf
+* http://ctan.mirrors.hoobly.com/macros/latex/contrib/biblatex/doc/biblatex.pdf
 
 IEEE citation reference
 -----------------------
