@@ -1,5 +1,7 @@
 .. _bibtexparser_api:
 
+.. contents::
+
 bibtexparser: API
 =================
 
@@ -15,26 +17,27 @@ bibtexparser: API
 .. autoclass:: bibdatabase.BibDatabase
     :members: entries, entries_dict, comments, strings, preambles
 
-:mod:`bibtexparser.bibtexexpression` --- core (pyparsing)
----------------------------------------------------------
-
-.. automodule:: bibtexexpression
-    :members:
-
-:mod:`bibtexparser.bparser` --- Modifying the default parser
-------------------------------------------------------------
+:mod:`bibtexparser.bparser` --- Tune the default parser
+--------------------------------------------------------
 
 .. automodule:: bparser
     :members:
 
-:mod:`bibtexparser.customization` --- Record customization functions
+:mod:`bibtexparser.customization` --- Functions to customize records
 --------------------------------------------------------------------
 
 .. automodule:: customization
     :members:
 
-:mod:`bibtexparser.bwriter` --- Modifying the default writer
-------------------------------------------------------------
+:mod:`bibtexparser.bwriter` --- Tune the default writer
+-------------------------------------------------------
 
 .. autoclass:: bwriter.BibTexWriter
     :members:
+
+:mod:`bibtexparser.bibtexexpression` --- Parser's core relying on pyparsing
+---------------------------------------------------------------------------
+
+.. automodule:: bibtexexpression
+    :members:
+

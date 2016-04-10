@@ -21,12 +21,17 @@ __all__ = ['getnames', 'author', 'editor', 'journal', 'keyword', 'link',
 
 
 def getnames(names):
-    """Make people names as surname, firstnames
-    or surname, initials. Should eventually combine up the two.
+    """Convert people names as surname, firstnames
+    or surname, initials.
 
     :param names: a list of names
     :type names: list
     :returns: list -- Correctly formated names
+
+    .. Note::
+
+    This function is known to be too simple to handle properly
+    the complex rules. We would like to enhance this in forthcoming releases.
     """
     tidynames = []
     for namestring in names:
