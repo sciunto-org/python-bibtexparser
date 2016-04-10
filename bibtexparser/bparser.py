@@ -119,7 +119,8 @@ class BibTexParser(object):
 
         :param bibtex_str: BibTeX string
         :type: str or unicode
-        :param partial: if True, warn only on parsing failures
+        :param partial: If True, print errors only on parsing failures.
+        If False, an exception is raised.
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
@@ -128,7 +129,7 @@ class BibTexParser(object):
         try:
             self._expr.parseFile(bibtex_file_obj)
         except self._expr.ParseException as exc:
-            logger.error("Could not parse near %s", exc.line)
+            logger.error("Could not parse properly, starting at %s", exc.line)
             if not partial:
                 raise exc
         return self.bib_database
@@ -138,7 +139,8 @@ class BibTexParser(object):
 
         :param file: BibTeX file or file-like object
         :type: file
-        :param partial: if True, warn only on parsing failures
+        :param partial: If True, print errors only on parsing failures.
+        If False, an exception is raised.
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase

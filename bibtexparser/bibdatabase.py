@@ -41,14 +41,15 @@ COMMON_STRINGS = {
 
 class BibDatabase(object):
     """
-    A bibliographic database object following the data structure of a BibTeX file.
+    Bibliographic database object that follows the data structure of a BibTeX file.
     """
     def __init__(self):
         #: List of BibTeX entries, for example `@book{...}`, `@article{...}`, etc. Each entry is a simple dict with
         #: BibTeX field-value pairs, for example `'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'` Each
         #: entry will always have the following dict keys (in addition to other BibTeX fields):
-        #: - `ID` (BibTeX key)
-        #: - `ENTRYTYPE` (entry type in lowercase, e.g. `book`, `article` etc.)
+        #:
+        #: * `ID` (BibTeX key)
+        #: * `ENTRYTYPE` (entry type in lowercase, e.g. `book`, `article` etc.)
         self.entries = []
         self._entries_dict = {}
         #: List of BibTeX comment (`@comment{...}`) blocks.

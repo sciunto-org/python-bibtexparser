@@ -1,11 +1,14 @@
 """
 `BibTeX <http://en.wikipedia.org/wiki/BibTeX>`_ is a bibliographic data file format.
 
-The :mod:`bibtexparser` module provides parsing and writing of BibTeX files functionality. The API is similar to the
+The :mod:`bibtexparser` module can parse BibTeX files and write them. The API is similar to the
 :mod:`json` module. The parsed data is returned as a simple :class:`BibDatabase` object with the main attribute being
 :attr:`entries` representing bibliographic sources such as books and journal articles.
 
-Parsing is as simple as::
+The following functions provide a quick and basic way to manipulate a BibTeX file.
+More advanced features are also available in this module.
+
+Parsing a file is as simple as::
 
     import bibtexparser
     with open('bibtex.bib') as bibtex_file:
@@ -53,6 +56,13 @@ def load(bibtex_file, parser=None):
     :type parser: BibTexParser
     :returns: bibliographic database object
     :rtype: BibDatabase
+
+    Example::
+
+        import bibtexparser
+        with open('bibtex.bib') as bibtex_file:
+           bibtex_database = bibtexparser.load(bibtex_file)
+
     """
     if parser is None:
         parser = bparser.BibTexParser()
@@ -77,7 +87,7 @@ def dumps(bib_database, writer=None):
 
 def dump(bib_database, bibtex_file, writer=None):
     """
-    Save :class:`BibDatabase` object as a BibTeX text file
+    Dump :class:`BibDatabase` object as a BibTeX text file
 
     :param bib_database: bibliographic database object
     :type bib_database: BibDatabase
@@ -85,6 +95,13 @@ def dump(bib_database, bibtex_file, writer=None):
     :type bibtex_file: file
     :param writer: custom writer to use (optional) (not yet implemented)
     :type writer: BibTexWriter
+
+    Example::
+
+        import bibtexparser
+        with open('bibtex.bib', 'w') as bibtex_file:
+            bibtexparser.dump(bibtex_database, bibtex_file)
+
     """
     if writer is None:
         writer = bwriter.BibTexWriter()

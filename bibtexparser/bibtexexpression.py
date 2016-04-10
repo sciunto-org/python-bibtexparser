@@ -77,6 +77,7 @@ class BibtexExpression(object):
     * explicit_comment: an explicit comment
     * entry: an entry definition
     * implicit_comment: an implicit comment
+
     """
 
     ParseException = pp.ParseException
