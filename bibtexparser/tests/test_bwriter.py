@@ -76,6 +76,19 @@ class TestBibtexWriterList(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(expected, result)
 
+    @unittest.skip('Not implemented. If already in {}, should not add braces again')
+    def test_protect_upper_case_alreadyprotected(self):
+        with open('bibtexparser/tests/data/article_with_protection_braces.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+
+        with open('bibtexparser/tests/data/article_with_protection_braces.bib', 'r') as bibfile:
+            expected = bibfile.read()
+        writer = BibTexWriter()
+        writer.indent = '   '
+        writer.protect_upper_case = True
+        result = writer.write(bib)
+        self.maxDiff = None
+        self.assertEqual(expected, result)
     ###########
     # MULTIPLE
     ###########

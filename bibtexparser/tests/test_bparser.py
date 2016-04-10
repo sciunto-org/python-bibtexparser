@@ -316,7 +316,7 @@ class TestBibtexParserList(unittest.TestCase):
                      'comments': 'A comment',
                      'keyword': 'keyword1, keyword2',
                      'title': '{An amazing title}',
-                     'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
+                     'abstract': "This is an abstract.",
                      },
                      ]
         self.assertEqual(res, expected)
