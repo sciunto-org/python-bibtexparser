@@ -15,7 +15,7 @@ Documentation
 Our documentation includes the installation procedure, a tutorial, the API and advices to report a bug.
 References, related projects and softwares based on bibtexparser are also listed. If you would like to appear on this list, feel free to open a ticket or send an email.
 
-`Documentation on readthedocs.io https://bibtexparser.readthedocs.io/`_
+`Documentation on readthedocs.io <https://bibtexparser.readthedocs.io/>`_
 
 Upgrading
 ---------
