@@ -33,3 +33,6 @@
 
 - Olivier Mangin
   Pyparsing implementation of the parser.
+
+- Blair Bonnett
+  customization.splitname() function
