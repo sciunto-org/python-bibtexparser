@@ -29,6 +29,10 @@ bibtexparser: API
 .. automodule:: customization
     :members:
 
+Exception classes
+^^^^^^^^^^^^^^^^^
+.. autoclass:: customization.InvalidName
+
 :mod:`bibtexparser.bwriter` --- Tune the default writer
 -------------------------------------------------------
 
