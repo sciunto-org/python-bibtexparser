@@ -33,6 +33,12 @@ Exception classes
 ^^^^^^^^^^^^^^^^^
 .. autoclass:: customization.InvalidName
 
+:mod:`bibtexparser.utils` --- Utility functions
+-----------------------------------------------
+
+.. automodule:: utils
+    :members:
+
 :mod:`bibtexparser.bwriter` --- Tune the default writer
 -------------------------------------------------------
 
