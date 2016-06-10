@@ -3,101 +3,101 @@
 
 import unittest
 
-from bibtexparser.customization import InvalidName, splitname
+from bibtexparser.utils import InvalidName, parsename
 
-class TestSplitnameMethod(unittest.TestCase):
-    def test_splitname_basic(self):
-        """Basic tests of customization.splitname() """
+class TestParsenameMethod(unittest.TestCase):
+    def test_parsename_basic(self):
+        """Basic tests of utils.parsename() """
         # Empty input.
-        result = splitname("")
+        result = parsename("")
         expected = {}
         self.assertEqual(result, expected, msg="Invalid output for empty name")
 
         # Non-whitespace names.
-        result = splitname("    ")
+        result = parsename("    ")
         expected = {}
         self.assertEqual(result, expected, msg="Invalid output for space-only name")
-        result = splitname("  \t~~")
+        result = parsename("  \t~~")
         expected = {}
         self.assertEqual(result, expected, msg="Invalid output for whitespace name")
 
         # Test strict mode.
         with self.assertRaises(InvalidName):         # Trailing comma (4 cases).
-            splitname("BB,", strict_mode=True)
+            parsename("BB,", strict_mode=True)
         with self.assertRaises(InvalidName):
-            splitname("BB,  ", strict_mode=True)
+            parsename("BB,  ", strict_mode=True)
         with self.assertRaises(InvalidName):
-            splitname("BB, ~\t", strict_mode=True)
+            parsename("BB, ~\t", strict_mode=True)
         with self.assertRaises(InvalidName):
-            splitname(", ~\t", strict_mode=True)
+            parsename(", ~\t", strict_mode=True)
         with self.assertRaises(InvalidName):         # Too many sections.
-            splitname("AA, BB, CC, DD", strict_mode=True)
+            parsename("AA, BB, CC, DD", strict_mode=True)
         with self.assertRaises(InvalidName):         # Unterminated opening brace (x3).
-            splitname("AA {BB CC", strict_mode=True)
+            parsename("AA {BB CC", strict_mode=True)
         with self.assertRaises(InvalidName):
-            splitname("AA {{{BB CC", strict_mode=True)
+            parsename("AA {{{BB CC", strict_mode=True)
         with self.assertRaises(InvalidName):
-            splitname("AA {{{BB} CC}", strict_mode=True)
+            parsename("AA {{{BB} CC}", strict_mode=True)
         with self.assertRaises(InvalidName):         # Unmatched closing brace (x3).
-            splitname("AA BB CC}", strict_mode=True)
+            parsename("AA BB CC}", strict_mode=True)
         with self.assertRaises(InvalidName):
-            splitname("AA BB CC}}}", strict_mode=True)
+            parsename("AA BB CC}}}", strict_mode=True)
         with self.assertRaises(InvalidName):
-            splitname("{AA {BB CC}}}", strict_mode=True)
+            parsename("{AA {BB CC}}}", strict_mode=True)
 
         # Test strict mode off for trailing comma.
         expected = {'first': [], 'von': [], 'last': ["BB"], 'jr': []}
-        result = splitname("BB,", strict_mode=False)
+        result = parsename("BB,", strict_mode=False)
         self.assertEqual(result, expected, msg="Invalid output for trailing comma with strict mode off")
-        result = splitname("BB,   ", strict_mode=False)
+        result = parsename("BB,   ", strict_mode=False)
         self.assertEqual(result, expected, msg="Invalid output for trailing comma with strict mode off")
-        result = splitname("BB,  ~\t ", strict_mode=False)
+        result = parsename("BB,  ~\t ", strict_mode=False)
         self.assertEqual(result, expected, msg="Invalid output for trailing comma with strict mode off")
         expected = {}
-        result = splitname(",  ~\t", strict_mode=False)
+        result = parsename(",  ~\t", strict_mode=False)
         self.assertEqual(result, expected, msg="Invalid output for trailing comma with strict mode off")
 
         # Test strict mode off for too many sections.
         expected = {'first': ["CC", "DD"], 'von': [], 'last': ["AA"], 'jr': ["BB"]}
-        result = splitname("AA, BB, CC, DD", strict_mode=False)
+        result = parsename("AA, BB, CC, DD", strict_mode=False)
         self.assertEqual(result, expected, msg="Invalid output for too many sections with strict mode off")
 
         # Test strict mode off for an unterminated opening brace.
-        result = splitname("AA {BB CC", strict_mode=False)
+        result = parsename("AA {BB CC", strict_mode=False)
         expected = {'first': ["AA"], 'von': [], 'last': ["{BB CC}"], 'jr': []}
         self.assertEqual(result, expected, msg="Invalid output for unterminated opening brace with strict mode off")
-        result = splitname("AA {{{BB CC", strict_mode=False)
+        result = parsename("AA {{{BB CC", strict_mode=False)
         expected = {'first': ["AA"], 'von': [], 'last': ["{{{BB CC}}}"], 'jr': []}
         self.assertEqual(result, expected, msg="Invalid output for unterminated opening brace with strict mode off")
-        result = splitname("AA {{{BB} CC}", strict_mode=False)
+        result = parsename("AA {{{BB} CC}", strict_mode=False)
         expected = {'first': ["AA"], 'von': [], 'last': ["{{{BB} CC}}"], 'jr': []}
         self.assertEqual(result, expected, msg="Invalid output for unterminated opening brace with strict mode off")
 
         # Test strict mode off for an unmatched closing brace.
-        result = splitname("AA BB CC}", strict_mode=False)
+        result = parsename("AA BB CC}", strict_mode=False)
         expected = {'first': ["AA", "BB"], 'von': [], 'last': ["{CC}"], 'jr': []}
         self.assertEqual(result, expected, msg="Invalid output for unmatched closing brace with strict mode off")
-        result = splitname("AA BB CC}}}", strict_mode=False)
+        result = parsename("AA BB CC}}}", strict_mode=False)
         expected = {'first': ["AA", "BB"], 'von': [], 'last': ["{{{CC}}}"], 'jr': []}
         self.assertEqual(result, expected, msg="Invalid output for unmatched closing brace with strict mode off")
-        result = splitname("{AA {BB CC}}}", strict_mode=False)
+        result = parsename("{AA {BB CC}}}", strict_mode=False)
         expected = {'first': [], 'von': [], 'last': ["{{AA {BB CC}}}"], 'jr': []}
         self.assertEqual(result, expected, msg="Invalid output for unmatched closing brace with strict mode off")
 
         # Test it handles commas at higher brace levels.
-        result = splitname("CC, dd, {AA, BB}")
+        result = parsename("CC, dd, {AA, BB}")
         expected = {'first': ["{AA, BB}"], 'von': [], 'last': ["CC"], 'jr': ["dd"]}
         self.assertEqual(result, expected, msg="Invalid output for braced commas")
 
 
-    def test_splitname_cases(self):
-        """Test customization.splitname() vs output from BibTeX """
-        for name, expected in splitname_test_cases:
-            result = splitname(name)
+    def test_parsename_cases(self):
+        """Test utils.parsename() vs output from BibTeX """
+        for name, expected in parsename_test_cases:
+            result = parsename(name)
             self.assertEqual(result, expected, msg="Input name: {0}".format(name))
 
 
-splitname_test_cases = (
+parsename_test_cases = (
     (r'Per Brinch Hansen',
      {'first': ['Per', 'Brinch'], 'von': [], 'last': ['Hansen'], 'jr': []}),
 

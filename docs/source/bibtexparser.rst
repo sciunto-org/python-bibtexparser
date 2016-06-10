@@ -29,10 +29,6 @@ bibtexparser: API
 .. automodule:: customization
     :members:
 
-Exception classes
-^^^^^^^^^^^^^^^^^
-.. autoclass:: customization.InvalidName
-
 :mod:`bibtexparser.utils` --- Utility functions
 -----------------------------------------------
 
