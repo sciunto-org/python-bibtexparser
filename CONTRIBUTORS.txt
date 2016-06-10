@@ -35,4 +35,4 @@
   Pyparsing implementation of the parser.
 
 - Blair Bonnett
-  customization.splitname() function
+  utils.parsename() and utils.splitnames() functions
