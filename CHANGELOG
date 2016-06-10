@@ -2,6 +2,8 @@ v0.XXX
 ======
 
 * ENH: we use pyparsing (#64) by Olivier Magin.
+* ENH: added utils.splitnames() and utils.parsename() functions to
+       work with BibTeX name strings (#137, #140).
 * DOC: Refactoring of the tutorial
 * DOC: include docs/ in manifest
 * API: fix spelling "homogenize". Affects customization and bparser
