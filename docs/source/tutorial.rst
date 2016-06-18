@@ -6,8 +6,8 @@ Step 0: Vocabulary
 ==================
 
 * An **entry** designates for example `@book{...}`, `@article{...}`, etc.
-* A **comment** is writen as `@comment{...}`.
-* A **preambule** is a `@preamble{...}` block.
+* A **comment** is written as `@comment{...}`.
+* A **preamble** is a `@preamble{...}` block.
 * A **string** is `@string{...}`.
 
 In an entry, you can find
@@ -107,7 +107,7 @@ Tune parser's options
 ---------------------
 
 In the previous snippet, several default options are used.
-You can tweek them as you wish.
+You can tweak them as you wish.
 
 .. code-block:: python
 
@@ -299,8 +299,8 @@ If you think that you have a customization which could be useful to others, plea
 Accents and weird characters
 ----------------------------
 
-Your bibtex may content accents and specific characters.
-They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``{\'e}`` is prefered. Moreover, you may want to manipulate ``é``. There is different situations:
+Your bibtex may contain accents and specific characters.
+They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``{\'e}`` is preferred. Moreover, you may want to manipulate ``é``. There is different situations:
 
 * Case 1: you plan to use this library to work with latex and you assume that the original bibtex is clean. You have nothing to do.
 
@@ -338,5 +338,3 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 .. Note::
 
     If you want to mix different customization functions, you can write your own function.
-
-
