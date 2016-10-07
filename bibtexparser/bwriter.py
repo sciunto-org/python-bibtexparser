@@ -5,6 +5,7 @@
 
 import logging
 from bibtexparser.bibdatabase import BibDatabase
+from bibtexparser.latexenc import string_to_latex, protect_uppercase
 
 logger = logging.getLogger(__name__)
 
@@ -113,10 +114,13 @@ class BibTexWriter(object):
         # Write field = value lines
         for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
             try:
+                fbt = string_to_latex(entry[field])
+                if field == 'title':
+                    fbt = protect_uppercase(fbt)
                 if self.comma_first:
-                    bibtex += "\n" + self.indent + ", " + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
+                    bibtex += "\n" + self.indent + ", " + "{0:<{1}}".format(field, self._max_field_width) + " = {" + fbt + "}"
                 else:
-                    bibtex += ",\n" + self.indent + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
+                    bibtex += ",\n" + self.indent + "{0:<{1}}".format(field, self._max_field_width) + " = {" + fbt + "}"
             except TypeError:
                 raise TypeError(u"The field %s in entry %s must be a string"
                                 % (field, entry['ID']))
