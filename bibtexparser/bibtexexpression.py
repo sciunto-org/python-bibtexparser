@@ -103,7 +103,7 @@ class BibtexExpression(object):
         comment_line_start = pp.CaselessKeyword('@comment')
 
         # String names
-        string_name = pp.Word(pp.alphanums + '_')('StringName')
+        string_name = pp.Word(pp.alphanums + '_-:')('StringName')
         self.set_string_name_parse_action(lambda s, l, t: None)
         string_name.addParseAction(self._string_name_parse_action)
 
@@ -154,7 +154,7 @@ class BibtexExpression(object):
         key.setParseAction(lambda s, l, t: first_token(s, l, t).strip())
 
         # Field name: word of letters, digits, dashes and underscores
-        field_name = pp.Word(pp.alphanums + '_-()')('FieldName')
+        field_name = pp.Word(pp.alphanums + '_-().')('FieldName')
         field_name.setParseAction(first_token)
 
         # Field: field_name = value
