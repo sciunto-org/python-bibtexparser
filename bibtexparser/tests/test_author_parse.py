@@ -24,6 +24,17 @@ from bibtexparser.author_parse import (Author,
                                        post_process_brackets,
                                        )
 
+from bibtexparser.customization import splitname
+
+## little wrapper so I can test the splitname() function with the same tests.
+
+def parse_author(name_string):
+    result = splitname(name_string)
+
+    result = {key: " ".join(part) for key, part in result.items()}
+
+    return Author(result['first'], result['von'], result['last'], result['jr'])
+
 
 # fixme: This could be made much cleaner with parameterized tests!
 
@@ -197,6 +208,7 @@ class Test_parse_name():
         """
         name = r"Maria {\uppercase{d}e La} Cruz"
         author = parse_author(name)
+        print(author)
         assert author.first == "Maria"
         assert author.last == "Cruz"
         assert author.von == r"{\uppercase{d}e La}"
