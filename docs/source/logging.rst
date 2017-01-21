@@ -11,7 +11,7 @@ Steps
 3. For a parsing error, provide the expected output.
 4. For a crash, set the logger to the debug level (see below).
 
-If you want to provide a patch (that's wonderful! thank you), please, take few minutes to write a unittest that fails without your contribution.
+If you want to provide a patch (that's wonderful! thank you), please, take few minutes to write a unit test that fails without your contribution.
 
 Logging module to understand failures
 -------------------------------------
