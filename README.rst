@@ -4,6 +4,8 @@ python-bibtexparser
 Python library to parse `bibtex <https://en.wikipedia.org/wiki/BibTeX>`_ files.
 
 
+IMPORTANT: the library is looking for new maintainers. Please, manifest yourself if you are interested.
+
 .. contents::
 
 
