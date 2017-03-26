@@ -7,11 +7,13 @@
 # Etienne Posthumus (epoz)
 # Francois Boulogne <fboulogne at april dot org>
 
+import itertools
 import re
 import sys
 
-__all__ = ['string_to_latex', 'protect_uppercase', 'unicode_to_latex',
-           'unicode_to_crappy_latex1', 'unicode_to_crappy_latex2']
+__all__ = ['string_to_latex', 'latex_to_unicode', 'protect_uppercase',
+           'unicode_to_latex', 'unicode_to_crappy_latex1',
+           'unicode_to_crappy_latex2']
 
 
 def string_to_latex(string):
@@ -27,6 +29,37 @@ def string_to_latex(string):
         else:
             new.append(unicode_to_latex_map.get(char, char))
     return ''.join(new)
+
+
+def latex_to_unicode(string):
+    """
+    Convert a LaTeX string to unicode equivalent.
+
+    :param string: string to convert
+    :returns: string
+    """
+    if '\\' in string or '{' in string:
+        for k, v in itertools.chain(unicode_to_crappy_latex1, unicode_to_latex):
+            if v in string:
+                string = string.replace(v, k)
+
+    # Handle umlaut case
+    if '\\"' in string:
+        string = re.sub(r'\\"(\w)', "\1\u0308", string)
+
+    # If there is still very crappy items
+    if '\\' in string:
+        for k, v in unicode_to_crappy_latex2:
+            if v in string:
+                parts = string.split(str(v))
+                for key, string in enumerate(parts):
+                    if key+1 < len(parts) and len(parts[key+1]) > 0:
+                        # Change order to display accents
+                        parts[key] = parts[key] + parts[key+1][0]
+                        parts[key+1] = parts[key+1][1:]
+                string = k.join(parts)
+
+    return string
 
 
 def protect_uppercase(string):
@@ -326,6 +359,7 @@ def prepare_unicode_to_latex():
         ("\u00C2", "{\\^A}"),
         ("\u00C3", "{\\~A}"),
         ("\u00C4", "{\\\"A}"),
+        ("\u00C4", "\\\"A"),
         ("\u00C5", "{\\AA}"),
         ("\u00C6", "{\\AE}"),
         ("\u00C7", "{\\c C}"),
@@ -333,10 +367,12 @@ def prepare_unicode_to_latex():
         ("\u00C9", "{\\'E}"),
         ("\u00CA", "{\\^E}"),
         ("\u00CB", "{\\\"E}"),
+        ("\u00CB", "\\\"E"),
         ("\u00CC", "{\\`I}"),
         ("\u00CD", "{\\'I}"),
         ("\u00CE", "{\\^I}"),
         ("\u00CF", "{\\\"I}"),
+        ("\u00CF", "\\\"I"),
         ("\u00D0", "{\\DH}"),
         ("\u00D1", "{\\~N}"),
         ("\u00D2", "{\\`O}"),
@@ -344,12 +380,14 @@ def prepare_unicode_to_latex():
         ("\u00D4", "{\\^O}"),
         ("\u00D5", "{\\~O}"),
         ("\u00D6", "{\\\"O}"),
+        ("\u00D6", "\\\"O"),
         ("\u00D7", "\\texttimes "),
         ("\u00D8", "{\\O}"),
         ("\u00D9", "{\\`U}"),
         ("\u00DA", "{\\'U}"),
         ("\u00DB", "{\\^U}"),
         ("\u00DC", "{\\\"U}"),
+        ("\u00DC", "\\\"U"),
         ("\u00DD", "{\\'Y}"),
         ("\u00DE", "{\\TH}"),
         ("\u00DF", "{\\ss}"),
@@ -358,6 +396,7 @@ def prepare_unicode_to_latex():
         ("\u00E2", "{\\^a}"),
         ("\u00E3", "{\\~a}"),
         ("\u00E4", "{\\\"a}"),
+        ("\u00E4", "\\\"a"),
         ("\u00E5", "{\\aa}"),
         ("\u00E6", "{\\ae}"),
         ("\u00E7", "{\\c c}"),
@@ -365,10 +404,12 @@ def prepare_unicode_to_latex():
         ("\u00E9", "{\\'e}"),
         ("\u00EA", "{\\^e}"),
         ("\u00EB", "{\\\"e}"),
+        ("\u00EB", "\\\"e"),
         ("\u00EC", "{\\`\\i}"),
         ("\u00ED", "{\\'\\i}"),
         ("\u00EE", "{\\^\\i}"),
         ("\u00EF", "{\\\"\\i}"),
+        ("\u00EF", "\\\"\\i"),
         ("\u00F0", "{\\dh }"),
         ("\u00F1", "{\\~n}"),
         ("\u00F2", "{\\`o}"),
@@ -376,15 +417,18 @@ def prepare_unicode_to_latex():
         ("\u00F4", "{\\^o}"),
         ("\u00F5", "{\\~o}"),
         ("\u00F6", "{\\\"o}"),
+        ("\u00F6", "\\\"o"),
         ("\u00F7", "{\\div}"),
         ("\u00F8", "{\\o}"),
         ("\u00F9", "{\\`u}"),
         ("\u00FA", "{\\'u}"),
         ("\u00FB", "{\\^u}"),
         ("\u00FC", "{\\\"u}"),
+        ("\u00FC", "\\\"u"),
         ("\u00FD", "{\\'y}"),
         ("\u00FE", "{\\th}"),
         ("\u00FF", "{\\\"y}"),
+        ("\u00FF", "\\\"y"),
         ("\u0100", "{\\= A}"),
         ("\u0101", "{\\= a}"),
         ("\u0102", "{\\u A}"),
@@ -585,7 +629,10 @@ def prepare_unicode_to_latex():
         ("\u0304", "\\="),
         ("\u0306", "\\u"),
         ("\u0307", "\\."),
-        ("\u0308", "\\\""),
+        # Replacement of umlaut is not working because the unicode character
+        # should be *after* the letter whereas the LaTeX one should be
+        # *before*. This is treated separately in `latex_to_unicode` function.
+        # ("\u0308", "\\\""),
         ("\u030A", "\\r"),
         ("\u030B", "\\H"),
         ("\u030C", "\\v"),

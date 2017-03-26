@@ -86,6 +86,11 @@ class TestBibtexParserMethod(unittest.TestCase):
         result = convert_to_unicode(record)
         expected = {'toto': 'ü ü'}
         self.assertEqual(result, expected)
+        # From issue 121
+        record = {'title': '{Two Gedenk\\"uberlieferung der Angelsachsen}'}
+        result = convert_to_unicode(record)
+        expected = {'title': '{Two Gedenküberlieferung der Angelsachsen}'}
+        self.assertEqual(result, expected)
 
     ###########
     # homogenize

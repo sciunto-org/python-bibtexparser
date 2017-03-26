@@ -7,11 +7,10 @@ You can find inspiration from these functions to design yours.
 Each of them takes a record and return the modified record.
 """
 
-import itertools
 import re
 import logging
 
-from bibtexparser.latexenc import unicode_to_latex, unicode_to_crappy_latex1, unicode_to_crappy_latex2, string_to_latex, protect_uppercase
+from bibtexparser.latexenc import latex_to_unicode, string_to_latex, protect_uppercase
 
 logger = logging.getLogger(__name__)
 
@@ -495,22 +494,7 @@ def convert_to_unicode(record):
     :returns: dict -- the modified record.
     """
     for val in record:
-        if '\\' in record[val] or '{' in record[val]:
-            for k, v in itertools.chain(unicode_to_crappy_latex1, unicode_to_latex):
-                if v in record[val]:
-                    record[val] = record[val].replace(v, k)
-
-        # If there is still very crappy items
-        if '\\' in record[val]:
-            for k, v in unicode_to_crappy_latex2:
-                if v in record[val]:
-                    parts = record[val].split(str(v))
-                    for key, record[val] in enumerate(parts):
-                        if key+1 < len(parts) and len(parts[key+1]) > 0:
-                            # Change order to display accents
-                            parts[key] = parts[key] + parts[key+1][0]
-                            parts[key+1] = parts[key+1][1:]
-                    record[val] = k.join(parts)
+        record[val] = latex_to_unicode(record[val])
     return record
 
 
