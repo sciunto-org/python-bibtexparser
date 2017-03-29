@@ -1,3 +1,5 @@
+# coding: utf-8
+import tempfile
 import unittest
 import bibtexparser
 from bibtexparser.bwriter import BibTexWriter
@@ -233,4 +235,29 @@ class TestEntrySorting(unittest.TestCase):
         result = bibtexparser.dumps(bib_database, writer)
         expected = "@book{a\n}\n\n@article{b,\n year = {2000}\n}\n\n@book{c,\n year = {2010}\n}\n\n"
         self.assertEqual(result, expected)
+
+    def test_unicode_problems(self):
+        # See #51
+        bibtex = """
+        @article{Mesa-Gresa2013,
+            abstract = {During a 4-week period half the mice (n = 16) were exposed to EE and the other half (n = 16) remained in a standard environment (SE). Aggr. Behav. 9999:XX-XX, 2013. © 2013 Wiley Periodicals, Inc.},
+            author = {Mesa-Gresa, Patricia and P\'{e}rez-Martinez, Asunci\'{o}n and Redolat, Rosa},
+            doi = {10.1002/ab.21481},
+            file = {:Users/jscholz/Documents/mendeley/Mesa-Gresa, P\'{e}rez-Martinez, Redolat - 2013 - Environmental Enrichment Improves Novel Object Recognition and Enhances Agonistic Behavior.pdf:pdf},
+            issn = {1098-2337},
+            journal = {Aggressive behavior},
+            month = "apr",
+            number = {April},
+            pages = {269--279},
+            pmid = {23588702},
+            title = {{Environmental Enrichment Improves Novel Object Recognition and Enhances Agonistic Behavior in Male Mice.}},
+            url = {http://www.ncbi.nlm.nih.gov/pubmed/23588702},
+            volume = {39},
+            year = {2013}
+        }
+        """
+        bibdb = bibtexparser.loads(bibtex)
+        with tempfile.TemporaryFile(mode='w+') as bibtex_file:
+            bibtexparser.dump(bibdb, bibtex_file)
+            # No exception should be raised
 
