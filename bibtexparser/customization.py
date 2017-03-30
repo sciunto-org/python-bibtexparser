@@ -10,13 +10,15 @@ Each of them takes a record and return the modified record.
 import re
 import logging
 
+from builtins import str
+
 from bibtexparser.latexenc import latex_to_unicode, string_to_latex, protect_uppercase
 
 logger = logging.getLogger(__name__)
 
 __all__ = ['splitname', 'getnames', 'author', 'editor', 'journal', 'keyword',
            'link', 'page_double_hyphen', 'doi', 'type', 'convert_to_unicode',
-           'homogenize_latex_encoding']
+           'homogenize_latex_encoding', 'add_plaintext_fields']
 
 
 class InvalidName(ValueError):
@@ -529,4 +531,39 @@ def homogenize_latex_encoding(record):
                 logger.debug('Before: %s', record[val])
                 record[val] = protect_uppercase(record[val])
                 logger.debug('After: %s', record[val])
+    return record
+
+
+def add_plaintext_fields(record):
+    """
+    For each field in the record, add a `plain_` field containing the
+    plaintext, stripped from braces and similar. See
+    https://github.com/sciunto-org/python-bibtexparser/issues/116.
+
+    :param record: the record.
+    :type record: dict
+    :returns: dict -- the modified record.
+    """
+    def _strip_string(string):
+        for stripped in ['{', '}']:
+            string = string.replace(stripped, "")
+        return string
+
+    for key in list(record.keys()):
+        plain_key = "plain_{}".format(key)
+        record[plain_key] = record[key]
+
+        if isinstance(record[plain_key], str):
+            record[plain_key] = _strip_string(record[plain_key])
+        elif isinstance(record[plain_key], dict):
+            record[plain_key] = {
+                subkey: _strip_string(value)
+                for subkey, value in record[plain_key].items()
+            }
+        elif isinstance(record[plain_key], list):
+            record[plain_key] = [
+                _strip_string(value)
+                for value in record[plain_key]
+            ]
+
     return record
