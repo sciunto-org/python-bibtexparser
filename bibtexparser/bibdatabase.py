@@ -39,10 +39,15 @@ COMMON_STRINGS = {
     }
 
 
+class UndefinedString(KeyError):
+    pass
+
+
 class BibDatabase(object):
     """
     Bibliographic database object that follows the data structure of a BibTeX file.
     """
+
     def __init__(self):
         #: List of BibTeX entries, for example `@book{...}`, `@article{...}`, etc. Each entry is a simple dict with
         #: BibTeX field-value pairs, for example `'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'` Each
@@ -95,7 +100,7 @@ class BibDatabase(object):
         try:
             return self.strings[name]
         except KeyError:
-            raise(KeyError("Unknown string: {}.".format(name)))
+            raise(UndefinedString(name))
 
 
 class BibDataString(object):
