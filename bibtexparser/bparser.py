@@ -66,6 +66,7 @@ class BibTexParser(object):
                  customization=None,
                  ignore_nonstandard_types=True,
                  homogenize_fields=False,
+                 interpolate_strings=True,
                  common_strings=False):
         """
         Creates a parser for rading BibTeX files
@@ -95,6 +96,9 @@ class BibTexParser(object):
         #: Field names are always converted to lowercase names.
         #: Default: `False`.
         self.homogenize_fields = homogenize_fields
+
+        #: Interpolate Bibtex Strings or keep the structure
+        self.interpolate_strings = interpolate_strings
 
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
@@ -158,9 +162,13 @@ class BibTexParser(object):
         self._expr.set_string_name_parse_action(
             lambda s, l, t:
                 BibDataString(self.bib_database, t[0]))
+        if self.interpolate_strings:
+            maybe_interpolate = lambda expr: expr.get_value()
+        else:
+            maybe_interpolate = lambda expr: expr
         self._expr.set_string_expression_parse_action(
             lambda s, l, t:
-                BibDataStringExpression(t).get_value())
+                maybe_interpolate(BibDataStringExpression(t)))
 
         # Add notice to logger
         self._expr.add_log_function(logger.debug)

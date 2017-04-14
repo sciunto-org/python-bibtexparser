@@ -50,6 +50,14 @@ class TestBibDataString(unittest.TestCase):
         self.assertEqual(BibDataString.expand_string('name'), 'name')
         self.assertEqual(BibDataString.expand_string(bds), 'value')
 
+    def test_get_value_string_is_defined_by_expression(self):
+        self.bd.strings['name'] = 'string'
+        exp = BibDataStringExpression(['this is a ',
+                                       BibDataString(self.bd, 'name')])
+        self.bd.strings['exp'] = exp
+        bds = BibDataString(self.bd, 'exp')
+        self.assertEqual(bds.get_value(), 'this is a string')
+
 
 class TestBibDataStringExpression(unittest.TestCase):
 

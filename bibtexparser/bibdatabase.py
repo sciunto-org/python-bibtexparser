@@ -98,7 +98,8 @@ class BibDatabase(object):
 
     def expand_string(self, name):
         try:
-            return self.strings[name]
+            return BibDataStringExpression.expand_if_expression(
+                self.strings[name])
         except KeyError:
             raise(UndefinedString(name))
 
@@ -168,3 +169,27 @@ class BibDataStringExpression(object):
         :returns: string
         """
         return ''.join([BibDataString.expand_string(s) for s in self.expr])
+
+    def apply_on_strings(self, fun):
+        """
+        Maps a function on strings in expression, keeping unchanged
+        BibDataStrings.
+
+        :param fun: function from strings to strings
+        """
+        self.expr = [s if isinstance(s, BibDataString) else fun(s)
+                     for s in self.expr]
+
+    @staticmethod
+    def expand_if_expression(string_or_expression):
+        """
+        Eventually replaces a BibDataStringExpression by its value.
+
+        :param string_or_expression: the object to expand
+        :type string_expr: string or BibDataStringExpression
+        :returns: string
+        """
+        if isinstance(string_or_expression, BibDataStringExpression):
+            return string_or_expression.get_value()
+        else:
+            return string_or_expression
