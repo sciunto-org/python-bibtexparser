@@ -193,3 +193,11 @@ class BibDataStringExpression(object):
             return string_or_expression.get_value()
         else:
             return string_or_expression
+
+
+def as_text(text_string_or_expression):
+    if isinstance(text_string_or_expression,
+                  (BibDataString, BibDataStringExpression)):
+        return text_string_or_expression.get_value()
+    else:
+        return TEXT_TYPE(text_string_or_expression)

@@ -11,7 +11,7 @@ import sys
 import io
 import logging
 
-from bibtexparser.bibdatabase import (BibDatabase, BibDataString,
+from bibtexparser.bibdatabase import (BibDatabase, BibDataString, as_text,
                                       BibDataStringExpression, STANDARD_TYPES)
 from bibtexparser.bibtexexpression import BibtexExpression
 
@@ -163,7 +163,7 @@ class BibTexParser(object):
             lambda s, l, t:
                 BibDataString(self.bib_database, t[0]))
         if self.interpolate_strings:
-            maybe_interpolate = lambda expr: expr.get_value()
+            maybe_interpolate = lambda expr: as_text(expr)
         else:
             maybe_interpolate = lambda expr: expr
         self._expr.set_string_expression_parse_action(
