@@ -12,7 +12,7 @@ class TestBibDatabase(unittest.TestCase):
                 'volume': '1',
                 'title': 'Dynamics of Polymeric Liquid',
                 'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'
-               }]
+                }]
 
     def test_entries_list_method(self):
         bib_db = BibDatabase()
@@ -58,6 +58,17 @@ class TestBibDataString(unittest.TestCase):
         bds = BibDataString(self.bd, 'exp')
         self.assertEqual(bds.get_value(), 'this is a string')
 
+    def test_strings_are_equal_iif_name_is_equal(self):
+        self.bd.strings['a'] = 'foo'
+        self.bd.strings['b'] = 'foo'
+        a1 = BibDataString(self.bd, 'a')
+        a2 = BibDataString(self.bd, 'a')
+        b = BibDataString(self.bd, 'b')
+        self.assertEqual(a1, a2)
+        self.assertNotEqual(a1, b)
+        self.assertNotEqual(a1, b)
+        self.assertNotEqual(a1, "foo")
+
 
 class TestBibDataStringExpression(unittest.TestCase):
 
@@ -76,6 +87,14 @@ class TestBibDataStringExpression(unittest.TestCase):
         exp = BibDataStringExpression([bds, self.bds, 'text'])
         with self.assertRaises(KeyError):
             exp.get_value()
+
+    def test_equations_are_equal_iif_same(self):
+        a1 = BibDataString(self.bd, 'a')
+        a2 = BibDataString(self.bd, 'a')
+        exp = BibDataStringExpression([a1, self.bds, 'text'])
+        self.assertEqual(exp, BibDataStringExpression([a2, self.bds, 'text']))
+        self.assertNotEqual(exp, BibDataStringExpression(['foo', self.bds, 'text']))
+        self.assertNotEqual(exp, 'foovaluetext')
 
 
 if __name__ == '__main__':

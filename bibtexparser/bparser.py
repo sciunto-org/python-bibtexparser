@@ -168,7 +168,8 @@ class BibTexParser(object):
             maybe_interpolate = lambda expr: expr
         self._expr.set_string_expression_parse_action(
             lambda s, l, t:
-                maybe_interpolate(BibDataStringExpression(t)))
+                maybe_interpolate(
+                    BibDataStringExpression.expression_if_needed(t)))
 
         # Add notice to logger
         self._expr.add_log_function(logger.debug)

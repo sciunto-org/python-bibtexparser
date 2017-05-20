@@ -116,6 +116,9 @@ class BibDataString(object):
         self._bibdatabase = bibdatabase
         self.name = name.lower()
 
+    def __eq__(self, other):
+        return isinstance(other, BibDataString) and self.name == other.name
+
     def __repr__(self):
         return "BibDataString({})".format(self.name.__repr__())
 
@@ -126,6 +129,13 @@ class BibDataString(object):
         :returns: string
         """
         return self._bibdatabase.expand_string(self.name)
+
+    def get_dependencies(self, known_dependencies=set()):
+        """Recursively tracks strings on which the expression depends.
+
+        :param kown_dependencies: dependencies to ignore
+        """
+        raise NotImplementedError
 
     @staticmethod
     def expand_string(string_or_bibdatastring):
@@ -158,6 +168,9 @@ class BibDataStringExpression(object):
 
     def __init__(self, expression):
         self.expr = expression
+
+    def __eq__(self, other):
+        return isinstance(other, BibDataStringExpression) and self.expr == other.expr
 
     def __repr__(self):
         return "BibDataStringExpression({})".format(self.expr.__repr__())
@@ -193,6 +206,15 @@ class BibDataStringExpression(object):
             return string_or_expression.get_value()
         else:
             return string_or_expression
+
+    @staticmethod
+    def expression_if_needed(tokens):
+        """Build expression only if tokens are not a regular value.
+        """
+        if len(tokens) == 1 and not isinstance(tokens[0], BibDataString):
+            return tokens[0]
+        else:
+            return BibDataStringExpression(tokens)
 
 
 def as_text(text_string_or_expression):
