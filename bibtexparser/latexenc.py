@@ -85,6 +85,9 @@ def latex_to_unicode(string):
     # to normalize to the latter.
     cleaned_string = unicodedata.normalize("NFC", "".join(cleaned_string))
 
+    # Remove any left braces
+    cleaned_string = cleaned_string.replace("{", "").replace("}", "")
+
     return cleaned_string
 
 
