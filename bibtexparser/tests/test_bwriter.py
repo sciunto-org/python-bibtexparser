@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import unittest
 import os
+import io
 import sys
 
 from bibtexparser.bparser import BibTexParser
@@ -21,33 +22,30 @@ def test_data_path(filename):
 class TestBibtexWriterList(unittest.TestCase):
 
     def test_article(self):
-        with open(test_data_path('article.bib'), 'r') as bibfile:
+        with io.open(test_data_path('article.bib'), 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
 
-        with open(test_data_path('article_output.bib'), 'r') as bibfile:
+        with io.open(test_data_path('article_output.bib'), 'r') as bibfile:
             expected = bibfile.read()
         result = to_bibtex(bib)
-        if not sys.version_info >= (3, 0):
-            if isinstance(result, unicode):
-                result = result.encode('utf-8')
         self.maxDiff = None
         self.assertEqual(expected, result)
 
     def test_book(self):
-        with open(test_data_path('book.bib'), 'r') as bibfile:
+        with io.open(test_data_path('book.bib'), 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
 
-        with open(test_data_path('book_output.bib'), 'r') as bibfile:
+        with io.open(test_data_path('book_output.bib'), 'r') as bibfile:
             expected = bibfile.read()
         result = to_bibtex(bib)
         self.maxDiff = None
         self.assertEqual(expected, result)
 
     def test_comma_first(self):
-        with open(test_data_path('book.bib'), 'r') as bibfile:
+        with io.open(test_data_path('book.bib'), 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
 
-        with open(test_data_path('book_comma_first.bib'), 'r') as bibfile:
+        with io.open(test_data_path('book_comma_first.bib'), 'r') as bibfile:
             expected = bibfile.read()
         writer = BibTexWriter()
         writer.indent = '   '
@@ -57,25 +55,25 @@ class TestBibtexWriterList(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_multiple(self):
-        with open(test_data_path('multiple_entries.bib'), 'r') as bibfile:
+        with io.open(test_data_path('multiple_entries.bib'), 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
 
-        with open(test_data_path('multiple_entries_output.bib'), 'r') as bibfile:
+        with io.open(test_data_path('multiple_entries_output.bib'), 'r') as bibfile:
             expected = bibfile.read()
         result = to_bibtex(bib)
         self.maxDiff = None
         self.assertEqual(expected, result)
 
     def test_exception_typeerror(self):
-        with open(test_data_path('article.bib'), 'r') as bibfile:
+        with io.open(test_data_path('article.bib'), 'r') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=author)
         self.assertRaises(TypeError, to_bibtex, bib)
 
     def test_with_strings(self):
-        with open(test_data_path('article_with_strings.bib'), 'r') as bibfile:
+        with io.open(test_data_path('article_with_strings.bib'), 'r') as bibfile:
             bib = BibTexParser(bibfile.read(), common_strings=True,
                                interpolate_strings=False)
-        with open(test_data_path(
+        with io.open(test_data_path(
                 'article_with_strings_output.bib'), 'r') as bibfile:
             expected = bibfile.read()
         result = to_bibtex(bib)

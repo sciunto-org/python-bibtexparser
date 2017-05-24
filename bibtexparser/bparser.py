@@ -292,7 +292,7 @@ class BibTexParser(object):
         if string_key in self.bib_database.strings:
             logger.warning('Overwritting existing string for key: %s.',
                            string_key)
-        logger.debug('Store string: {} -> {}'.format(string_key, string))
+        logger.debug(u'Store string: {} -> {}'.format(string_key, string))
         self.bib_database.strings[string_key] = self._clean_val(string)
 
     def _add_preamble(self, preamble):

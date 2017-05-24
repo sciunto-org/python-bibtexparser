@@ -1,3 +1,4 @@
+import io
 import unittest
 import codecs
 import bibtexparser
@@ -84,7 +85,7 @@ class TestStringWrite(unittest.TestCase):
         bib_database.load_common_strings()
         writer = BibTexWriter(write_common_strings=True)
         result = bibtexparser.dumps(bib_database, writer=writer)
-        with open('bibtexparser/tests/data/common_strings.bib') as f:
+        with io.open('bibtexparser/tests/data/common_strings.bib') as f:
             expected = f.read()
         self.assertEqual(result, expected)
 

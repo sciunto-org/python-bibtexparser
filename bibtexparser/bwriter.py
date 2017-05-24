@@ -3,6 +3,7 @@
 # Author: Francois Boulogne
 # License:
 
+
 import logging
 from bibtexparser.bibdatabase import (BibDatabase, COMMON_STRINGS,
                                       BibDataString,
@@ -121,9 +122,9 @@ class BibTexWriter(object):
         # then all the other fields sorted alphabetically
         display_order += [i for i in sorted(entry) if i not in self.display_order]
         if self.comma_first:
-            field_fmt = "\n{indent}, {field:<{field_max_w}} = {value}"
+            field_fmt = u"\n{indent}, {field:<{field_max_w}} = {value}"
         else:
-            field_fmt = ",\n{indent}{field:<{field_max_w}} = {value}"
+            field_fmt = u",\n{indent}{field:<{field_max_w}} = {value}"
         # Write field = value lines
         for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
             try:
@@ -148,7 +149,7 @@ class BibTexWriter(object):
 
     def _strings_to_bibtex(self, bib_database):
         return ''.join([
-            '@string{{{name} = {value}}}\n{sep}'.format(
+            u'@string{{{name} = {value}}}\n{sep}'.format(
                 name=name,
                 value=_str_or_expr_to_bibtex(value),
                 sep=self.entry_separator)
