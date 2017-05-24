@@ -9,12 +9,12 @@ matrix:
       env: TEST_SUITE=suite_3_4
     - python: "3.5"
       env: TEST_SUITE=suite_3_5
+    - python: "3.6"
+      env: TEST_SUITE=suite_3_6
     - python: "pypy"
       env: TEST_SUITE=suite_pypy
-    - python: "pypy3"
-      env: TEST_SUITE=suite_pypy3
 install:
-  - if [[ $TEST_SUITE == suite_3_5 ]]; then
+  - if [[ $TEST_SUITE == suite_3_6 ]]; then
         pip install sphinx;
     fi;
   - pip install coverage
@@ -22,7 +22,7 @@ install:
   - python setup.py install
 script:
   - nosetests --with-coverage  --cover-erase --cover-package=bibtexparser
-  - if [[ $TEST_SUITE == suite_3_5 ]]; then
+  - if [[ $TEST_SUITE == suite_3_6 ]]; then
         cd docs;
         make html;
     fi;
