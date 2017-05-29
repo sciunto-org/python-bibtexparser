@@ -89,7 +89,16 @@ class TestBibtexParserMethod(unittest.TestCase):
         # From issue 121
         record = {'title': '{Two Gedenk\\"uberlieferung der Angelsachsen}'}
         result = convert_to_unicode(record)
-        expected = {'title': '{Two Gedenküberlieferung der Angelsachsen}'}
+        expected = {'title': 'Two Gedenküberlieferung der Angelsachsen'}
+        self.assertEqual(result, expected)
+        # From issue 161
+        record = {'title': r"p\^{a}t\'{e}"}
+        result = convert_to_unicode(record)
+        expected = {'title': "pâté"}
+        self.assertEqual(result, expected)
+        record = {'title': r"\^{i}le"}
+        result = convert_to_unicode(record)
+        expected = {'title': "île"}
         self.assertEqual(result, expected)
 
     ###########
