@@ -338,3 +338,50 @@ They are sometimes coded like this ``\'{e}`` but this is not the correct way, ``
 .. Note::
 
     If you want to mix different customization functions, you can write your own function.
+
+
+Using bibtex strings
+--------------------
+
+.. Warning:: support for bibtex strings representation is still an experimental feature; the way strings are represented is likely to change in future releases.
+
+Bibtex strings and string expressions are expanded by default into the value they represent.
+This behavior is controlled by the ``interpolate_string`` argument of the BibTexParser. It defaults to ``True`` but can be set to ``False``, in which case bibtex strings and string expressions from input files are represented with the :class:`bibdatabase.BibDataString` and :class:`bibdatabase.BibDataStringExpression` from the :mod:`bibdatabase` module. Both classes retain the intrinsic structure of the string or expression so that they can be written to a new file, the same way. Each instance provides a :func:`get_value` method to interpolate the string or expression and the module also provide an :func:`bibdatabase.as_text` helper to expand a string or an expression when needed.
+
+Using the code would yield the following output.
+
+.. code-block:: python
+
+    from bibtexparser.bparser import BibTexParser
+    from bibtexparser.bibdatabase import as_text
+
+
+    bibtex = """@STRING{ jean = "Jean"}
+    
+    @ARTICLE{Cesar2013,
+      author = jean # { César},
+      title = {An amazing title},
+      year = {2013},
+      month = jan,
+      volume = {12},
+      pages = {12--23},
+      journal = {Nice Journal},
+    }
+    """
+
+    bp = BibTexParser(interpolate_strings=False)
+    bib_database = bp.parse(bibtex)
+    bib_database.entries[0]
+    as_text(bd.entries[0]['author'])
+
+.. code-block:: python
+
+    {'ENTRYTYPE': 'article',
+     'ID': 'Cesar2013',
+     'author': BibDataStringExpression([BibDataString('jean'), ' César']),
+     'journal': 'Nice Journal',
+     'month': BibDataStringExpression([BibDataString('jan')]),
+     'pages': '12--23',
+     'title': 'An amazing title',
+     }
+    'Jean César'

@@ -1,12 +1,16 @@
+import io
 import unittest
 import codecs
 import bibtexparser
-from bibtexparser.bibdatabase import BibDatabase
+from bibtexparser.bibdatabase import (BibDatabase, BibDataString,
+                                      BibDataStringExpression)
 from bibtexparser.bparser import BibTexParser
+from bibtexparser.bwriter import BibTexWriter
 from collections import OrderedDict
 
 
 class TestStringParse(unittest.TestCase):
+
     def test_single_string_parse_count(self):
         bibtex_str = '@string{name1 = "value1"}\n\n'
         bib_database = bibtexparser.loads(bibtex_str)
@@ -46,13 +50,13 @@ class TestStringParse(unittest.TestCase):
         self.assertEqual(res, expected)
 
 
-
 class TestStringWrite(unittest.TestCase):
+
     def test_single_string_write(self):
         bib_database = BibDatabase()
         bib_database.strings['name1'] = 'value1'
         result = bibtexparser.dumps(bib_database)
-        expected = '@string{name1 = "value1"}\n\n'
+        expected = '@string{name1 = {value1}}\n\n'
         self.assertEqual(result, expected)
 
     def test_multiple_string_write(self):
@@ -60,5 +64,36 @@ class TestStringWrite(unittest.TestCase):
         bib_database.strings['name1'] = 'value1'
         bib_database.strings['name2'] = 'value2'  # Order is important!
         result = bibtexparser.dumps(bib_database)
-        expected = '@string{name1 = "value1"}\n\n@string{name2 = "value2"}\n\n'
+        expected = '@string{name1 = {value1}}\n\n@string{name2 = {value2}}\n\n'
+        self.assertEqual(result, expected)
+
+    def test_ignore_common_strings(self):
+        bib_database = BibDatabase()
+        bib_database.load_common_strings()
+        result = bibtexparser.dumps(bib_database)
+        self.assertEqual(result, '')
+
+    def test_ignore_common_strings_only_if_not_overloaded(self):
+        bib_database = BibDatabase()
+        bib_database.load_common_strings()
+        bib_database.strings['jan'] = 'Janvier'
+        result = bibtexparser.dumps(bib_database)
+        self.assertEqual(result, '@string{jan = {Janvier}}\n\n')
+
+    def test_write_common_strings(self):
+        bib_database = BibDatabase()
+        bib_database.load_common_strings()
+        writer = BibTexWriter(write_common_strings=True)
+        result = bibtexparser.dumps(bib_database, writer=writer)
+        with io.open('bibtexparser/tests/data/common_strings.bib') as f:
+            expected = f.read()
+        self.assertEqual(result, expected)
+
+    def test_write_dependent_strings(self):
+        bib_database = BibDatabase()
+        bib_database.strings['title'] = 'Mr'
+        expr = BibDataStringExpression([BibDataString(bib_database, 'title'), 'Smith'])
+        bib_database.strings['name'] = expr
+        result = bibtexparser.dumps(bib_database)
+        expected = '@string{title = {Mr}}\n\n@string{name = title # {Smith}}\n\n'
         self.assertEqual(result, expected)

@@ -3,8 +3,12 @@
 # Author: Francois Boulogne
 # License:
 
+
 import logging
-from bibtexparser.bibdatabase import BibDatabase
+from bibtexparser.bibdatabase import (BibDatabase, COMMON_STRINGS,
+                                      BibDataString,
+                                      BibDataStringExpression)
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +20,15 @@ def to_bibtex(parsed):
     Convenience function for backwards compatibility.
     """
     return BibTexWriter().write(parsed)
+
+
+def _str_or_expr_to_bibtex(e):
+    if isinstance(e, BibDataStringExpression):
+        return ' # '.join([_str_or_expr_to_bibtex(s) for s in e.expr])
+    elif isinstance(e, BibDataString):
+        return e.name
+    else:
+        return '{' + e + '}'
 
 
 class BibTexWriter(object):
@@ -38,7 +51,7 @@ class BibTexWriter(object):
 
     _valid_contents = ['entries', 'comments', 'preambles', 'strings']
 
-    def __init__(self):
+    def __init__(self, write_common_strings=False):
         #: List of BibTeX elements to write, valid values are `entries`, `comments`, `preambles`, `strings`.
         self.contents = ['comments', 'preambles', 'strings', 'entries']
         #: Character(s) for indenting BibTeX field-value pairs. Default: single space.
@@ -57,10 +70,10 @@ class BibTexWriter(object):
         #: (common in functional languages), use this to enable
         #: comma first syntax as the bwritter output
         self.comma_first = False
-
         #: internal variable used if self.align_values = True
         self._max_field_width = 0
-
+        #: Whether common strings are written
+        self.common_strings = write_common_strings
 
     def write(self, bib_database):
         """
@@ -107,16 +120,19 @@ class BibTexWriter(object):
         # first those keys which are both in self.display_order and in entry.keys
         display_order = [i for i in self.display_order if i in entry]
         # then all the other fields sorted alphabetically
-        more_fields = [i for i in sorted(entry) if i not in self.display_order]
         display_order += [i for i in sorted(entry) if i not in self.display_order]
-
+        if self.comma_first:
+            field_fmt = u"\n{indent}, {field:<{field_max_w}} = {value}"
+        else:
+            field_fmt = u",\n{indent}{field:<{field_max_w}} = {value}"
         # Write field = value lines
         for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
             try:
-                if self.comma_first:
-                    bibtex += "\n" + self.indent + ", " + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
-                else:
-                    bibtex += ",\n" + self.indent + "{0:<{1}}".format(field, self._max_field_width) + " = {" + entry[field] + "}"
+                bibtex += field_fmt.format(
+                    indent=self.indent,
+                    field=field,
+                    field_max_w=self._max_field_width,
+                    value=_str_or_expr_to_bibtex(entry[field]))
             except TypeError:
                 raise TypeError(u"The field %s in entry %s must be a string"
                                 % (field, entry['ID']))
@@ -132,5 +148,13 @@ class BibTexWriter(object):
                         for preamble in bib_database.preambles])
 
     def _strings_to_bibtex(self, bib_database):
-        return ''.join(['@string{{{0} = "{1}"}}\n{2}'.format(name, value, self.entry_separator)
-                        for name, value in bib_database.strings.items()])
+        return ''.join([
+            u'@string{{{name} = {value}}}\n{sep}'.format(
+                name=name,
+                value=_str_or_expr_to_bibtex(value),
+                sep=self.entry_separator)
+            for name, value in bib_database.strings.items()
+            if (self.common_strings or
+                name not in COMMON_STRINGS or  # user defined string
+                value != COMMON_STRINGS[name]  # string has been updated
+                )])

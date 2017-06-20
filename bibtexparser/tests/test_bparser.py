@@ -6,6 +6,8 @@ import unittest
 import codecs
 
 from bibtexparser.bparser import BibTexParser
+from bibtexparser.bibdatabase import (COMMON_STRINGS, BibDataStringExpression,
+                                      BibDataString)
 from bibtexparser.customization import *
 from bibtexparser import customization
 
@@ -517,6 +519,54 @@ class TestBibtexParserList(unittest.TestCase):
             'strange-field-name2': 'val2',
             }]
         self.assertEqual(res, expected)
+
+    def test_string_definitions(self):
+        with open('bibtexparser/tests/data/article_with_strings.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read(), common_strings=True)
+        res = dict(bib.strings)
+        expected = COMMON_STRINGS.copy()
+        expected.update({
+                'nice_journal': 'Nice Journal',
+                'jean': 'Jean',
+                'cesar': "César",
+                })
+        self.assertEqual(res, expected)
+
+    def test_string_is_interpolated(self):
+        with open('bibtexparser/tests/data/article_with_strings.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read(), common_strings=True,
+                               interpolate_strings=True)
+        res = bib.get_entry_list()
+        expected = [{
+            'keyword': 'keyword1, keyword2',
+            'ENTRYTYPE': 'article',
+            'year': '2013',
+            'month': 'January',
+            'journal': 'Nice Journal',
+            'ID': 'Cesar2013',
+            'pages': '12-23',
+            'title': 'An amazing title',
+            'comments': 'A comment',
+            'author': 'Jean César',
+            'volume': '12',
+            }]
+        self.assertEqual(res, expected)
+
+    def test_string_is_not_interpolated(self):
+        with open('bibtexparser/tests/data/article_with_strings.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read(), common_strings=True,
+                               interpolate_strings=False)
+        res = bib.get_entry_list()[0]
+        self.assertIsInstance(res['month'], BibDataStringExpression)
+        self.assertEqual(len(res['month'].expr), 1)
+        self.assertEqual(res['month'].get_value(), 'January')
+        self.assertIsInstance(res['author'], BibDataStringExpression)
+        self.assertEqual(len(res['author'].expr), 3)
+        self.assertEqual(res['author'].get_value(), 'Jean César')
+        self.assertIsInstance(res['journal'], BibDataStringExpression)
+        self.assertEqual(len(res['journal'].expr), 1)
+        self.assertEqual(res['journal'].get_value(), 'Nice Journal')
+
 
 if __name__ == '__main__':
     unittest.main()

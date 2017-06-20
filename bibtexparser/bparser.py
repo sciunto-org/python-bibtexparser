@@ -11,7 +11,8 @@ import sys
 import io
 import logging
 
-from bibtexparser.bibdatabase import BibDatabase, BibDataString, STANDARD_TYPES
+from bibtexparser.bibdatabase import (BibDatabase, BibDataString, as_text,
+                                      BibDataStringExpression, STANDARD_TYPES)
 from bibtexparser.bibtexexpression import BibtexExpression
 
 logger = logging.getLogger(__name__)
@@ -65,6 +66,7 @@ class BibTexParser(object):
                  customization=None,
                  ignore_nonstandard_types=True,
                  homogenize_fields=False,
+                 interpolate_strings=True,
                  common_strings=False):
         """
         Creates a parser for rading BibTeX files
@@ -94,6 +96,9 @@ class BibTexParser(object):
         #: Field names are always converted to lowercase names.
         #: Default: `False`.
         self.homogenize_fields = homogenize_fields
+
+        #: Interpolate Bibtex Strings or keep the structure
+        self.interpolate_strings = interpolate_strings
 
         # On some sample data files, the character encoding detection simply
         # hangs We are going to default to utf8, and mandate it.
@@ -157,9 +162,14 @@ class BibTexParser(object):
         self._expr.set_string_name_parse_action(
             lambda s, l, t:
                 BibDataString(self.bib_database, t[0]))
+        if self.interpolate_strings:
+            maybe_interpolate = lambda expr: as_text(expr)
+        else:
+            maybe_interpolate = lambda expr: expr
         self._expr.set_string_expression_parse_action(
             lambda s, l, t:
-                self._interpolate_string_expression(t))
+                maybe_interpolate(
+                    BibDataStringExpression.expression_if_needed(t)))
 
         # Add notice to logger
         self._expr.add_log_function(logger.debug)
@@ -282,30 +292,8 @@ class BibTexParser(object):
         if string_key in self.bib_database.strings:
             logger.warning('Overwritting existing string for key: %s.',
                            string_key)
-        logger.debug('Store string: {} -> {}'.format(string_key, string))
+        logger.debug(u'Store string: {} -> {}'.format(string_key, string))
         self.bib_database.strings[string_key] = self._clean_val(string)
-
-    def _interpolate_string_expression(self, string_expr):
-        """
-        Replaces bibdatastrings by their values in an expression.
-
-        :param string_expr: the parsed string as a list
-        :type string_expr: list
-        """
-        return ''.join([self._expand_string(s) for s in string_expr])
-
-    def _expand_string(self, string_or_bibdatastring):
-        """
-        Eventually replaces a bibdatastring by its value.
-
-        :param string_or_bibdatastring: the parsed token
-        :type string_expr: string or BibDataString
-        :returns: string
-        """
-        if isinstance(string_or_bibdatastring, BibDataString):
-            return string_or_bibdatastring.get_value()
-        else:
-            return string_or_bibdatastring
 
     def _add_preamble(self, preamble):
         """

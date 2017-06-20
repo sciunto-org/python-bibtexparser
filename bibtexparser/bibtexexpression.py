@@ -1,14 +1,28 @@
 import pyparsing as pp
 
+from .bibdatabase import BibDataStringExpression
+
 
 # General helpers
 
-def strip_after_new_lines(s):
+def _strip_after_new_lines(s):
     """Removes leading and trailing whitespaces in all but first line."""
     lines = s.splitlines()
     if len(lines) > 1:
         lines = [lines[0]] + [l.lstrip() for l in lines[1:]]
     return '\n'.join(lines)
+
+
+def strip_after_new_lines(s):
+    """Removes leading and trailing whitespaces in all but first line.
+
+    :param s: string or BibDataStringExpression
+    """
+    if isinstance(s, BibDataStringExpression):
+        s.apply_on_strings(_strip_after_new_lines)
+        return s
+    else:
+        return _strip_after_new_lines(s)
 
 
 def add_logger_parse_action(expr, log_func):
@@ -50,8 +64,6 @@ def field_to_pair(s, l, t):
     :returns: (name, value).
     """
     f = t.get('Field')
-    # Not sure it is desirable here to strip but it is for conformance
-    # to previous implementation
     return (f.get('FieldName'),
             strip_after_new_lines(f.get('Value')))
 
