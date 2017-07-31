@@ -105,9 +105,9 @@ class BibTexParser(object):
             'keywords': u'keyword',
             'authors': u'author',
             'editors': u'editor',
-            'url': u'link',
-            'urls': u'link',
-            'links': u'link',
+            'urls': u'url',
+            'link': u'url',
+            'links': u'url',
             'subjects': u'subject'
         }
 
