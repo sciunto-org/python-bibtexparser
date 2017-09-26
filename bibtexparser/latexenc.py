@@ -41,8 +41,9 @@ def latex_to_unicode(string):
     """
     if '\\' in string or '{' in string:
         for k, v in itertools.chain(unicode_to_crappy_latex1, unicode_to_latex):
-            if v in string:
-                string = string.replace(v, k)
+            vs = v.rstrip()
+            if vs in string:
+                string = string.replace(vs, k)
 
     # If there is still very crappy items
     if '\\' in string:
