@@ -6,6 +6,7 @@ from tempfile import TemporaryFile
 
 class TestBibtexParserParserMethods(unittest.TestCase):
     input_file_path = 'bibtexparser/tests/data/book.bib'
+    input_bom_file_path = 'bibtexparser/tests/data/book_bom.bib'
     entries_expected = [{'ENTRYTYPE': 'book',
                          'year': '1987',
                          'edition': '2',
@@ -27,6 +28,20 @@ class TestBibtexParserParserMethods(unittest.TestCase):
         with open(self.input_file_path) as bibtex_file:
             bibtex_str = bibtex_file.read()
         bibtex_database = parser.parse(bibtex_str)
+        self.assertEqual(bibtex_database.entries, self.entries_expected)
+
+    def test_parse_bom_str(self):
+        parser = BibTexParser()
+        with open(self.input_bom_file_path) as bibtex_file:
+            bibtex_str = bibtex_file.read()
+            bibtex_database = parser.parse(bibtex_str)
+        self.assertEqual(bibtex_database.entries, self.entries_expected)
+
+    def test_parse_bom_bytes(self):
+        parser = BibTexParser()
+        with open(self.input_bom_file_path, 'rb') as bibtex_file:
+            bibtex_str = bibtex_file.read()
+            bibtex_database = parser.parse(bibtex_str)
         self.assertEqual(bibtex_database.entries, self.entries_expected)
 
     def test_parse_file(self):
