@@ -195,12 +195,14 @@ class BibTexParser(object):
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
-        byte = '\xef\xbb\xbf'
-        if not isinstance(byte, ustr):
+        byte = b'\xef\xbb\xbf'
+        if isinstance(bibtex_str, ustr):
             byte = ustr(byte, self.encoding, 'ignore')
-        if bibtex_str[:3] == byte:
-            bibtex_str = bibtex_str[3:]
-        if not isinstance(bibtex_str, ustr):
+            if bibtex_str[0] == byte:
+                bibtex_str = bibtex_str[1:]
+        else:
+            if bibtex_str[:3] == byte:
+                bibtex_str = bibtex_str[3:]
             bibtex_str = bibtex_str.decode(encoding=self.encoding)
         return io.StringIO(bibtex_str)
 
