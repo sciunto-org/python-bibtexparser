@@ -80,7 +80,7 @@ def latex_to_unicode(string):
     # string, that is always having only compound accentuated character (letter
     # + accent) or single accentuated character (letter with accent). We choose
     # to normalize to the latter.
-    string = unicodedata.normalize("NFC", "".join(string))
+    string = unicodedata.normalize("NFC", u"".join(string))
 
     return string
 
