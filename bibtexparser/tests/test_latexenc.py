@@ -91,13 +91,13 @@ class TestUnicodeConversion(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_does_not_modify_existing_combining(self):
-        string = b'ph\xc6\xa1\xcc\x89'.decode()
+        string = b'ph\xc6\xa1\xcc\x89'.decode('utf8')
         result = latex_to_unicode(string)
         expected = 'phở'  # normalized
         self.assertEqual(result, expected)
 
     def test_does_not_modify_two_existing_combining(self):
-        string = b'pho\xcc\x9b\xcc\x89'.decode()
+        string = b'pho\xcc\x9b\xcc\x89'.decode('utf8')
         result = latex_to_unicode(string)
         expected = 'phở'  # normalized
         self.assertEqual(result, expected)
