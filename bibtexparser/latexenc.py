@@ -32,6 +32,30 @@ def string_to_latex(string):
     return ''.join(new)
 
 
+def _replace_latex(string, latex, unicod):
+    if latex in string:
+        if unicodedata.combining(unicod):
+            for m in re.finditer(re.escape(latex), string):
+                i, j = m.span()
+                # Insert after the following character,
+                if j < len(string):
+                    string = ''.join([
+                        string[:i], string[j], unicod, string[(j + 1):]])
+                else:
+                    # except if not in last position (nothing to modify)
+                    string = string[:i]
+        else:
+            # Just replace
+            string = string.replace(latex, unicod)
+    return string
+
+
+def _replace_all_latex(string, replacements):
+    for u, l in replacements:
+        string = _replace_latex(string, l, u)
+    return string
+
+
 def latex_to_unicode(string):
     """
     Convert a LaTeX string to unicode equivalent.
@@ -40,55 +64,25 @@ def latex_to_unicode(string):
     :returns: string
     """
     if '\\' in string or '{' in string:
-        for k, v in itertools.chain(unicode_to_crappy_latex1, unicode_to_latex):
-            if v in string:
-                string = string.replace(v, k)
+        string = _replace_all_latex(string, itertools.chain(
+            unicode_to_crappy_latex1, unicode_to_latex))
+
+    # TODO Shouldn't this preserve escaped braces instead?
+    # Remove any left braces
+    string = string.replace("{", "").replace("}", "")
 
     # If there is still very crappy items
-    if '\\' in string:
-        for k, v in unicode_to_crappy_latex2:
-            if v in string:
-                parts = string.split(str(v))
-                for key, string in enumerate(parts):
-                    if key+1 < len(parts) and len(parts[key+1]) > 0:
-                        # Change order to display accents
-                        parts[key] = parts[key] + parts[key+1][0]
-                        parts[key+1] = parts[key+1][1:]
-                string = k.join(parts)
-
-    # Place accents at correct position
-    # LaTeX requires accents *before* the character. Unicode requires accents
-    # to be *after* the character. Hence, by a raw conversion, accents are not
-    # on the correct letter, see
-    # https://github.com/sciunto-org/python-bibtexparser/issues/121.
-    # We just swap accents positions to fix this.
-    cleaned_string = []
-    i = 0
-    while i < len(string):
-        if not unicodedata.combining(string[i]):
-            # Not a combining diacritical mark, append it
-            cleaned_string.append(string[i])
-            i += 1
-        elif i < len(string) - 1:
-            # Diacritical mark, append it but swap with next character
-            cleaned_string.append(string[i + 1])
-            cleaned_string.append(string[i])
-            i += 2
-        else:
-            # If trailing character is a combining one, just discard it
-            i += 1
+    if '\\' in string or '{' in string:
+        string = _replace_all_latex(string, unicode_to_crappy_latex2)
 
     # Normalize unicode characters
     # Also, when converting to unicode, we should return a normalized Unicode
     # string, that is always having only compound accentuated character (letter
     # + accent) or single accentuated character (letter with accent). We choose
     # to normalize to the latter.
-    cleaned_string = unicodedata.normalize("NFC", "".join(cleaned_string))
+    string = unicodedata.normalize("NFC", "".join(string))
 
-    # Remove any left braces
-    cleaned_string = cleaned_string.replace("{", "").replace("}", "")
-
-    return cleaned_string
+    return string
 
 
 def protect_uppercase(string):
@@ -112,6 +106,7 @@ unicode_to_latex = []
 unicode_to_latex_map = {}
 unicode_to_crappy_latex1 = []
 unicode_to_crappy_latex2 = []
+
 
 def prepare_unicode_to_latex():
     global unicode_to_latex
@@ -2701,5 +2696,6 @@ def prepare_unicode_to_latex():
         unicode_to_crappy_latex1 = tuple((k.decode('unicode-escape'), v) for k, v in to_crappy1)
         unicode_to_crappy_latex2 = tuple((k.decode('unicode-escape'), v) for k, v in to_crappy2)
         unicode_to_latex_map = dict(unicode_to_latex)
+
 
 prepare_unicode_to_latex()

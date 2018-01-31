@@ -78,10 +78,28 @@ class TestUnicodeConversion(unittest.TestCase):
         expected = 'à é è ö'
         self.assertEqual(result, expected)
 
+    def test_ignores_trailing_modifier(self):
+        string = "a\\\'"
+        result = latex_to_unicode(string)
+        expected = 'a'
+        self.assertEqual(result, expected)
+
     def test_special_caracter(self):
         string = '{\c c}'
         result = latex_to_unicode(string)
         expected = 'ç'
+        self.assertEqual(result, expected)
+
+    def test_does_not_modify_existing_combining(self):
+        string = b'ph\xc6\xa1\xcc\x89'.decode()
+        result = latex_to_unicode(string)
+        expected = 'phở'  # normalized
+        self.assertEqual(result, expected)
+
+    def test_does_not_modify_two_existing_combining(self):
+        string = b'pho\xcc\x9b\xcc\x89'.decode()
+        result = latex_to_unicode(string)
+        expected = 'phở'  # normalized
         self.assertEqual(result, expected)
 
 
