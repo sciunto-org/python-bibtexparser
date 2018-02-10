@@ -387,9 +387,6 @@ class TestBibtexParserList(unittest.TestCase):
 
         self.assertEqual(res, expected)
 
-    ###########
-    # TRAPS
-    ###########
     def test_traps(self):
         with codecs.open('bibtexparser/tests/data/traps.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -409,9 +406,6 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
-    ###########
-    # FEATURES
-    ###########
     def test_features(self):
         with open('bibtexparser/tests/data/features.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -440,10 +434,7 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
-    ###########
-    # WRONG
-    ###########
-    def test_wrong(self):
+    def test_nonstandard_ignored(self):
         with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
@@ -452,9 +443,12 @@ class TestBibtexParserList(unittest.TestCase):
                          'ENTRYTYPE': 'article'}]
         self.assertEqual(res, expected)
 
-    ###########
-    # ENCODING
-    ###########
+    def test_nonstandard_not_ignored(self):
+        with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read(), ignore_nonstandard_types=False)
+            res = bib.get_entry_list()
+        self.assertEqual(len(res), 2)
+
     def test_encoding(self):
         with codecs.open('bibtexparser/tests/data/encoding.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
