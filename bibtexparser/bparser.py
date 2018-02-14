@@ -47,6 +47,18 @@ class BibTexParser(object):
         parser.common_strings = False
         bib_database = bibtexparser.loads(bibtex_str, parser)
 
+    :param customization: function or None (default)
+        Customization to apply to parsed entries.
+    :param ignore_nonstandard_types: bool (default True)
+        If True ignores non-standard bibtex entry types.
+    :param homogenize_fields: bool (default False)
+        Common field name replacements (as set in alt_dict attribute).
+    :param interpolate_strings: bool (default True)
+        If True, replace bibtex string by their value, else uses
+        BibDataString objects.
+    :param common_strings: book (default False)
+        Include common string definitions (e.g. month abbreviations) to
+        the bibtex file.
     """
 
     def __new__(cls, data=None, **args):
