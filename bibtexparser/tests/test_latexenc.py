@@ -18,7 +18,9 @@
 from __future__ import unicode_literals
 import unittest
 
-from bibtexparser.latexenc import *
+from bibtexparser.latexenc import (string_to_latex, latex_to_unicode,
+                                   protect_uppercase)
+
 
 class TestLatexConverter(unittest.TestCase):
 
@@ -33,6 +35,7 @@ class TestLatexConverter(unittest.TestCase):
         result = string_to_latex(string)
         expected = '{\c c}'
         self.assertEqual(result, expected)
+
 
 class TestUppercaseProtection(unittest.TestCase):
 
@@ -64,6 +67,39 @@ class TestUppercaseProtection(unittest.TestCase):
         string = 'A}, mA}gnificient, it is a A}'
         result = protect_uppercase(string)
         expected = 'A}, mA}gnificient, it is a A}'
+        self.assertEqual(result, expected)
+
+
+class TestUnicodeConversion(unittest.TestCase):
+
+    def test_accents(self):
+        string = "{\`a} {\\\'e} {\`e} {\\\"o}"
+        result = latex_to_unicode(string)
+        expected = 'à é è ö'
+        self.assertEqual(result, expected)
+
+    def test_ignores_trailing_modifier(self):
+        string = "a\\\'"
+        result = latex_to_unicode(string)
+        expected = 'a'
+        self.assertEqual(result, expected)
+
+    def test_special_caracter(self):
+        string = '{\c c}'
+        result = latex_to_unicode(string)
+        expected = 'ç'
+        self.assertEqual(result, expected)
+
+    def test_does_not_modify_existing_combining(self):
+        string = b'ph\xc6\xa1\xcc\x89'.decode('utf8')
+        result = latex_to_unicode(string)
+        expected = 'phở'  # normalized
+        self.assertEqual(result, expected)
+
+    def test_does_not_modify_two_existing_combining(self):
+        string = b'pho\xcc\x9b\xcc\x89'.decode('utf8')
+        result = latex_to_unicode(string)
+        expected = 'phở'  # normalized
         self.assertEqual(result, expected)
 
 
