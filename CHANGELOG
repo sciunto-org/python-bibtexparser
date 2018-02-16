@@ -1,6 +1,11 @@
 v1.xxx
 ======
 
+v1.0.1
+======
+
+* BUGFIX: future missing in setup.py
+
 v1.0
 ====
 
