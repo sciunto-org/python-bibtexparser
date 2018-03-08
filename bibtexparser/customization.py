@@ -14,6 +14,7 @@ from builtins import str
 
 from bibtexparser.latexenc import latex_to_unicode, string_to_latex, protect_uppercase
 
+
 logger = logging.getLogger(__name__)
 
 __all__ = ['splitname', 'getnames', 'author', 'editor', 'journal', 'keyword',
@@ -335,15 +336,20 @@ def getnames(names):
     return tidynames
 
 
-def author(record):
+def author(record, inplace=True):
     """
     Split author field into a list of "Name, Surname".
 
     :param record: the record.
     :type record: dict
+    :param inplace: Modify the underlying record
+    :type inplace: Boolean, optional
     :returns: dict -- the modified record.
 
     """
+    if not inplace:
+        record = dict((x, y) for x, y in record.items())
+
     if "author" in record:
         if record["author"]:
             record["author"] = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
