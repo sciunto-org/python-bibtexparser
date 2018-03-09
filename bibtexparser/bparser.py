@@ -137,7 +137,7 @@ class BibTexParser(object):
         :param bibtex_str: BibTeX string
         :type: str or unicode
         :param partial: If True, print errors only on parsing failures.
-        If False, an exception is raised.
+            If False, an exception is raised.
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
@@ -157,7 +157,7 @@ class BibTexParser(object):
         :param file: BibTeX file or file-like object
         :type: file
         :param partial: If True, print errors only on parsing failures.
-        If False, an exception is raised.
+            If False, an exception is raised.
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
