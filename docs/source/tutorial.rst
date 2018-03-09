@@ -28,7 +28,6 @@ First, we prepare a BibTeX sample file. This is just for the purpose of illustra
       author = {Jean César},
       title = {An amazing title},
       year = {2013},
-      month = jan,
       volume = {12},
       pages = {12--23},
       journal = {Nice Journal},
@@ -67,7 +66,6 @@ It prints a list of dictionaries for reference entries, for example books, artic
     [{'journal': 'Nice Journal',
       'comments': 'A comment',
       'pages': '12--23',
-      'month': 'jan',
       'abstract': 'This is an abstract. This line should be long enough to test\nmultilines...',
       'title': 'An amazing title',
       'year': '2013',
@@ -86,6 +84,10 @@ You can also print comments, preambles and string:
     print(bib_database.comments)
     print(bib_database.preambles)
     print(bib_database.strings)
+
+.. note::
+  If your bibtex contains months defined as strings such as :code:`month = jan`, you will need to parse it with the :code:`common_strings` option:
+  :code:`bib_database = bibtexparser.bparser.BibTexParser(common_strings=True).parse_file(bibtex_file)`. (More in `Using bibtex strings`_.)
 
 
 Parse a string
