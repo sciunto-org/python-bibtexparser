@@ -6,8 +6,7 @@ import unittest
 import codecs
 
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.bibdatabase import (COMMON_STRINGS, BibDataStringExpression,
-                                      BibDataString)
+from bibtexparser.bibdatabase import (COMMON_STRINGS, BibDataStringExpression)
 from bibtexparser.customization import *
 from bibtexparser import customization
 
@@ -553,6 +552,29 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertIsInstance(res['journal'], BibDataStringExpression)
         self.assertEqual(len(res['journal'].expr), 1)
         self.assertEqual(res['journal'].get_value(), 'Nice Journal')
+
+    def test_comments_spaces_and_declarations(self):
+        with codecs.open(
+                'bibtexparser/tests/data/comments_spaces_and_declarations.bib',
+                'r', 'utf-8') as bibfile:
+            bib = BibTexParser(bibfile.read())
+        res_dict = bib.get_entry_dict()
+        expected_dict = {'Cesar2013': {
+            'keyword': 'keyword1, keyword2',
+            'ENTRYTYPE': 'article',
+            'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+            'year': '2013',
+            'journal': 'Nice Journal',
+            'ID': 'Cesar2013',
+            'pages': '12-23',
+            'title': 'A great title',
+            'comments': 'A comment',
+            'author': 'Jean César',
+            'volume': '12',
+            'month': 'jan'
+        }}
+        self.assertEqual(res_dict, expected_dict)
+        self.assertEqual(bib.preambles, ["Blah blah"])
 
 
 if __name__ == '__main__':
