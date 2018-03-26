@@ -54,3 +54,30 @@ class TestBibtexExpression(unittest.TestCase):
         result = self.expr.entry.parseString(
             '@journal{key, name = "àbcđéf" }')
         self.assertEqual(result.get('Fields'), {'name': 'àbcđéf'})
+
+    def test_entry_declaration_after_space(self):
+        self.expr.entry.parseString('  @journal{key, name = {abcd}}')
+
+    def test_string_declaration_after_space(self):
+        self.expr.string_def.parseString('  @string{ name = {abcd}}')
+
+    def test_preamble_declaration_after_space(self):
+        self.expr.preamble_decl.parseString('  @preamble{ "blah blah " }')
+
+    def test_declaration_after_space(self):
+        keys = []
+        self.expr.entry.addParseAction(
+            lambda s, l, t: keys.append(t.get('Key'))
+        )
+        self.expr.main_expression.parseString(' @journal{key, name = {abcd}}')
+        self.assertEqual(keys, ['key'])
+
+    def test_declaration_after_space_and_comment(self):
+        keys = []
+        self.expr.entry.addParseAction(
+            lambda s, l, t: keys.append(t.get('Key'))
+        )
+        self.expr.main_expression.parseString(
+            '% Implicit comment\n @article{key, name={abcd}}'
+        )
+        self.assertEqual(keys, ['key'])

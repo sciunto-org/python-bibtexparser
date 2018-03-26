@@ -176,7 +176,7 @@ class BibtexExpression(object):
 
         # Explicit comments: @comment + everything up to next valid declaration
         # starting on new line.
-        not_an_implicit_comment = (pp.LineStart() + pp.Literal('@')
+        not_an_implicit_comment = (pp.LineEnd() + pp.Literal('@')
                                    ) | pp.stringEnd()
         self.explicit_comment = (
             pp.Suppress(comment_line_start) +
