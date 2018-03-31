@@ -14,7 +14,7 @@ class TestBibtexParserParserMethods(unittest.TestCase):
                          'ID': 'Bird1987',
                          'volume': '1',
                          'title': 'Dynamics of Polymeric Liquid',
-                         'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'
+                         'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.',
                         }]
 
     def test_parse_immediately(self):
@@ -93,6 +93,18 @@ class TestBibtexparserWriteMethods(unittest.TestCase):
 
         self.assertEqual(bibtex_out_str, self.expected)
 
+class TestBibtexparserFieldNames(unittest.TestCase):
+    input_file_path = 'bibtexparser/tests/data/fieldname.bib'
+    entries_expected = [{'ENTRYTYPE': 'book',
+                         'ID': 'Bird1987',
+                         'dc.date': '2004-01'
+                        }]
+
+    def test_parse_immediately(self):
+        with open(self.input_file_path) as bibtex_file:
+            bibtex_str = bibtex_file.read()
+        bibtex_database = BibTexParser(bibtex_str)
+        self.assertEqual(bibtex_database.entries, self.entries_expected)
 
 if __name__ == '__main__':
     unittest.main()
