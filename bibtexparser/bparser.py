@@ -79,14 +79,15 @@ class BibTexParser(object):
                  ignore_nonstandard_types=True,
                  homogenize_fields=False,
                  interpolate_strings=True,
-                 common_strings=False):
+                 common_strings=False,
+                 string_provider=None):
         """
         Creates a parser for rading BibTeX files
 
         :return: parser
         :rtype: `BibTexParser`
         """
-        self.bib_database = BibDatabase()
+        self.bib_database = BibDatabase(string_provider)
 
         #: Load common strings such as months abbreviation
         #: Default: `False`.

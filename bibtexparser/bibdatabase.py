@@ -48,7 +48,7 @@ class BibDatabase(object):
     Bibliographic database object that follows the data structure of a BibTeX file.
     """
 
-    def __init__(self):
+    def __init__(self, string_provider=None):
         #: List of BibTeX entries, for example `@book{...}`, `@article{...}`, etc. Each entry is a simple dict with
         #: BibTeX field-value pairs, for example `'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'` Each
         #: entry will always have the following dict keys (in addition to other BibTeX fields):
@@ -63,6 +63,7 @@ class BibDatabase(object):
         self.strings = OrderedDict()  # Not sure if order is import, keep order just in case
         #: List of BibTeX preamble (`@preamble{...}`) blocks.
         self.preambles = []
+        self.string_provider = string_provider
 
     def load_common_strings(self):
         self.strings.update(COMMON_STRINGS)
@@ -101,6 +102,10 @@ class BibDatabase(object):
             return BibDataStringExpression.expand_if_expression(
                 self.strings[name])
         except KeyError:
+            if self.string_provider:
+                val = self.string_provider(name)
+                if val:
+                    return val
             raise(UndefinedString(name))
 
 
