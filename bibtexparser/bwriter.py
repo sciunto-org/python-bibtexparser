@@ -68,8 +68,11 @@ class BibTexWriter(object):
         self.display_order = []
         #: BibTeX syntax allows comma first syntax
         #: (common in functional languages), use this to enable
-        #: comma first syntax as the bwritter output
+        #: comma first syntax as the bwriter output
         self.comma_first = False
+        #: BibTeX syntax allows the comma to be optional at the end of the last field in an entry.
+        #: Use this to enable writing this last comma in the bwriter output. Defaults: False.
+        self.comma_last = False
         #: internal variable used if self.align_values = True
         self._max_field_width = 0
         #: Whether common strings are written
@@ -136,6 +139,7 @@ class BibTexWriter(object):
             except TypeError:
                 raise TypeError(u"The field %s in entry %s must be a string"
                                 % (field, entry['ID']))
+        bibtex += "," if self.comma_last else ""
         bibtex += "\n}\n" + self.entry_separator
         return bibtex
 
