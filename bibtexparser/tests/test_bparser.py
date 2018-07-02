@@ -91,6 +91,42 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res_list, expected_list)
         self.assertEqual(res_dict, expected_dict)
 
+    def test_article_annotation(self):
+        with codecs.open('bibtexparser/tests/data/article_with_annotation.bib', 'r', 'utf-8') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            res_list = bib.get_entry_list()
+            res_dict = bib.get_entry_dict()
+            expected_list = [{'keyword': 'keyword1, keyword2',
+                              'ENTRYTYPE': 'article',
+                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                              'year': '2013',
+                              'journal': 'Nice Journal',
+                              'ID': 'Cesar2013',
+                              'pages': '12-23',
+                              'title': 'An amazing title',
+                              'comments': 'A comment',
+                              'author': 'Jean César',
+                              'author+an': '1=highlight',
+                              'volume': '12',
+                              'month': 'jan'
+                              }]
+            expected_dict = {'Cesar2013': {'keyword': 'keyword1, keyword2',
+                              'ENTRYTYPE': 'article',
+                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                              'year': '2013',
+                              'journal': 'Nice Journal',
+                              'ID': 'Cesar2013',
+                              'pages': '12-23',
+                              'title': 'An amazing title',
+                              'comments': 'A comment',
+                              'author': 'Jean César',
+                              'author+an': '1=highlight',
+                              'volume': '12',
+                              'month': 'jan'
+                              }}
+        self.assertEqual(res_list, expected_list)
+        self.assertEqual(res_dict, expected_dict)
+
     def test_article_start_bom(self):
         with codecs.open('bibtexparser/tests/data/article_start_with_bom.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
