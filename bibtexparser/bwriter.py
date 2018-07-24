@@ -72,7 +72,7 @@ class BibTexWriter(object):
         self.comma_first = False
         #: BibTeX syntax allows the comma to be optional at the end of the last field in an entry.
         #: Use this to enable writing this last comma in the bwriter output. Defaults: False.
-        self.comma_last = False
+        self.add_trailing_comma = False
         #: internal variable used if self.align_values = True
         self._max_field_width = 0
         #: Whether common strings are written
@@ -139,7 +139,11 @@ class BibTexWriter(object):
             except TypeError:
                 raise TypeError(u"The field %s in entry %s must be a string"
                                 % (field, entry['ID']))
-        bibtex += "," if self.comma_last else ""
+        if self.add_trailing_comma:
+            if self.comma_first:
+                bibtex += '\n,'
+            else:
+                bibtex += ','
         bibtex += "\n}\n" + self.entry_separator
         return bibtex
 
