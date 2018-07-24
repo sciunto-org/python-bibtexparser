@@ -111,19 +111,19 @@ class TestBibtexParserList(unittest.TestCase):
                               'month': 'jan'
                               }]
             expected_dict = {'Cesar2013': {'keyword': 'keyword1, keyword2',
-                              'ENTRYTYPE': 'article',
-                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
-                              'year': '2013',
-                              'journal': 'Nice Journal',
-                              'ID': 'Cesar2013',
-                              'pages': '12-23',
-                              'title': 'An amazing title',
-                              'comments': 'A comment',
-                              'author': 'Jean César',
-                              'author+an': '1=highlight',
-                              'volume': '12',
-                              'month': 'jan'
-                              }}
+                                           'ENTRYTYPE': 'article',
+                                           'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                                           'year': '2013',
+                                           'journal': 'Nice Journal',
+                                           'ID': 'Cesar2013',
+                                           'pages': '12-23',
+                                           'title': 'An amazing title',
+                                           'comments': 'A comment',
+                                           'author': 'Jean César',
+                                           'author+an': '1=highlight',
+                                           'volume': '12',
+                                           'month': 'jan'
+                                           }}
         self.assertEqual(res_list, expected_list)
         self.assertEqual(res_dict, expected_dict)
 
