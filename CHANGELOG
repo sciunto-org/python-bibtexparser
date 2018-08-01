@@ -1,5 +1,13 @@
-v0.XXX
+v1.xxx
 ======
+
+v1.0.1
+======
+
+* BUGFIX: future missing in setup.py
+
+v1.0
+====
 
 * ENH: we use pyparsing (#64) by Olivier Magin.
 * DOC: Refactoring of the tutorial

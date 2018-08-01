@@ -1,4 +1,4 @@
-include requirements.txt
+include *.txt
 include *.md
 include docs/Makefile
 include docs/source/*

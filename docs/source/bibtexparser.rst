@@ -14,34 +14,34 @@ bibtexparser: API
 :mod:`bibtexparser.bibdatabase` --- The bibliographic database object
 ---------------------------------------------------------------------
 
-.. autoclass:: bibdatabase.BibDatabase
+.. autoclass:: bibtexparser.bibdatabase.BibDatabase
     :members: entries, entries_dict, comments, strings, preambles
 
 :mod:`bibtexparser.bparser` --- Tune the default parser
 --------------------------------------------------------
 
-.. automodule:: bparser
+.. automodule:: bibtexparser.bparser
     :members:
 
 :mod:`bibtexparser.customization` --- Functions to customize records
 --------------------------------------------------------------------
 
-.. automodule:: customization
+.. automodule:: bibtexparser.customization
     :members:
 
 Exception classes
 ^^^^^^^^^^^^^^^^^
-.. autoclass:: customization.InvalidName
+.. autoclass:: bibtexparser.customization.InvalidName
 
 :mod:`bibtexparser.bwriter` --- Tune the default writer
 -------------------------------------------------------
 
-.. autoclass:: bwriter.BibTexWriter
+.. autoclass:: bibtexparser.bwriter.BibTexWriter
     :members:
 
 :mod:`bibtexparser.bibtexexpression` --- Parser's core relying on pyparsing
 ---------------------------------------------------------------------------
 
-.. automodule:: bibtexexpression
+.. automodule:: bibtexparser.bibtexexpression
     :members:
 

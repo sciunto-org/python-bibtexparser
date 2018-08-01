@@ -47,6 +47,18 @@ class BibTexParser(object):
         parser.common_strings = False
         bib_database = bibtexparser.loads(bibtex_str, parser)
 
+    :param customization: function or None (default)
+        Customization to apply to parsed entries.
+    :param ignore_nonstandard_types: bool (default True)
+        If True ignores non-standard bibtex entry types.
+    :param homogenize_fields: bool (default False)
+        Common field name replacements (as set in alt_dict attribute).
+    :param interpolate_strings: bool (default True)
+        If True, replace bibtex string by their value, else uses
+        BibDataString objects.
+    :param common_strings: book (default False)
+        Include common string definitions (e.g. month abbreviations) to
+        the bibtex file.
     """
 
     def __new__(cls, data=None, **args):
@@ -125,7 +137,7 @@ class BibTexParser(object):
         :param bibtex_str: BibTeX string
         :type: str or unicode
         :param partial: If True, print errors only on parsing failures.
-        If False, an exception is raised.
+            If False, an exception is raised.
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
@@ -145,7 +157,7 @@ class BibTexParser(object):
         :param file: BibTeX file or file-like object
         :type: file
         :param partial: If True, print errors only on parsing failures.
-        If False, an exception is raised.
+            If False, an exception is raised.
         :type: boolean
         :return: bibliographic database
         :rtype: BibDatabase
@@ -195,12 +207,14 @@ class BibTexParser(object):
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
-        byte = '\xef\xbb\xbf'
-        if not isinstance(byte, ustr):
+        byte = b'\xef\xbb\xbf'
+        if isinstance(bibtex_str, ustr):
             byte = ustr(byte, self.encoding, 'ignore')
-        if bibtex_str[:3] == byte:
-            bibtex_str = bibtex_str[3:]
-        if not isinstance(bibtex_str, ustr):
+            if bibtex_str[0] == byte:
+                bibtex_str = bibtex_str[1:]
+        else:
+            if bibtex_str[:3] == byte:
+                bibtex_str = bibtex_str[3:]
             bibtex_str = bibtex_str.decode(encoding=self.encoding)
         return io.StringIO(bibtex_str)
 

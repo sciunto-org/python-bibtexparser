@@ -309,9 +309,9 @@ def getnames(names):
     :returns: list -- Correctly formated names
 
     .. Note::
-
-    This function is known to be too simple to handle properly
-    the complex rules. We would like to enhance this in forthcoming releases.
+        This function is known to be too simple to handle properly
+        the complex rules. We would like to enhance this in forthcoming
+        releases.
     """
     tidynames = []
     for namestring in names:

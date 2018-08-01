@@ -6,8 +6,7 @@ import unittest
 import codecs
 
 from bibtexparser.bparser import BibTexParser
-from bibtexparser.bibdatabase import (COMMON_STRINGS, BibDataStringExpression,
-                                      BibDataString)
+from bibtexparser.bibdatabase import (COMMON_STRINGS, BibDataStringExpression)
 from bibtexparser.customization import *
 from bibtexparser import customization
 
@@ -54,13 +53,6 @@ def customizations_latex(record):
 
 class TestBibtexParserList(unittest.TestCase):
 
-    def test_wrong(self):
-        """
-        Wrong entry type
-        """
-        with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
-            self.assetRaises(TypeError, BibTexParser, bibfile)
-
     ###########
     # ARTICLE
     ###########
@@ -96,6 +88,42 @@ class TestBibtexParserList(unittest.TestCase):
                               'volume': '12',
                               'month': 'jan'
                               }}
+        self.assertEqual(res_list, expected_list)
+        self.assertEqual(res_dict, expected_dict)
+
+    def test_article_annotation(self):
+        with codecs.open('bibtexparser/tests/data/article_with_annotation.bib', 'r', 'utf-8') as bibfile:
+            bib = BibTexParser(bibfile.read())
+            res_list = bib.get_entry_list()
+            res_dict = bib.get_entry_dict()
+            expected_list = [{'keyword': 'keyword1, keyword2',
+                              'ENTRYTYPE': 'article',
+                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                              'year': '2013',
+                              'journal': 'Nice Journal',
+                              'ID': 'Cesar2013',
+                              'pages': '12-23',
+                              'title': 'An amazing title',
+                              'comments': 'A comment',
+                              'author': 'Jean César',
+                              'author+an': '1=highlight',
+                              'volume': '12',
+                              'month': 'jan'
+                              }]
+            expected_dict = {'Cesar2013': {'keyword': 'keyword1, keyword2',
+                                           'ENTRYTYPE': 'article',
+                                           'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                                           'year': '2013',
+                                           'journal': 'Nice Journal',
+                                           'ID': 'Cesar2013',
+                                           'pages': '12-23',
+                                           'title': 'An amazing title',
+                                           'comments': 'A comment',
+                                           'author': 'Jean César',
+                                           'author+an': '1=highlight',
+                                           'volume': '12',
+                                           'month': 'jan'
+                                           }}
         self.assertEqual(res_list, expected_list)
         self.assertEqual(res_dict, expected_dict)
 
@@ -394,9 +422,6 @@ class TestBibtexParserList(unittest.TestCase):
 
         self.assertEqual(res, expected)
 
-    ###########
-    # TRAPS
-    ###########
     def test_traps(self):
         with codecs.open('bibtexparser/tests/data/traps.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -416,9 +441,6 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
-    ###########
-    # FEATURES
-    ###########
     def test_features(self):
         with open('bibtexparser/tests/data/features.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -447,10 +469,7 @@ class TestBibtexParserList(unittest.TestCase):
                          }]
         self.assertEqual(res, expected)
 
-    ###########
-    # WRONG
-    ###########
-    def test_wrong(self):
+    def test_nonstandard_ignored(self):
         with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
@@ -459,9 +478,12 @@ class TestBibtexParserList(unittest.TestCase):
                          'ENTRYTYPE': 'article'}]
         self.assertEqual(res, expected)
 
-    ###########
-    # ENCODING
-    ###########
+    def test_nonstandard_not_ignored(self):
+        with open('bibtexparser/tests/data/wrong.bib', 'r') as bibfile:
+            bib = BibTexParser(bibfile.read(), ignore_nonstandard_types=False)
+            res = bib.get_entry_list()
+        self.assertEqual(len(res), 2)
+
     def test_encoding(self):
         with codecs.open('bibtexparser/tests/data/encoding.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -566,6 +588,29 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertIsInstance(res['journal'], BibDataStringExpression)
         self.assertEqual(len(res['journal'].expr), 1)
         self.assertEqual(res['journal'].get_value(), 'Nice Journal')
+
+    def test_comments_spaces_and_declarations(self):
+        with codecs.open(
+                'bibtexparser/tests/data/comments_spaces_and_declarations.bib',
+                'r', 'utf-8') as bibfile:
+            bib = BibTexParser(bibfile.read())
+        res_dict = bib.get_entry_dict()
+        expected_dict = {'Cesar2013': {
+            'keyword': 'keyword1, keyword2',
+            'ENTRYTYPE': 'article',
+            'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+            'year': '2013',
+            'journal': 'Nice Journal',
+            'ID': 'Cesar2013',
+            'pages': '12-23',
+            'title': 'A great title',
+            'comments': 'A comment',
+            'author': 'Jean César',
+            'volume': '12',
+            'month': 'jan'
+        }}
+        self.assertEqual(res_dict, expected_dict)
+        self.assertEqual(bib.preambles, ["Blah blah"])
 
 
 if __name__ == '__main__':
