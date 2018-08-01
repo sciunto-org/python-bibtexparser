@@ -100,6 +100,10 @@ class TestBibtexParserMethod(unittest.TestCase):
         result = convert_to_unicode(record)
         expected = {'title': "île"}
         self.assertEqual(result, expected)
+        record = {'title': r"\texttimes{}{\texttimes}\texttimes"}
+        result = convert_to_unicode(record)
+        expected = {'title': "×××"}
+        self.assertEqual(result, expected)
 
     ###########
     # homogenize

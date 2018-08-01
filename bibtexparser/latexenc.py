@@ -52,7 +52,7 @@ def _replace_latex(string, latex, unicod):
 
 def _replace_all_latex(string, replacements):
     for u, l in replacements:
-        string = _replace_latex(string, l, u)
+        string = _replace_latex(string, l.rstrip(), u)
     return string
 
 
