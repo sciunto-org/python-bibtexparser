@@ -210,10 +210,10 @@ class BibTexParser(object):
         byte = b'\xef\xbb\xbf'
         if isinstance(bibtex_str, ustr):
             byte = ustr(byte, self.encoding, 'ignore')
-            if bibtex_str[0] == byte:
+            if len(bibtex_str) >= 1 and bibtex_str[0] == byte:
                 bibtex_str = bibtex_str[1:]
         else:
-            if bibtex_str[:3] == byte:
+            if len(bibtex_str) >= 3 and bibtex_str[:3] == byte:
                 bibtex_str = bibtex_str[3:]
             bibtex_str = bibtex_str.decode(encoding=self.encoding)
         return io.StringIO(bibtex_str)
