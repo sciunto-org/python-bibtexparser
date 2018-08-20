@@ -149,9 +149,22 @@ class BibtexExpression(object):
         entry_type.setParseAction(first_token)
 
         # Entry key: any character up to a ',' without leading and trailing
-        # spaces.
-        key = pp.SkipTo(',')('Key')  # Exclude @',\#}{~%
-        key.setParseAction(lambda s, l, t: first_token(s, l, t).strip())
+        # spaces. Also exclude spaces and prevent it from being empty.
+        key = pp.SkipTo(',')('Key')  # TODO Maybe alsi exclude @',\#}{~%
+
+        def citekeyParseAction(s, l, t):
+            key = first_token(s, l, t).strip()
+            if len(key) < 1:
+                raise self.ParseException(
+                    s, loc=l, msg="Empty citekeys are not allowed.")
+            for i, c in enumerate(key):
+                if c.isspace():
+                    raise self.ParseException(
+                        s, loc=(l + i),
+                        msg="Whitespace not allowed in citekeys.")
+            return key
+
+        key.setParseAction(citekeyParseAction)
 
         # Field name: word of letters, digits, dashes and underscores
         field_name = pp.Word(pp.alphanums + '_-().+')('FieldName')
