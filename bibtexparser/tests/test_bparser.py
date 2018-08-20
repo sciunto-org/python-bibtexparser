@@ -612,6 +612,13 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res_dict, expected_dict)
         self.assertEqual(bib.preambles, ["Blah blah"])
 
+    def test_no_citekey_parsed_as_comment(self):
+        bib = BibTexParser('@BOOK{, title = "bla"}')
+        self.assertEqual(bib.entries, [])
+        self.assertEqual(bib.preambles, [])
+        self.assertEqual(bib.strings, {})
+        self.assertEqual(bib.comments, ['@BOOK{, title = "bla"}'])
+
 
 if __name__ == '__main__':
     unittest.main()
