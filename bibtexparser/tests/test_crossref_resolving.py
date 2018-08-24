@@ -189,23 +189,18 @@ class TestCrossRef(unittest.TestCase):
         entries_expected = {'circ1': {'ENTRYTYPE': 'book',
                                       'ID': 'circ1',
                                       '_FROM_CROSSREF': [],
-                                      'crossref': 'circ3',
+                                      'crossref': 'circ2',
                                       'date': '1911'},
                             'circ2': {'ENTRYTYPE': 'book',
                                       'ID': 'circ2',
                                       '_FROM_CROSSREF': [],
                                       'crossref': 'circ1',
-                                      'date': '1911'},
-                            'circ3': {'ENTRYTYPE': 'book',
-                                      'ID': 'circ3',
-                                      '_FROM_CROSSREF': [],
-                                      'crossref': 'circ2',
                                       'date': '1911'}}
         parser = BibTexParser(add_missing_from_crossref=True)
         with self.assertLogs('bibtexparser.bibdatabase', level='ERROR') as cm:
             with open(input_file_path) as bibtex_file:
                 bibtex_database = parser.parse_file(bibtex_file)
-            self.assertIn("ERROR:bibtexparser.bibdatabase:Circular crossref dependency: circ1->circ3->circ2->circ1.", cm.output)
+            self.assertIn("ERROR:bibtexparser.bibdatabase:Circular crossref dependency: circ1->circ2->circ1.", cm.output)
         self.assertDictEqual(bibtex_database.entries_dict, entries_expected)
 
     def test_crossref_missing_entries(self):
