@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 from bibtexparser.bibdatabase import BibDatabase
 from bibtexparser.bparser import BibTexParser
 
