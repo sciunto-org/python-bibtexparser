@@ -1,9 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from collections import OrderedDict
 import sys
-
 import logging
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 if sys.version_info.major == 2:
     TEXT_TYPE = unicode
