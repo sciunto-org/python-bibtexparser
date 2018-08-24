@@ -153,7 +153,7 @@ class TestCrossRef(unittest.TestCase):
                                     'publisher': 'Rancour',
                                     'title': 'Beasts of the Burbling Burns',
                                     'year': '1996'}}
-        parser = BibTexParser(add_missing_field_from_crossref=True, ignore_nonstandard_types=False)
+        parser = BibTexParser(add_missing_from_crossref=True, ignore_nonstandard_types=False)
         with open(input_file_path) as bibtex_file:
             bibtex_database = parser.parse_file(bibtex_file)
         self.assertDictEqual(bibtex_database.entries_dict, entries_expected)
@@ -178,12 +178,12 @@ class TestCrossRef(unittest.TestCase):
                             'r4': {'ENTRYTYPE': 'book',
                                    'ID': 'r4',
                                    'date': '1911'}}
-        
-        parser = BibTexParser(add_missing_field_from_crossref=True)
+
+        parser = BibTexParser(add_missing_from_crossref=True)
         with open(input_file_path) as bibtex_file:
             bibtex_database = parser.parse_file(bibtex_file)
         self.assertDictEqual(bibtex_database.entries_dict, entries_expected)
-        
+
     def test_crossref_cascading_cycle(self):
         input_file_path = 'bibtexparser/tests/data/crossref_cascading_cycle.bib'
         entries_expected = {'circ1': {'ENTRYTYPE': 'book',
@@ -201,13 +201,13 @@ class TestCrossRef(unittest.TestCase):
                                       '_FROM_CROSSREF': [],
                                       'crossref': 'circ2',
                                       'date': '1911'}}
-        parser = BibTexParser(add_missing_field_from_crossref=True)
+        parser = BibTexParser(add_missing_from_crossref=True)
         with self.assertLogs('bibtexparser.bibdatabase', level='ERROR') as cm:
             with open(input_file_path) as bibtex_file:
                 bibtex_database = parser.parse_file(bibtex_file)
-            self.assertIn("ERROR:bibtexparser.bibdatabase:Circular crossref dependance : circ1->circ3->circ2->circ1.", cm.output)
+            self.assertIn("ERROR:bibtexparser.bibdatabase:Circular crossref dependency: circ1->circ3->circ2->circ1.", cm.output)
         self.assertDictEqual(bibtex_database.entries_dict, entries_expected)
-        
+
     def test_crossref_missing_entries(self):
         input_file_path = 'bibtexparser/tests/data/crossref_missing_entries.bib'
         entries_expected = {'mcr': {'ENTRYTYPE': 'inbook',
@@ -217,8 +217,8 @@ class TestCrossRef(unittest.TestCase):
                                     'crossref': 'missing1',
                                     'origdate': '1933',
                                     'title': 'Lumbering Lunatics'}}
-        
-        parser = BibTexParser(add_missing_field_from_crossref=True)
+
+        parser = BibTexParser(add_missing_from_crossref=True)
         with self.assertLogs('bibtexparser.bibdatabase', level='ERROR') as cm:
             with open(input_file_path) as bibtex_file:
                 bibtex_database = parser.parse_file(bibtex_file)

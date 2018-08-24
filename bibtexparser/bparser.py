@@ -80,7 +80,7 @@ class BibTexParser(object):
                  homogenize_fields=False,
                  interpolate_strings=True,
                  common_strings=False,
-                 add_missing_field_from_crossref=False):
+                 add_missing_from_crossref=False):
         """
         Creates a parser for rading BibTeX files
 
@@ -118,7 +118,7 @@ class BibTexParser(object):
         self.encoding = 'utf8'
 
         # Add missing field from cross-ref
-        self.add_missing_field_from_crossref = add_missing_field_from_crossref
+        self.add_missing_from_crossref = add_missing_from_crossref
 
         # pre-defined set of key changes
         self.alt_dict = {
@@ -129,7 +129,7 @@ class BibTexParser(object):
             'urls': u'url',
             'link': u'url',
             'links': u'url',
-            'subjects': u'subject'
+            'subjects': u'subject',
             'xref': u'crossref'
         }
 
@@ -154,8 +154,9 @@ class BibTexParser(object):
             logger.error("Could not parse properly, starting at %s", exc.line)
             if not partial:
                 raise exc
-        if self.add_missing_field_from_crossref:
-            self.bib_database._add_missing_field_from_crossref()
+
+        if self.add_missing_from_crossref:
+            self.bib_database._add_missing_from_crossref()
 
         return self.bib_database
 
@@ -285,15 +286,14 @@ class BibTexParser(object):
             d[self._clean_field_key(key)] = self._clean_val(fields[key])
         d['ENTRYTYPE'] = entry_type
         d['ID'] = entry_id
-        # Copy untouch cross-ref
+
         crossref = d.get('crossref', None)
+        if self.add_missing_from_crossref and crossref is not None:
+            d['_crossref'] = crossref
+
         if self.customization is not None:
-            # apply any customizations to the record object
-            # if we didn't use crossref then return it
             logger.debug('Apply customizations and return dict')
             d = self.customization(d)
-        if self.add_missing_field_from_crossref and crossref is not None:
-            d['_crossref'] = crossref
 
         self.bib_database.entries.append(d)
 
