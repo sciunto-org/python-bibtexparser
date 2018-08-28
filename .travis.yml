@@ -12,6 +12,10 @@ matrix:
       env: TEST_SUITE=suite_3_5
     - python: "3.6"
       env: TEST_SUITE=suite_3_6
+    - python: "3.7"
+      dist: xenial # Required for Python 3.7
+      sudo: true   # travis-ci/travis-ci#9069
+      env: TEST_SUITE=suite_3_7
     - python: "pypy-5.7.1"
       env: TEST_SUITE=suite_pypy
     - python: "pypy3.5-5.8.0"
