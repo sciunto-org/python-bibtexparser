@@ -151,7 +151,7 @@ class BibDatabase(object):
         entry['_FROM_CROSSREF'] = sorted(from_crossref.keys())
         del entry['_crossref']
 
-    def _add_missing_from_crossref(self):
+    def add_missing_from_crossref(self):
         self._make_entries_dict()
         self._crossref_updated = []
         for entry in self.entries:

@@ -156,7 +156,7 @@ class BibTexParser(object):
                 raise exc
 
         if self.add_missing_from_crossref:
-            self.bib_database._add_missing_from_crossref()
+            self.bib_database.add_missing_from_crossref()
 
         return self.bib_database
 
