@@ -120,7 +120,7 @@ class BibDatabase(object):
         if entry['ID'] in self._crossref_updated:
             return
 
-        if entry['_crossref'] not in self._entries_dict:
+        if entry['_crossref'] not in self.entries_dict:
             logger.error("Crossref reference %s for %s is missing.",
                          entry['_crossref'],
                          entry['ID'])
@@ -133,7 +133,7 @@ class BibDatabase(object):
                          entry['_crossref'])
             return
 
-        crossref_entry = self._entries_dict[entry['_crossref']]
+        crossref_entry = self.entries_dict[entry['_crossref']]
         if '_crossref' in crossref_entry:
             dependencies.add(entry['ID'])
             self._add_missing_from_crossref_entry(crossref_entry, dependencies)
@@ -152,7 +152,6 @@ class BibDatabase(object):
         del entry['_crossref']
 
     def add_missing_from_crossref(self):
-        self._make_entries_dict()
         self._crossref_updated = []
         for entry in self.entries:
             if "_crossref" in entry:
