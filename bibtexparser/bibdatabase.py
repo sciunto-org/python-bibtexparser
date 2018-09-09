@@ -70,9 +70,8 @@ class BibDatabase(object):
         #: List of BibTeX preamble (`@preamble{...}`) blocks.
         self.preambles = []
 
-        self.not_update_by_crossref = [
-            '_FROM_CROSSREF'
-        ]
+        #: List of fields that should not be updated when resolving crossrefs
+        self._not_updated_by_crossref = ['_FROM_CROSSREF']
 
     def load_common_strings(self):
         self.strings.update(COMMON_STRINGS)
@@ -142,7 +141,7 @@ class BibDatabase(object):
         from_crossref = {bibfield: bibvalue
                          for (bibfield, bibvalue) in crossref_entry.items()
                          if bibfield not in entry.keys() and
-                            bibfield not in self.not_update_by_crossref}
+                            bibfield not in self._not_updated_by_crossref}
 
         entry.update(from_crossref)
 
