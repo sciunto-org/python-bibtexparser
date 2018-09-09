@@ -144,8 +144,7 @@ class BibDatabase(object):
                          if bibfield not in entry.keys() and
                             bibfield not in self.not_update_by_crossref}
 
-        for bibfield, bibvalue in from_crossref.items():
-            entry[bibfield] = bibvalue
+        entry.update(from_crossref)
 
         self._crossref_updated.append(entry['ID'])
         entry['_FROM_CROSSREF'] = sorted(from_crossref.keys())
