@@ -150,6 +150,8 @@ class BibDatabase(object):
         del entry['_crossref']
 
     def add_missing_from_crossref(self):
+        """Resolve crossrefs and update entries accordingly.
+        """
         self._crossref_updated = []
         for entry in self.entries:
             if "_crossref" in entry:
