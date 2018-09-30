@@ -56,7 +56,7 @@ class BibTexParser(object):
     :param interpolate_strings: bool (default True)
         If True, replace bibtex string by their value, else uses
         BibDataString objects.
-    :param common_strings: book (default False)
+    :param common_strings: bool (default False)
         Include common string definitions (e.g. month abbreviations) to
         the bibtex file.
     :param add_missing_from_crossref: bool (default False)
