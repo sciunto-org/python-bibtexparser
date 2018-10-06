@@ -1,6 +1,16 @@
 v1.xxx
 ======
 
+v1.1.0
+======
+
+* Handles declarations on lines starting with spaces after comments (#199)
+* accept extra characters in @string (#148)
+* Add support for BibLaTeX annotations (#208)
+* Strip the latex command str for latex_to_unicode() (#182)
+* Add comma_last to BibTexWriter (#219)
+* Feature: crossref Support (#216)
+
 v1.0.1
 ======
 
