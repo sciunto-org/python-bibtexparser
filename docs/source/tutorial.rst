@@ -116,7 +116,7 @@ You can tweak them as you wish.
    import bibtexparser
    from bibtexparser.bparser import BibTexParser
 
-   parser = BibTexParser(parser.common_strings=False)
+   parser = BibTexParser(common_strings=False)
    parser.ignore_nonstandard_types = False
    parser.homogenise_fields = False
 
