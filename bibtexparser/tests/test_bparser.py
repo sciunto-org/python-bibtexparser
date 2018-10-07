@@ -53,6 +53,13 @@ def customizations_latex(record):
 
 class TestBibtexParserList(unittest.TestCase):
 
+    def test_empty_string(self):
+        bib = BibTexParser("")
+        self.assertEqual(bib.entries, [])
+        self.assertEqual(bib.comments, [])
+        self.assertEqual(bib.preambles, [])
+        self.assertEqual(bib.strings, {})
+
     ###########
     # ARTICLE
     ###########
