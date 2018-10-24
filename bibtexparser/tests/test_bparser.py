@@ -634,5 +634,13 @@ class TestBibtexParserList(unittest.TestCase):
             '          like = a = bibtex file but\n'
             '              , is not a real one!'])
 
+    def test_no_citekey_parsed_as_comment(self):
+        bib = BibTexParser('@BOOK{, title = "bla"}')
+        self.assertEqual(bib.entries, [])
+        self.assertEqual(bib.preambles, [])
+        self.assertEqual(bib.strings, {})
+        self.assertEqual(bib.comments, ['@BOOK{, title = "bla"}'])
+
+
 if __name__ == '__main__':
     unittest.main()
