@@ -113,16 +113,17 @@ You can tweak them as you wish.
 
 .. code-block:: python
 
-    import bibtexparser
-    from bibtexparser.bparser import BibTexParser
+   import bibtexparser
+   from bibtexparser.bparser import BibTexParser
 
-	parser = BibTexParser()
-	parser.ignore_nonstandard_types = False
-	parser.homogenise_fields = False
-	parser.common_strings = False
+   parser = BibTexParser(common_strings=False)
+   parser.ignore_nonstandard_types = False
+   parser.homogenise_fields = False
 
-	bib_database = bibtexparser.loads(bibtex_str, parser)
+   bib_database = bibtexparser.loads(bibtex_str, parser)
 
+.. note::
+   The :code:`common_strings` option needs to be set when the parser object is created and has no effect if changed afterwards.
 
 Step 3: Export
 ==============

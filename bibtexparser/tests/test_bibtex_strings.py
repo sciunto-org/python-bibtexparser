@@ -49,6 +49,15 @@ class TestStringParse(unittest.TestCase):
                      }]
         self.assertEqual(res, expected)
 
+    def test_string_parse_accept_chars(self):
+        bibtex_str = '@string{pub-ieee-std = {IEEE}}\n\n@string{pub-ieee-std:adr = {New York, NY, USA}}'
+        bib_database = bibtexparser.loads(bibtex_str)
+        self.assertEqual(len(bib_database.strings), 2)
+        expected = OrderedDict()
+        expected['pub-ieee-std'] = 'IEEE'
+        expected['pub-ieee-std:adr'] = 'New York, NY, USA'
+        self.assertEqual(bib_database.strings, expected)
+
 
 class TestStringWrite(unittest.TestCase):
 

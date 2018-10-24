@@ -1,11 +1,16 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from collections import OrderedDict
 import sys
+import logging
 
+logger = logging.getLogger(__name__)
 
-if sys.version_info.major == 2:
-    TEXT_TYPE = unicode
+if sys.version_info >= (3, 0):
+    ustr = str
 else:
-    TEXT_TYPE = str
+    ustr = unicode
 
 
 STANDARD_TYPES = set([
@@ -23,6 +28,7 @@ STANDARD_TYPES = set([
     'proceedings',
     'techreport',
     'unpublished'])
+
 COMMON_STRINGS = OrderedDict([
     ('jan', 'January'),
     ('feb', 'February'),
@@ -64,6 +70,9 @@ class BibDatabase(object):
         #: List of BibTeX preamble (`@preamble{...}`) blocks.
         self.preambles = []
 
+        #: List of fields that should not be updated when resolving crossrefs
+        self._not_updated_by_crossref = ['_FROM_CROSSREF']
+
     def load_common_strings(self):
         self.strings.update(COMMON_STRINGS)
 
@@ -81,8 +90,12 @@ class BibDatabase(object):
     def entry_sort_key(entry, fields):
         result = []
         for field in fields:
-            result.append(TEXT_TYPE(entry.get(field, '')).lower())  # Sorting always as string
+            result.append(ustr(entry.get(field, '')).lower())  # Sorting always as string
         return tuple(result)
+
+    def _make_entries_dict(self):
+        for entry in self.entries:
+            self._entries_dict[entry['ID']] = entry
 
     def get_entry_dict(self):
         """Return a dictionary of BibTeX entries.
@@ -90,8 +103,7 @@ class BibDatabase(object):
         """
         # If the hash has never been made, make it
         if not self._entries_dict:
-            for entry in self.entries:
-                self._entries_dict[entry['ID']] = entry
+            self._make_entries_dict()
         return self._entries_dict
 
     entries_dict = property(get_entry_dict)
@@ -102,6 +114,48 @@ class BibDatabase(object):
                 self.strings[name])
         except KeyError:
             raise(UndefinedString(name))
+
+    def _add_missing_from_crossref_entry(self, entry, dependencies=set()):
+        if entry['ID'] in self._crossref_updated:
+            return
+
+        if entry['_crossref'] not in self.entries_dict:
+            logger.error("Crossref reference %s for %s is missing.",
+                         entry['_crossref'],
+                         entry['ID'])
+            return
+
+        if entry['_crossref'] in dependencies:
+            logger.error("Circular crossref dependency: %s->%s->%s.",
+                         "->".join(dependencies),
+                         entry['ID'],
+                         entry['_crossref'])
+            return
+
+        crossref_entry = self.entries_dict[entry['_crossref']]
+        if '_crossref' in crossref_entry:
+            dependencies.add(entry['ID'])
+            self._add_missing_from_crossref_entry(crossref_entry, dependencies)
+            dependencies.remove(entry['ID'])
+
+        from_crossref = {bibfield: bibvalue
+                         for (bibfield, bibvalue) in crossref_entry.items()
+                         if bibfield not in entry.keys() and
+                            bibfield not in self._not_updated_by_crossref}
+
+        entry.update(from_crossref)
+
+        self._crossref_updated.append(entry['ID'])
+        entry['_FROM_CROSSREF'] = sorted(from_crossref.keys())
+        del entry['_crossref']
+
+    def add_missing_from_crossref(self):
+        """Resolve crossrefs and update entries accordingly.
+        """
+        self._crossref_updated = []
+        for entry in self.entries:
+            if "_crossref" in entry:
+                self._add_missing_from_crossref_entry(entry)
 
 
 class BibDataString(object):
@@ -222,4 +276,4 @@ def as_text(text_string_or_expression):
                   (BibDataString, BibDataStringExpression)):
         return text_string_or_expression.get_value()
     else:
-        return TEXT_TYPE(text_string_or_expression)
+        return ustr(text_string_or_expression)

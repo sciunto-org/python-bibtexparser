@@ -31,6 +31,17 @@ class TestBibtexWriterList(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(expected, result)
 
+    def test_article_with_annotation(self):
+        with io.open(_data_path('article_with_annotation.bib'), 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+
+        with io.open(_data_path('article_with_annotation_output.bib'), 'r') \
+                as bibfile:
+            expected = bibfile.read()
+        result = to_bibtex(bib)
+        self.maxDiff = None
+        self.assertEqual(expected, result)
+
     def test_book(self):
         with io.open(_data_path('book.bib'), 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -77,5 +88,30 @@ class TestBibtexWriterList(unittest.TestCase):
                 'article_with_strings_output.bib'), 'r') as bibfile:
             expected = bibfile.read()
         result = to_bibtex(bib)
+        self.maxDiff = None
+        self.assertEqual(expected, result)
+
+    def test_trailing_comma(self):
+        with io.open(_data_path('article.bib'), 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+
+        with io.open(_data_path('article_trailing_comma_output.bib'), 'r') as bibfile:
+            expected = bibfile.read()
+        writer = BibTexWriter()
+        writer.add_trailing_comma = True
+        result = writer.write(bib)
+        self.maxDiff = None
+        self.assertEqual(expected, result)
+
+    def test_comma_first_and_trailing_comma(self):
+        with io.open(_data_path('article.bib'), 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+
+        with io.open(_data_path('article_comma_first_and_trailing_comma_output.bib'), 'r') as bibfile:
+            expected = bibfile.read()
+        writer = BibTexWriter()
+        writer.add_trailing_comma = True
+        writer.comma_first = True
+        result = writer.write(bib)
         self.maxDiff = None
         self.assertEqual(expected, result)
