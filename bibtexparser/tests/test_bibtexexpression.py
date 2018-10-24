@@ -58,6 +58,26 @@ class TestBibtexExpression(unittest.TestCase):
     def test_entry_declaration_after_space(self):
         self.expr.entry.parseString('  @journal{key, name = {abcd}}')
 
+    def test_entry_declaration_no_key(self):
+        with self.assertRaises(self.expr.ParseException):
+            self.expr.entry.parseString('@misc{name = {abcd}}')
+
+    def test_entry_declaration_no_key_new_line(self):
+        with self.assertRaises(self.expr.ParseException):
+            self.expr.entry.parseString('@misc{\n name = {abcd}}')
+
+    def test_entry_declaration_no_key_comma(self):
+        with self.assertRaises(self.expr.ParseException):
+            self.expr.entry.parseString('@misc{, \nname = {abcd}}')
+
+    def test_entry_declaration_no_key_keyvalue_without_space(self):
+        with self.assertRaises(self.expr.ParseException):
+            self.expr.entry.parseString('@misc{\nname=aaa}')
+
+    def test_entry_declaration_key_with_whitespace(self):
+        with self.assertRaises(self.expr.ParseException):
+            self.expr.entry.parseString('@misc{ xx yy, \n name = aaa}')
+
     def test_string_declaration_after_space(self):
         self.expr.string_def.parseString('  @string{ name = {abcd}}')
 
