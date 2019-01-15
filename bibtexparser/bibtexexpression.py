@@ -62,9 +62,14 @@ def field_to_pair(string_, location, token):
 
     :returns: (name, value).
     """
-    f = token.get('Field')
-    return (f.get('FieldName'),
-            strip_after_new_lines(f.get('Value')))
+    field = token.get('Field')
+    value = field.get('Value')
+    if isinstance(value, pp.ParseResults):
+        # For pyparsing >= 2.3.1 (see #225 and API change note in pyparsing's
+        # Changelog).
+        value = value[0]
+    return (field.get('FieldName'),
+            strip_after_new_lines(value))
 
 
 # Expressions helpers
