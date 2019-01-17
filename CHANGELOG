@@ -1,6 +1,15 @@
 v1.xxx
 ======
 
+v1.1.0
+======
+
+* BUGFIX: Fix for pyparsing 2.3.1 (#226)
+* NEW: Add support for BibLaTeX annotations (#208)
+* NEW: Feature: crossref Support (#216)
+* ENH: Handles declarations on lines starting with spaces after comments (#199)
+* ENH: Checks for empty citekeys and whitespaces (#213)
+
 v1.0.1
 ======
 
