@@ -375,7 +375,7 @@ Using the code would yield the following output.
     bp = BibTexParser(interpolate_strings=False)
     bib_database = bp.parse(bibtex)
     bib_database.entries[0]
-    as_text(bd.entries[0]['author'])
+    as_text(bib_database.entries[0]['author'])
 
 .. code-block:: python
 
