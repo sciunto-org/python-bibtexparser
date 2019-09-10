@@ -115,3 +115,16 @@ class TestBibtexWriterList(unittest.TestCase):
         result = writer.write(bib)
         self.maxDiff = None
         self.assertEqual(expected, result)
+
+    def test_sort_reverse(self):
+        with io.open(_data_path('multiple_entries_sort.bib'), 'r') as bibfile:
+            bib = BibTexParser(bibfile.read())
+
+        with io.open(_data_path('multiple_entries_sort_output.bib'), 'r') as bibfile:
+            expected = bibfile.read()
+
+        writer = BibTexWriter()
+        writer.order_entries_by = ['author', '-year']
+        result = writer.write(bib)
+        self.maxDiff = None
+        self.assertEqual(expected, result)

@@ -61,7 +61,8 @@ class BibTexWriter(object):
         self.align_values = False
         #: Characters(s) for separating BibTeX entries. Default: new line.
         self.entry_separator = '\n'
-        #: Tuple of fields for ordering BibTeX entries. Set to `None` to disable sorting. Default: BibTeX key `('ID', )`.
+        #: Tuple of fields for ordering BibTeX entries. Set to `None` to disable sorting.
+        #  Prefix key(s) with '-' to denote descending order. Default: BibTeX key `('ID', )`.
         self.order_entries_by = ('ID', )
         #: Tuple of fields for display order in a single BibTeX entry. Fields not listed here will be displayed
         #: alphabetically at the end. Set to '[]' for alphabetical order. Default: '[]'
@@ -99,11 +100,24 @@ class BibTexWriter(object):
 
     def _entries_to_bibtex(self, bib_database):
         bibtex = ''
+        entries = bib_database.entries
         if self.order_entries_by:
             # TODO: allow sort field does not exist for entry
-            entries = sorted(bib_database.entries, key=lambda x: BibDatabase.entry_sort_key(x, self.order_entries_by))
-        else:
-            entries = bib_database.entries
+            order_fields = list(self.order_entries_by)
+            order_reversed = []
+            for i, f in enumerate(order_fields):
+                if f.startswith('-'):
+                    order_reversed.append(i)
+                    order_fields[i] = f[1:]
+            # Make a list of tuples from order_fields in reverse, with indices.
+            # e.g. [(3, 'id'), (2,'year'), (1, 'title'), (0, 'author')]
+            order_fields_r = zip(range(len(order_fields)-1, -1, -1), order_fields[::-1])
+            for ofi, order_field in order_fields_r:
+                entries = sorted(
+                    entries,
+                    key=lambda en: en.get(order_field, '').lower(),
+                    reverse=bool(ofi in order_reversed)
+                )
 
         if self.align_values:
             # determine maximum field width to be used
