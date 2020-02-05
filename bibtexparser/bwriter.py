@@ -77,6 +77,9 @@ class BibTexWriter(object):
         self._max_field_width = 0
         #: Whether common strings are written
         self.common_strings = write_common_strings
+        #: Define which fields will be written out for entries (list)
+        #: default is empty list: all available fields are writen
+        self.export_fields = []
 
     def write(self, bib_database):
         """
@@ -124,6 +127,10 @@ class BibTexWriter(object):
         display_order = [i for i in self.display_order if i in entry]
         # then all the other fields sorted alphabetically
         display_order += [i for i in sorted(entry) if i not in self.display_order]
+        # then only those field which are in export_fields:
+        if len(self.export_fields) > 0:
+            display_order = [i for i in display_order if i in self.export_fields]
+
         if self.comma_first:
             field_fmt = u"\n{indent}, {field:<{field_max_w}} = {value}"
         else:
