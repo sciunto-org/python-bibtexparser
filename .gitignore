@@ -1,3 +1,5 @@
+/bibtexparser/version.py
+
 *.py[cod]
 
 # C extensions

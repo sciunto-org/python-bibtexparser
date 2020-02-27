@@ -24,9 +24,12 @@ install:
   - if [[ $TEST_SUITE == suite_3_6 ]]; then
         pip install sphinx;
     fi;
-  - pip install coverage
+  - pip install --upgrade coverage pip setuptools
   - pip install -r requirements.txt
-  - python setup.py install
+  - python setup.py bdist_wheel
+  - mv ./dist/*.whl ./bibtexparser-1.CI-py3.py2-none-any.whl
+  - pip install --upgrade ./bibtexparser-1.CI-py3.py2-none-any.whl --user
+
 script:
   - nosetests --with-coverage  --cover-erase --cover-package=bibtexparser
   - if [[ $TEST_SUITE == suite_3_6 ]]; then
