@@ -25,7 +25,7 @@ __all__ = [
     'loads', 'load', 'dumps', 'dump', 'bibdatabase',
     'bparser', 'bwriter', 'bibtexexpression', 'latexenc', 'customization',
 ]
-__version__ = '1.1.0'
+__version__ = '1.2.0'
 
 from . import bibdatabase, bibtexexpression, bparser, bwriter, latexenc, customization
 
