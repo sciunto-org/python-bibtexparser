@@ -206,7 +206,7 @@ class BibTexParser(object):
         byte = b'\xef\xbb\xbf'
 
         if isinstance(bibtex_str, str):
-            byte = ustr(byte, self.encoding, 'ignore')
+            byte = str(byte, self.encoding, 'ignore')
             if len(bibtex_str) >= 1 and bibtex_str[0] == byte:
                 bibtex_str = bibtex_str[1:]
         else:
