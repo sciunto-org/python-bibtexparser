@@ -1,5 +1,7 @@
-v1.xxx
+v1.2.0
 ======
+
+* Support for python 3 only
 
 v1.1.0
 ======

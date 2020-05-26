@@ -8,7 +8,6 @@ from __future__ import unicode_literals
 import unittest
 import os
 import io
-import sys
 
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.bwriter import BibTexWriter, to_bibtex

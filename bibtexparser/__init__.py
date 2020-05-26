@@ -27,8 +27,6 @@ __all__ = [
 ]
 __version__ = '1.1.0'
 
-import sys
-
 from . import bibdatabase, bibtexexpression, bparser, bwriter, latexenc, customization
 
 
@@ -107,8 +105,4 @@ def dump(bib_database, bibtex_file, writer=None):
     """
     if writer is None:
         writer = bwriter.BibTexWriter()
-    if sys.version_info >= (3, 0):
-        bibtex_file.write(writer.write(bib_database))
-    else:
-        # Encode to UTF-8
-        bibtex_file.write(writer.write(bib_database).encode("utf-8"))
+    bibtex_file.write(writer.write(bib_database))
