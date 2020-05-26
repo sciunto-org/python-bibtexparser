@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -482,7 +481,7 @@ def doi(record):
         if nodoi:
             link = record['doi']
             if link.startswith('10'):
-                link = 'http://dx.doi.org/' + link
+                link = 'https://doi.org/' + link
             record['link'].append({"url": link, "anchor": "doi"})
     return record
 

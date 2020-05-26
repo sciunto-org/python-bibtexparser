@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Original source: github.com/okfn/bibserver
@@ -7,7 +6,6 @@
 # Etienne Posthumus (epoz)
 # Francois Boulogne <fboulogne at april dot org>
 
-import sys
 import io
 import logging
 
@@ -18,12 +16,6 @@ from bibtexparser.bibtexexpression import BibtexExpression
 logger = logging.getLogger(__name__)
 
 __all__ = ['BibTexParser']
-
-
-if sys.version_info >= (3, 0):
-    ustr = str
-else:
-    ustr = unicode
 
 
 def parse(data, *args, **kwargs):
@@ -212,7 +204,8 @@ class BibTexParser(object):
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
         byte = b'\xef\xbb\xbf'
-        if isinstance(bibtex_str, ustr):
+
+        if isinstance(bibtex_str, str):
             byte = ustr(byte, self.encoding, 'ignore')
             if len(bibtex_str) >= 1 and bibtex_str[0] == byte:
                 bibtex_str = bibtex_str[1:]
@@ -244,8 +237,8 @@ class BibTexParser(object):
         :returns: (unicode) string -- value
         """
         key = key.lower()
-        if not isinstance(key, ustr):
-            return ustr(key, 'utf-8')
+        if not isinstance(key, str):
+            return str(key, 'utf-8')
         else:
             return key
 
