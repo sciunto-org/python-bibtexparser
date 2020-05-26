@@ -5,8 +5,6 @@ How to release
 * Update version in __init__.py
 * git tag -a 'vX'
 * merge in branch latest
-* Create a tarball and upload it on the server
-    git archive master  --prefix 'bibtexparser/' | bzip2 > bibtexparser-x.y.tar.bz2
 * Send the package on pypi
     python setup.py sdist upload
 * tick the doc version on readthedocs

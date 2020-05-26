@@ -34,38 +34,42 @@ def add_logger_parse_action(expr, log_func):
 
 # Parse action helpers
 # Helpers for returning values from the parsed tokens. Shaped as pyparsing's
-# parse actions. In pyparsing wording:
-# s, l, t, stand for string, location, token
+# parse actions. See pyparsing documentation for the arguments.
 
-def first_token(s, l, t):
+def first_token(string_, location, token):
     # TODO Handle this case correctly!
-    assert(len(t) == 1)
-    return t[0]
+    assert(len(token) == 1)
+    return token[0]
 
 
-def remove_trailing_newlines(s, l, t):
-    if t[0]:
-        return t[0].rstrip('\n')
+def remove_trailing_newlines(string_, location, token):
+    if token[0]:
+        return token[0].rstrip('\n')
 
 
-def remove_braces(s, l, t):
-    if len(t[0]) < 1:
+def remove_braces(string_, location, token):
+    if len(token[0]) < 1:
         return ''
     else:
-        start = 1 if t[0][0] == '{' else 0
-        end = -1 if t[0][-1] == '}' else None
-        return t[0][start:end]
+        start = 1 if token[0][0] == '{' else 0
+        end = -1 if token[0][-1] == '}' else None
+        return token[0][start:end]
 
 
-def field_to_pair(s, l, t):
+def field_to_pair(string_, location, token):
     """
     Looks for parsed element named 'Field'.
 
     :returns: (name, value).
     """
-    f = t.get('Field')
-    return (f.get('FieldName'),
-            strip_after_new_lines(f.get('Value')))
+    field = token.get('Field')
+    value = field.get('Value')
+    if isinstance(value, pp.ParseResults):
+        # For pyparsing >= 2.3.1 (see #225 and API change note in pyparsing's
+        # Changelog).
+        value = value[0]
+    return (field.get('FieldName'),
+            strip_after_new_lines(value))
 
 
 # Expressions helpers
@@ -149,9 +153,28 @@ class BibtexExpression(object):
         entry_type.setParseAction(first_token)
 
         # Entry key: any character up to a ',' without leading and trailing
-        # spaces.
-        key = pp.SkipTo(',')('Key')  # Exclude @',\#}{~%
-        key.setParseAction(lambda s, l, t: first_token(s, l, t).strip())
+        # spaces. Also exclude spaces and prevent it from being empty.
+        key = pp.SkipTo(',')('Key')  # TODO Maybe also exclude @',\#}{~%
+
+        def citekeyParseAction(string_, location, token):
+            """Parse action for validating citekeys.
+
+            It ensures citekey is not empty and has no space.
+
+            :args: see pyparsing documentation.
+            """
+            key = first_token(string_, location, token).strip()
+            if len(key) < 1:
+                raise self.ParseException(
+                    string_, loc=location, msg="Empty citekeys are not allowed.")
+            for i, c in enumerate(key):
+                if c.isspace():
+                    raise self.ParseException(
+                        string_, loc=(location + i),
+                        msg="Whitespace not allowed in citekeys.")
+            return key
+
+        key.setParseAction(citekeyParseAction)
 
         # Field name: word of letters, digits, dashes and underscores
         field_name = pp.Word(pp.alphanums + '_-().+')('FieldName')

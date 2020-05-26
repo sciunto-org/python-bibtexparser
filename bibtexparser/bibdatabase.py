@@ -1,16 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
-import sys
 import logging
 
 logger = logging.getLogger(__name__)
-
-if sys.version_info >= (3, 0):
-    ustr = str
-else:
-    ustr = unicode
 
 
 STANDARD_TYPES = set([
@@ -90,7 +83,7 @@ class BibDatabase(object):
     def entry_sort_key(entry, fields):
         result = []
         for field in fields:
-            result.append(ustr(entry.get(field, '')).lower())  # Sorting always as string
+            result.append(str(entry.get(field, '')).lower())  # Sorting always as string
         return tuple(result)
 
     def _make_entries_dict(self):
@@ -276,4 +269,4 @@ def as_text(text_string_or_expression):
                   (BibDataString, BibDataStringExpression)):
         return text_string_or_expression.get_value()
     else:
-        return ustr(text_string_or_expression)
+        return str(text_string_or_expression)

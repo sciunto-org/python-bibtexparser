@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # Original source: github.com/okfn/bibserver
@@ -9,7 +8,6 @@
 
 import itertools
 import re
-import sys
 import unicodedata
 
 __all__ = ['string_to_latex', 'latex_to_unicode', 'protect_uppercase',
@@ -2686,16 +2684,10 @@ def prepare_unicode_to_latex():
         ("\uD7FF", "\\mathtt{9}"),
     )
 
-    if sys.version_info >= (3, 0):
-        unicode_to_latex = to_latex
-        unicode_to_crappy_latex1 = to_crappy1
-        unicode_to_crappy_latex2 = to_crappy2
-        unicode_to_latex_map = dict(unicode_to_latex)
-    else:
-        unicode_to_latex = tuple((k.decode('unicode-escape'), v) for k, v in to_latex)
-        unicode_to_crappy_latex1 = tuple((k.decode('unicode-escape'), v) for k, v in to_crappy1)
-        unicode_to_crappy_latex2 = tuple((k.decode('unicode-escape'), v) for k, v in to_crappy2)
-        unicode_to_latex_map = dict(unicode_to_latex)
+    unicode_to_latex = to_latex
+    unicode_to_crappy_latex1 = to_crappy1
+    unicode_to_crappy_latex2 = to_crappy2
+    unicode_to_latex_map = dict(unicode_to_latex)
 
 
 prepare_unicode_to_latex()
