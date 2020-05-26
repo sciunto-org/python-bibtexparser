@@ -9,7 +9,7 @@ IMPORTANT: the library is looking for new maintainers. Please, manifest yourself
 .. contents::
 
 
-Bibtexparser relies on `pyparsing <https://pypi.python.org/pypi/pyparsing>`_ and is compatible with Python 2.7 and 3.3 or newer.
+Bibtexparser relies on `pyparsing <https://pypi.python.org/pypi/pyparsing>`_ and is compatible with Python 3.3 or newer.
 
 Documentation
 -------------
