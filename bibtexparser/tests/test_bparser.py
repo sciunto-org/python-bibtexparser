@@ -53,6 +53,13 @@ def customizations_latex(record):
 
 class TestBibtexParserList(unittest.TestCase):
 
+    def test_empty_string(self):
+        bib = BibTexParser("")
+        self.assertEqual(bib.entries, [])
+        self.assertEqual(bib.comments, [])
+        self.assertEqual(bib.preambles, [])
+        self.assertEqual(bib.strings, {})
+
     ###########
     # ARTICLE
     ###########
@@ -611,6 +618,21 @@ class TestBibtexParserList(unittest.TestCase):
         }}
         self.assertEqual(res_dict, expected_dict)
         self.assertEqual(bib.preambles, ["Blah blah"])
+
+    def test_does_not_fail_on_non_bibtex_with_partial(self):
+        bibraw = '''@misc{this looks,
+          like = a = bibtex file but
+              , is not a real one!
+        '''
+        parser = BibTexParser()
+        bib = parser.parse(bibraw, partial=False)
+        self.assertEqual(bib.entries, [])
+        self.assertEqual(bib.preambles, [])
+        self.assertEqual(bib.strings, {})
+        self.assertEqual(bib.comments, [
+            '@misc{this looks,\n'
+            '          like = a = bibtex file but\n'
+            '              , is not a real one!'])
 
     def test_no_citekey_parsed_as_comment(self):
         bib = BibTexParser('@BOOK{, title = "bla"}')

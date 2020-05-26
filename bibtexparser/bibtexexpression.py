@@ -99,6 +99,8 @@ class BibtexExpression(object):
     ParseException = pp.ParseException
 
     def __init__(self):
+        # Init parse action functions
+        self.set_string_name_parse_action(lambda s, l, t: None)
 
         # Bibtex keywords
 
@@ -141,7 +143,6 @@ class BibtexExpression(object):
         string_expr = pp.delimitedList(
             (quoted_value | braced_value | string_name), delim='#'
             )('StringExpression')
-        self.set_string_expression_parse_action(lambda s, l, t: None)
         string_expr.addParseAction(self._string_expr_parse_action)
 
         value = (integer | string_expr)('Value')
@@ -270,17 +271,8 @@ class BibtexExpression(object):
     def _string_name_parse_action(self, s, l, t):
         return self._string_name_parse_action_fun(s, l, t)
 
-    def set_string_expression_parse_action(self, fun):
-        """Set the parseAction for string_expression expression.
-
-        .. Note::
-
-            See set_string_name_parse_action.
-        """
-        self._string_expr_parse_action_fun = fun
-
     def _string_expr_parse_action(self, s, l, t):
-        return self._string_expr_parse_action_fun(s, l, t)
+        return BibDataStringExpression.expression_if_needed(t)
 
     def parseFile(self, file_obj):
         return self.main_expression.parseFile(file_obj, parseAll=True)

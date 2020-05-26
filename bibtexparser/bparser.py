@@ -178,14 +178,6 @@ class BibTexParser(object):
         self._expr.set_string_name_parse_action(
             lambda s, l, t:
                 BibDataString(self.bib_database, t[0]))
-        if self.interpolate_strings:
-            maybe_interpolate = lambda expr: as_text(expr)
-        else:
-            maybe_interpolate = lambda expr: expr
-        self._expr.set_string_expression_parse_action(
-            lambda s, l, t:
-                maybe_interpolate(
-                    BibDataStringExpression.expression_if_needed(t)))
 
         # Add notice to logger
         self._expr.add_log_function(logger.debug)
@@ -212,12 +204,13 @@ class BibTexParser(object):
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
         byte = b'\xef\xbb\xbf'
+
         if isinstance(bibtex_str, str):
             byte = str(byte, self.encoding, 'ignore')
-            if bibtex_str[0] == byte:
+            if len(bibtex_str) >= 1 and bibtex_str[0] == byte:
                 bibtex_str = bibtex_str[1:]
         else:
-            if bibtex_str[:3] == byte:
+            if len(bibtex_str) >= 3 and bibtex_str[:3] == byte:
                 bibtex_str = bibtex_str[3:]
             bibtex_str = bibtex_str.decode(encoding=self.encoding)
         return io.StringIO(bibtex_str)
@@ -231,7 +224,10 @@ class BibTexParser(object):
         """
         if not val or val == "{}":
             return ''
-        return val
+        elif self.interpolate_strings:
+            return as_text(val)
+        else:
+            return val
 
     def _clean_key(self, key):
         """ Lowercase a key and return as unicode.
