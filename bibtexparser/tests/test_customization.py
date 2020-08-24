@@ -42,7 +42,7 @@ class TestBibtexParserMethod(unittest.TestCase):
 
     @unittest.skip('Bug #9')
     def test_getnames_braces(self):
-        names = ['A. {Delgado de Molina}', 'M. Vign{\\\'e}']
+        names = ['A. {Delgado de Molina}', r'M. Vign{\'e}']
         result = getnames(names)
         expected = ['Delgado de Molina, A.', 'Vigné, M.']
         self.assertEqual(result, expected)
@@ -78,40 +78,40 @@ class TestBibtexParserMethod(unittest.TestCase):
     # convert to unicode
     ###########
     def test_convert_to_unicode(self):
-        record = {'toto': '{\`a} \`{a}'}
+        record = {'toto': r'{\`a} \`{a}'}
         result = convert_to_unicode(record)
-        expected = {'toto': 'à à'}
+        expected = {'toto': r'à à'}
         self.assertEqual(result, expected)
-        record = {'toto': '{\\"u} \\"{u}'}
+        record = {'toto': r'{\"u} \"{u}'}
         result = convert_to_unicode(record)
-        expected = {'toto': 'ü ü'}
+        expected = {'toto': r'ü ü'}
         self.assertEqual(result, expected)
         # From issue 121
-        record = {'title': '{Two Gedenk\\"uberlieferung der Angelsachsen}'}
+        record = {'title': r'{Two Gedenk\"uberlieferung der Angelsachsen}'}
         result = convert_to_unicode(record)
-        expected = {'title': 'Two Gedenküberlieferung der Angelsachsen'}
+        expected = {'title': r'Two Gedenküberlieferung der Angelsachsen'}
         self.assertEqual(result, expected)
         # From issue 161
         record = {'title': r"p\^{a}t\'{e}"}
         result = convert_to_unicode(record)
-        expected = {'title': "pâté"}
+        expected = {'title': r"pâté"}
         self.assertEqual(result, expected)
         record = {'title': r"\^{i}le"}
         result = convert_to_unicode(record)
-        expected = {'title': "île"}
+        expected = {'title': r"île"}
         self.assertEqual(result, expected)
         record = {'title': r"\texttimes{}{\texttimes}\texttimes"}
         result = convert_to_unicode(record)
-        expected = {'title': "×××"}
+        expected = {'title': r"×××"}
         self.assertEqual(result, expected)
 
     ###########
     # homogenize
     ###########
     def test_homogenize(self):
-        record = {'toto': 'à {\`a} \`{a}'}
+        record = {'toto': r'à {\`a} \`{a}'}
         result = homogenize_latex_encoding(record)
-        expected = {'toto': '{\`a} {\`a} {\`a}'}
+        expected = {'toto': r'{\`a} {\`a} {\`a}'}
         self.assertEqual(result, expected)
 
     ###########
@@ -119,7 +119,7 @@ class TestBibtexParserMethod(unittest.TestCase):
     ###########
     def test_add_plaintext_fields(self):
         record = {
-            'title': 'On-line {Recognition} of {Handwritten} {Mathematical} {Symbols}',
+            'title': r'On-line {Recognition} of {Handwritten} {Mathematical} {Symbols}',
             'foobar': ['{FFT} {Foobar}', '{foobar}'],
             'foobar2': {'item1': '{FFT} {Foobar}', 'item2': '{foobar}'}
         }
