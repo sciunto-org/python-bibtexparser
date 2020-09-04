@@ -1,4 +1,5 @@
 include *.txt
 include *.md
+include COPYING
 include docs/Makefile
 include docs/source/*
