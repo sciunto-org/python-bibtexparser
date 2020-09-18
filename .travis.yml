@@ -1,5 +1,6 @@
 dist: trusty
 language: python
+arch: ppc64le
 matrix:
   include:
     - python: "3.3"
