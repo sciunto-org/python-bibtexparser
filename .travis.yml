@@ -1,3 +1,4 @@
+arch: ppc64le
 dist: trusty
 language: python
 matrix:
