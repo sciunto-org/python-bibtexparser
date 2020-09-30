@@ -17,6 +17,18 @@ matrix:
       env: TEST_SUITE=suite_3_7
     - python: "pypy3.5-5.8.0"
       env: TEST_SUITE=suite_pypy3
+      
+# Disable version 3.3, 3.2 & pypy
+jobs: 
+  exclude:
+    - arch: ppc64le
+      python: 3.3
+    - arch: ppc64le
+      python: 3.4
+    - arch: ppc64le
+      python: pypy3.5-5.8.0
+  
+      
 install:
   - if [[ $TEST_SUITE == suite_3_6 ]]; then
         pip install sphinx;
