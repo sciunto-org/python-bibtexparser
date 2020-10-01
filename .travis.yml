@@ -1,10 +1,6 @@
 dist: trusty
 language: python
-arch: ppc64le
-    
-    
-   
-   matrix:
+matrix:
   include:
     - python: "3.5"
       env: TEST_SUITE=suite_3_5
@@ -14,6 +10,7 @@ arch: ppc64le
       dist: xenial # Required for Python 3.7
       sudo: true   # travis-ci/travis-ci#9069
       env: TEST_SUITE=suite_3_7
+    
 install:
   - if [[ $TEST_SUITE == suite_3_6 ]]; then
         pip install sphinx;
