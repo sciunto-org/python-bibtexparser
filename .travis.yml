@@ -1,10 +1,10 @@
 dist: trusty
 language: python
-arch: 
-    - ppc64le
-    - amd64
+arch: ppc64le
     
-matrix:
+    
+   
+   matrix:
   include:
     - python: "3.5"
       env: TEST_SUITE=suite_3_5
