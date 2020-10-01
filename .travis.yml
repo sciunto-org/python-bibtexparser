@@ -1,8 +1,8 @@
 dist: trusty
 language: python
-arch: 
-  - ppc64le
-  - amd64
+  arch: 
+    - ppc64le
+    - amd64
 matrix:
   include:
     - python: "3.5"
