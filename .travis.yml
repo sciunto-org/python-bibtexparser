@@ -19,8 +19,8 @@ matrix:
       env: TEST_SUITE=suite_3_7
     - python: "pypy3.5-5.8.0"
       env: TEST_SUITE=suite_pypy3
-Exclude:
-  Jobs:
+  exclude:
+   Jobs:
     - python: "3.3"
       env: TEST_SUITE=suite_3_3
       arch: ppc64le
