@@ -10,24 +10,32 @@ matrix:
       arch: amd64
     - python: "3.5"
       env: TEST_SUITE=suite_3_5
+      arch: amd64
+    - python: "3.5"
+      env: TEST_SUITE=suite_3_5
       arch: ppc64le
+    - python: "3.6"
+      env: TEST_SUITE=suite_3_6
       arch: amd64
     - python: "3.6"
       env: TEST_SUITE=suite_3_6
-      arch: ppc64le
+      arch: ppc64le  
+    - python: "3.7"
+      dist: xenial # Required for Python 3.7
+      sudo: true   # travis-ci/travis-ci#9069
+      env: TEST_SUITE=suite_3_7
       arch: amd64
     - python: "3.7"
       dist: xenial # Required for Python 3.7
       sudo: true   # travis-ci/travis-ci#9069
       env: TEST_SUITE=suite_3_7
       arch: ppc64le
-      arch: amd64
     - python: "pypy3.5-5.8.0"
       env: TEST_SUITE=suite_pypy3
       arch: amd64
   
  
-    
+   
 install:
   - if [[ $TEST_SUITE == suite_3_6 ]]; then
         pip install sphinx;
