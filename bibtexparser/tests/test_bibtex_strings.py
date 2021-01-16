@@ -58,6 +58,18 @@ class TestStringParse(unittest.TestCase):
         expected['pub-ieee-std:adr'] = 'New York, NY, USA'
         self.assertEqual(bib_database.strings, expected)
 
+    def test_parse_empty_string_quote(self):
+        bibtex_str = '@string{empty = ""}\n\n'
+        bib_database = bibtexparser.loads(bibtex_str)
+        expected = {'empty': ''}
+        self.assertEqual(bib_database.strings, expected)
+
+    def test_parse_empty_string_brace(self):
+        bibtex_str = '@string{empty = {}}\n\n'
+        bib_database = bibtexparser.loads(bibtex_str)
+        expected = {'empty': ''}
+        self.assertEqual(bib_database.strings, expected)
+
 
 class TestStringWrite(unittest.TestCase):
 

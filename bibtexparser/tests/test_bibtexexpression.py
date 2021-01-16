@@ -79,7 +79,30 @@ class TestBibtexExpression(unittest.TestCase):
             self.expr.entry.parseString('@misc{ xx yy, \n name = aaa}')
 
     def test_string_declaration_after_space(self):
-        self.expr.string_def.parseString('  @string{ name = {abcd}}')
+        self.expr.set_string_expression_parse_action(lambda s, l, t: t[0])
+        result = self.expr.string_def.parseString('  @string{ name = {abcd}}')
+        self.assertEqual(result['StringName'], 'name')
+        self.assertEqual(result['StringValue'], 'abcd')
+
+    def test_string_declaration_quoted(self):
+        self.expr.set_string_expression_parse_action(lambda s, l, t: t[0])
+        result = self.expr.string_def.parseString('  @string{ name = "abcd"}')
+        self.assertEqual(result['StringName'], 'name')
+        self.assertEqual(result['StringValue'], 'abcd')
+
+    def test_string_definition_empty_quote(self):
+        self.expr.set_string_expression_parse_action(lambda s, l, t: t[0])
+        result = self.expr.string_def.parseString('@string{ name = ""}')
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result['StringName'], 'name')
+        self.assertEqual(result.get('StringValue', defaultValue=""), '')
+
+    def test_string_definition_empty_braces(self):
+        self.expr.set_string_expression_parse_action(lambda s, l, t: t[0])
+        result = self.expr.string_def.parseString('@string{ name = {}}')
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result['StringName'], 'name')
+        self.assertEqual(result.get('StringValue', defaultValue=""), '')
 
     def test_preamble_declaration_after_space(self):
         self.expr.preamble_decl.parseString('  @preamble{ "blah blah " }')

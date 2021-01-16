@@ -197,9 +197,15 @@ class BibTexParser(object):
             lambda s, l, t: self._add_preamble(t[0])
             )
         self._expr.string_def.addParseAction(
-            lambda s, l, t: self._add_string(t['StringName'].name,
-                                             t['StringValue'])
-            )
+            lambda s, l, t: self._add_string(
+                t['StringName'].name,
+                t.get('StringValue', defaultValue="")))
+        # Note: unfortunately pyparsing does not return empty tokens
+        #       as named results. Hence, although the empty "" or {}
+        #       is correctly parsed, it cannot be accessed by name.
+        #       Since it only happens for such values that the parsing
+        #       succeeds but the named value is missing, it is enough to
+        #       use the default to catch the expected result.
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start

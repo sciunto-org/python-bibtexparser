@@ -274,5 +274,6 @@ class BibtexExpression(object):
     def _string_expr_parse_action(self, s, l, t):
         return BibDataStringExpression.expression_if_needed(t)
 
+
     def parseFile(self, file_obj):
         return self.main_expression.parseFile(file_obj, parseAll=True)
