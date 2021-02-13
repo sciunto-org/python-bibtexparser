@@ -118,16 +118,21 @@ class BibTexWriter(object):
         # Write BibTeX key
         bibtex += '@' + entry['ENTRYTYPE'] + '{' + entry['ID']
 
-        # create display_order of fields for this entry
-        # first those keys which are both in self.display_order and in entry.keys
-        display_order = [i for i in self.display_order if i in entry]
-        # then all the other fields sorted alphabetically
-        display_order += [i for i in sorted(entry) if i not in self.display_order]
+        if self.display_order is not None:
+            # create display_order of fields for this entry
+            # first those keys which are both in self.display_order and in entry.keys
+            display_order = [i for i in self.display_order if i in entry]
+            # then all the other fields sorted alphabetically
+            display_order += [i for i in sorted(entry) if i not in self.display_order]
+        else:
+            # use pre-existing order
+            display_order = reversed(entry)
         if self.comma_first:
             field_fmt = u"\n{indent}, {field:<{field_max_w}} = {value}"
         else:
             field_fmt = u",\n{indent}{field:<{field_max_w}} = {value}"
-        # Write field = value lines
+        
+        # Write "field = value' lines
         for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
             try:
                 bibtex += field_fmt.format(
@@ -144,6 +149,7 @@ class BibTexWriter(object):
             else:
                 bibtex += ','
         bibtex += "\n}\n" + self.entry_separator
+        
         return bibtex
 
     def _comments_to_bibtex(self, bib_database):
