@@ -114,19 +114,20 @@ class BibTexWriter(object):
         return bibtex
 
     def _entry_to_bibtex(self, entry):
+        from io import StringIO
         from itertools import chain
 
-        bibtex = ''
+        bibtex = StringIO()
         # Write BibTeX key
-        bibtex += '@' + entry['ENTRYTYPE'] + '{' + entry['ID']
+        bibtex.write('@' + entry['ENTRYTYPE'] + '{' + entry['ID'])
 
         if self.display_order is not None:
             # create display_order of fields for this entry
             # first those keys which are both in self.display_order and in entry.keys
             # then all the other fields sorted alphabetically
             display_order = chain(
-                i for i in self.display_order if i in entry,
-                i for i in sorted(entry) if i not in self.display_order)
+                (i for i in self.display_order if i in entry),
+                (i for i in sorted(entry) if i not in self.display_order))
         else:
             # use pre-existing order
             display_order = reversed(entry)
@@ -138,22 +139,22 @@ class BibTexWriter(object):
         # Write "field = value' lines
         for field in (i for i in display_order if i not in ['ENTRYTYPE', 'ID']):
             try:
-                bibtex += field_fmt.format(
+                bibtex.write(field_fmt.format(
                     indent=self.indent,
                     field=field,
                     field_max_w=self._max_field_width,
-                    value=_str_or_expr_to_bibtex(entry[field]))
+                    value=_str_or_expr_to_bibtex(entry[field])))
             except TypeError:
                 raise TypeError(u"The field %s in entry %s must be a string"
                                 % (field, entry['ID']))
         if self.add_trailing_comma:
             if self.comma_first:
-                bibtex += '\n'+self.indent+','
+                bibtex.write('\n' + self.indent + ',')
             else:
-                bibtex += ','
-        bibtex += "\n}\n" + self.entry_separator
-        
-        return bibtex
+                bibtex.write(',')
+        bibtex.write("\n}\n" + self.entry_separator)
+
+        return bibtex.getvalue()
 
     def _comments_to_bibtex(self, bib_database):
         return ''.join(['@comment{{{0}}}\n{1}'.format(comment, self.entry_separator)
