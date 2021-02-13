@@ -114,6 +114,8 @@ class BibTexWriter(object):
         return bibtex
 
     def _entry_to_bibtex(self, entry):
+        from itertools import chain
+
         bibtex = ''
         # Write BibTeX key
         bibtex += '@' + entry['ENTRYTYPE'] + '{' + entry['ID']
@@ -121,9 +123,10 @@ class BibTexWriter(object):
         if self.display_order is not None:
             # create display_order of fields for this entry
             # first those keys which are both in self.display_order and in entry.keys
-            display_order = [i for i in self.display_order if i in entry]
             # then all the other fields sorted alphabetically
-            display_order += [i for i in sorted(entry) if i not in self.display_order]
+            display_order = chain(
+                i for i in self.display_order if i in entry,
+                i for i in sorted(entry) if i not in self.display_order)
         else:
             # use pre-existing order
             display_order = reversed(entry)
@@ -131,9 +134,9 @@ class BibTexWriter(object):
             field_fmt = u"\n{indent}, {field:<{field_max_w}} = {value}"
         else:
             field_fmt = u",\n{indent}{field:<{field_max_w}} = {value}"
-        
+
         # Write "field = value' lines
-        for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
+        for field in (i for i in display_order if i not in ['ENTRYTYPE', 'ID']):
             try:
                 bibtex += field_fmt.format(
                     indent=self.indent,
