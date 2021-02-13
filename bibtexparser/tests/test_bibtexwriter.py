@@ -177,6 +177,42 @@ class TestBibTexWriter(unittest.TestCase):
 
             """)
         self.assertEqual(result, expected)
+    
+    def test_display_order_none(self):
+        with open('bibtexparser/tests/data/multiple_entries_and_comments.bib') as bibtex_file:
+            bib_database = bibtexparser.load(bibtex_file)
+        writer = BibTexWriter()
+        writer.contents = ['entries']
+        writer.display_order = None
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = dedent("""\
+            @book{Toto3000,
+             title = {A title},
+             author = {Toto, A and Titi, B}
+            }
+
+            @article{Wigner1938,
+             title = {The transition state method},
+             author = {Wigner, E.},
+             journal = {Trans. Faraday Soc.},
+             year = {1938},
+             pages = {29--41},
+             volume = {34},
+             doi = {10.1039/TF9383400029},
+             issn = {0014-7672},
+             owner = {fr},
+             publisher = {The Royal Society of Chemistry}
+            }
+
+            @book{Yablon2005,
+             title = {Optical fiber fusion slicing},
+             author = {Yablon, A.D.},
+             publisher = {Springer},
+             year = {2005}
+            }
+
+            """)
+        self.assertEqual(result, expected)
 
 
 class TestEntrySorting(unittest.TestCase):
