@@ -87,7 +87,7 @@ class BibTexParser(object):
         #: Load common strings such as months abbreviation
         #: Default: `False`.
         self.common_strings = common_strings
-        if self.common_strings:
+        if not self.common_strings:
             self.bib_database.load_common_strings()
 
         #: Callback function to process BibTeX entries after parsing,
