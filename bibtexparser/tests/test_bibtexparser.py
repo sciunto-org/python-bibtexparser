@@ -73,7 +73,6 @@ class TestBibtexparserWriteMethods(unittest.TestCase):
  volume = {1},
  year = {1987}
 }
-
 """
 
     def test_write_str(self):

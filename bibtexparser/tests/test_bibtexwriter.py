@@ -38,7 +38,6 @@ class TestBibTexWriter(unittest.TestCase):
  title = {Optical fiber fusion slicing},
  year = {2005}
 }
-
 """
         self.assertEqual(result, expected)
 
@@ -68,7 +67,6 @@ class TestBibTexWriter(unittest.TestCase):
 """@book{abc123,
   author = {test}
 }
-
 """
         self.assertEqual(result, expected)
 
@@ -86,7 +84,6 @@ class TestBibTexWriter(unittest.TestCase):
  author             = {test},
  thisisaverylongkey = {longvalue}
 }
-
 """
         self.assertEqual(result, expected)
 
@@ -121,7 +118,6 @@ class TestBibTexWriter(unittest.TestCase):
  title     = {Optical fiber fusion slicing},
  year      = {2005}
 }
-
 """
         self.assertEqual(result, expected)
 
@@ -173,7 +169,6 @@ class TestBibTexWriter(unittest.TestCase):
  title = {Optical fiber fusion slicing},
  author = {Yablon, A.D.}
 }
-
 """
         self.assertEqual(result, expected)
 
@@ -189,35 +184,35 @@ class TestEntrySorting(unittest.TestCase):
 
     def test_sort_default(self):
         result = bibtexparser.dumps(self.bib_database)
-        expected = "@book{a\n}\n\n@article{b\n}\n\n@book{c\n}\n\n"
+        expected = "@book{a\n}\n\n@article{b\n}\n\n@book{c\n}\n"
         self.assertEqual(result, expected)
 
     def test_sort_none(self):
         writer = BibTexWriter()
         writer.order_entries_by = None
         result = bibtexparser.dumps(self.bib_database, writer)
-        expected = "@article{b\n}\n\n@book{c\n}\n\n@book{a\n}\n\n"
+        expected = "@article{b\n}\n\n@book{c\n}\n\n@book{a\n}\n"
         self.assertEqual(result, expected)
 
     def test_sort_id(self):
         writer = BibTexWriter()
         writer.order_entries_by = ('ID', )
         result = bibtexparser.dumps(self.bib_database, writer)
-        expected = "@book{a\n}\n\n@article{b\n}\n\n@book{c\n}\n\n"
+        expected = "@book{a\n}\n\n@article{b\n}\n\n@book{c\n}\n"
         self.assertEqual(result, expected)
 
     def test_sort_type(self):
         writer = BibTexWriter()
         writer.order_entries_by = ('ENTRYTYPE', )
         result = bibtexparser.dumps(self.bib_database, writer)
-        expected = "@article{b\n}\n\n@book{c\n}\n\n@book{a\n}\n\n"
+        expected = "@article{b\n}\n\n@book{c\n}\n\n@book{a\n}\n"
         self.assertEqual(result, expected)
 
     def test_sort_type_id(self):
         writer = BibTexWriter()
         writer.order_entries_by = ('ENTRYTYPE', 'ID')
         result = bibtexparser.dumps(self.bib_database, writer)
-        expected = "@article{b\n}\n\n@book{a\n}\n\n@book{c\n}\n\n"
+        expected = "@article{b\n}\n\n@book{a\n}\n\n@book{c\n}\n"
         self.assertEqual(result, expected)
 
     def test_sort_missing_field(self):
@@ -233,7 +228,7 @@ class TestEntrySorting(unittest.TestCase):
         writer = BibTexWriter()
         writer.order_entries_by = ('year', )
         result = bibtexparser.dumps(bib_database, writer)
-        expected = "@book{a\n}\n\n@article{b,\n year = {2000}\n}\n\n@book{c,\n year = {2010}\n}\n\n"
+        expected = "@book{a\n}\n\n@article{b,\n year = {2000}\n}\n\n@book{c,\n year = {2010}\n}\n"
         self.assertEqual(result, expected)
 
     def test_unicode_problems(self):
