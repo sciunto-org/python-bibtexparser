@@ -74,6 +74,9 @@ class BibTexWriter(object):
         self.add_trailing_comma = False
         #: internal variable used if self.align_values = True
         self._max_field_width = 0
+        #: Minimum alignment padding. Setting minimum alignment paddings can be helpful to avoid alignment changes
+        #: throughout the whole file if fields with field_width below min_align_padding are added.
+        self.min_align_padding = 0
         #: Whether common strings are written
         self.common_strings = write_common_strings
 
@@ -107,7 +110,7 @@ class BibTexWriter(object):
         if self.align_values:
             # determine maximum field width to be used
             widths = [max(map(len, entry.keys())) for entry in entries]
-            self._max_field_width = max(widths)
+            self._max_field_width = max(widths.append(self.min_align_padding))
 
         for entry in entries:
             bibtex += self._entry_to_bibtex(entry)
