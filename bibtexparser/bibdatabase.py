@@ -65,6 +65,9 @@ class BibDatabase(object):
 
         #: List of fields that should not be updated when resolving crossrefs
         self._not_updated_by_crossref = ['_FROM_CROSSREF']
+        
+        #: Aliases of common strings
+        self.load_common_strings()
 
     def load_common_strings(self):
         self.strings.update(COMMON_STRINGS)
