@@ -23,5 +23,4 @@ setup(
     packages     = ['bibtexparser'],
     install_requires = ['pyparsing>=2.0.3',
                         'future>=0.16.0'],
-    extra_requires = {'unittest': 'unittest2>=1.1.0'}
 )
