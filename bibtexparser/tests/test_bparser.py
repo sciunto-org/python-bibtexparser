@@ -398,7 +398,7 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_book_cust_unicode(self):
-        with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/book_capital_AND.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
             res = bib.get_entry_list()
             expected = [{'ENTRYTYPE': 'book',
