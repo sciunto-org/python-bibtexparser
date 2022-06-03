@@ -77,7 +77,7 @@ class BibTexParser(object):
                  common_strings=False,
                  add_missing_from_crossref=False):
         """
-        Creates a parser for rading BibTeX files
+        Creates a parser for reading BibTeX files
 
         :return: parser
         :rtype: `BibTexParser`
