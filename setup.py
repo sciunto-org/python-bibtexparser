@@ -21,6 +21,5 @@ setup(
     author_email = "devel@sciunto.org",
     description  = "Bibtex parser for python 2.7 and 3.3 and newer",
     packages     = ['bibtexparser'],
-    install_requires = ['pyparsing>=2.0.3',
-                        'future>=0.16.0'],
+    install_requires = ['pyparsing>=2.0.3'],
 )
