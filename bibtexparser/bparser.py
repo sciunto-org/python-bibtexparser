@@ -309,7 +309,7 @@ class BibTexParser(object):
         :type string: string
         """
         if string_key in self.bib_database.strings:
-            logger.warning('Overwritting existing string for key: %s.',
+            logger.warning('Overwriting existing string for key: %s.',
                            string_key)
         logger.debug(u'Store string: {} -> {}'.format(string_key, string))
         self.bib_database.strings[string_key] = self._clean_val(string)
