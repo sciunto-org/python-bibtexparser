@@ -4,8 +4,6 @@ python-bibtexparser
 Python library to parse `bibtex <https://en.wikipedia.org/wiki/BibTeX>`_ files.
 
 
-IMPORTANT: the library is looking for new maintainers. Please, manifest yourself if you are interested.
-
 .. contents::
 
 
@@ -41,3 +39,5 @@ History and evolutions
 The original source code was part of bibserver from `OKFN <http://github.com/okfn/bibserver>`_. This project is released under the AGPLv3. OKFN and the original authors kindly provided the permission to use a subpart of their project (ie the bibtex parser) under LGPLv3. Many thanks to them!
 
 The parser evolved to a new core based on pyparsing.
+
+News (July 7h, 2022): This library has a new maintainer (`@MiWeiss <https://github.com/MiWeiss>`_). No large changes are planned for the immediate future; the immediate goal is to reduce the backlog of open issues and PRs. 
