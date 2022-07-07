@@ -97,7 +97,6 @@ class BibTexWriter(object):
         return bibtex
 
     def _entries_to_bibtex(self, bib_database):
-        bibtex = ''
         if self.order_entries_by:
             # TODO: allow sort field does not exist for entry
             entries = sorted(bib_database.entries, key=lambda x: BibDatabase.entry_sort_key(x, self.order_entries_by))
@@ -109,9 +108,7 @@ class BibTexWriter(object):
             widths = [max(map(len, entry.keys())) for entry in entries]
             self._max_field_width = max(widths)
 
-        for entry in entries:
-            bibtex += self._entry_to_bibtex(entry)
-        return bibtex
+        return self.entry_separator.join(self._entry_to_bibtex(entry) for entry in entries)
 
     def _entry_to_bibtex(self, entry):
         bibtex = ''
@@ -143,7 +140,7 @@ class BibTexWriter(object):
                 bibtex += '\n'+self.indent+','
             else:
                 bibtex += ','
-        bibtex += "\n}\n" + self.entry_separator
+        bibtex += "\n}\n"
         return bibtex
 
     def _comments_to_bibtex(self, bib_database):

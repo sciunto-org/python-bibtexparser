@@ -77,7 +77,7 @@ class BibTexParser(object):
                  common_strings=False,
                  add_missing_from_crossref=False):
         """
-        Creates a parser for rading BibTeX files
+        Creates a parser for reading BibTeX files
 
         :return: parser
         :rtype: `BibTexParser`
@@ -309,7 +309,7 @@ class BibTexParser(object):
         :type string: string
         """
         if string_key in self.bib_database.strings:
-            logger.warning('Overwritting existing string for key: %s.',
+            logger.warning('Overwriting existing string for key: %s.',
                            string_key)
         logger.debug(u'Store string: {} -> {}'.format(string_key, string))
         self.bib_database.strings[string_key] = self._clean_val(string)

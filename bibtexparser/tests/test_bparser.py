@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
+import os
 import unittest
 import codecs
 
@@ -209,7 +211,7 @@ class TestBibtexParserList(unittest.TestCase):
             res = bib.get_entry_list()
         with open('bibtexparser/tests/data/multiple_entries.bib', 'r') as bibfile:
             bib2 = BibTexParser(bibfile.read(), customization=cust2)
-            res2 = bib.get_entry_list()
+            res2 = bib2.get_entry_list()
         self.assertEqual(res, res2)
 
     def test_article_missing_coma(self):
@@ -398,7 +400,7 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_book_cust_unicode(self):
-        with open('bibtexparser/tests/data/book.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/book_capital_AND.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
             res = bib.get_entry_list()
             expected = [{'ENTRYTYPE': 'book',

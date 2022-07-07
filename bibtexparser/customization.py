@@ -6,9 +6,9 @@ You can find inspiration from these functions to design yours.
 Each of them takes a record and return the modified record.
 """
 
-import re
 import logging
-
+import re
+import warnings
 from builtins import str
 
 from bibtexparser.latexenc import latex_to_unicode, string_to_latex, protect_uppercase
@@ -72,14 +72,14 @@ def splitname(name, strict_mode=True):
     # We'll iterate over the input once, dividing it into a list of words for
     # each comma-separated section. We'll also calculate the case of each word
     # as we work.
-    sections = [[]]      # Sections of the name.
-    cases = [[]]         # 1 = uppercase, 0 = lowercase, -1 = caseless.
-    word = []            # Current word.
-    case = -1            # Case of the current word.
-    level = 0            # Current brace level.
-    bracestart = False   # Will the next character be the first within a brace?
-    controlseq = True    # Are we currently processing a control sequence?
-    specialchar = None   # Are we currently processing a special character?
+    sections = [[]]  # Sections of the name.
+    cases = [[]]  # 1 = uppercase, 0 = lowercase, -1 = caseless.
+    word = []  # Current word.
+    case = -1  # Case of the current word.
+    level = 0  # Current brace level.
+    bracestart = False  # Will the next character be the first within a brace?
+    controlseq = True  # Are we currently processing a control sequence?
+    specialchar = None  # Are we currently processing a special character?
 
     # Using an iterator allows us to deal with escapes in a simple manner.
     nameiter = iter(name)
@@ -246,12 +246,12 @@ def splitname(name, strict_mode=True):
                 firstl = cases.index(0) - len(cases)
                 lastl = -cases[::-1].index(0) - 1
                 if lastl == -1:
-                    lastl -= 1      # Cannot consume the rest of the string.
+                    lastl -= 1  # Cannot consume the rest of the string.
 
                 # Pull the parts out.
                 parts['first'] = p0[:firstl]
-                parts['von'] = p0[firstl:lastl+1]
-                parts['last'] = p0[lastl+1:]
+                parts['von'] = p0[firstl:lastl + 1]
+                parts['last'] = p0[lastl + 1:]
 
             # No lowercase: last is the last word, first is everything else.
             else:
@@ -287,7 +287,7 @@ def splitname(name, strict_mode=True):
             if 0 in lcases:
                 split = len(lcases) - lcases[::-1].index(0)
                 if split == len(lcases):
-                    split = 0            # Last cannot be empty.
+                    split = 0  # Last cannot be empty.
                 parts['von'] = sections[0][:split]
                 parts['last'] = sections[0][split:]
 
@@ -345,7 +345,8 @@ def author(record):
     """
     if "author" in record:
         if record["author"]:
-            record["author"] = getnames([i.strip() for i in record["author"].replace('\n', ' ').split(" and ")])
+            record["author"] = getnames([i.strip() for i in re.split(r"\ and\ ", record["author"].replace('\n', ' '),
+                                                                     flags=re.IGNORECASE)])
         else:
             del record["author"]
     return record
@@ -365,7 +366,8 @@ def editor(record):
         if record["editor"]:
             record["editor"] = getnames([i.strip() for i in record["editor"].replace('\n', ' ').split(" and ")])
             # convert editor to object
-            record["editor"] = [{"name": i, "ID": i.replace(',', '').replace(' ', '').replace('.', '')} for i in record["editor"]]
+            record["editor"] = [{"name": i, "ID": i.replace(',', '').replace(' ', '').replace('.', '')} for i in
+                                record["editor"]]
         else:
             del record["editor"]
     return record
@@ -417,7 +419,8 @@ def journal(record):
     if "journal" in record:
         # switch journal to object
         if record["journal"]:
-            record["journal"] = {"name": record["journal"], "ID": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
+            record["journal"] = {"name": record["journal"],
+                                 "ID": record["journal"].replace(',', '').replace(' ', '').replace('.', '')}
 
     return record
 
@@ -518,13 +521,21 @@ def homogenize_latex_encoding(record):
     :type record: dict
     :returns: dict -- the modified record.
     """
-    # First, we convert everything to unicode
+    #  First, we convert everything to unicode
     record = convert_to_unicode(record)
     # And then, we fall back
     for val in record:
         if val not in ('ID',):
             logger.debug('Apply string_to_latex to: %s', val)
-            record[val] = string_to_latex(record[val])
+            if isinstance(record[val], list):
+                record[val] = [
+                    string_to_latex(x) for x in record[val]
+                ]
+            elif isinstance(record[val], str):
+                record[val] = string_to_latex(record[val])
+            else:
+                warnings.warn('Unable to homogenize latex encoding for %s: Expected string or list,' % val,
+                              RuntimeWarning)
             if val == 'title':
                 logger.debug('Protect uppercase in title')
                 logger.debug('Before: %s', record[val])
@@ -543,6 +554,7 @@ def add_plaintext_fields(record):
     :type record: dict
     :returns: dict -- the modified record.
     """
+
     def _strip_string(string):
         for stripped in ['{', '}']:
             string = string.replace(stripped, "")
