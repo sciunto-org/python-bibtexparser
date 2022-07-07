@@ -252,7 +252,7 @@ class TestEntrySorting(unittest.TestCase):
         }
         """
         bibdb = bibtexparser.loads(bibtex)
-        with tempfile.TemporaryFile(mode='w+') as bibtex_file:
+        with tempfile.TemporaryFile(mode='w+', encoding="utf-8") as bibtex_file:
             bibtexparser.dump(bibdb, bibtex_file)
             # No exception should be raised
 
