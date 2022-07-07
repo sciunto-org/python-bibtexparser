@@ -320,7 +320,8 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_article_no_braces(self):
-        with open('bibtexparser/tests/data/article_no_braces.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/article_no_braces.bib', 'r',
+                  encoding="utf-8") as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
         expected = [{'ENTRYTYPE': 'article',
@@ -340,7 +341,8 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_article_special_characters(self):
-        with open('bibtexparser/tests/data/article_with_special_characters.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/article_with_special_characters.bib', 'r',
+                  encoding="utf-8") as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
         expected = [{'ENTRYTYPE': 'article',
@@ -360,7 +362,8 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_article_protection_braces(self):
-        with open('bibtexparser/tests/data/article_with_protection_braces.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/article_with_protection_braces.bib', 'r',
+                  encoding="utf-8") as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
         expected = [{'ENTRYTYPE': 'article',
@@ -532,7 +535,8 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_field_name_with_dash_underscore(self):
-        with open('bibtexparser/tests/data/article_field_name_with_underscore.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/article_field_name_with_underscore.bib', 'r',
+                  encoding="utf-8") as bibfile:
             bib = BibTexParser(bibfile.read())
         res = bib.get_entry_list()
         expected = [{
@@ -552,7 +556,8 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_string_definitions(self):
-        with open('bibtexparser/tests/data/article_with_strings.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/article_with_strings.bib', 'r',
+                  encoding="utf-8") as bibfile:
             bib = BibTexParser(bibfile.read(), common_strings=True)
         res = dict(bib.strings)
         expected = COMMON_STRINGS.copy()
@@ -564,7 +569,8 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_string_is_interpolated(self):
-        with open('bibtexparser/tests/data/article_with_strings.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/article_with_strings.bib', 'r',
+                  encoding="utf-8") as bibfile:
             bib = BibTexParser(bibfile.read(), common_strings=True,
                                interpolate_strings=True)
         res = bib.get_entry_list()
@@ -584,7 +590,8 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_string_is_not_interpolated(self):
-        with open('bibtexparser/tests/data/article_with_strings.bib', 'r') as bibfile:
+        with open('bibtexparser/tests/data/article_with_strings.bib', 'r',
+                  encoding="utf-8") as bibfile:
             bib = BibTexParser(bibfile.read(), common_strings=True,
                                interpolate_strings=False)
         res = bib.get_entry_list()[0]

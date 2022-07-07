@@ -32,7 +32,7 @@ class TestBibtexParserParserMethods(unittest.TestCase):
 
     def test_parse_bom_str(self):
         parser = BibTexParser()
-        with open(self.input_bom_file_path) as bibtex_file:
+        with open(self.input_bom_file_path, encoding="utf-8") as bibtex_file:
             bibtex_str = bibtex_file.read()
             bibtex_database = parser.parse(bibtex_str)
         self.assertEqual(bibtex_database.entries, self.entries_expected)
