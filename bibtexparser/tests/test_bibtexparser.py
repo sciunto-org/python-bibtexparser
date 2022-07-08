@@ -37,6 +37,15 @@ class TestBibtexParserParserMethods(unittest.TestCase):
             bibtex_database = parser.parse(bibtex_str)
         self.assertEqual(bibtex_database.entries, self.entries_expected)
 
+    def test_parse_empty(self):
+        parser = BibTexParser()
+        bibtex_database_from_str = parser.parse('')
+        self.assertEqual(bibtex_database_from_str.entries, [])
+
+        with open('bibtexparser/tests/data/empty.bib') as bibtex_file:
+            bibtex_database_from_file = parser.parse_file(bibtex_file)
+        self.assertEqual(bibtex_database_from_file.entries, [])
+
     def test_parse_bom_bytes(self):
         parser = BibTexParser()
         with open(self.input_bom_file_path, 'rb') as bibtex_file:
