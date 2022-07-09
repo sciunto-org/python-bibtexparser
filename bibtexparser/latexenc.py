@@ -61,6 +61,9 @@ def latex_to_unicode(string):
     :param string: string to convert
     :returns: string
     """
+
+    # TODO Issue 264 is likely caused in this method
+
     if '\\' in string or '{' in string:
         string = _replace_all_latex(string, itertools.chain(
             unicode_to_crappy_latex1, unicode_to_latex))

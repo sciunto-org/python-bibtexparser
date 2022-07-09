@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
 import unittest
 
-from bibtexparser.customization import getnames, convert_to_unicode, homogenize_latex_encoding, page_double_hyphen, keyword, add_plaintext_fields
+from bibtexparser.customization import getnames, convert_to_unicode, homogenize_latex_encoding, page_double_hyphen, \
+    keyword, add_plaintext_fields
 
 
 class TestBibtexParserMethod(unittest.TestCase):
@@ -22,8 +24,8 @@ class TestBibtexParserMethod(unittest.TestCase):
                  'Jean la Tour',
                  'Jean le Tour',
                  'Mike ben Akar',
-                 #'Jean de la Tour',
-                 #'Johannes Diderik van der Waals',
+                 # 'Jean de la Tour',
+                 # 'Johannes Diderik van der Waals',
                  ]
         result = getnames(names)
         expected = ['Bar, Foo',
@@ -35,8 +37,8 @@ class TestBibtexParserMethod(unittest.TestCase):
                     'la Tour, Jean',
                     'le Tour, Jean',
                     'ben Akar, Mike',
-                    #'de la Tour, Jean',
-                    #'van der Waals, Johannes Diderik',
+                    # 'de la Tour, Jean',
+                    # 'van der Waals, Johannes Diderik',
                     ]
         self.assertEqual(result, expected)
 
@@ -114,6 +116,14 @@ class TestBibtexParserMethod(unittest.TestCase):
         expected = {'toto': r'{\`a} {\`a} {\`a}'}
         self.assertEqual(result, expected)
 
+    # https://github.com/sciunto-org/python-bibtexparser/issues/264
+    def test_escaped_character(self):
+        # TODO Check also for other special characters, e.g. "\{"
+        record = {'title': 'Say \\$1 billion.'}
+        result = homogenize_latex_encoding(record)
+        expected = {'toto': 'Say \\textdollar 1 billion.'}
+        self.assertEqual(result, expected)
+
     ###########
     # add_plaintext_fields
     ###########
@@ -142,6 +152,7 @@ class TestBibtexParserMethod(unittest.TestCase):
         result = keyword(record)
         expected = {'keyword': ['a b'] * 6}
         self.assertEqual(result, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
