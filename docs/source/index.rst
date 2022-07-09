@@ -16,8 +16,8 @@ Welcome to BibtexParser's documentation!
 :Version: |release|
 
 BibtexParser is a python library to parse bibtex files. The code relies on `pyparsing <http://pyparsing.wikispaces.com/>`_ and is tested with unittests.
+BibtexParser is used in more than 1300 open-source `repositories <https://github.com/sciunto-org/python-bibtexparser/network/dependents?package_id=UGFja2FnZS01MDI4NzgxNg%3D%3D>`_.
 
-If you use BibtexParser for your project, feel free to send me an email. I would be happy to hear that and to mention your project in the documentation.
 
 Contents:
 
@@ -29,7 +29,6 @@ Contents:
     bibtexparser.rst
     logging.rst
     bibtex_conv.rst
-    who.rst
 
 
 Other projects
