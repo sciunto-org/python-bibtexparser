@@ -1,3 +1,17 @@
+v1.3.0
+======
+
+Most of these changes come from @MiWeiss personal fork, as one,
+hence have a commit id instead of a PR number in CHANGELOG.
+
+* Support for python 3.10
+* Removing unused dependencies (fb86407 and d4e3f42)
+* No empty extra lines at end of generated files (f84e318)
+* Allow capital AND when splitting author list (a8527ff)
+* Fix problem in `homogenize_latex_encoding` when authors are lists (528714c)
+* Long description in setup.py (#304)
+* Typo fixes (2b2c8ee, 11340f3)
+
 v1.2.0
 ======
 
