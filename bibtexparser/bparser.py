@@ -74,7 +74,7 @@ class BibTexParser(object):
                  ignore_nonstandard_types=True,
                  homogenize_fields=False,
                  interpolate_strings=True,
-                 common_strings=False,
+                 common_strings=True,
                  add_missing_from_crossref=False):
         """
         Creates a parser for reading BibTeX files
@@ -85,7 +85,7 @@ class BibTexParser(object):
         self.bib_database = BibDatabase()
 
         #: Load common strings such as months abbreviation
-        #: Default: `False`.
+        #: Default: `True` (new in 1.4.0 - was previously `False`)
         self.common_strings = common_strings
         if self.common_strings:
             self.bib_database.load_common_strings()

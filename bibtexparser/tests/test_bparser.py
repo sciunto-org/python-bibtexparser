@@ -56,7 +56,7 @@ def customizations_latex(record):
 class TestBibtexParserList(unittest.TestCase):
 
     def test_empty_string(self):
-        bib = BibTexParser("")
+        bib = BibTexParser("", common_strings=False)
         self.assertEqual(bib.entries, [])
         self.assertEqual(bib.comments, [])
         self.assertEqual(bib.preambles, [])
@@ -633,7 +633,7 @@ class TestBibtexParserList(unittest.TestCase):
           like = a = bibtex file but
               , is not a real one!
         '''
-        parser = BibTexParser()
+        parser = BibTexParser(common_strings=False)
         bib = parser.parse(bibraw, partial=False)
         self.assertEqual(bib.entries, [])
         self.assertEqual(bib.preambles, [])
@@ -644,7 +644,7 @@ class TestBibtexParserList(unittest.TestCase):
             '              , is not a real one!'])
 
     def test_no_citekey_parsed_as_comment(self):
-        bib = BibTexParser('@BOOK{, title = "bla"}')
+        bib = BibTexParser('@BOOK{, title = "bla"}', common_strings=False)
         self.assertEqual(bib.entries, [])
         self.assertEqual(bib.preambles, [])
         self.assertEqual(bib.strings, {})

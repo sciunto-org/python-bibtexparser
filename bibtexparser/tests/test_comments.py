@@ -131,7 +131,7 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                   "This is a comment\n" \
                   "This is a second comment."
         expected = "This is a comment\nThis is a second comment."
-        bib = BibTexParser(comment)
+        bib = BibTexParser(comment, common_strings=False)
         self.assertEqual(bib.comments, [expected])
         self.assertEqual(bib.strings, {'foo': 'bar'})
 
@@ -141,7 +141,7 @@ Sunt in culpa qui officia deserunt mollit anim id est laborum.
                   "STRING{Baz = \"This should be interpreted as comment.\"}"
         expected = "This is a comment\n" \
                    "STRING{Baz = \"This should be interpreted as comment.\"}"
-        bib = BibTexParser(comment)
+        bib = BibTexParser(comment, common_strings=False)
         self.assertEqual(bib.comments, [expected])
         self.assertEqual(bib.strings, {'foo': 'bar'})
 

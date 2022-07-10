@@ -12,24 +12,28 @@ from collections import OrderedDict
 class TestStringParse(unittest.TestCase):
 
     def test_single_string_parse_count(self):
+        parser = BibTexParser(common_strings=False)
         bibtex_str = '@string{name1 = "value1"}\n\n'
-        bib_database = bibtexparser.loads(bibtex_str)
+        bib_database = bibtexparser.loads(bibtex_str, parser)
         self.assertEqual(len(bib_database.strings), 1)
 
     def test_multiple_string_parse_count(self):
+        parser = BibTexParser(common_strings=False)
         bibtex_str = '@string{name1 = "value1"}\n\n@string{name2 = "value2"}\n\n'
-        bib_database = bibtexparser.loads(bibtex_str)
+        bib_database = bibtexparser.loads(bibtex_str, parser)
         self.assertEqual(len(bib_database.strings), 2)
 
     def test_single_string_parse(self):
+        parser = BibTexParser(common_strings=False)
         bibtex_str = '@string{name1 = "value1"}\n\n'
-        bib_database = bibtexparser.loads(bibtex_str)
+        bib_database = bibtexparser.loads(bibtex_str, parser)
         expected = {'name1': 'value1'}
         self.assertEqual(bib_database.strings, expected)
 
     def test_multiple_string_parse(self):
+        parser = BibTexParser(common_strings=False)
         bibtex_str = '@string{name1 = "value1"}\n\n@string{name2 = "value2"}\n\n'
-        bib_database = bibtexparser.loads(bibtex_str)
+        bib_database = bibtexparser.loads(bibtex_str, parser)
         expected = OrderedDict()
         expected['name1'] = 'value1'
         expected['name2'] = 'value2'
@@ -50,8 +54,9 @@ class TestStringParse(unittest.TestCase):
         self.assertEqual(res, expected)
 
     def test_string_parse_accept_chars(self):
+        parser = BibTexParser(common_strings=False)
         bibtex_str = '@string{pub-ieee-std = {IEEE}}\n\n@string{pub-ieee-std:adr = {New York, NY, USA}}'
-        bib_database = bibtexparser.loads(bibtex_str)
+        bib_database = bibtexparser.loads(bibtex_str, parser)
         self.assertEqual(len(bib_database.strings), 2)
         expected = OrderedDict()
         expected['pub-ieee-std'] = 'IEEE'
