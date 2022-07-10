@@ -83,6 +83,8 @@ class BibTexParser(object):
         :return: parser
         :rtype: `BibTexParser`
         """
+
+        self._parse_call_count = 0
         self.bib_database = BibDatabase()
 
         #: Load common strings such as months abbreviation
@@ -144,9 +146,10 @@ class BibTexParser(object):
         :rtype: BibDatabase
         """
 
-        call_counter = self.__parse_call_count
+        self._parse_call_count += 1
+        call_counter = self._parse_call_count
         if call_counter > 1 and not expect_multiple_parse:
-            warnings.warn("Parser has been called more than once.")
+            warnings.warn("parser has been called more than once")
 
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         try:
