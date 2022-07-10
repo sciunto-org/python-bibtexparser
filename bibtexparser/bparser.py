@@ -8,6 +8,7 @@
 
 import io
 import logging
+import warnings
 
 from bibtexparser.bibdatabase import (BibDatabase, BibDataString, as_text,
                                       BibDataStringExpression, STANDARD_TYPES)
@@ -131,9 +132,9 @@ class BibTexParser(object):
         # Setup the parser expression
         self._init_expressions()
 
-    def parse(self, bibtex_str, partial=False):
+    def parse(self, bibtex_str, partial=False, expect_multiple_parse=False):
         """Parse a BibTeX string into an object
-
+        :param expect_multiple_parse: if True, does not print warnings
         :param bibtex_str: BibTeX string
         :type: str or unicode
         :param partial: If True, print errors only on parsing failures.
@@ -142,6 +143,11 @@ class BibTexParser(object):
         :return: bibliographic database
         :rtype: BibDatabase
         """
+
+        call_counter = self.__parse_call_count
+        if call_counter > 1 and not expect_multiple_parse:
+            warnings.warn("Parser has been called more than once.")
+
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         try:
             self._expr.parseFile(bibtex_file_obj)
