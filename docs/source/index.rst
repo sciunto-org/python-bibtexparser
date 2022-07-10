@@ -8,8 +8,7 @@ Welcome to BibtexParser's documentation!
 
 
 :Author: François Boulogne, Olivier Mangin, Lucas Verney, and other contributors.
-:Devel: `github.com project <https://github.com/sciunto-org/python-bibtexparser>`_
-:Mirror: `git.sciunto.org <https://git.sciunto.org/mirror/python-bibtexparser>`_
+:Source Code: `github.com project <https://github.com/sciunto-org/python-bibtexparser>`_
 :Bugs: `github.com <https://github.com/sciunto-org/python-bibtexparser/issues>`_
 :Generated: |today|
 :License: LGPL v3 or BSD
