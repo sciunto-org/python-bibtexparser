@@ -76,7 +76,8 @@ class BibTexParser(object):
                  homogenize_fields=False,
                  interpolate_strings=True,
                  common_strings=True,
-                 add_missing_from_crossref=False):
+                 add_missing_from_crossref=False,
+                 expect_multiple_parse=False):
         """
         Creates a parser for reading BibTeX files
 
@@ -84,7 +85,9 @@ class BibTexParser(object):
         :rtype: `BibTexParser`
         """
 
+        self.expect_multiple_parse = expect_multiple_parse
         self._parse_call_count = 0
+
         self.bib_database = BibDatabase()
 
         #: Load common strings such as months abbreviation
@@ -134,7 +137,7 @@ class BibTexParser(object):
         # Setup the parser expression
         self._init_expressions()
 
-    def parse(self, bibtex_str, partial=False, expect_multiple_parse=False):
+    def parse(self, bibtex_str, partial=False):
         """Parse a BibTeX string into an object
         :param expect_multiple_parse: if True, does not print warnings
         :param bibtex_str: BibTeX string
@@ -148,7 +151,7 @@ class BibTexParser(object):
 
         self._parse_call_count += 1
         call_counter = self._parse_call_count
-        if call_counter > 1 and not expect_multiple_parse:
+        if call_counter > 1 and not self.expect_multiple_parse:
             warnings.warn("parser has been called more than once")
 
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
