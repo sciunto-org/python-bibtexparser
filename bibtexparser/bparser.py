@@ -76,8 +76,7 @@ class BibTexParser(object):
                  homogenize_fields=False,
                  interpolate_strings=True,
                  common_strings=True,
-                 add_missing_from_crossref=False,
-                 expect_multiple_parse=False):
+                 add_missing_from_crossref=False):
         """
         Creates a parser for reading BibTeX files
 
@@ -85,8 +84,8 @@ class BibTexParser(object):
         :rtype: `BibTexParser`
         """
 
-        self.expect_multiple_parse = expect_multiple_parse
         self._parse_call_count = 0
+        self.expect_multiple_parse = False
 
         self.bib_database = BibDatabase()
 
@@ -139,7 +138,6 @@ class BibTexParser(object):
 
     def parse(self, bibtex_str, partial=False):
         """Parse a BibTeX string into an object
-        :param expect_multiple_parse: if True, does not print warnings
         :param bibtex_str: BibTeX string
         :type: str or unicode
         :param partial: If True, print errors only on parsing failures.
@@ -150,9 +148,10 @@ class BibTexParser(object):
         """
 
         self._parse_call_count += 1
-        call_counter = self._parse_call_count
-        if call_counter > 1 and not self.expect_multiple_parse:
-            warnings.warn("parser has been called more than once")
+        if self._parse_call_count == 2 and not self.expect_multiple_parse:
+            warnings.warn("Parser has been called more than once, "
+                          "avoid the warning by setting property expect_multiple_parse to True.", category=UserWarning,
+                          stacklevel=2)
 
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         try:
@@ -189,7 +188,7 @@ class BibTexParser(object):
         # Handle string as BibDataString object
         self._expr.set_string_name_parse_action(
             lambda s, l, t:
-                BibDataString(self.bib_database, t[0]))
+            BibDataString(self.bib_database, t[0]))
 
         # Add notice to logger
         self._expr.add_log_function(logger.debug)
@@ -198,20 +197,20 @@ class BibTexParser(object):
         self._expr.entry.addParseAction(
             lambda s, l, t: self._add_entry(
                 t.get('EntryType'), t.get('Key'), t.get('Fields'))
-            )
+        )
         self._expr.implicit_comment.addParseAction(
             lambda s, l, t: self._add_comment(t[0])
-            )
+        )
         self._expr.explicit_comment.addParseAction(
             lambda s, l, t: self._add_comment(t[0])
-            )
+        )
         self._expr.preamble_decl.addParseAction(
             lambda s, l, t: self._add_preamble(t[0])
-            )
+        )
         self._expr.string_def.addParseAction(
             lambda s, l, t: self._add_string(t['StringName'].name,
                                              t['StringValue'])
-            )
+        )
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
