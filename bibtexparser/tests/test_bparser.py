@@ -6,7 +6,9 @@ from __future__ import unicode_literals
 import os
 import unittest
 import codecs
+import warnings
 
+import bibtexparser
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.bibdatabase import (COMMON_STRINGS, BibDataStringExpression)
 from bibtexparser.customization import *
@@ -85,18 +87,18 @@ class TestBibtexParserList(unittest.TestCase):
                               'month': 'jan'
                               }]
             expected_dict = {'Cesar2013': {'keyword': 'keyword1, keyword2',
-                              'ENTRYTYPE': 'article',
-                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
-                              'year': '2013',
-                              'journal': 'Nice Journal',
-                              'ID': 'Cesar2013',
-                              'pages': '12-23',
-                              'title': 'An amazing title',
-                              'comments': 'A comment',
-                              'author': 'Jean César',
-                              'volume': '12',
-                              'month': 'jan'
-                              }}
+                                           'ENTRYTYPE': 'article',
+                                           'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                                           'year': '2013',
+                                           'journal': 'Nice Journal',
+                                           'ID': 'Cesar2013',
+                                           'pages': '12-23',
+                                           'title': 'An amazing title',
+                                           'comments': 'A comment',
+                                           'author': 'Jean César',
+                                           'volume': '12',
+                                           'month': 'jan'
+                                           }}
         self.assertEqual(res_list, expected_list)
         self.assertEqual(res_dict, expected_dict)
 
@@ -140,57 +142,60 @@ class TestBibtexParserList(unittest.TestCase):
         with codecs.open('bibtexparser/tests/data/article_start_with_bom.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
             res = bib.get_entry_list()
-        expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
-                     'ENTRYTYPE': 'article',
-                     'pages': '12-23',
-                     'volume': '12',
-                     'ID': 'Cesar2013',
-                     'year': '2013',
-                     'author': 'Jean César',
-                     'journal': 'Nice Journal',
-                     'comments': 'A comment',
-                     'month': 'jan',
-                     'keyword': 'keyword1, keyword2',
-                     'title': 'An amazing title'
-                     }]
+        expected = [{
+            'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+            'ENTRYTYPE': 'article',
+            'pages': '12-23',
+            'volume': '12',
+            'ID': 'Cesar2013',
+            'year': '2013',
+            'author': 'Jean César',
+            'journal': 'Nice Journal',
+            'comments': 'A comment',
+            'month': 'jan',
+            'keyword': 'keyword1, keyword2',
+            'title': 'An amazing title'
+        }]
         self.assertEqual(res, expected)
 
     def test_article_cust_unicode(self):
         with codecs.open('bibtexparser/tests/data/article.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_unicode)
             res = bib.get_entry_list()
-        expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
-                     'ENTRYTYPE': 'article',
-                     'pages': '12--23',
-                     'volume': '12',
-                     'ID': 'Cesar2013',
-                     'year': '2013',
-                     'author': ['César, Jean'],
-                     'journal': {'ID': 'NiceJournal', 'name': 'Nice Journal'},
-                     'comments': 'A comment',
-                     'month': 'jan',
-                     'keyword': ['keyword1', 'keyword2'],
-                     'title': 'An amazing title'
-                     }]
+        expected = [{
+            'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+            'ENTRYTYPE': 'article',
+            'pages': '12--23',
+            'volume': '12',
+            'ID': 'Cesar2013',
+            'year': '2013',
+            'author': ['César, Jean'],
+            'journal': {'ID': 'NiceJournal', 'name': 'Nice Journal'},
+            'comments': 'A comment',
+            'month': 'jan',
+            'keyword': ['keyword1', 'keyword2'],
+            'title': 'An amazing title'
+        }]
         self.assertEqual(res, expected)
 
     def test_article_cust_latex(self):
         with codecs.open('bibtexparser/tests/data/article.bib', 'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read(), customization=customizations_latex)
             res = bib.get_entry_list()
-        expected = [{'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
-                     'ENTRYTYPE': 'article',
-                     'pages': '12--23',
-                     'volume': '12',
-                     'ID': 'Cesar2013',
-                     'year': '2013',
-                     'author': ['C{\\\'e}sar, Jean'],
-                     'journal': {'ID': 'NiceJournal', 'name': 'Nice Journal'},
-                     'comments': 'A comment',
-                     'month': 'jan',
-                     'keyword': ['keyword1', 'keyword2'],
-                     'title': '{A}n amazing title'
-                     }]
+        expected = [{
+            'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french {\\\'e}rudit word',
+            'ENTRYTYPE': 'article',
+            'pages': '12--23',
+            'volume': '12',
+            'ID': 'Cesar2013',
+            'year': '2013',
+            'author': ['C{\\\'e}sar, Jean'],
+            'journal': {'ID': 'NiceJournal', 'name': 'Nice Journal'},
+            'comments': 'A comment',
+            'month': 'jan',
+            'keyword': ['keyword1', 'keyword2'],
+            'title': '{A}n amazing title'
+        }]
         self.assertEqual(res, expected)
 
     def test_article_cust_order(self):
@@ -287,7 +292,6 @@ class TestBibtexParserList(unittest.TestCase):
                      }]
         self.assertEqual(res, expected)
 
-
     def test_article_start_with_whitespace(self):
         with open('bibtexparser/tests/data/article_start_with_whitespace.bib', 'r') as bibfile:
             bib = BibTexParser(bibfile.read())
@@ -337,7 +341,7 @@ class TestBibtexParserList(unittest.TestCase):
                      'title': 'An amazing title',
                      'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
                      },
-                     ]
+                    ]
         self.assertEqual(res, expected)
 
     def test_article_special_characters(self):
@@ -358,7 +362,7 @@ class TestBibtexParserList(unittest.TestCase):
                      'title': 'An amazing title',
                      'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
                      },
-                     ]
+                    ]
         self.assertEqual(res, expected)
 
     def test_article_protection_braces(self):
@@ -379,9 +383,8 @@ class TestBibtexParserList(unittest.TestCase):
                      'title': '{An amazing title}',
                      'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
                      },
-                     ]
+                    ]
         self.assertEqual(res, expected)
-
 
     ###########
     # BOOK
@@ -552,7 +555,7 @@ class TestBibtexParserList(unittest.TestCase):
             'volume': '12',
             'strange_field_name': 'val',
             'strange-field-name2': 'val2',
-            }]
+        }]
         self.assertEqual(res, expected)
 
     def test_string_definitions(self):
@@ -562,10 +565,10 @@ class TestBibtexParserList(unittest.TestCase):
         res = dict(bib.strings)
         expected = COMMON_STRINGS.copy()
         expected.update({
-                'nice_journal': 'Nice Journal',
-                'jean': 'Jean',
-                'cesar': "César",
-                })
+            'nice_journal': 'Nice Journal',
+            'jean': 'Jean',
+            'cesar': "César",
+        })
         self.assertEqual(res, expected)
 
     def test_string_is_interpolated(self):
@@ -586,7 +589,7 @@ class TestBibtexParserList(unittest.TestCase):
             'comments': 'A comment',
             'author': 'Jean César',
             'volume': '12',
-            }]
+        }]
         self.assertEqual(res, expected)
 
     def test_string_is_not_interpolated(self):
@@ -607,8 +610,8 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_comments_spaces_and_declarations(self):
         with codecs.open(
-                'bibtexparser/tests/data/comments_spaces_and_declarations.bib',
-                'r', 'utf-8') as bibfile:
+            'bibtexparser/tests/data/comments_spaces_and_declarations.bib',
+            'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
         res_dict = bib.get_entry_dict()
         expected_dict = {'Cesar2013': {
@@ -649,6 +652,60 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(bib.preambles, [])
         self.assertEqual(bib.strings, {})
         self.assertEqual(bib.comments, ['@BOOK{, title = "bla"}'])
+
+    def test_parsing_just_once_not_raising_warnings_with_default_settings(self):
+        parser = BibTexParser()
+
+        with open('bibtexparser/tests/data/article_comma_normal_single.bib',
+                  'r', encoding='utf-8') as bibfile:
+            with warnings.catch_warnings(record=True) as warning:
+                warnings.simplefilter("always")
+                bibtexparser.load(bibfile, parser)
+                assert len(warning) == 0
+
+    def test_parsing_twice_raise_warnings_with_default_settings(self):
+        parser = BibTexParser()
+
+        with open('bibtexparser/tests/data/article_comma_normal_single.bib',
+                  'r', encoding='utf-8') as bibfile_first, \
+            open('bibtexparser/tests/data/article_comma_normal_multiple.bib', 'r', encoding='utf-8') \
+                as bibfile_second:
+            with warnings.catch_warnings(record=True) as warning:
+                warnings.simplefilter("always")
+                bibtexparser.load(bibfile_first, parser)
+                bibtexparser.load(bibfile_second, parser)
+                assert len(warning) != 0
+
+    def test_parsing_three_times_raise_warnings_only_once_with_default_settings(self):
+        parser = BibTexParser()
+
+        with open('bibtexparser/tests/data/article_comma_normal_single.bib',
+                  'r', encoding='utf-8') as bibfile_first, \
+            open('bibtexparser/tests/data/article_comma_normal_multiple.bib', 'r', encoding='utf-8') \
+                as bibfile_second, \
+                open('bibtexparser/tests/data/article.bib', 'r', encoding='utf-8') as bibfile_third:
+            with warnings.catch_warnings(record=True) as warning:
+                warnings.simplefilter("always")
+                bibtexparser.load(bibfile_first, parser)
+                bibtexparser.load(bibfile_second, parser)
+                bibtexparser.load(bibfile_third, parser)
+                assert len(warning) == 1
+
+    def test_parsing_three_times_not_raising_a_warning_if_expect_multiple_parse_is_true(self):
+        parser = BibTexParser()
+        parser.expect_multiple_parse = True
+
+        with open('bibtexparser/tests/data/article_comma_normal_single.bib',
+                  'r', encoding='utf-8') as bibfile_first, \
+            open('bibtexparser/tests/data/article_comma_normal_multiple.bib', 'r', encoding='utf-8') \
+                as bibfile_second, \
+                open('bibtexparser/tests/data/article.bib', 'r', encoding='utf-8') as bibfile_third:
+            with warnings.catch_warnings(record=True) as warning:
+                warnings.simplefilter("always")
+                bibtexparser.load(bibfile_first, parser)
+                bibtexparser.load(bibfile_second, parser)
+                bibtexparser.load(bibfile_third, parser)
+                assert len(warning) == 0
 
 
 if __name__ == '__main__':
