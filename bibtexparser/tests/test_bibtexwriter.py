@@ -172,6 +172,30 @@ class TestBibTexWriter(unittest.TestCase):
 """
         self.assertEqual(result, expected)
 
+    def test_align_mutliline_values(self):
+        with open('bibtexparser/tests/data/article_multilines.bib') as bibtex_file:
+            bib_database = bibtexparser.load(bibtex_file)
+        writer = BibTexWriter()
+        writer.align_multiline_values = True
+        writer.display_order = ["author", "title", "year", "journal", "abstract", "comments", "keyword"]
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@article{Cesar2013,
+ author = {Jean César},
+ title = {A mutline line title is very amazing. It should be
+          long enough to test multilines... with two lines or should we
+          even test three lines... What an amazing title.},
+ year = {2013},
+ journal = {Nice Journal},
+ abstract = {This is an abstract. This line should be long enough to test
+             multilines... and with a french érudit word},
+ comments = {A comment},
+ keyword = {keyword1, keyword2,
+            multiline-keyword1, multiline-keyword2}
+}
+"""
+        self.assertEqual(result, expected)
+
 
 class TestEntrySorting(unittest.TestCase):
     bib_database = BibDatabase()
