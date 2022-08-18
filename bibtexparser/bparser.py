@@ -138,6 +138,7 @@ class BibTexParser(object):
 
     def parse(self, bibtex_str, partial=False):
         """Parse a BibTeX string into an object
+
         :param bibtex_str: BibTeX string
         :type: str or unicode
         :param partial: If True, print errors only on parsing failures.
@@ -188,7 +189,7 @@ class BibTexParser(object):
         # Handle string as BibDataString object
         self._expr.set_string_name_parse_action(
             lambda s, l, t:
-            BibDataString(self.bib_database, t[0]))
+                BibDataString(self.bib_database, t[0]))
 
         # Add notice to logger
         self._expr.add_log_function(logger.debug)
@@ -197,20 +198,20 @@ class BibTexParser(object):
         self._expr.entry.addParseAction(
             lambda s, l, t: self._add_entry(
                 t.get('EntryType'), t.get('Key'), t.get('Fields'))
-        )
+            )
         self._expr.implicit_comment.addParseAction(
             lambda s, l, t: self._add_comment(t[0])
-        )
+            )
         self._expr.explicit_comment.addParseAction(
             lambda s, l, t: self._add_comment(t[0])
-        )
+            )
         self._expr.preamble_decl.addParseAction(
             lambda s, l, t: self._add_preamble(t[0])
-        )
+            )
         self._expr.string_def.addParseAction(
             lambda s, l, t: self._add_string(t['StringName'].name,
                                              t['StringValue'])
-        )
+            )
 
     def _bibtex_file_obj(self, bibtex_str):
         # Some files have Byte-order marks inserted at the start
