@@ -87,18 +87,18 @@ class TestBibtexParserList(unittest.TestCase):
                               'month': 'jan'
                               }]
             expected_dict = {'Cesar2013': {'keyword': 'keyword1, keyword2',
-                                           'ENTRYTYPE': 'article',
-                                           'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
-                                           'year': '2013',
-                                           'journal': 'Nice Journal',
-                                           'ID': 'Cesar2013',
-                                           'pages': '12-23',
-                                           'title': 'An amazing title',
-                                           'comments': 'A comment',
-                                           'author': 'Jean César',
-                                           'volume': '12',
-                                           'month': 'jan'
-                                           }}
+                              'ENTRYTYPE': 'article',
+                              'abstract': 'This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word',
+                              'year': '2013',
+                              'journal': 'Nice Journal',
+                              'ID': 'Cesar2013',
+                              'pages': '12-23',
+                              'title': 'An amazing title',
+                              'comments': 'A comment',
+                              'author': 'Jean César',
+                              'volume': '12',
+                              'month': 'jan'
+                              }}
         self.assertEqual(res_list, expected_list)
         self.assertEqual(res_dict, expected_dict)
 
@@ -339,7 +339,7 @@ class TestBibtexParserList(unittest.TestCase):
                      'title': 'An amazing title',
                      'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
                      },
-                    ]
+                     ]
         self.assertEqual(res, expected)
 
     def test_article_special_characters(self):
@@ -360,7 +360,7 @@ class TestBibtexParserList(unittest.TestCase):
                      'title': 'An amazing title',
                      'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
                      },
-                    ]
+                     ]
         self.assertEqual(res, expected)
 
     def test_article_protection_braces(self):
@@ -381,7 +381,7 @@ class TestBibtexParserList(unittest.TestCase):
                      'title': '{An amazing title}',
                      'abstract': "This is an abstract. This line should be long enough to test\nmultilines... and with a french érudit word",
                      },
-                    ]
+                     ]
         self.assertEqual(res, expected)
 
 
@@ -554,7 +554,7 @@ class TestBibtexParserList(unittest.TestCase):
             'volume': '12',
             'strange_field_name': 'val',
             'strange-field-name2': 'val2',
-        }]
+            }]
         self.assertEqual(res, expected)
 
     def test_string_definitions(self):
@@ -564,10 +564,10 @@ class TestBibtexParserList(unittest.TestCase):
         res = dict(bib.strings)
         expected = COMMON_STRINGS.copy()
         expected.update({
-            'nice_journal': 'Nice Journal',
-            'jean': 'Jean',
-            'cesar': "César",
-        })
+                'nice_journal': 'Nice Journal',
+                'jean': 'Jean',
+                'cesar': "César",
+                })
         self.assertEqual(res, expected)
 
     def test_string_is_interpolated(self):
@@ -588,7 +588,7 @@ class TestBibtexParserList(unittest.TestCase):
             'comments': 'A comment',
             'author': 'Jean César',
             'volume': '12',
-        }]
+            }]
         self.assertEqual(res, expected)
 
     def test_string_is_not_interpolated(self):
@@ -609,8 +609,8 @@ class TestBibtexParserList(unittest.TestCase):
 
     def test_comments_spaces_and_declarations(self):
         with codecs.open(
-            'bibtexparser/tests/data/comments_spaces_and_declarations.bib',
-            'r', 'utf-8') as bibfile:
+                'bibtexparser/tests/data/comments_spaces_and_declarations.bib',
+                'r', 'utf-8') as bibfile:
             bib = BibTexParser(bibfile.read())
         res_dict = bib.get_entry_dict()
         expected_dict = {'Cesar2013': {
