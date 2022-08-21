@@ -58,7 +58,8 @@ class BibTexWriter(object):
         #: Align values. Determines the maximal number of characters used in any fieldname and aligns all values
         #    according to that by filling up with single spaces. Default: False
         self.align_values = False
-        # Align multi-line values. Formats a multi-line value such that the text is aligned exactly on top of each other.
+        #: Align multi-line values. Formats a multi-line value such that the text is aligned exactly
+        #    on top of each other. Default: False
         self.align_multiline_values = False
         #: Characters(s) for separating BibTeX entries. Default: new line.
         self.entry_separator = '\n'
