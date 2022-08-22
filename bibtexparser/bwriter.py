@@ -58,6 +58,9 @@ class BibTexWriter(object):
         #: Align values. Determines the maximal number of characters used in any fieldname and aligns all values
         #    according to that by filling up with single spaces. Default: False
         self.align_values = False
+        #: Align multi-line values. Formats a multi-line value such that the text is aligned exactly
+        #    on top of each other. Default: False
+        self.align_multiline_values = False
         #: Characters(s) for separating BibTeX entries. Default: new line.
         self.entry_separator = '\n'
         #: Tuple of fields for ordering BibTeX entries. Set to `None` to disable sorting. Default: BibTeX key `('ID', )`.
@@ -127,11 +130,31 @@ class BibTexWriter(object):
         # Write field = value lines
         for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
             try:
+                value = _str_or_expr_to_bibtex(entry[field])
+
+                if self.align_multiline_values:
+                    # Calculate indent of multi-line values. Text from a multiline string
+                    # should be aligned, i.e., be exactly on top of each other.
+                    # E.g.:       title = {Hello
+                    #                      World}
+                    # Calculate the indent of "World":
+                    # Left of field (whitespaces before e.g. 'title')
+                    value_indent = len(self.indent)
+                    # Field itself (e.g. len('title'))
+                    if self._max_field_width > 0:
+                        value_indent += self._max_field_width
+                    else:
+                        value_indent += len(field)
+                    # Right of field ' = ' (<- 3 chars) + '{' (<- 1 char)
+                    value_indent += 3 + 1
+
+                    value = value.replace('\n', '\n' + value_indent * ' ')
+
                 bibtex += field_fmt.format(
                     indent=self.indent,
                     field=field,
                     field_max_w=self._max_field_width,
-                    value=_str_or_expr_to_bibtex(entry[field]))
+                    value=value)
             except TypeError:
                 raise TypeError(u"The field %s in entry %s must be a string"
                                 % (field, entry['ID']))
