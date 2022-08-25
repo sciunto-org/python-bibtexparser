@@ -150,9 +150,10 @@ class BibTexParser(object):
 
         self._parse_call_count += 1
         if self._parse_call_count == 2 and not self.expect_multiple_parse:
-            warnings.warn("Parser has been called more than once, "
-                          "avoid the warning by setting property expect_multiple_parse to True.", category=UserWarning,
-                          stacklevel=2)
+            warnings.warn("The parser has been called more than once. "
+                          "Subsequent parse calls lead to a combined BibTeX library. \n"
+                          "To avoid the warning, set property `parser.expect_multiple_parse` to `True`.",
+                          category=UserWarning, stacklevel=2)
 
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         try:
