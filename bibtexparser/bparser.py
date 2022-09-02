@@ -85,6 +85,8 @@ class BibTexParser(object):
         """
 
         self._parse_call_count = 0
+        #: Parsers can be called multiple times, merging databases, but raising a warning.
+        #      Set this to `True` to disable the warning. Default: `False`
         self.expect_multiple_parse = False
 
         self.bib_database = BibDatabase()
