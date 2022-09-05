@@ -22,7 +22,7 @@ class SortingStrategy(Enum):
     PRESERVE = auto()
 
 
-def apply_sorting_strategy(strategy: SortingStrategy, items: [Iterable[str]]) -> Iterable[str]:
+def apply_sorting_strategy(strategy: SortingStrategy, items: Iterable[str]) -> Iterable[str]:
     if strategy == SortingStrategy.ALPHABETICAL_ASC:
         return sorted(items)
     elif strategy == SortingStrategy.ALPHABETICAL_DESC:
