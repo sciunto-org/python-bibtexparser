@@ -70,7 +70,7 @@ class TestBibTexWriter(unittest.TestCase):
 """
         self.assertEqual(result, expected)
 
-    def test_align(self):
+    def test_align_bool(self):
         bib_database = BibDatabase()
         bib_database.entries = [{'ID': 'abc123',
                                  'ENTRYTYPE': 'book',
@@ -83,6 +83,22 @@ class TestBibTexWriter(unittest.TestCase):
 """@book{abc123,
  author             = {test},
  thisisaverylongkey = {longvalue}
+}
+"""
+        self.assertEqual(result, expected)
+
+        bib_database = BibDatabase()
+        bib_database.entries = [{'ID': 'veryveryverylongID',
+                                 'ENTRYTYPE': 'book',
+                                 'a': 'test',
+                                 'bb': 'longvalue'}]
+        writer = BibTexWriter()
+        writer.align_values = True
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{veryveryverylongID,
+ a  = {test},
+ bb = {longvalue}
 }
 """
         self.assertEqual(result, expected)
@@ -121,6 +137,71 @@ class TestBibTexWriter(unittest.TestCase):
 """
         self.assertEqual(result, expected)
 
+    def test_align_int(self):
+        bib_database = BibDatabase()
+        bib_database.entries = [{'ID': 'abc123',
+                                 'ENTRYTYPE': 'book',
+                                 'author': 'test',
+                                 'thisisaverylongkey': 'longvalue'}]
+        # Behaviour should be equal to align_values = True:
+        # - Negative values have no effect
+        # - A value <= length of the maximum field name has no effect
+        for align_values in range(-2, len('thisisaverylongkey') + 1):
+            writer = BibTexWriter()
+            writer.align_values = align_values
+            result = bibtexparser.dumps(bib_database, writer)
+            expected = \
+"""@book{abc123,
+ author             = {test},
+ thisisaverylongkey = {longvalue}
+}
+"""
+            self.assertEqual(result, expected, align_values)
+
+        writer = BibTexWriter()
+        writer.align_values = len('thisisaverylongkey') + 5
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{abc123,
+ author                  = {test},
+ thisisaverylongkey      = {longvalue}
+}
+"""
+        self.assertEqual(result, expected)
+
+        with open('bibtexparser/tests/data/multiple_entries_and_comments.bib') as bibtex_file:
+            bib_database = bibtexparser.load(bibtex_file)
+        writer = BibTexWriter()
+        writer.contents = ['entries']
+        writer.align_values = 15
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{Toto3000,
+ author          = {Toto, A and Titi, B},
+ title           = {A title}
+}
+
+@article{Wigner1938,
+ author          = {Wigner, E.},
+ doi             = {10.1039/TF9383400029},
+ issn            = {0014-7672},
+ journal         = {Trans. Faraday Soc.},
+ owner           = {fr},
+ pages           = {29--41},
+ publisher       = {The Royal Society of Chemistry},
+ title           = {The transition state method},
+ volume          = {34},
+ year            = {1938}
+}
+
+@book{Yablon2005,
+ author          = {Yablon, A.D.},
+ publisher       = {Springer},
+ title           = {Optical fiber fusion slicing},
+ year            = {2005}
+}
+"""
+        self.assertEqual(result, expected)
 
     def test_entry_separator(self):
         bib_database = BibDatabase()
@@ -206,17 +287,17 @@ class TestBibTexWriter(unittest.TestCase):
         result = bibtexparser.dumps(bib_database, writer)
         expected = \
 """@article{Cesar2013,
- author    = {Jean César},
- title     = {A mutline line title is very amazing. It should be
-              long enough to test multilines... with two lines or should we
-              even test three lines... What an amazing title.},
- year      = {2013},
- journal   = {Nice Journal},
- abstract  = {This is an abstract. This line should be long enough to test
-              multilines... and with a french érudit word},
- comments  = {A comment},
- keyword   = {keyword1, keyword2,
-              multiline-keyword1, multiline-keyword2}
+ author   = {Jean César},
+ title    = {A mutline line title is very amazing. It should be
+             long enough to test multilines... with two lines or should we
+             even test three lines... What an amazing title.},
+ year     = {2013},
+ journal  = {Nice Journal},
+ abstract = {This is an abstract. This line should be long enough to test
+             multilines... and with a french érudit word},
+ comments = {A comment},
+ keyword  = {keyword1, keyword2,
+             multiline-keyword1, multiline-keyword2}
 }
 """
         self.assertEqual(result, expected)
@@ -331,17 +412,17 @@ class TestBibTexWriter(unittest.TestCase):
         result = bibtexparser.dumps(bib_database, writer)
         expected = \
 """@article{Cesar2013,
-   author    = {Jean César},
-   title     = {A mutline line title is very amazing. It should be
-                long enough to test multilines... with two lines or should we
-                even test three lines... What an amazing title.},
-   year      = {2013},
-   journal   = {Nice Journal},
-   abstract  = {This is an abstract. This line should be long enough to test
-                multilines... and with a french érudit word},
-   comments  = {A comment},
-   keyword   = {keyword1, keyword2,
-                multiline-keyword1, multiline-keyword2}
+   author   = {Jean César},
+   title    = {A mutline line title is very amazing. It should be
+               long enough to test multilines... with two lines or should we
+               even test three lines... What an amazing title.},
+   year     = {2013},
+   journal  = {Nice Journal},
+   abstract = {This is an abstract. This line should be long enough to test
+               multilines... and with a french érudit word},
+   comments = {A comment},
+   keyword  = {keyword1, keyword2,
+               multiline-keyword1, multiline-keyword2}
 }
 """
         self.assertEqual(result, expected)

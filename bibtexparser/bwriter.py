@@ -5,7 +5,7 @@
 
 import logging
 from enum import Enum, auto
-from typing import Dict, Callable, Iterable
+from typing import Dict, Callable, Iterable, Union
 from bibtexparser.bibdatabase import (BibDatabase, COMMON_STRINGS,
                                       BibDataString,
                                       BibDataStringExpression)
@@ -14,6 +14,9 @@ from bibtexparser.bibdatabase import (BibDatabase, COMMON_STRINGS,
 logger = logging.getLogger(__name__)
 
 __all__ = ['BibTexWriter']
+
+# A list of entries that should not be included in the content (key = value) of a BibTex entry
+ENTRY_TO_BIBTEX_IGNORE_ENTRIES = ['ENTRYTYPE', 'ID']
 
 
 class SortingStrategy(Enum):
@@ -89,9 +92,12 @@ class BibTexWriter(object):
         self.contents = ['comments', 'preambles', 'strings', 'entries']
         #: Character(s) for indenting BibTeX field-value pairs. Default: single space.
         self.indent = ' '
-        #: Align values. Determines the maximal number of characters used in any fieldname and aligns all values
-        #    according to that by filling up with single spaces. Default: False
-        self.align_values = False
+        #: Align values. Aligns all values according to a given length by padding with single spaces.
+        #    If align_values is true, the maximum number of characters used in any field name is used as the length.
+        #    If align_values is a number, the greater of the specified value or the maximum number of characters used
+        #    in any field name is used as the length.
+        #    Default: False
+        self.align_values: Union[int, bool] = False
         #: Align multi-line values. Formats a multi-line value such that the text is aligned exactly
         #    on top of each other. Default: False
         self.align_multiline_values = False
@@ -112,7 +118,7 @@ class BibTexWriter(object):
         #: BibTeX syntax allows the comma to be optional at the end of the last field in an entry.
         #: Use this to enable writing this last comma in the bwriter output. Defaults: False.
         self.add_trailing_comma = False
-        #: internal variable used if self.align_values = True
+        #: internal variable used if self.align_values = True or self.align_values = <number>
         self._max_field_width = 0
         #: Whether common strings are written
         self.common_strings = write_common_strings
@@ -143,9 +149,12 @@ class BibTexWriter(object):
         else:
             entries = bib_database.entries
 
-        if self.align_values:
+        if self.align_values is True or type(self.align_values) == int:
             # determine maximum field width to be used
-            widths = [max(map(len, entry.keys())) for entry in entries]
+            widths = [len(ele) for entry in entries for ele in entry if ele not in ENTRY_TO_BIBTEX_IGNORE_ENTRIES]
+            if type(self.align_values) == int:
+                # specified width should be taken into account
+                widths.append(self.align_values)
             self._max_field_width = max(widths)
 
         return self.entry_separator.join(self._entry_to_bibtex(entry) for entry in entries)
@@ -165,7 +174,7 @@ class BibTexWriter(object):
         else:
             field_fmt = u",\n{indent}{field:<{field_max_w}} = {value}"
         # Write field = value lines
-        for field in [i for i in display_order if i not in ['ENTRYTYPE', 'ID']]:
+        for field in [i for i in display_order if i not in ENTRY_TO_BIBTEX_IGNORE_ENTRIES]:
             try:
                 value = _str_or_expr_to_bibtex(entry[field])
 
