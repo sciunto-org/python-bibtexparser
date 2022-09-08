@@ -17,12 +17,27 @@ __all__ = ['BibTexWriter']
 
 
 class SortingStrategy(Enum):
+    """
+    Defines different strategies for sorting the entries not defined in :py:attr:`~.BibTexWriter.display_order` and that are added at the end.
+    """
     ALPHABETICAL_ASC = auto()
+    """
+    Alphabetical sorting in ascending order.
+    """
     ALPHABETICAL_DESC = auto()
+    """
+    Alphabetical sorting in descending order.
+    """
     PRESERVE = auto()
+    """
+    Preserves the order of the entries. Entries are not sorted.
+    """
 
 
 def _apply_sorting_strategy(strategy: SortingStrategy, items: Iterable[str]) -> Iterable[str]:
+    """
+    Sorts the items based on the given sorting strategy.
+    """
     if strategy == SortingStrategy.ALPHABETICAL_ASC:
         return sorted(items)
     elif strategy == SortingStrategy.ALPHABETICAL_DESC:
