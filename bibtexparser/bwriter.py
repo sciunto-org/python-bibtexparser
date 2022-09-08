@@ -22,7 +22,7 @@ class SortingStrategy(Enum):
     PRESERVE = auto()
 
 
-def apply_sorting_strategy(strategy: SortingStrategy, items: Iterable[str]) -> Iterable[str]:
+def _apply_sorting_strategy(strategy: SortingStrategy, items: Iterable[str]) -> Iterable[str]:
     if strategy == SortingStrategy.ALPHABETICAL_ASC:
         return sorted(items)
     elif strategy == SortingStrategy.ALPHABETICAL_DESC:
@@ -144,7 +144,7 @@ class BibTexWriter(object):
         # first those keys which are both in self.display_order and in entry.keys
         display_order = [i for i in self.display_order if i in entry]
         # then all the other fields sorted alphabetically
-        display_order += [i for i in apply_sorting_strategy(self.display_order_sorting, entry) if i not in self.display_order]
+        display_order += [i for i in _apply_sorting_strategy(self.display_order_sorting, entry) if i not in self.display_order]
         if self.comma_first:
             field_fmt = u"\n{indent}, {field:<{field_max_w}} = {value}"
         else:
