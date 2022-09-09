@@ -4,6 +4,8 @@
 
 
 import logging
+from enum import Enum, auto
+from typing import Dict, Callable, Iterable
 from bibtexparser.bibdatabase import (BibDatabase, COMMON_STRINGS,
                                       BibDataString,
                                       BibDataStringExpression)
@@ -12,6 +14,38 @@ from bibtexparser.bibdatabase import (BibDatabase, COMMON_STRINGS,
 logger = logging.getLogger(__name__)
 
 __all__ = ['BibTexWriter']
+
+
+class SortingStrategy(Enum):
+    """
+    Defines different strategies for sorting the entries not defined in :py:attr:`~.BibTexWriter.display_order` and that are added at the end.
+    """
+    ALPHABETICAL_ASC = auto()
+    """
+    Alphabetical sorting in ascending order.
+    """
+    ALPHABETICAL_DESC = auto()
+    """
+    Alphabetical sorting in descending order.
+    """
+    PRESERVE = auto()
+    """
+    Preserves the order of the entries. Entries are not sorted.
+    """
+
+
+def _apply_sorting_strategy(strategy: SortingStrategy, items: Iterable[str]) -> Iterable[str]:
+    """
+    Sorts the items based on the given sorting strategy.
+    """
+    if strategy == SortingStrategy.ALPHABETICAL_ASC:
+        return sorted(items)
+    elif strategy == SortingStrategy.ALPHABETICAL_DESC:
+        return reversed(sorted(items))
+    elif strategy == SortingStrategy.PRESERVE:
+        return items
+    else:
+        raise NotImplementedError(f"The strategy {strategy.name} is not implemented.")
 
 
 def to_bibtex(parsed):
@@ -65,9 +99,12 @@ class BibTexWriter(object):
         self.entry_separator = '\n'
         #: Tuple of fields for ordering BibTeX entries. Set to `None` to disable sorting. Default: BibTeX key `('ID', )`.
         self.order_entries_by = ('ID', )
-        #: Tuple of fields for display order in a single BibTeX entry. Fields not listed here will be displayed
-        #: alphabetically at the end. Set to '[]' for alphabetical order. Default: '[]'
+        #: Tuple of fields for display order in a single BibTeX entry. Fields not listed here will be displayed at the
+        #    end in the order defined by display_order_sorting. Default: '[]'
         self.display_order = []
+        # Sorting strategy for entries not contained in display_order. Entries not defined in display_order are added
+        #    at the end in the order defined by this strategy. Default: SortingStrategy.ALPHABETICAL_ASC
+        self.display_order_sorting: SortingStrategy = SortingStrategy.ALPHABETICAL_ASC
         #: BibTeX syntax allows comma first syntax
         #: (common in functional languages), use this to enable
         #: comma first syntax as the bwriter output
@@ -122,7 +159,7 @@ class BibTexWriter(object):
         # first those keys which are both in self.display_order and in entry.keys
         display_order = [i for i in self.display_order if i in entry]
         # then all the other fields sorted alphabetically
-        display_order += [i for i in sorted(entry) if i not in self.display_order]
+        display_order += [i for i in _apply_sorting_strategy(self.display_order_sorting, entry) if i not in self.display_order]
         if self.comma_first:
             field_fmt = u"\n{indent}, {field:<{field_max_w}} = {value}"
         else:

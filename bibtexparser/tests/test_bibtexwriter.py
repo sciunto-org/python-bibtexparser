@@ -2,7 +2,7 @@
 import tempfile
 import unittest
 import bibtexparser
-from bibtexparser.bwriter import BibTexWriter
+from bibtexparser.bwriter import BibTexWriter, SortingStrategy
 from bibtexparser.bibdatabase import BibDatabase
 
 
@@ -217,6 +217,80 @@ class TestBibTexWriter(unittest.TestCase):
  comments  = {A comment},
  keyword   = {keyword1, keyword2,
               multiline-keyword1, multiline-keyword2}
+}
+"""
+        self.assertEqual(result, expected)
+
+    def test_display_order_sorting(self):
+        bib_database = BibDatabase()
+        bib_database.entries = [{'ID': 'abc123',
+                                 'ENTRYTYPE': 'book',
+                                 'b': 'test2',
+                                 'a': 'test1',
+                                 'd': 'test4',
+                                 'c': 'test3',
+                                 'e': 'test5'}]
+        # Only 'a' is not ordered. As it's only one element, strategy should not matter.
+        for strategy in SortingStrategy:
+            writer = BibTexWriter()
+            writer.display_order = ['b', 'c', 'd', 'e', 'a']
+            writer.display_order_sorting = strategy
+            result = bibtexparser.dumps(bib_database, writer)
+            expected = \
+"""@book{abc123,
+ b = {test2},
+ c = {test3},
+ d = {test4},
+ e = {test5},
+ a = {test1}
+}
+"""
+            self.assertEqual(result, expected)
+
+        # Test ALPHABETICAL_ASC strategy
+        writer = BibTexWriter()
+        writer.display_order = ['c']
+        writer.display_order_sorting = SortingStrategy.ALPHABETICAL_ASC
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{abc123,
+ c = {test3},
+ a = {test1},
+ b = {test2},
+ d = {test4},
+ e = {test5}
+}
+"""
+        self.assertEqual(result, expected)
+
+        # Test ALPHABETICAL_DESC strategy
+        writer = BibTexWriter()
+        writer.display_order = ['c']
+        writer.display_order_sorting = SortingStrategy.ALPHABETICAL_DESC
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{abc123,
+ c = {test3},
+ e = {test5},
+ d = {test4},
+ b = {test2},
+ a = {test1}
+}
+"""
+        self.assertEqual(result, expected)
+
+        # Test PRESERVE strategy
+        writer = BibTexWriter()
+        writer.display_order = ['c']
+        writer.display_order_sorting = SortingStrategy.PRESERVE
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{abc123,
+ c = {test3},
+ b = {test2},
+ a = {test1},
+ d = {test4},
+ e = {test5}
 }
 """
         self.assertEqual(result, expected)
