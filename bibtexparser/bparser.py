@@ -8,6 +8,7 @@
 
 import io
 import logging
+import warnings
 
 from bibtexparser.bibdatabase import (BibDatabase, BibDataString, as_text,
                                       BibDataStringExpression, STANDARD_TYPES)
@@ -82,6 +83,12 @@ class BibTexParser(object):
         :return: parser
         :rtype: `BibTexParser`
         """
+
+        self._parse_call_count = 0
+        #: Parsers can be called multiple times, merging databases, but raising a warning.
+        #      Set this to `True` to disable the warning. Default: `False`
+        self.expect_multiple_parse = False
+
         self.bib_database = BibDatabase()
 
         #: Load common strings such as months abbreviation
@@ -142,6 +149,14 @@ class BibTexParser(object):
         :return: bibliographic database
         :rtype: BibDatabase
         """
+
+        self._parse_call_count += 1
+        if self._parse_call_count == 2 and not self.expect_multiple_parse:
+            warnings.warn("The parser has been called more than once. "
+                          "Subsequent parse calls lead to a combined BibTeX library. \n"
+                          "To avoid the warning, set property `parser.expect_multiple_parse` to `True`.",
+                          category=UserWarning, stacklevel=2)
+
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         try:
             self._expr.parseFile(bibtex_file_obj)

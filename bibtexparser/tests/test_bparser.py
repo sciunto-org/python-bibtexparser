@@ -6,7 +6,9 @@ from __future__ import unicode_literals
 import os
 import unittest
 import codecs
+import warnings
 
+import bibtexparser
 from bibtexparser.bparser import BibTexParser
 from bibtexparser.bibdatabase import (COMMON_STRINGS, BibDataStringExpression)
 from bibtexparser.customization import *
@@ -649,6 +651,60 @@ class TestBibtexParserList(unittest.TestCase):
         self.assertEqual(bib.preambles, [])
         self.assertEqual(bib.strings, {})
         self.assertEqual(bib.comments, ['@BOOK{, title = "bla"}'])
+
+    def test_parsing_just_once_not_raising_warnings_with_default_settings(self):
+        parser = BibTexParser()
+
+        with open('bibtexparser/tests/data/article_comma_normal_single.bib',
+                  'r', encoding='utf-8') as bibfile:
+            with warnings.catch_warnings(record=True) as warning:
+                warnings.simplefilter("always")
+                bibtexparser.load(bibfile, parser)
+                assert len(warning) == 0
+
+    def test_parsing_twice_raise_warnings_with_default_settings(self):
+        parser = BibTexParser()
+
+        with open('bibtexparser/tests/data/article_comma_normal_single.bib',
+                  'r', encoding='utf-8') as bibfile_first, \
+            open('bibtexparser/tests/data/article_comma_normal_multiple.bib', 'r', encoding='utf-8') \
+                as bibfile_second:
+            with warnings.catch_warnings(record=True) as warning:
+                warnings.simplefilter("always")
+                bibtexparser.load(bibfile_first, parser)
+                bibtexparser.load(bibfile_second, parser)
+                assert len(warning) != 0
+
+    def test_parsing_three_times_raise_warnings_only_once_with_default_settings(self):
+        parser = BibTexParser()
+
+        with open('bibtexparser/tests/data/article_comma_normal_single.bib',
+                  'r', encoding='utf-8') as bibfile_first, \
+            open('bibtexparser/tests/data/article_comma_normal_multiple.bib', 'r', encoding='utf-8') \
+                as bibfile_second, \
+                open('bibtexparser/tests/data/article.bib', 'r', encoding='utf-8') as bibfile_third:
+            with warnings.catch_warnings(record=True) as warning:
+                warnings.simplefilter("always")
+                bibtexparser.load(bibfile_first, parser)
+                bibtexparser.load(bibfile_second, parser)
+                bibtexparser.load(bibfile_third, parser)
+                assert len(warning) == 1
+
+    def test_parsing_three_times_not_raising_a_warning_if_expect_multiple_parse_is_true(self):
+        parser = BibTexParser()
+        parser.expect_multiple_parse = True
+
+        with open('bibtexparser/tests/data/article_comma_normal_single.bib',
+                  'r', encoding='utf-8') as bibfile_first, \
+            open('bibtexparser/tests/data/article_comma_normal_multiple.bib', 'r', encoding='utf-8') \
+                as bibfile_second, \
+                open('bibtexparser/tests/data/article.bib', 'r', encoding='utf-8') as bibfile_third:
+            with warnings.catch_warnings(record=True) as warning:
+                warnings.simplefilter("always")
+                bibtexparser.load(bibfile_first, parser)
+                bibtexparser.load(bibfile_second, parser)
+                bibtexparser.load(bibfile_third, parser)
+                assert len(warning) == 0
 
 
 if __name__ == '__main__':
