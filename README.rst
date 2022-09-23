@@ -21,7 +21,6 @@ Upgrading
 ---------
 
 Please, read the changelog before upgrading regarding API modifications.
-Prior version 1.0, we do not hesitate to modify the API to get the best API from your feedbacks.
 
 License
 -------
@@ -40,4 +39,6 @@ The original source code was part of bibserver from `OKFN <http://github.com/okf
 
 The parser evolved to a new core based on pyparsing.
 
-News (July 7h, 2022): This library has a new maintainer (`@MiWeiss <https://github.com/MiWeiss>`_). No large changes are planned for the immediate future; the immediate goal is to reduce the backlog of open issues and PRs. 
+News (July 7h, 2022): This library has a new maintainer (`@MiWeiss <https://github.com/MiWeiss>`_).
+Versions 1.x will be mostly bugfixes and maintenance.
+In the meantime, we are working on a new version 2.0.0 which will be a complete rewrite of the library.

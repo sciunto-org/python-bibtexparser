@@ -24,7 +24,7 @@ setup(
     url="https://github.com/sciunto-org/python-bibtexparser",
     author="Francois Boulogne and other contributors",
     license="LGPLv3 or BSD",
-    author_email="devel@sciunto.org",
+    author_email="code@mweiss.ch",
     description="Bibtex parser for python 3",
     long_description_content_type="text/x-rst",
     long_description=load_readme(),
