@@ -94,8 +94,8 @@ class BibTexWriter(object):
         self.indent = ' '
         #: Align values. Aligns all values according to a given length by padding with single spaces.
         #    If align_values is true, the maximum number of characters used in any field name is used as the length.
-        #    If align_values is a number, the greater of the specified value or the maximum number of characters used
-        #    in any field name is used as the length.
+        #    If align_values is a number, the greater of the specified value or the number of characters used in the
+        #    field name is used as the length.
         #    Default: False
         self.align_values: Union[int, bool] = False
         #: Align multi-line values. Formats a multi-line value such that the text is aligned exactly
@@ -149,13 +149,13 @@ class BibTexWriter(object):
         else:
             entries = bib_database.entries
 
-        if self.align_values is True or type(self.align_values) == int:
+        if self.align_values is True:
             # determine maximum field width to be used
             widths = [len(ele) for entry in entries for ele in entry if ele not in ENTRY_TO_BIBTEX_IGNORE_ENTRIES]
-            if type(self.align_values) == int:
-                # specified width should be taken into account
-                widths.append(self.align_values)
             self._max_field_width = max(widths)
+        elif type(self.align_values) == int:
+            # Use specified value
+            self._max_field_width = self.align_values
 
         return self.entry_separator.join(self._entry_to_bibtex(entry) for entry in entries)
 
@@ -175,6 +175,7 @@ class BibTexWriter(object):
             field_fmt = u",\n{indent}{field:<{field_max_w}} = {value}"
         # Write field = value lines
         for field in [i for i in display_order if i not in ENTRY_TO_BIBTEX_IGNORE_ENTRIES]:
+            max_field_width = max(len(field), self._max_field_width)
             try:
                 value = _str_or_expr_to_bibtex(entry[field])
 
@@ -185,12 +186,7 @@ class BibTexWriter(object):
                     #                      World}
                     # Calculate the indent of "World":
                     # Left of field (whitespaces before e.g. 'title')
-                    value_indent = len(self.indent)
-                    # Field itself (e.g. len('title'))
-                    if self._max_field_width > 0:
-                        value_indent += self._max_field_width
-                    else:
-                        value_indent += len(field)
+                    value_indent = len(self.indent) + max_field_width
                     # Right of field ' = ' (<- 3 chars) + '{' (<- 1 char)
                     value_indent += 3 + 1
 
@@ -199,7 +195,7 @@ class BibTexWriter(object):
                 bibtex += field_fmt.format(
                     indent=self.indent,
                     field=field,
-                    field_max_w=self._max_field_width,
+                    field_max_w=max_field_width,
                     value=value)
             except TypeError:
                 raise TypeError(u"The field %s in entry %s must be a string"

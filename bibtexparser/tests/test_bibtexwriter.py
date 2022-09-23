@@ -143,31 +143,30 @@ class TestBibTexWriter(unittest.TestCase):
                                  'ENTRYTYPE': 'book',
                                  'author': 'test',
                                  'thisisaverylongkey': 'longvalue'}]
-        # Behaviour should be equal to align_values = True:
-        # - Negative values have no effect
-        # - A value <= length of the maximum field name has no effect
-        for align_values in range(-2, len('thisisaverylongkey') + 1):
-            writer = BibTexWriter()
-            writer.align_values = align_values
-            result = bibtexparser.dumps(bib_database, writer)
-            expected = \
-"""@book{abc123,
- author             = {test},
- thisisaverylongkey = {longvalue}
-}
-"""
-            self.assertEqual(result, expected, align_values)
-
+        # Negative value should have no effect
         writer = BibTexWriter()
-        writer.align_values = len('thisisaverylongkey') + 5
+        writer.align_values = -20
         result = bibtexparser.dumps(bib_database, writer)
         expected = \
 """@book{abc123,
- author                  = {test},
- thisisaverylongkey      = {longvalue}
+ author = {test},
+ thisisaverylongkey = {longvalue}
 }
 """
         self.assertEqual(result, expected)
+
+        # Value smaller than longest field name should only impact the "short" field names
+        writer = BibTexWriter()
+        writer.align_values = 10
+        result = bibtexparser.dumps(bib_database, writer)
+        expected = \
+"""@book{abc123,
+ author     = {test},
+ thisisaverylongkey = {longvalue}
+}
+"""
+        self.assertEqual(result, expected)
+
 
         with open('bibtexparser/tests/data/multiple_entries_and_comments.bib') as bibtex_file:
             bib_database = bibtexparser.load(bibtex_file)
