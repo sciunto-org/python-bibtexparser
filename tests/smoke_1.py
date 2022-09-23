@@ -1,5 +1,13 @@
+from bibtexparser.splitter import Splitter
+
+example_bibstr = """
+
+@string{goossens = "Goossens, Michel"}
+
+This line is an implicit comment.
+
 @article{FuMetalhalideperovskite2019,
-    author = {Yongping Fu and Haiming Zhu and Jie Chen and Matthew P. Hautzinger and X.-Y. Zhu and Song Jin},
+    author = "Yongping Fu and Haiming Zhu and Jie Chen and Matthew P. Hautzinger and X.-Y. Zhu and Song Jin",
     doi = {10.1038/s41578-019-0080-9},
     journal = {Nature Reviews Materials},
     month = {feb},
@@ -12,6 +20,13 @@
     year = {2019}
 }
 
+@comment{
+    This is a comment.
+    Spanning over two lines.
+}
+
+@preamble{e = mc^2}
+
 @article{SunEnablingSiliconSolar2014,
     author = {Ke Sun and Shaohua Shen and Yongqi Liang and Paul E. Burrows and Samuel S. Mao and Deli Wang},
     doi = {10.1021/cr300459q},
@@ -20,11 +35,14 @@
     number = {17},
     pages = {8662-8719},
     publisher = {American Chemical Society ({ACS})},
-    title = {Enabling Silicon for Solar-Fuel Production},
+    title = "Enabling Silicon for Solar-Fuel Production,
     url = {http://pubs.acs.org/doi/10.1021/cr300459q},
     volume = {114},
     year = {2014}
 }
+
+
+@string{mittelbach="Mittelbach, Franck"}
 
 @article{LiuPhotocatalytichydrogenproduction2016,
     author = {Maochang Liu and Yubin Chen and Jinzhan Su and Jinwen Shi and Xixi Wang and Liejin Guo},
@@ -40,3 +58,16 @@
     volume = {1},
     year = {2016}
 }
+
+
+@Comment{This is another comment}
+
+"""
+
+
+# Using pytest
+def test_smoke():
+    splitter = Splitter(example_bibstr)
+    library = splitter.split()
+    print(library)
+    # TODO make this an actual test

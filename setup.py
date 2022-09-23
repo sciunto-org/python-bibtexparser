@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# TODO This needs to be replaced!
+
 try:
     from setuptools import setup
 except ImportError as ex:

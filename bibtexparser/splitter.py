@@ -1,0 +1,374 @@
+import logging
+import re
+from typing import Dict, List, Optional, Tuple
+
+from bibtexparser.exceptions import (
+    BlockAbortedException,
+    ParserStateException,
+    RegexMismatchException,
+)
+from bibtexparser.library import Library
+from bibtexparser.model import (
+    Entry,
+    ExplicitComment,
+    Field,
+    ImplicitComment,
+    ParsingFailedBlock,
+    Preamble,
+    String,
+)
+
+
+class Splitter:
+    def __init__(self, bibstr: str):
+        self.bibstr = bibstr
+
+        self._markiter = None
+        self._unaccepted_mark = None
+
+        self._current_line = 0
+        self._reset_block_status(current_char_index=0)
+
+    def _reset_block_status(self, current_char_index):
+        self._open_brackets = 0
+        self._is_quote_open = False
+        self._expected_next: Optional[List[str]] = None
+
+        # By default, we assume that an implicit comment is started
+        #   at the beginning of the file and after each @{...} block.
+        #   We then ignore empty implicit comments.
+        self._implicit_comment_start_line = (
+            self._current_line
+        )  # TODO maybe we have to pass this as arg as well?
+        self._implicit_comment_start: Optional[int] = current_char_index
+
+    def _end_implicit_comment(self, end_char_index) -> Optional[ImplicitComment]:
+        if self._implicit_comment_start is None:
+            return  # No implicit comment started
+
+        comment = self.bibstr[self._implicit_comment_start: end_char_index].strip()
+        if len(comment) > 0:
+            return ImplicitComment(
+                start_line=self._implicit_comment_start_line,
+                raw=self.bibstr[self._implicit_comment_start: end_char_index],
+                comment=comment,
+            )
+        else:
+            return None
+
+    def _next_mark(self):
+        # Check if there is a mark that was previously not consumed
+        #   and return it if so
+        if self._unaccepted_mark is not None:
+            m = self._unaccepted_mark
+            self._unaccepted_mark = None
+            self._current_char_index = m.start()
+            return m
+
+        # Get next mark from iterator
+        m = next(self._markiter, None)
+        if m is not None:
+            self._current_char_index = m.start()
+            if m.group(0) == "\n":
+                self._current_line += 1
+                return self._next_mark()
+        else:
+            # Reached end of file
+            self._current_char_index = len(self.bibstr) - 1
+        return m
+
+    def _move_to_closed_bracket(self) -> int:
+        """Index of the curly bracket closing a just opened one."""
+        num_additional_brackets = 0
+        while True:
+            m = self._next_mark()
+            if m is None:
+                raise BlockAbortedException(
+                    abort_reason="No closing bracket found.", end_index=None
+                )
+
+            if m.group(0) == "{":
+                num_additional_brackets += 1
+            elif m.group(0) == "}":
+                if num_additional_brackets == 0:
+                    return m.start()
+                else:
+                    num_additional_brackets -= 1
+            elif m.group(0).startswith("@"):
+                self._unaccepted_mark = m
+                raise BlockAbortedException(
+                    abort_reason=f"Unexpected block start: `{m.group(0)}`. "
+                                 f"Was still looking for closing bracket",
+                    end_index=m.start(),
+                )
+
+    def _move_to_end_of_double_quoted_string(self) -> int:
+        """Index of the closing double quote."""
+        while True:
+            m = self._next_mark()
+            if m is None:
+                raise BlockAbortedException(
+                    abort_reason="No closing double quote found.", end_index=None
+                )
+
+            if m.group(0) == '"':
+                return m.start()
+            elif m.group(0).startswith("@"):
+                self._unaccepted_mark = m
+                raise BlockAbortedException(
+                    abort_reason=f"Unexpected block start: `{m.group(0)}`. "
+                                 f'Was still looking for field-value closing `"`',
+                    end_index=m.start(),
+                )
+
+    def _move_to_end_of_entry(
+            self, first_key_start: int
+    ) -> Tuple[Dict[str, Field], int]:
+        """Move to the end of the entry and return the fields and the end index."""
+        result = dict()
+
+        key_start = first_key_start
+        while True:
+            start_line = self._current_line
+            equals_mark = self._next_mark()
+            assert (
+                    equals_mark is not None
+            ), "Parsing Error, file ended unexpectedly"  # TODO Fail gently
+            if equals_mark.group(0) == "}":
+                # End of entry
+                return result, equals_mark.end()
+
+            if equals_mark.group(0) != "=":
+                raise BlockAbortedException(
+                    abort_reason="Expected a `=` after entry key, "
+                                 f"but found `{equals_mark.group(0)}`.",
+                    end_index=equals_mark.start(),
+                )
+            key_end = equals_mark.start()
+            value_start = equals_mark.end()
+            value_start_mark = self._next_mark()
+            if value_start_mark is None:
+                raise BlockAbortedException(
+                    abort_reason="Unexpected end of file.", end_index=None
+                )
+            if value_start_mark.group(0) == "{":
+                value_end = self._move_to_closed_bracket() + 1
+            elif value_start_mark.group(0) == '"':
+                value_end = self._move_to_end_of_double_quoted_string() + 1
+            else:
+                # e.g.  String reference. Ended by the observed mark
+                #       (as there is not start mark).
+                #       Should be either a comma or a "}"
+                value_start = equals_mark.end()
+                value_end = value_start_mark.start()
+                # We expect a comma (after a closed field-value), or at the end of entry, a closing bracket
+                assert value_start_mark.group(0) in [
+                    ",",
+                    "}",
+                ], "Parsing Error, expected comma or closing bracket"  # TODO Fail gently
+
+            key = self.bibstr[key_start:key_end].strip()
+            value = self.bibstr[value_start:value_end].strip()
+            result[key] = Field(start_line=start_line, key=key, value=value)
+
+            # If next mark is a comma, continue
+            after_field_mark = self._next_mark()
+            if after_field_mark is None:
+                raise BlockAbortedException(
+                    abort_reason="Unexpected end of file.", end_index=None
+                )
+            if after_field_mark.group(0) == ",":
+                key_start = after_field_mark.end()
+            elif after_field_mark.group(0) == "}":
+                # If next mark is a closing bracket, put it back (will return in next loop iteration)
+                self._unaccepted_mark = after_field_mark
+                continue
+            else:
+                raise BlockAbortedException(
+                    abort_reason="Expected either a `,` or `}` after a closed entry field value, "
+                                 f"but found a {after_field_mark.group(0)} before.",
+                    end_index=after_field_mark.start(),
+                )
+
+    def split(self, library: Optional[Library] = None) -> Library:
+        marks = [
+            e
+            for e in re.finditer(
+                r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*(?={)", self.bibstr, re.MULTILINE
+            )
+        ]
+
+        if library is None:
+            library = Library()
+        else:
+            logging.info("Adding blocks to existing library.")
+
+        self._markiter = iter(marks)
+
+        while True:
+            m = self._next_mark()
+            if m is None:
+                break
+
+            m_val = m.group(0).lower()
+
+            if m_val.startswith("@"):
+                # Clean up previous block implicit_comment
+                implicit_comment = self._end_implicit_comment(m.start())
+                if implicit_comment is not None:
+                    library.add(implicit_comment)
+                self._implicit_comment_start = None
+
+                start_line = self._current_line
+                try:
+                    # Start new block parsing
+                    if m_val.startswith("@comment"):
+                        library.add(self._handle_explicit_comment())
+                    elif m_val.startswith("@preamble"):
+                        library.add(self._handle_preamble())
+                    elif m_val.startswith("@string"):
+                        library.add(self._handle_string(m))
+                    else:
+                        library.add(self._handle_entry(m, m_val))
+
+                except BlockAbortedException as e:
+                    logging.warning(
+                        f"Parsing of `{m_val}` block (line {start_line}) aborted on line {self._current_line}  "
+                        f"due to syntactical error in bibtex:\n {e.abort_reason}"
+                    )
+                    logging.info(
+                        "We will try to continue parsing, but this might lead to unexpected results."
+                        "The failed block will be stored in the `failed_blocks`of the library."
+                    )
+                    library.add(
+                        ParsingFailedBlock(
+                            start_line=start_line,
+                            raw=self.bibstr[m.start(): e.end_index],
+                            error=e,
+                        )
+                    )
+
+                except ParserStateException as e:
+                    logging.error(e.message)
+                    raise e  # TODO consider allowing to continue
+                except Exception as e:
+                    logging.error(
+                        f"Unexpected exception while parsing `{m_val}` block (line {start_line})"
+                    )
+                    raise e  # TODO consider allowing to continue
+
+                self._reset_block_status(
+                    current_char_index=self._current_char_index + 1
+                )
+            else:
+                # Part of implicit comment
+                continue
+
+        return library
+
+    def _handle_explicit_comment(self) -> ExplicitComment:
+        """Handle explicit comment block. Return end index"""
+        start_index = self._current_char_index
+        start_line = self._current_line
+        start_bracket_mark = self._next_mark()
+        if start_bracket_mark.group(0) != "{":
+            self._unaccepted_mark = start_bracket_mark
+            # Note: The following should never happen, as we check for the "{" in the regex
+            raise RegexMismatchException(
+                first_match="@comment{",
+                expected_match="{",
+                second_match=start_bracket_mark.group(0),
+            )
+        end_bracket_index = self._move_to_closed_bracket()
+        comment_str = self.bibstr[start_bracket_mark.end(): end_bracket_index]
+        return ExplicitComment(
+            start_line=start_line,
+            comment=comment_str,
+            raw=self.bibstr[start_index: end_bracket_index + 1],
+        )
+
+    def _handle_entry(self, m, m_val) -> Entry:
+        """Handle entry block. Return end index"""
+        start_line = self._current_line
+        entry_type = m_val[1:]
+        start_bracket_mark = self._next_mark()
+        if start_bracket_mark.group(0) != "{":
+            self._unaccepted_mark = start_bracket_mark
+            # Note: The following should never happen, as we check for the "{" in the regex
+            raise ParserStateException(
+                message="matched a regex that should end with `{`, "
+                        "e.g. `@article{`, "
+                        "but no closing bracket was found."
+            )
+        comma_mark = self._next_mark()
+        if comma_mark.group(0) != ",":
+            self._unaccepted_mark = comma_mark
+            raise BlockAbortedException(
+                abort_reason="Expected comma after entry key,"
+                             f" but found {comma_mark.group(0)}",
+                end_index=comma_mark.end(),
+            )
+        self._open_brackets += 1
+        key = self.bibstr[m.end() + 1: comma_mark.start()].strip()
+        fields, end_index = self._move_to_end_of_entry(comma_mark.end())
+
+        return Entry(
+            start_line=start_line,
+            entry_type=entry_type,
+            key=key,
+            fields=fields,  # TODO Fields instances indestad of dict
+            raw=self.bibstr[m.start(): end_index + 1],
+        )
+
+    def _handle_string(self, m) -> String:
+        """Handle string block. Return end index"""
+        # Get next mark, which should be an equals sign
+        start_i = self._current_char_index
+        start_line = self._current_line
+        start_bracket_mark = self._next_mark()
+        if start_bracket_mark.group(0) != "{":
+            self._unaccepted_mark = start_bracket_mark
+            # Note: The following should never happen, as we check for the "{" in the regex
+            raise ParserStateException(
+                message="matched a string def regex (`@string{`) that "
+                        "should end with `{`, but no closing bracket was found."
+            )
+        equals_mark = self._next_mark()
+        if equals_mark.group(0) != "=":
+            self._unaccepted_mark = equals_mark
+            raise BlockAbortedException(
+                abort_reason="Expected equals sign after field key,"
+                             f" but found {equals_mark.group(0)}",
+                end_index=equals_mark.end(),
+            )
+        key = self.bibstr[m.end(): equals_mark.start()].strip()
+        value_start = equals_mark.end()
+        end_i = self._move_to_closed_bracket()
+        value = self.bibstr[value_start:end_i]
+        return String(
+            start_line=start_line,
+            key=key,
+            value=value,
+            raw=self.bibstr[start_i: end_i + 1],
+        )
+
+    def _handle_preamble(self) -> Preamble:
+        """Handle preamble block. Return end index"""
+        start_i = self._current_char_index
+        start_line = self._current_line
+        start_bracket_mark = self._next_mark()
+        if start_bracket_mark.group(0) != "{":
+            self._unaccepted_mark = start_bracket_mark
+            # Note: The following should never happen, as we check for the "{" in the regex
+            raise ParserStateException(
+                message="matched a preamble def regex (`@preamble{`) that "
+                        "should end with `{`, but no closing bracket was found."
+            )
+
+        end_bracket_index = self._move_to_closed_bracket()
+        preamble = self.bibstr[start_bracket_mark.end(): end_bracket_index]
+        return Preamble(
+            start_line=start_line,
+            value=preamble,
+            raw=self.bibstr[start_i: end_bracket_index + 1],
+        )
