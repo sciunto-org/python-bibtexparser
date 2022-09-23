@@ -3,7 +3,8 @@ How to release
 
 * Update CHANGELOG
 * Update version in __init__.py
-* Commit and open PR on Github to see that all tests pass
+* Commit and open PR on Github to see that all tests pass,
+  and then merge the PR.
 * Check out master locally
 * Build wheel
     python setup.py sdist upload
@@ -13,6 +14,6 @@ How to release
     twine upload --repository testpypi dist/*
 * Upload to pypi
     twine check dist/*
-* Create release on Github and Merge PR
+* Create release on Github
 * Verify docs are automatically updated
 
