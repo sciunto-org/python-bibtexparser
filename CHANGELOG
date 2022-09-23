@@ -1,3 +1,18 @@
+v1.4.0
+======
+
+Breaking Changes
+----------------
+* Using common strings in string interpolation is now the default (#311 by @MiWeiss).
+  See the PR for more details, and how to fall back to old behavior.
+
+New Features / Improvements
+---------------------------
+* Add option to adjust alignment of text of multi-line values. (#290 by @michaelfruth)
+* Raise warning if parser is used multiple times (#312 by @mrn97),
+  which leads to a merged library. Set `parser.expect_multiple_parse = True` to disable the warning.
+* Allow preservation of existing order of entry fields in writer (#317 by @michaelfruth)
+
 v1.3.0
 ======
 
