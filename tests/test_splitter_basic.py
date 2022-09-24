@@ -1,9 +1,11 @@
-from typing import Dict
+"""Basic splitter tests.
+
+These tests are not exhaustive, but they should cover the most common cases."""
+from typing import Dict, Any
 
 import pytest as pytest
 
 from bibtexparser.library import Library
-from bibtexparser.model import ImplicitComment, ExplicitComment
 from bibtexparser.splitter import Splitter
 
 example_bibstr = """
@@ -23,7 +25,7 @@ This line is an implicit comment.
     title = {Metal halide perovskite nanostructures for optoelectronic applications and the study of physical properties},
     url = {https://www.nature.com/articles/s41578-019-0080-9},
     volume = {4},
-    year = 2019
+    year = {2019}
 }
 
 @comment{
@@ -50,7 +52,7 @@ This line is an implicit comment.
 
 @string{mittelbach="Mittelbach, Franck"}
 
-@article{LiuPhotocatalytichydrogenproduction2016,
+@inproceedings{LiuPhotocatalytichydrogenproduction2016,
     author = {Maochang Liu and Yubin Chen and Jinzhan Su and Jinwen Shi and Xixi Wang and Liejin Guo},
     doi = {10.1038/nenergy.2016.151},
     impactfactor = {54.000},
@@ -73,6 +75,78 @@ This line is an implicit comment.
 
 def _split() -> Library:
     return Splitter(example_bibstr).split()
+
+
+@pytest.mark.parametrize("expected", [
+    # First valid entry
+    {
+        'key': 'FuMetalhalideperovskite2019',
+        'type': 'article',
+        'start_line': 6,
+        'overall_position': 2,
+        'entries_position': 0,
+        'fields': {
+            'author': '"Yongping Fu and Haiming Zhu and Jie Chen '
+                      'and Matthew P. Hautzinger and X.-Y. Zhu '
+                      'and Song Jin"',
+            'doi': '{10.1038/s41578-019-0080-9}',
+            'journal': '{Nature Reviews Materials}',
+            'month': '{feb}',
+            'number': '{3}',
+            'pages': '{169-188}',
+            'publisher': '{Springer Science and Business Media {LLC}}',
+            'title': '{Metal halide perovskite nanostructures for '            
+                        'optoelectronic applications and the study of ' 
+                        'physical properties}',
+            'url': '{https://www.nature.com/articles/s41578-019-0080-9}',
+            'volume': '{4}',
+            'year': '{2019}'
+        }
+    },
+    # Second valid entry
+    {
+        'key': 'LiuPhotocatalytichydrogenproduction2016',
+        'type': 'inproceedings',
+        'start_line': 44,
+        'overall_position': 7,
+        'entries_position': 1,
+        'fields': {
+            'author': '{Maochang Liu and Yubin Chen and Jinzhan Su '
+                        'and Jinwen Shi and Xixi Wang and Liejin Guo}',
+            'doi': '{10.1038/nenergy.2016.151}',
+            'impactfactor': '{54.000}',
+            'journal': '{Nature Energy}',
+            'month': '{sep}',
+            'number': '{11}',
+            'pages': '{16151}',
+            'publisher': '{Springer Science and Business Media {LLC}}',
+            'title': '{Photocatalytic hydrogen production using twinned '
+                        'nanocrystals and an unanchored {NiSx} co-catalyst}',
+            'url': '{http://www.nature.com/articles/nenergy2016151}',
+            'volume': '{1}',
+            'year': '{2016}'
+        }
+    },
+])
+def test_entry(expected: Dict[str, Any]):
+    library = _split()
+    assert len(library.entries) == 2
+    entry_by_key = library.entries_dict
+    assert len(entry_by_key) == 2
+
+    entry = entry_by_key[expected['key']]
+    assert entry.key == expected['key']
+    assert entry.entry_type == expected['type']
+    assert len(entry.fields) == len(expected['fields'])
+    for field_name, field_value in expected['fields'].items():
+        field = entry.fields[field_name]
+        assert field.key == field_name
+        assert field.value == field_value
+    assert entry.start_line == expected['start_line']
+    # Assert overall position
+    assert library.blocks.index(entry) == expected['overall_position']
+    # Assert position in entries
+    assert library.entries.index(entry) == expected['entries_position']
 
 
 @pytest.mark.parametrize("expected", [
@@ -146,3 +220,12 @@ def test_comments(expected: Dict[str, any]) -> None:
     assert library.comments[expected['comment_position']] == tested_comment
 
 
+def test_failed_block():
+    library = _split()
+    assert len(library.failed_blocks) == 1
+    failed_block = library.failed_blocks[0]
+
+    expected_raw = "\n".join(example_bibstr.splitlines()[27:40])
+    assert failed_block.raw.strip() == expected_raw.strip()
+    assert failed_block.start_line == 27
+    assert "Was still looking for field-value closing `\"`" in failed_block.error.abort_reason

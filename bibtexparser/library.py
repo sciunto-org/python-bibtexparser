@@ -8,9 +8,11 @@ from bibtexparser.model import (
     ExplicitComment,
     ImplicitComment,
     Preamble,
-    String,
+    String, ParsingFailedBlock,
 )
 
+
+# TODO Use functools.lru_cache for library properties (which create lists when called)
 
 class Library:
     def __init__(self, blocks: Union[List[Block], None] = None):
@@ -137,6 +139,10 @@ class Library:
         return self._blocks.copy()
 
     @property
+    def failed_blocks(self) -> List[ParsingFailedBlock]:
+        return [b for b in self._blocks if isinstance(b, ParsingFailedBlock)]
+
+    @property
     def strings(self) -> List[String]:
         return list(self._strings_by_key.values())
 
@@ -145,8 +151,8 @@ class Library:
         return self._strings_by_key.copy()
 
     @property
-    def entries(self) -> ValuesView[Entry]:
-        return self._entries_by_key.values()
+    def entries(self) -> List[Entry]:
+        return list(self._entries_by_key.values())
 
     @property
     def entries_dict(self) -> Dict[str, Entry]:
@@ -178,5 +184,5 @@ class Library:
         if isinstance(middlewares, BlockMiddleware):
             middlewares = [middlewares]
         for block_middleware in middlewares:
-            transformed_blocks = [block_middleware.transform(b) for b in self._blocks]
+            transformed_blocks = [block_middleware.transform(b, self) for b in self._blocks]
         return Library(transformed_blocks)
