@@ -46,17 +46,30 @@ class Splitter:
         if self._implicit_comment_start is None:
             return  # No implicit comment started
 
-        comment = self.bibstr[self._implicit_comment_start: end_char_index].strip()
+        comment = self.bibstr[self._implicit_comment_start: end_char_index]
+
+        # Clear leading and trailing empty lines,
+        #   and count how many lines were removed, to adapt start_line below
+        leading_empty_lines = 0
+        i = 0
+        for i, char in enumerate(comment):
+            if char == "\n":
+                leading_empty_lines += 1
+            elif not char.isspace():
+                break
+
+        comment = comment[i:].rstrip()
+
         if len(comment) > 0:
             return ImplicitComment(
-                start_line=self._implicit_comment_start_line,
-                raw=self.bibstr[self._implicit_comment_start: end_char_index],
+                start_line=self._implicit_comment_start_line + leading_empty_lines,
+                raw=comment,
                 comment=comment,
             )
         else:
             return None
 
-    def _next_mark(self):
+    def _next_mark(self) -> Optional[re.Match]:
         # Check if there is a mark that was previously not consumed
         #   and return it if so
         if self._unaccepted_mark is not None:
@@ -99,7 +112,7 @@ class Splitter:
                 raise BlockAbortedException(
                     abort_reason=f"Unexpected block start: `{m.group(0)}`. "
                                  f"Was still looking for closing bracket",
-                    end_index=m.start(),
+                    end_index=m.start() - 1,
                 )
 
     def _move_to_end_of_double_quoted_string(self) -> int:
@@ -118,7 +131,7 @@ class Splitter:
                 raise BlockAbortedException(
                     abort_reason=f"Unexpected block start: `{m.group(0)}`. "
                                  f'Was still looking for field-value closing `"`',
-                    end_index=m.start(),
+                    end_index=m.start() - 1,
                 )
 
     def _move_to_end_of_entry(
@@ -184,6 +197,7 @@ class Splitter:
                 self._unaccepted_mark = after_field_mark
                 continue
             else:
+                self._unaccepted_mark = after_field_mark
                 raise BlockAbortedException(
                     abort_reason="Expected either a `,` or `}` after a closed entry field value, "
                                  f"but found a {after_field_mark.group(0)} before.",
@@ -280,7 +294,7 @@ class Splitter:
                 second_match=start_bracket_mark.group(0),
             )
         end_bracket_index = self._move_to_closed_bracket()
-        comment_str = self.bibstr[start_bracket_mark.end(): end_bracket_index]
+        comment_str = self.bibstr[start_bracket_mark.end(): end_bracket_index].strip()
         return ExplicitComment(
             start_line=start_line,
             comment=comment_str,
@@ -341,10 +355,10 @@ class Splitter:
                              f" but found {equals_mark.group(0)}",
                 end_index=equals_mark.end(),
             )
-        key = self.bibstr[m.end(): equals_mark.start()].strip()
+        key = self.bibstr[m.end() + 1: equals_mark.start()].strip()
         value_start = equals_mark.end()
         end_i = self._move_to_closed_bracket()
-        value = self.bibstr[value_start:end_i]
+        value = self.bibstr[value_start:end_i].strip()
         return String(
             start_line=start_line,
             key=key,
