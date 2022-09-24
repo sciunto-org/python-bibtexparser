@@ -197,6 +197,7 @@ class Splitter:
                 self._unaccepted_mark = after_field_mark
                 continue
             else:
+                self._unaccepted_mark = after_field_mark
                 raise BlockAbortedException(
                     abort_reason="Expected either a `,` or `}` after a closed entry field value, "
                                  f"but found a {after_field_mark.group(0)} before.",
@@ -293,7 +294,7 @@ class Splitter:
                 second_match=start_bracket_mark.group(0),
             )
         end_bracket_index = self._move_to_closed_bracket()
-        comment_str = self.bibstr[start_bracket_mark.end(): end_bracket_index]
+        comment_str = self.bibstr[start_bracket_mark.end(): end_bracket_index].strip()
         return ExplicitComment(
             start_line=start_line,
             comment=comment_str,

@@ -116,15 +116,15 @@ def test_preamble():
     },
     # The second (explicit comment)
     {
-        'position': 3, 'comment_position': 1, 'type': 'ImplicitComment',
+        'position': 3, 'comment_position': 1, 'type': 'ExplicitComment',
         'raw': '@comment{\n    This is a comment.\n    Spanning over two lines.\n}',
-        'line': 21, 'comment': 'This is a comment.\n    Spanning over two lines.\n'
+        'line': 20, 'comment': 'This is a comment.\n    Spanning over two lines.'
     },
     # The third (explicit comment)
     {
         'position': 8, 'comment_position': 2, 'type': 'ExplicitComment',
         'raw': '@Comment{This is another comment}',
-        'line': 61, 'comment': 'This is another comment'
+        'line': 60, 'comment': 'This is another comment'
     },
 ])
 def test_comments(expected: Dict[str, any]) -> None:
