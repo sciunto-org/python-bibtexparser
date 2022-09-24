@@ -8,9 +8,11 @@ from bibtexparser.model import (
     ExplicitComment,
     ImplicitComment,
     Preamble,
-    String,
+    String, ParsingFailedBlock,
 )
 
+
+# TODO Use functools.lru_cache for library properties (which create lists when called)
 
 class Library:
     def __init__(self, blocks: Union[List[Block], None] = None):
@@ -50,7 +52,7 @@ class Library:
                 del self._strings_by_key[block.key]
 
     def replace(
-        self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True
+            self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True
     ):
         """Replace a block with another block, at the same position.
 
@@ -70,9 +72,9 @@ class Library:
         block_after_add = self._add_to_dicts(new_block)
 
         if (
-            new_block is not block_after_add
-            and isinstance(new_block, DuplicateKeyBlock)
-            and fail_on_duplicate_key
+                new_block is not block_after_add
+                and isinstance(new_block, DuplicateKeyBlock)
+                and fail_on_duplicate_key
         ):
             # Revert changes to old_block
             #   Don't fail on duplicate key, as this would lead to an infinite recursion
@@ -83,7 +85,7 @@ class Library:
 
     @staticmethod
     def _cast_to_duplicate(
-        prev_block_with_same_key: Union[Entry, String], duplicate: Union[Entry, String]
+            prev_block_with_same_key: Union[Entry, String], duplicate: Union[Entry, String]
     ):
         assert isinstance(prev_block_with_same_key, type(duplicate)) or isinstance(
             duplicate, type(prev_block_with_same_key)
@@ -95,7 +97,7 @@ class Library:
         )
 
         assert (
-            prev_block_with_same_key.key == duplicate.key
+                prev_block_with_same_key.key == duplicate.key
         ), "Internal BibtexParser Error. Duplicate blocks have different keys."
 
         return DuplicateKeyBlock(
@@ -137,16 +139,20 @@ class Library:
         return self._blocks.copy()
 
     @property
-    def strings(self) -> ValuesView[String]:
-        return self._strings_by_key.values()
+    def failed_blocks(self) -> List[ParsingFailedBlock]:
+        return [b for b in self._blocks if isinstance(b, ParsingFailedBlock)]
+
+    @property
+    def strings(self) -> List[String]:
+        return list(self._strings_by_key.values())
 
     @property
     def strings_dict(self) -> Dict[str, String]:
         return self._strings_by_key.copy()
 
     @property
-    def entries(self) -> ValuesView[Entry]:
-        return self._entries_by_key.values()
+    def entries(self) -> List[Entry]:
+        return list(self._entries_by_key.values())
 
     @property
     def entries_dict(self) -> Dict[str, Entry]:
@@ -165,7 +171,7 @@ class Library:
         ]
 
     def apply_middleware(
-        self, middlewares: Union[BlockMiddleware, Collection[BlockMiddleware]]
+            self, middlewares: Union[BlockMiddleware, Collection[BlockMiddleware]]
     ) -> "Library":
         """Apply a middleware to all blocks in the library.
 
@@ -178,5 +184,5 @@ class Library:
         if isinstance(middlewares, BlockMiddleware):
             middlewares = [middlewares]
         for block_middleware in middlewares:
-            transformed_blocks = [block_middleware.transform(b) for b in self._blocks]
+            transformed_blocks = [block_middleware.transform(b, self) for b in self._blocks]
         return Library(transformed_blocks)
