@@ -1,6 +1,6 @@
-from typing import Collection, Dict, List, Union, ValuesView
+from typing import Collection, Dict, List, Union
 
-from bibtexparser.middleware import BlockMiddleware
+from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import (
     Block,
     DuplicateKeyBlock,
@@ -184,5 +184,5 @@ class Library:
         if isinstance(middlewares, BlockMiddleware):
             middlewares = [middlewares]
         for block_middleware in middlewares:
-            transformed_blocks = [block_middleware.transform(b, self) for b in self._blocks]
+            transformed_blocks = [block_middleware.transform_block(b, self) for b in self._blocks]
         return Library(transformed_blocks)
