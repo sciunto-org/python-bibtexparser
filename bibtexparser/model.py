@@ -1,13 +1,20 @@
 import abc
 from typing import Any, Dict, List, Optional
 
+
 # TODO Overwrite copy and deepcopy dundermethods
 
 
 class Block(abc.ABC):
-    def __init__(self, start_line: int, raw: str):
+    def __init__(self,
+                 start_line: int,
+                 raw: str,
+                 parser_metadata: Optional[Dict[str, Any]] = None):
         self._start_line_in_file = start_line
         self._raw = raw
+        self._parser_metadata: Dict[str, Any] = parser_metadata
+        if parser_metadata is None:
+            self._parser_metadata: Dict[str, Any] = {}
 
     @property
     def start_line(self) -> int:
@@ -16,6 +23,10 @@ class Block(abc.ABC):
     @property
     def raw(self) -> str:
         return self._raw
+
+    @property
+    def parser_metadata(self) -> Dict[str, Any]:
+        return self._parser_metadata
 
 
 class String(Block):
@@ -54,6 +65,10 @@ class Preamble(Block):
     def value(self) -> str:
         return self._value
 
+    @value.setter
+    def value(self, value: str):
+        self._value = value
+
 
 class ExplicitComment(Block):
     """Bibtex Blocks of the `@comment` type, e.g. @comment{This is a comment}."""
@@ -66,6 +81,10 @@ class ExplicitComment(Block):
     def comment(self) -> str:
         return self._comment
 
+    @comment.setter
+    def comment(self, value: str):
+        self._comment = value
+
 
 class ImplicitComment(Block):
     """Bibtex outside of an @{...} block, which is treated as a comment."""
@@ -77,6 +96,10 @@ class ImplicitComment(Block):
     @property
     def comment(self) -> str:
         return self._comment
+
+    @comment.setter
+    def comment(self, value: str):
+        self._comment = value
 
 
 class Field:
@@ -108,12 +131,12 @@ class Entry(Block):
     """Bibtex Blocks of the `@entry` type, e.g. @article{Cesar2013, ...}."""
 
     def __init__(
-        self,
-        start_line: int,
-        raw: str,
-        entry_type: str,
-        key: str,
-        fields: Dict[str, Field],
+            self,
+            start_line: int,
+            raw: str,
+            entry_type: str,
+            key: str,
+            fields: Dict[str, Field],
     ):
         super().__init__(start_line, raw)
 
@@ -169,12 +192,12 @@ class DuplicateKeyBlock(Block):
     """A block that has a duplicate key."""
 
     def __init__(
-        self,
-        start_line: int,
-        raw: str,
-        key: str,
-        previous_block: Block,
-        duplicate_block: Block,
+            self,
+            start_line: int,
+            raw: str,
+            key: str,
+            previous_block: Block,
+            duplicate_block: Block,
     ):
         super().__init__(start_line, raw)
         self._key = key
