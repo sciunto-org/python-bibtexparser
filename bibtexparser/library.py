@@ -1,6 +1,5 @@
 from typing import Collection, Dict, List, Union
 
-from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import (
     Block,
     DuplicateKeyBlock,
@@ -169,20 +168,3 @@ class Library:
             for block in self._blocks
             if isinstance(block, (ExplicitComment, ImplicitComment))
         ]
-
-    def apply_middleware(
-            self, middlewares: Union[BlockMiddleware, Collection[BlockMiddleware]]
-    ) -> "Library":
-        """Apply a middleware to all blocks in the library.
-
-        :param middlewares: Middleware to apply.
-        :returns: A new library with the middleware applied.
-        """
-
-        # TODO better implementation, (1) merging middlewares and (2) allowing multithreading
-        transformed_blocks = self._blocks.copy()
-        if isinstance(middlewares, BlockMiddleware):
-            middlewares = [middlewares]
-        for block_middleware in middlewares:
-            transformed_blocks = [block_middleware.transform_block(b, self) for b in self._blocks]
-        return Library(transformed_blocks)

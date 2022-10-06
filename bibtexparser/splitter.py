@@ -21,7 +21,9 @@ from bibtexparser.model import (
 
 class Splitter:
     def __init__(self, bibstr: str):
-        self.bibstr = bibstr
+        # Add a newline at the beginning to simplify parsing
+        #   (we only allow "@"-block starts after a newline)
+        self.bibstr = f"\n{bibstr}"
 
         self._markiter = None
         self._unaccepted_mark = None
@@ -39,7 +41,7 @@ class Splitter:
         #   We then ignore empty implicit comments.
         self._implicit_comment_start_line = (
             self._current_line
-        )  # TODO maybe we have to pass this as arg as well?
+        )
         self._implicit_comment_start: Optional[int] = current_char_index
 
     def _end_implicit_comment(self, end_char_index) -> Optional[ImplicitComment]:
@@ -164,12 +166,13 @@ class Splitter:
                 raise BlockAbortedException(
                     abort_reason="Unexpected end of file.", end_index=None
                 )
+
             if value_start_mark.group(0) == "{":
                 value_end = self._move_to_closed_bracket() + 1
             elif value_start_mark.group(0) == '"':
                 value_end = self._move_to_end_of_double_quoted_string() + 1
             else:
-                # e.g.  String reference. Ended by the observed mark
+                # e.g.  String reference or integer. Ended by the observed mark
                 #       (as there is not start mark).
                 #       Should be either a comma or a "}"
                 value_start = equals_mark.end()
@@ -179,6 +182,8 @@ class Splitter:
                     ",",
                     "}",
                 ], "Parsing Error, expected comma or closing bracket"  # TODO Fail gently
+                # Put comma back into stream, as still expected.
+                self._unaccepted_mark = value_start_mark
 
             key = self.bibstr[key_start:key_end].strip()
             value = self.bibstr[value_start:value_end].strip()
@@ -277,6 +282,7 @@ class Splitter:
             else:
                 # Part of implicit comment
                 continue
+
 
         return library
 
