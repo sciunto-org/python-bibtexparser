@@ -28,7 +28,10 @@ class Splitter:
         self._markiter = None
         self._unaccepted_mark = None
 
-        self._current_line = 0
+        # Keep track of line we're currently looking at.
+        #   `-1` compensates for manually added `\n` above
+        self._current_line = -1
+
         self._reset_block_status(current_char_index=0)
 
     def _reset_block_status(self, current_char_index):
@@ -144,7 +147,6 @@ class Splitter:
 
         key_start = first_key_start
         while True:
-            start_line = self._current_line
             equals_mark = self._next_mark()
             assert (
                     equals_mark is not None
@@ -159,6 +161,9 @@ class Splitter:
                                  f"but found `{equals_mark.group(0)}`.",
                     end_index=equals_mark.start(),
                 )
+            # We follow the convention that the field start line
+            #   is where the `=` between key and value is.
+            start_line = self._current_line
             key_end = equals_mark.start()
             value_start = equals_mark.end()
             value_start_mark = self._next_mark()
@@ -283,6 +288,11 @@ class Splitter:
                 # Part of implicit comment
                 continue
 
+        # Check if there's an implicit comment at the EOF
+        if self._implicit_comment_start is not None:
+            comment = self._end_implicit_comment(len(self.bibstr))
+            if comment is not None:
+                library.add(comment)
 
         return library
 
