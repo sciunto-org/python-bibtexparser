@@ -33,6 +33,10 @@ setup(
     packages=['bibtexparser'],
     install_requires=[],
     extras_require={
-        'test': ['pytest'],
+        'test': [
+            'pytest',  # Test runner
+            'pytest-xdist',  # Parallel tests: `pytest -n <num-workers>`
+            'pytest-cov',  # Code coverage
+        ],
     }
 )

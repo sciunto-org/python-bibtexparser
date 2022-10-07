@@ -13,8 +13,8 @@ from tests.splitter_tests.resources import VALID_BIBTEX_SNIPPETS, EDGE_CASE_VALU
 def test_explicit_comment_parsing(bibtex_before: str,
                                   bibtex_after: str,
                                   comment_content: str):
-    num_before_comments = bibtex_before.lower().count("\n@comment{")
-    num_after_comments = bibtex_after.lower().count("\n@comment{")
+    num_before_comments = bibtex_before.lower().count("@comment{")
+    num_after_comments = bibtex_after.lower().count("@comment{")
 
     bibtex_str = bibtex_before + f"\n@comment{{{comment_content}}}\n" + bibtex_after
 

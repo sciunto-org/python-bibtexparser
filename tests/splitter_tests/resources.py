@@ -49,6 +49,9 @@ VALID_BIBTEX_SNIPPETS: List[str] = [
     "% This is a comment",
 ]
 
-
-
-
+PREAMBLES = [
+    "ax + b",
+    "ax + b + c",
+    "a^2 + 2ab + b^2",
+    r"\{a_1, a_2, a_3\}",
+]
