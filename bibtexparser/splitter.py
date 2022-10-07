@@ -173,10 +173,13 @@ class Splitter:
                 value_start = equals_mark.end()
                 value_end = value_start_mark.start()
                 # We expect a comma (after a closed field-value), or at the end of entry, a closing bracket
-                assert value_start_mark.group(0) in [
-                    ",",
-                    "}",
-                ], "Parsing Error, expected comma or closing bracket"  # TODO Fail gently
+                if not value_start_mark.group(0) in [",", "}", ]:
+                    self._unaccepted_mark = value_start_mark
+                    raise BlockAbortedException(
+                        abort_reason=f"Unexpected character `{value_start_mark.group(0)}` "
+                                     f"after field-value. Expected a comma or closing bracket.",
+                        end_index=value_start_mark.start(),
+                    )
                 # Put comma back into stream, as still expected.
                 self._unaccepted_mark = value_start_mark
 
