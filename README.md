@@ -16,8 +16,11 @@ If you want to join the development, please contact us through github issues.
 - :hankey: Fault-Tolerant: Able to parse files with syntax errors
 - :mahjong: Massively simplified, robuster handling of de- and encoding (special chars, ...).
 
+## TLDR Usage Example
+ 
+*TODO*
 
-## v2-architecture
+## V2 Architecture and Terminology
 
 ![bibtexparserv2](https://user-images.githubusercontent.com/4815944/193734283-f19f94e8-7986-4acf-b1a3-1d215e297224.png)
 
