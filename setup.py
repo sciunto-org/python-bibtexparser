@@ -31,5 +31,12 @@ setup(
     long_description_content_type="text/x-rst",
     long_description=load_readme(),
     packages=['bibtexparser'],
-    install_requires=['pyparsing>=2.0.3'],
+    install_requires=[],
+    extras_require={
+        'test': [
+            'pytest',  # Test runner
+            'pytest-xdist',  # Parallel tests: `pytest -n <num-workers>`
+            'pytest-cov',  # Code coverage
+        ],
+    }
 )

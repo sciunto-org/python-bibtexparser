@@ -126,6 +126,10 @@ class Field:
     def value(self, value: str):
         self._value = value
 
+    @property
+    def start_line(self) -> int:
+        return self._start_line
+
 
 class Entry(Block):
     """Bibtex Blocks of the `@entry` type, e.g. @article{Cesar2013, ...}."""
