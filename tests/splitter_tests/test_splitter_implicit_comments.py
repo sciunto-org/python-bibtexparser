@@ -1,3 +1,4 @@
+"""Tests the parsing of implicit comments, i.e., anything outside @{...} blocks."""
 from textwrap import dedent
 
 import pytest
@@ -9,9 +10,10 @@ from bibtexparser.splitter import Splitter
 def test_implicit_comment_eof():
     """Makes sure implicit comments at end of file are parsed."""
 
-    bibtex_str = """@article{article1, title={title1}}
+    bibtex_str = dedent("""\
+    @article{article1, title={title1}}
     
-    % This is an implicit comment at the end of the file."""
+    % This is an implicit comment at the end of the file.""")
 
     library = Splitter(bibtex_str).split()
 

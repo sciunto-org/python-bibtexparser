@@ -1,3 +1,4 @@
+"""Tests the parsing of entries, e.g. `@article{...}` blocks."""
 import pytest as pytest
 
 from bibtexparser.library import Library
@@ -65,3 +66,40 @@ def test_entry_type(declared_block_type, expected):
     assert len(library.failed_blocks) == 0
     assert len(library.entries) == 1
     assert library.entries[0].entry_type == expected
+
+
+@pytest.mark.parametrize("field_value", [
+    "John Doe",
+    r'à {\`a} \`{a}',
+    r'{\`a} {\`a} {\`a}',
+    r"Two Gedenk\"uberlieferung der Angelsachsen",
+    r"\texttimes{}{\texttimes}\texttimes",
+    r"p\^{a}t\'{e}"
+    r"Title with \{ a curly brace",
+    r"Title with \} a curly brace",
+    r"Title with \{ a curly brace and \} a curly brace",
+    r"Title with \{ a curly brace and \} a curly brace and \{ another curly brace",
+    r"Title with { UnEscaped Curly } Braces",
+])
+@pytest.mark.parametrize("enclosing", [
+    '"{0}"',
+    "{{{0}}}",
+])
+def test_field_value(field_value: str, enclosing: str):
+    """Test that the field values are correctly parsed.
+
+    The primarily tested edge-cases here are special chars,
+    such as curly braces, backslashes, etc. in the field values.
+
+    We test all of them for both enclosings (double quotes and curly braces).
+    """
+    expected = enclosing.format(field_value)
+    bibtex_str = f"""@article{{test,
+    firstfield = {expected},.
+    otherfield = "otherValue"
+    }}"""
+    library: Library = Splitter(bibtex_str).split()
+    assert len(library.failed_blocks) == 0
+    assert len(library.entries) == 1
+    assert len(library.entries[0].fields) == 2
+    assert library.entries[0].fields["firstfield"].value == expected

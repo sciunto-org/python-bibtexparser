@@ -1,6 +1,7 @@
 """Basic splitter tests.
 
-These tests are not exhaustive, but they should cover the most common cases."""
+These tests are not exhaustive, but they should cover the most common cases.
+More exhaustive and atomic tests are provided in separate modules."""
 from typing import Dict, Any
 
 import pytest as pytest
