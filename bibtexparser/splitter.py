@@ -21,12 +21,17 @@ from bibtexparser.model import (
 
 class Splitter:
     def __init__(self, bibstr: str):
-        self.bibstr = bibstr
+        # Add a newline at the beginning to simplify parsing
+        #   (we only allow "@"-block starts after a newline)
+        self.bibstr = f"\n{bibstr}"
 
         self._markiter = None
         self._unaccepted_mark = None
 
-        self._current_line = 0
+        # Keep track of line we're currently looking at.
+        #   `-1` compensates for manually added `\n` above
+        self._current_line = -1
+
         self._reset_block_status(current_char_index=0)
 
     def _reset_block_status(self, current_char_index):
@@ -39,7 +44,7 @@ class Splitter:
         #   We then ignore empty implicit comments.
         self._implicit_comment_start_line = (
             self._current_line
-        )  # TODO maybe we have to pass this as arg as well?
+        )
         self._implicit_comment_start: Optional[int] = current_char_index
 
     def _end_implicit_comment(self, end_char_index) -> Optional[ImplicitComment]:
@@ -69,7 +74,7 @@ class Splitter:
         else:
             return None
 
-    def _next_mark(self) -> Optional[re.Match]:
+    def _next_mark(self, accept_eof: bool) -> Optional[re.Match]:
         # Check if there is a mark that was previously not consumed
         #   and return it if so
         if self._unaccepted_mark is not None:
@@ -84,22 +89,21 @@ class Splitter:
             self._current_char_index = m.start()
             if m.group(0) == "\n":
                 self._current_line += 1
-                return self._next_mark()
+                return self._next_mark(accept_eof=accept_eof)
         else:
             # Reached end of file
-            self._current_char_index = len(self.bibstr) - 1
+            self._current_char_index = len(self.bibstr)
+            if not accept_eof:
+                raise BlockAbortedException(
+                    abort_reason="Unexpectedly reached end of file.", end_index=self._current_char_index
+                )
         return m
 
     def _move_to_closed_bracket(self) -> int:
         """Index of the curly bracket closing a just opened one."""
         num_additional_brackets = 0
         while True:
-            m = self._next_mark()
-            if m is None:
-                raise BlockAbortedException(
-                    abort_reason="No closing bracket found.", end_index=None
-                )
-
+            m = self._next_mark(accept_eof=False)
             if m.group(0) == "{":
                 num_additional_brackets += 1
             elif m.group(0) == "}":
@@ -118,11 +122,7 @@ class Splitter:
     def _move_to_end_of_double_quoted_string(self) -> int:
         """Index of the closing double quote."""
         while True:
-            m = self._next_mark()
-            if m is None:
-                raise BlockAbortedException(
-                    abort_reason="No closing double quote found.", end_index=None
-                )
+            m = self._next_mark(accept_eof=False)
 
             if m.group(0) == '"':
                 return m.start()
@@ -142,54 +142,53 @@ class Splitter:
 
         key_start = first_key_start
         while True:
-            start_line = self._current_line
-            equals_mark = self._next_mark()
-            assert (
-                    equals_mark is not None
-            ), "Parsing Error, file ended unexpectedly"  # TODO Fail gently
+            equals_mark = self._next_mark(accept_eof=False)
             if equals_mark.group(0) == "}":
                 # End of entry
                 return result, equals_mark.end()
 
             if equals_mark.group(0) != "=":
+                self._unaccepted_mark = equals_mark
                 raise BlockAbortedException(
                     abort_reason="Expected a `=` after entry key, "
                                  f"but found `{equals_mark.group(0)}`.",
                     end_index=equals_mark.start(),
                 )
+
+            # We follow the convention that the field start line
+            #   is where the `=` between key and value is.
+            start_line = self._current_line
             key_end = equals_mark.start()
             value_start = equals_mark.end()
-            value_start_mark = self._next_mark()
-            if value_start_mark is None:
-                raise BlockAbortedException(
-                    abort_reason="Unexpected end of file.", end_index=None
-                )
+            value_start_mark = self._next_mark(accept_eof=False)
+
             if value_start_mark.group(0) == "{":
                 value_end = self._move_to_closed_bracket() + 1
             elif value_start_mark.group(0) == '"':
                 value_end = self._move_to_end_of_double_quoted_string() + 1
             else:
-                # e.g.  String reference. Ended by the observed mark
+                # e.g.  String reference or integer. Ended by the observed mark
                 #       (as there is not start mark).
                 #       Should be either a comma or a "}"
                 value_start = equals_mark.end()
                 value_end = value_start_mark.start()
                 # We expect a comma (after a closed field-value), or at the end of entry, a closing bracket
-                assert value_start_mark.group(0) in [
-                    ",",
-                    "}",
-                ], "Parsing Error, expected comma or closing bracket"  # TODO Fail gently
+                if not value_start_mark.group(0) in [",", "}", ]:
+                    self._unaccepted_mark = value_start_mark
+                    raise BlockAbortedException(
+                        abort_reason=f"Unexpected character `{value_start_mark.group(0)}` "
+                                     f"after field-value. Expected a comma or closing bracket.",
+                        end_index=value_start_mark.start(),
+                    )
+                # Put comma back into stream, as still expected.
+                self._unaccepted_mark = value_start_mark
 
             key = self.bibstr[key_start:key_end].strip()
             value = self.bibstr[value_start:value_end].strip()
             result[key] = Field(start_line=start_line, key=key, value=value)
 
             # If next mark is a comma, continue
-            after_field_mark = self._next_mark()
-            if after_field_mark is None:
-                raise BlockAbortedException(
-                    abort_reason="Unexpected end of file.", end_index=None
-                )
+            after_field_mark = self._next_mark(accept_eof=False)
             if after_field_mark.group(0) == ",":
                 key_start = after_field_mark.end()
             elif after_field_mark.group(0) == "}":
@@ -220,7 +219,7 @@ class Splitter:
         self._markiter = iter(marks)
 
         while True:
-            m = self._next_mark()
+            m = self._next_mark(accept_eof=True)
             if m is None:
                 break
 
@@ -278,13 +277,19 @@ class Splitter:
                 # Part of implicit comment
                 continue
 
+        # Check if there's an implicit comment at the EOF
+        if self._implicit_comment_start is not None:
+            comment = self._end_implicit_comment(len(self.bibstr))
+            if comment is not None:
+                library.add(comment)
+
         return library
 
     def _handle_explicit_comment(self) -> ExplicitComment:
         """Handle explicit comment block. Return end index"""
         start_index = self._current_char_index
         start_line = self._current_line
-        start_bracket_mark = self._next_mark()
+        start_bracket_mark = self._next_mark(accept_eof=False)
         if start_bracket_mark.group(0) != "{":
             self._unaccepted_mark = start_bracket_mark
             # Note: The following should never happen, as we check for the "{" in the regex
@@ -305,7 +310,7 @@ class Splitter:
         """Handle entry block. Return end index"""
         start_line = self._current_line
         entry_type = m_val[1:]
-        start_bracket_mark = self._next_mark()
+        start_bracket_mark = self._next_mark(accept_eof=False)
         if start_bracket_mark.group(0) != "{":
             self._unaccepted_mark = start_bracket_mark
             # Note: The following should never happen, as we check for the "{" in the regex
@@ -314,7 +319,7 @@ class Splitter:
                         "e.g. `@article{`, "
                         "but no closing bracket was found."
             )
-        comma_mark = self._next_mark()
+        comma_mark = self._next_mark(accept_eof=False)
         if comma_mark.group(0) != ",":
             self._unaccepted_mark = comma_mark
             raise BlockAbortedException(
@@ -330,7 +335,7 @@ class Splitter:
             start_line=start_line,
             entry_type=entry_type,
             key=key,
-            fields=fields,  # TODO Fields instances indestad of dict
+            fields=fields,
             raw=self.bibstr[m.start(): end_index + 1],
         )
 
@@ -339,7 +344,7 @@ class Splitter:
         # Get next mark, which should be an equals sign
         start_i = self._current_char_index
         start_line = self._current_line
-        start_bracket_mark = self._next_mark()
+        start_bracket_mark = self._next_mark(accept_eof=False)
         if start_bracket_mark.group(0) != "{":
             self._unaccepted_mark = start_bracket_mark
             # Note: The following should never happen, as we check for the "{" in the regex
@@ -347,7 +352,7 @@ class Splitter:
                 message="matched a string def regex (`@string{`) that "
                         "should end with `{`, but no closing bracket was found."
             )
-        equals_mark = self._next_mark()
+        equals_mark = self._next_mark(accept_eof=False)
         if equals_mark.group(0) != "=":
             self._unaccepted_mark = equals_mark
             raise BlockAbortedException(
@@ -370,7 +375,7 @@ class Splitter:
         """Handle preamble block. Return end index"""
         start_i = self._current_char_index
         start_line = self._current_line
-        start_bracket_mark = self._next_mark()
+        start_bracket_mark = self._next_mark(accept_eof=False)
         if start_bracket_mark.group(0) != "{":
             self._unaccepted_mark = start_bracket_mark
             # Note: The following should never happen, as we check for the "{" in the regex
