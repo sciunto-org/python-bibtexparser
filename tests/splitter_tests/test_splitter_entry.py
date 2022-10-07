@@ -1,9 +1,12 @@
 """Tests the parsing of entries, e.g. `@article{...}` blocks."""
+from textwrap import dedent
+
 import pytest as pytest
 
 from bibtexparser.library import Library
 from bibtexparser.model import Field
 from bibtexparser.splitter import Splitter
+from tests.splitter_tests.resources import FIELD_VALUE_EDGE_CASES, FIELD_VALUE_EDGE_CASES_ENCLOSINGS
 
 
 @pytest.mark.parametrize("field_key,value,line", [
@@ -68,23 +71,8 @@ def test_entry_type(declared_block_type, expected):
     assert library.entries[0].entry_type == expected
 
 
-@pytest.mark.parametrize("field_value", [
-    "John Doe",
-    r'à {\`a} \`{a}',
-    r'{\`a} {\`a} {\`a}',
-    r"Two Gedenk\"uberlieferung der Angelsachsen",
-    r"\texttimes{}{\texttimes}\texttimes",
-    r"p\^{a}t\'{e}"
-    r"Title with \{ a curly brace",
-    r"Title with \} a curly brace",
-    r"Title with \{ a curly brace and \} a curly brace",
-    r"Title with \{ a curly brace and \} a curly brace and \{ another curly brace",
-    r"Title with { UnEscaped Curly } Braces",
-])
-@pytest.mark.parametrize("enclosing", [
-    '"{0}"',
-    "{{{0}}}",
-])
+@pytest.mark.parametrize("field_value", FIELD_VALUE_EDGE_CASES)
+@pytest.mark.parametrize("enclosing", FIELD_VALUE_EDGE_CASES_ENCLOSINGS)
 def test_field_value(field_value: str, enclosing: str):
     """Test that the field values are correctly parsed.
 
@@ -103,3 +91,30 @@ def test_field_value(field_value: str, enclosing: str):
     assert len(library.entries) == 1
     assert len(library.entries[0].fields) == 2
     assert library.entries[0].fields["firstfield"].value == expected
+
+
+@pytest.mark.parametrize("enclosing", FIELD_VALUE_EDGE_CASES_ENCLOSINGS + [
+    pytest.param("{0}", id="no enclosing"),
+])
+def test_trailing_comma(enclosing: str):
+    """Test that a trailing comma is correctly parsed (i.e., ignored)."""
+    value_before_trailing_comma = enclosing.format("valueBeforeTrailingComma")
+    bibtex_str = dedent(f"""\
+    @article{{test,
+        firstfield = {{some value}},
+        fieldBeforeTrailingComma = {value_before_trailing_comma},
+    }}
+    
+    @string{{someString = "some value"}}""")
+    library: Library = Splitter(bibtex_str).split()
+    assert len(library.failed_blocks) == 0
+    assert len(library.entries) == 1
+    assert len(library.entries[0].fields) == 2
+    assert library.entries[0].fields["firstfield"].value == "{some value}"
+    assert library.entries[0].fields["fieldBeforeTrailingComma"].value == value_before_trailing_comma
+
+    # Make sure that subsequent blocks are still parsed correctly
+    assert len(library.strings) == 1
+    assert library.strings[0].value == '"some value"'
+    assert library.strings[0].key == "someString"
+    assert library.strings[0].start_line == 5
