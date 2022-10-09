@@ -299,6 +299,17 @@ def splitname(name, strict_mode=True):
     return parts
 
 
+def parenthetic_contents(string):
+    """Generate parenthesized contents in string as pairs (level, contents)."""
+    stack = []
+    for i, c in enumerate(string):
+        if c == '{':
+            stack.append(i)
+        elif c == '}' and stack:
+            start = stack.pop()
+            if len(stack)==0:
+                yield string[start + 1: i]
+            
 def getnames(names):
     """Convert people names as surname, firstnames
     or surname, initials.
@@ -322,7 +333,7 @@ def getnames(names):
             last = namesplit[0].strip()
             firsts = [i.strip() for i in namesplit[1].split()]
         else:
-            namesplit = namestring.split()
+            namesplit = list(parenthetic_contents(namestring)) 
             last = namesplit.pop()
             firsts = [i.replace('.', '. ').strip() for i in namesplit]
         if last in ['jnr', 'jr', 'junior']:
@@ -339,7 +350,7 @@ def author(record):
     Split author field into a list of "Name, Surname".
 
     :param record: the record.
-    :type record: dict
+    :type record: dict~
     :returns: dict -- the modified record.
 
     """
