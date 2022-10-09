@@ -75,7 +75,7 @@ def dumps(bib_database, writer=None):
 
     :param bib_database: bibliographic database object
     :type bib_database: BibDatabase
-    :param writer: custom writer to use (optional) (not yet implemented)
+    :param writer: custom writer to use (optional)
     :type writer: BibTexWriter
     :returns: BibTeX string
     :rtype: unicode
@@ -93,7 +93,7 @@ def dump(bib_database, bibtex_file, writer=None):
     :type bib_database: BibDatabase
     :param bibtex_file: file to write to
     :type bibtex_file: file
-    :param writer: custom writer to use (optional) (not yet implemented)
+    :param writer: custom writer to use (optional)
     :type writer: BibTexWriter
 
     Example::
