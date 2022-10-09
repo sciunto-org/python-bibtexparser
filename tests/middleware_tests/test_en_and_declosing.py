@@ -160,7 +160,7 @@ def test_addition_of_enclosing_on_entry(metadata_enclosing: str,
 
     Also covers the internals for other block types (i.e., String),
     which thus can be tested more light-weight."""
-    # These values not matter for this unit test, 
+    # These values not matter for this unit test,
     #   but must not change during transformation
     #   (hence, they are created as variables, not directly in Entry constructor)
     input_entry = Entry(start_line=5,
