@@ -2,7 +2,7 @@ import pytest
 
 from bibtexparser.library import Library
 from bibtexparser.splitter import Splitter
-from tests.splitter_tests.resources import EDGE_CASE_VALUES, EDGE_CASE_VALUE_ENCLOSINGS
+from tests.resources import EDGE_CASE_VALUES, ENCLOSINGS
 
 
 @pytest.mark.parametrize("key", [
@@ -12,7 +12,7 @@ from tests.splitter_tests.resources import EDGE_CASE_VALUES, EDGE_CASE_VALUE_ENC
     "ICSE2022_with_underscore_and-dash",
 ])
 @pytest.mark.parametrize("value", EDGE_CASE_VALUES)
-@pytest.mark.parametrize("enclosing", EDGE_CASE_VALUE_ENCLOSINGS)
+@pytest.mark.parametrize("enclosing", ENCLOSINGS)
 def test_parse_string_key_val(key: str, value: str, enclosing: str):
     """Test that the string is correctly parsed."""
     enclosed_value = enclosing.format(value)
@@ -26,7 +26,7 @@ def test_parse_string_key_val(key: str, value: str, enclosing: str):
     assert library.strings[0].start_line == 0
 
 
-@pytest.mark.parametrize("enclosing", EDGE_CASE_VALUE_ENCLOSINGS)
+@pytest.mark.parametrize("enclosing", ENCLOSINGS)
 def test_parse_empty_string(enclosing: str):
     """Test that the string is correctly parsed."""
     empty_enclosing = enclosing.format("")

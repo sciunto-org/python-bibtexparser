@@ -1,7 +1,7 @@
 import pytest
 
 from bibtexparser.splitter import Splitter
-from tests.splitter_tests.resources import VALID_BIBTEX_SNIPPETS
+from tests.resources import VALID_BIBTEX_SNIPPETS
 
 
 @pytest.mark.parametrize("bibtex_before", VALID_BIBTEX_SNIPPETS)
