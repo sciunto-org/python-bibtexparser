@@ -114,8 +114,8 @@ def test_removal_of_enclosing_on_entry(enclosing: str, inplace: bool):
     "preamble", "implicit_comment", "explicit_comment"
 ])
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
-def test_unimpacted_block_types_remain_unchanged(block: str,
-                                                 inplace: bool):
+def test_no_removal_blocktypes(block: str,
+                               inplace: bool):
     assert_block_does_not_change(
         block_type=block,
         middleware=RemoveEnclosingMiddleware(allow_inplace_modification=inplace),
@@ -202,7 +202,24 @@ def test_addition_of_enclosing_on_entry(metadata_enclosing: str,
     else:
         assert transformed is not input_entry
 
+
 # TODO add test to add enclosing for string
 
-# Todo add add-enclosing tests for unimpacted blocks (preamble, comment, etc.)
-#   this can mostly be extracted from above.
+@pytest.mark.parametrize("block", ["preamble", "implicit_comment", "explicit_comment"])
+@pytest.mark.parametrize("reuse_encoding", [True, False], ids=["reuse", "no_reuse"])
+@pytest.mark.parametrize("enclose_int", [True, False], ids=["enclose_int", "no_enclose_int"])
+@pytest.mark.parametrize("default_enc", ["{", "\""])
+@pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
+def test_no_addition_block_types(block: str,
+                                 reuse_encoding: bool,
+                                 enclose_int: bool,
+                                 default_enc: str,
+                                 inplace: bool):
+    assert_block_does_not_change(
+        block_type=block,
+        middleware=AddEnclosingMiddleware(reuse_previous_enclosing=reuse_encoding,
+                                          enclose_integers=enclose_int,
+                                          default_enclosing=default_enc,
+                                          allow_inplace_modification=inplace),
+        same_instance=inplace
+    )
