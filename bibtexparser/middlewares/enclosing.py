@@ -45,7 +45,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     def transform_entry(self, entry: Entry, library: 'Library') -> Entry:
         field: Field
         metadata = dict()
-        for field in entry.fields:
+        for field in entry.fields.values():
             stripped, enclosing = self._strip_enclosing(field.value)
             field.value = stripped
             metadata[field.key] = enclosing
