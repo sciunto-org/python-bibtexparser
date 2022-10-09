@@ -2,9 +2,6 @@ import abc
 from typing import Any, Dict, List, Optional
 
 
-# TODO Overwrite copy and deepcopy dundermethods
-
-
 class Block(abc.ABC):
     def __init__(self,
                  start_line: int,
@@ -27,6 +24,12 @@ class Block(abc.ABC):
     @property
     def parser_metadata(self) -> Dict[str, Any]:
         return self._parser_metadata
+
+    def __eq__(self, other):
+        # make sure they have the same type and same content
+        return (isinstance(other, self.__class__) and
+                isinstance(self, other.__class__) and
+                self.__dict__ == other.__dict__)
 
 
 class String(Block):
@@ -129,6 +132,12 @@ class Field:
     @property
     def start_line(self) -> int:
         return self._start_line
+
+    def __eq__(self, other):
+        # make sure they have the same type and same content
+        return (isinstance(other, self.__class__) and
+                isinstance(self, other.__class__) and
+                self.__dict__ == other.__dict__)
 
 
 class Entry(Block):
