@@ -22,6 +22,7 @@ class TestBibtexParserMethod(unittest.TestCase):
                  'Jean la Tour',
                  'Jean le Tour',
                  'Mike ben Akar',
+                 '{G{\'{e}}rard} {Ben Arous}'
                  #'Jean de la Tour',
                  #'Johannes Diderik van der Waals',
                  ]
@@ -35,6 +36,7 @@ class TestBibtexParserMethod(unittest.TestCase):
                     'la Tour, Jean',
                     'le Tour, Jean',
                     'ben Akar, Mike',
+                    "{Ben Arous}, {G{\'{e}}rard}"
                     #'de la Tour, Jean',
                     #'van der Waals, Johannes Diderik',
                     ]

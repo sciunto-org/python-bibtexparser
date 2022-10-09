@@ -333,8 +333,10 @@ def getnames(names):
             last = namesplit[0].strip()
             firsts = [i.strip() for i in namesplit[1].split()]
         else:
-            if "{" in namestring:
-                namesplit = list(parenthetic_contents(namestring)) 
+            # should we check for both `{` and `}`
+            _parenthetic_content = list(parenthetic_contents(namestring)) 
+            if "{" in namestring and len(_parenthetic_content)>1:
+                namesplit = _parenthetic_content 
             else:
                 namesplit = namestring.split()
             last = namesplit.pop()
