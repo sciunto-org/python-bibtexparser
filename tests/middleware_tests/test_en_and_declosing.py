@@ -6,6 +6,8 @@ import pytest
 from bibtexparser.library import Library
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware, AddEnclosingMiddleware
 from bibtexparser.model import String, Entry, Field, Block, Preamble, ImplicitComment, ExplicitComment
+from tests.middleware_tests import middleware_test_util
+from tests.middleware_tests.middleware_test_util import assert_block_does_not_change
 from tests.resources import ENCLOSINGS, EDGE_CASE_VALUES
 
 
@@ -109,39 +111,16 @@ def test_removal_of_enclosing_on_entry(enclosing: str, inplace: bool):
 
 
 @pytest.mark.parametrize("block", [
-    pytest.param(
-        Preamble(start_line=5, raw="@Preamble{a_x + b_x^2}", value="a_x + b_x^2"),
-        id="preamble"
-    ),
-    pytest.param(
-        ImplicitComment(start_line=5, raw="# MyComment", comment="MyComment"),
-        id="implicit_comment"
-    ),
-    pytest.param(
-        ExplicitComment(start_line=5, raw="@Comment{MyComment}", comment="MyComment"),
-        id="explicit_comment"
-    ),
+    "preamble", "implicit_comment", "explicit_comment"
 ])
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
-def test_unimpacted_block_types_remain_unchanged(block: Block,
+def test_unimpacted_block_types_remain_unchanged(block: str,
                                                  inplace: bool):
-    # TODO this can probably be extracted in a test-utils class,
-    #   as almost every middleware will have a test like that.
-    input_copy = deepcopy(block)
-    middleware = RemoveEnclosingMiddleware(allow_inplace_modification=inplace)
-    transformed_library = middleware.transform(library=Library([block]))
-
-    # Assert correct library state
-    assert len(transformed_library.blocks) == 1
-    assert transformed_library.blocks[0] == input_copy
-    if inplace:
-        # Note that this is not a strict requirement,
-        #   as "allow_inplace" does not mandate inplace modification,
-        #   but it should be implemented as such for this middleware
-        #   for performance reasons.
-        assert transformed_library.blocks[0] is block
-    else:
-        assert transformed_library.blocks[0] is not block
+    assert_block_does_not_change(
+        block_type=block,
+        middleware=RemoveEnclosingMiddleware(allow_inplace_modification=inplace),
+        same_instance=inplace
+    )
 
 
 @pytest.mark.parametrize("metadata_enclosing", ["{", '"', "no-enclosing", None])
