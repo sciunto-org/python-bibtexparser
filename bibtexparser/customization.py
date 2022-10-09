@@ -308,7 +308,7 @@ def parenthetic_contents(string):
         elif c == '}' and stack:
             start = stack.pop()
             if len(stack)==0:
-                yield string[start + 1: i]
+                yield "{" + string[start + 1: i] + "}"
             
 def getnames(names):
     """Convert people names as surname, firstnames
@@ -333,7 +333,10 @@ def getnames(names):
             last = namesplit[0].strip()
             firsts = [i.strip() for i in namesplit[1].split()]
         else:
-            namesplit = list(parenthetic_contents(namestring)) 
+            if "{" in namestring:
+                namesplit = list(parenthetic_contents(namestring)) 
+            else:
+                namesplit = namestring.split()
             last = namesplit.pop()
             firsts = [i.replace('.', '. ').strip() for i in namesplit]
         if last in ['jnr', 'jr', 'junior']:
@@ -350,7 +353,7 @@ def author(record):
     Split author field into a list of "Name, Surname".
 
     :param record: the record.
-    :type record: dict~
+    :type record: dict
     :returns: dict -- the modified record.
 
     """
