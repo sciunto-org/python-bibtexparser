@@ -334,7 +334,12 @@ def getnames(names):
             firsts = [i.strip() for i in namesplit[1].split()]
         else:
             # should we check for both `{` and `}`
+            # This checks how many {} we have at root level
+            # {} -> 1
+            # {}{} -> 2
+            # {{}{}} -> 1 
             _parenthetic_content = list(parenthetic_contents(namestring)) 
+            
             if "{" in namestring and len(_parenthetic_content)>1:
                 namesplit = _parenthetic_content 
             else:
