@@ -15,9 +15,11 @@ from bibtexparser.model import (
 
 class Library:
     def __init__(self, blocks: Union[List[Block], None] = None):
-        self._blocks = blocks.copy() if blocks is not None else []
+        self._blocks = []
         self._entries_by_key = dict()
         self._strings_by_key = dict()
+        if blocks is not None:
+            self.add(blocks)
 
     def add(self, blocks: Union[List[Block], Block]):
         """Add blocks to library.

@@ -6,7 +6,7 @@ import pytest as pytest
 from bibtexparser.library import Library
 from bibtexparser.model import Field
 from bibtexparser.splitter import Splitter
-from tests.splitter_tests.resources import EDGE_CASE_VALUES, EDGE_CASE_VALUE_ENCLOSINGS
+from tests.resources import EDGE_CASE_VALUES, ENCLOSINGS
 
 
 @pytest.mark.parametrize("field_key,value,line", [
@@ -72,7 +72,7 @@ def test_entry_type(declared_block_type, expected):
 
 
 @pytest.mark.parametrize("field_value", EDGE_CASE_VALUES)
-@pytest.mark.parametrize("enclosing", EDGE_CASE_VALUE_ENCLOSINGS)
+@pytest.mark.parametrize("enclosing", ENCLOSINGS)
 def test_field_value(field_value: str, enclosing: str):
     """Test that the field values are correctly parsed.
 
@@ -93,7 +93,7 @@ def test_field_value(field_value: str, enclosing: str):
     assert library.entries[0].fields["firstfield"].value == expected
 
 
-@pytest.mark.parametrize("enclosing", EDGE_CASE_VALUE_ENCLOSINGS + [
+@pytest.mark.parametrize("enclosing", ENCLOSINGS + [
     pytest.param("{0}", id="no enclosing"),
 ])
 def test_trailing_comma(enclosing: str):

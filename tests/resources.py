@@ -17,7 +17,7 @@ EDGE_CASE_VALUES: List[str] = [
     r"Title with { UnEscaped Curly } Braces",
 ]
 
-EDGE_CASE_VALUE_ENCLOSINGS: List[pytest.param] = [
+ENCLOSINGS: List[pytest.param] = [
     pytest.param('"{0}"', id="double_quotes"),
     pytest.param("{{{0}}}", id="curly_braces"),
 ]

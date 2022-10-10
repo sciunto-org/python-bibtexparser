@@ -1,10 +1,8 @@
-from textwrap import dedent
-
 import pytest
 
 from bibtexparser.model import ExplicitComment
 from bibtexparser.splitter import Splitter
-from tests.splitter_tests.resources import VALID_BIBTEX_SNIPPETS, EDGE_CASE_VALUES
+from tests.resources import VALID_BIBTEX_SNIPPETS, EDGE_CASE_VALUES
 
 
 @pytest.mark.parametrize("bibtex_before", VALID_BIBTEX_SNIPPETS)
