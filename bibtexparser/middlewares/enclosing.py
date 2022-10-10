@@ -85,8 +85,8 @@ class AddEnclosingMiddleware(BlockMiddleware):
         super().__init__(allow_inplace_modification=allow_inplace_modification,
                          allow_parallel_execution=True)
 
-        if default_enclosing not in ('{', '"', 'no-enclosing'):
-            raise ValueError("default_enclosing must be either '{' or '\"' or 'no-enclosing', "
+        if default_enclosing not in ('{', '"'):
+            raise ValueError("default_enclosing must be either '{' or '\"'"
                              f"not '{default_enclosing}'")
         self._default_enclosing = default_enclosing
         self._reuse_previous_enclosing = reuse_previous_enclosing

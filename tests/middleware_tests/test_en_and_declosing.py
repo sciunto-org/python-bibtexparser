@@ -5,8 +5,7 @@ import pytest
 
 from bibtexparser.library import Library
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware, AddEnclosingMiddleware
-from bibtexparser.model import String, Entry, Field, Block, Preamble, ImplicitComment, ExplicitComment
-from tests.middleware_tests import middleware_test_util
+from bibtexparser.model import String, Entry, Field, Block
 from tests.middleware_tests.middleware_test_util import assert_block_does_not_change
 from tests.resources import ENCLOSINGS, EDGE_CASE_VALUES
 
@@ -58,15 +57,8 @@ def test_removal_of_enclosing_on_string(enclosing, value, inplace):
     assert transformed.key == key
     assert transformed.raw == raw
 
-    # Assert inplace modification
-    if inplace:
-        # Note that this is not a strict requirement,
-        #   as "allow_inplace" does not mandate inplace modification,
-        #   but it should be implemented as such for this middleware
-        #   for performance reasons.
-        assert transformed is original
-    else:
-        assert transformed is not original
+    # Assert `allow_inplace_modification` is respected
+    _assert_inplace_is_respected(inplace, original, transformed)
 
 
 @pytest.mark.parametrize("enclosing", ENCLOSINGS)
@@ -109,6 +101,9 @@ def test_removal_of_enclosing_on_entry(enclosing: str, inplace: bool):
     assert transformed_library.entries[0].raw == input_entry_copy.raw
     assert transformed_library.entries[0].key == input_entry_copy.key
 
+    # Assert `allow_inplace_modification` is respected
+    _assert_inplace_is_respected(inplace, input_entry, transformed_library.entries[0])
+
 
 @pytest.mark.parametrize("block", [
     "preamble", "implicit_comment", "explicit_comment"
@@ -124,7 +119,7 @@ def test_no_removal_blocktypes(block: str,
 
 
 @pytest.mark.parametrize("metadata_enclosing", ["{", '"', "no-enclosing", None])
-@pytest.mark.parametrize("default_enclosing", ["{", '"', "no-enclosing"])
+@pytest.mark.parametrize("default_enclosing", ["{", '"'])
 @pytest.mark.parametrize("enclose_ints", [True, False], ids=["enclose_ints", "no_enclose_ints"])
 @pytest.mark.parametrize("reuse_previous_enclosing", [True, False], ids=["reuse", "no_reuse"])
 @pytest.mark.parametrize("value", EDGE_CASE_VALUES + ["1990"])
@@ -171,14 +166,7 @@ def test_addition_of_enclosing_on_entry(metadata_enclosing: str,
     changed_value = transformed.fields["year"].value
 
     # Figure out which enclosing was added
-    if changed_value.startswith('"') and changed_value.endswith('"'):
-        used_enclosing = '"'
-    elif changed_value.startswith('{') and changed_value.endswith('}'):
-        used_enclosing = '{'
-    elif str(changed_value) == str(value):
-        used_enclosing = "no-enclosing"
-    else:
-        raise ValueError(f"Strange encoding: {changed_value}")
+    used_enclosing = _figure_out_added_enclosing(changed_value, value)
 
     # Assert correct enclosing was added
     if reuse_previous_enclosing and metadata_enclosing is not None:
@@ -193,17 +181,96 @@ def test_addition_of_enclosing_on_entry(metadata_enclosing: str,
 
     assert used_enclosing == expected_enclosing
 
+    # Assert remaining fields are unchanged
+    assert transformed.start_line == input_entry_copy.start_line
+    assert transformed.entry_type == input_entry_copy.entry_type
+    assert transformed.raw == input_entry_copy.raw
+    assert transformed.key == input_entry_copy.key
+
+    # Assert `allow_inplace_modification` is respected
+    _assert_inplace_is_respected(inplace, input_entry, transformed)
+
+
+def _figure_out_added_enclosing(changed_value, value):
+    if changed_value.startswith('"') and changed_value.endswith('"'):
+        used_enclosing = '"'
+    elif changed_value.startswith('{') and changed_value.endswith('}'):
+        used_enclosing = '{'
+    elif str(changed_value) == str(value):
+        used_enclosing = "no-enclosing"
+    else:
+        raise ValueError(f"Strange encoding: {changed_value}")
+    return used_enclosing
+
+
+@pytest.mark.parametrize("metadata_enclosing", ["{", '"', None])
+@pytest.mark.parametrize("default_enclosing", ["{", '"'])
+@pytest.mark.parametrize("enclose_ints", [True, False], ids=["enclose_ints", "no_enclose_ints"])
+@pytest.mark.parametrize("reuse_previous_enclosing", [True, False], ids=["reuse", "no_reuse"])
+@pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
+def test_addition_of_enclosing_on_string(metadata_enclosing: str,
+                                         default_enclosing: str,
+                                         enclose_ints: bool,
+                                         reuse_previous_enclosing: bool,
+                                         inplace: bool):
+    input_string = String(
+        start_line=5,
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        value="someValue"  # Value edge-cases are tested in Entry test
+    )
+    input_string_copy = deepcopy(input_string)
+
+    if metadata_enclosing is not None:
+        input_string.parser_metadata["removed_enclosing"] = metadata_enclosing
+
+    middleware = AddEnclosingMiddleware(
+        allow_inplace_modification=inplace,
+        default_enclosing=default_enclosing,
+        reuse_previous_enclosing=reuse_previous_enclosing,
+        enclose_integers=enclose_ints  # This should not impact String
+    )
+
+    transformed_library = middleware.transform(library=Library([input_string]))
+
+    # Assert correct library state
+    assert len(transformed_library.blocks) == 1
+    assert len(transformed_library.strings) == 1
+    # Assert correct addition of enclosing
+    transformed = transformed_library.strings[0]
+    changed_value = transformed.value
+
+    # Figure out which enclosing was added
+    used_enclosing = _figure_out_added_enclosing(changed_value, input_string.value)
+
+    # Assert correct enclosing was added
+    if reuse_previous_enclosing and metadata_enclosing is not None:
+        expected_enclosing = metadata_enclosing
+    else:
+        # Note: `enclose_integers` param is not relevant for String
+        expected_enclosing = default_enclosing
+
+    assert used_enclosing == expected_enclosing
+
+    # Assert remaining fields are unchanged
+    assert transformed.start_line == input_string_copy.start_line
+    assert transformed.raw == input_string_copy.raw
+    assert transformed.key == input_string_copy.key
+
+    # Assert `allow_inplace_modification` is respected
+    _assert_inplace_is_respected(inplace, input_string, transformed)
+
+
+def _assert_inplace_is_respected(inplace: bool, input_block: Block, transformed_block: Block):
     if inplace:
         # Note that this is not a strict requirement,
         #   as "allow_inplace" does not mandate inplace modification,
         #   but it should be implemented as such for this middleware
         #   for performance reasons.
-        assert transformed is input_entry
+        assert transformed_block is input_block
     else:
-        assert transformed is not input_entry
+        assert transformed_block is not input_block
 
-
-# TODO add test to add enclosing for string
 
 @pytest.mark.parametrize("block", ["preamble", "implicit_comment", "explicit_comment"])
 @pytest.mark.parametrize("reuse_encoding", [True, False], ids=["reuse", "no_reuse"])
@@ -223,3 +290,5 @@ def test_no_addition_block_types(block: str,
                                           allow_inplace_modification=inplace),
         same_instance=inplace
     )
+
+# TODO round-trip tests (removal -> addition -> removal)
