@@ -322,7 +322,24 @@ def getnames(names):
             last = namesplit[0].strip()
             firsts = [i.strip() for i in namesplit[1].split()]
         else:
-            namesplit = namestring.split()
+            if "{" in namestring and "}" in namestring:
+                namesplit = []
+                opening = 0
+                start = 0
+                for i in range(len(namestring)):
+                    print(namestring[i], i, opening)
+                    if namestring[i] == "{":
+                        opening += 1
+                    elif namestring[i] == "}":
+                        opening -= 1
+                    if opening == 0:
+                        if namestring[i] == " ":
+                            namesplit.append(namestring[start:i])
+                            start = i + 1
+                        elif i == len(namestring) - 1:
+                            namesplit.append(namestring[start:])
+            else:
+                namesplit = namestring.split()
             last = namesplit.pop()
             firsts = [i.replace('.', '. ').strip() for i in namesplit]
         if last in ['jnr', 'jr', 'junior']:
