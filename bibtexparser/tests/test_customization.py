@@ -22,9 +22,13 @@ class TestBibtexParserMethod(unittest.TestCase):
                  'Jean la Tour',
                  'Jean le Tour',
                  'Mike ben Akar',
+                 'A. {Delgado de Molina}',
+                 r'M. Vign{\'e}',
                  'Tom {de Geus}',
+                 'Tom de {G\{eus}',
                  'Foo B{\'a}r',
-                 '{G{\'{e}}rard} {Ben Arous}',
+                 r'{G{\'{e}}rard} {Ben Arous}',
+                 'Incorrect {{name}',
                  #'Jean de la Tour',
                  #'Johannes Diderik van der Waals',
                  ]
@@ -38,19 +42,16 @@ class TestBibtexParserMethod(unittest.TestCase):
                     'la Tour, Jean',
                     'le Tour, Jean',
                     'ben Akar, Mike',
+                    '{Delgado de Molina}, A.',
+                    r'Vign{\'e}, M.',
                     '{de Geus}, Tom',
-                    'B{\'a}r, Foo'
-                    '{Ben Arous}, {G{\'{e}}rard}',
+                    'de {G\{eus}, Tom',
+                    'B{\'a}r, Foo',
+                    r'{Ben Arous}, {G{\'{e}}rard}',
+                    'Incorrect {{name}',
                     #'de la Tour, Jean',
                     #'van der Waals, Johannes Diderik',
                     ]
-        self.assertEqual(result, expected)
-
-    @unittest.skip('Bug #9')
-    def test_getnames_braces(self):
-        names = ['A. {Delgado de Molina}', r'M. Vign{\'e}']
-        result = getnames(names)
-        expected = ['Delgado de Molina, A.', 'Vigné, M.']
         self.assertEqual(result, expected)
 
     ###########
