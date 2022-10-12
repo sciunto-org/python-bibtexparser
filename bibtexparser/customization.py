@@ -299,6 +299,61 @@ def splitname(name, strict_mode=True):
     return parts
 
 
+def find_matching(
+    text: str,
+    opening: str,
+    closing: str,
+    ignore_escaped: bool = True,
+) -> dict:
+    r"""
+    Find matching 'brackets'.
+
+    :param text: The string to consider.
+    :param opening: The opening bracket (e.g. "(", "[", "{").
+    :param closing: The closing bracket (e.g. ")", "]", "}").
+    :param ignore_escaped: Ignore escaped bracket (e.g. "\(", "\[", "\{", "\)", "\]", "\}").
+    :return: Dictionary with ``{index_opening: index_closing}``
+    """
+
+    a = []
+    b = []
+
+    if ignore_escaped:
+        opening = r"(?<!\\)" + opening
+        closing = r"(?<!\\)" + closing
+
+    for i in re.finditer(opening, text):
+        a.append(i.span()[0])
+
+    for i in re.finditer(closing, text):
+        b.append(-1 * i.span()[0])
+
+    if len(a) == 0 and len(b) == 0:
+        return {}
+
+    if len(a) != len(b):
+        raise IndexError(f"Unmatching {opening}...{closing} found")
+
+    brackets = sorted(a + b, key=lambda i: abs(i))
+
+    ret = {}
+    stack = []
+
+    for i in brackets:
+        if i >= 0:
+            stack.append(i)
+        else:
+            if len(stack) == 0:
+                raise IndexError(f"No closing {closing} at: {i:d}")
+            j = stack.pop()
+            ret[j] = -1 * i
+
+    if len(stack) > 0:
+        raise IndexError(f"No opening {opening} at {stack.pop():d}")
+
+    return ret
+
+
 def getnames(names):
     """Convert people names as surname, firstnames
     or surname, initials.
@@ -322,7 +377,29 @@ def getnames(names):
             last = namesplit[0].strip()
             firsts = [i.strip() for i in namesplit[1].split()]
         else:
-            namesplit = namestring.split()
+            if "{" in namestring and "}" in namestring:
+                try:
+                    brackets = find_matching(namestring, "{", "}")
+                except IndexError:
+                    tidynames.append(namestring)
+                    continue
+                namesplit = []
+                start = 0
+                i = 0
+                while True:
+                    if i in brackets:
+                        i = brackets[i]
+                    else:
+                        i += 1
+                    if i >= len(namestring):
+                        break
+                    if namestring[i] == " ":
+                        namesplit.append(namestring[start:i])
+                        start = i + 1
+                    elif i == len(namestring) - 1:
+                        namesplit.append(namestring[start:])
+            else:
+                namesplit = namestring.split()
             last = namesplit.pop()
             firsts = [i.replace('.', '. ').strip() for i in namesplit]
         if last in ['jnr', 'jr', 'junior']:
