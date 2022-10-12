@@ -24,6 +24,15 @@ class TestBibDatabase(unittest.TestCase):
         bib_db.entries = self.entries
         self.assertEqual(bib_db.entries_dict, bib_db.get_entry_dict())
 
+    def test_equality(self):
+        bib_db1 = BibDatabase()
+        bib_db2 = BibDatabase()
+        assert bib_db1 == bib_db2
+        bib_db1.entries = self.entries
+        assert bib_db1 != bib_db2
+        bib_db2.entries = self.entries
+        assert bib_db1 == bib_db2
+
 
 class TestBibDataString(unittest.TestCase):
 
