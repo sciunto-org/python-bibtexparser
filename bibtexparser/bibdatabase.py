@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,23 @@ class BibDatabase(object):
 
         #: List of fields that should not be updated when resolving crossrefs
         self._not_updated_by_crossref = ['_FROM_CROSSREF']
+
+    def __eq__(self, other: Any) -> bool:
+        """Equality == method."""
+        if (
+            isinstance(other, BibDatabase)
+            and other.entries == self.entries
+            and other.comments == self.comments
+            and other.strings == self.strings
+            and other.preambles == self.preambles
+        ):
+            return True
+        else:
+            return False
+
+    def __ne__(self, other: Any) -> bool:
+        """Different != method."""
+        return not self.__eq__(other)
 
     def load_common_strings(self):
         self.strings.update(COMMON_STRINGS)
