@@ -80,10 +80,6 @@ class BibDatabase(object):
         else:
             return False
 
-    def __ne__(self, other: Any) -> bool:
-        """Different != method."""
-        return not self.__eq__(other)
-
     def load_common_strings(self):
         self.strings.update(COMMON_STRINGS)
 
