@@ -75,6 +75,7 @@ class BibDatabase(object):
             and other.comments == self.comments
             and other.strings == self.strings
             and other.preambles == self.preambles
+            and other._not_updated_by_crossref == self._not_updated_by_crossref
         ):
             return True
         else:
