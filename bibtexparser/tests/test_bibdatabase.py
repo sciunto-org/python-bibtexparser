@@ -14,6 +14,10 @@ class TestBibDatabase(unittest.TestCase):
                 'author': 'Bird, R.B. and Armstrong, R.C. and Hassager, O.'
                 }]
 
+    comments = ['a', 'b']
+    strings = ['c', 'd']
+    preambles = ['e', 'f']
+
     def test_entries_list_method(self):
         bib_db = BibDatabase()
         bib_db.entries = self.entries
@@ -28,9 +32,25 @@ class TestBibDatabase(unittest.TestCase):
         bib_db1 = BibDatabase()
         bib_db2 = BibDatabase()
         assert bib_db1 == bib_db2
+        # entries
         bib_db1.entries = self.entries
         assert bib_db1 != bib_db2
         bib_db2.entries = self.entries
+        assert bib_db1 == bib_db2
+        # comments
+        bib_db1.comments = self.comments
+        assert bib_db1 != bib_db2
+        bib_db2.comments = self.comments
+        assert bib_db1 == bib_db2
+        # strings
+        bib_db1.strings = self.strings
+        assert bib_db1 != bib_db2
+        bib_db2.strings = self.strings
+        assert bib_db1 == bib_db2
+        # preambles
+        bib_db1.preambles = self.preambles
+        assert bib_db1 != bib_db2
+        bib_db2.preambles = self.preambles
         assert bib_db1 == bib_db2
 
 
