@@ -1,4 +1,5 @@
 import unittest
+from collections import OrderedDict
 from bibtexparser.bibdatabase import (BibDatabase, BibDataString,
                                       BibDataStringExpression)
 
@@ -15,7 +16,7 @@ class TestBibDatabase(unittest.TestCase):
                 }]
 
     comments = ['a', 'b']
-    strings = ['c', 'd']
+    strings = OrderedDict(c="c", d="d")
     preambles = ['e', 'f']
 
     def test_entries_list_method(self):
