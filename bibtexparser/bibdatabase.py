@@ -69,17 +69,9 @@ class BibDatabase(object):
 
     def __eq__(self, other: Any) -> bool:
         """Equality == method."""
-        if (
-            isinstance(other, BibDatabase)
-            and other.entries == self.entries
-            and other.comments == self.comments
-            and other.strings == self.strings
-            and other.preambles == self.preambles
-            and other._not_updated_by_crossref == self._not_updated_by_crossref
-        ):
-            return True
-        else:
-            return False
+        # uses .__dict__ attribute to avoid handling attributes which might not
+        # be defined, e.g. _crossref_updated
+        return isinstance(other, BibDatabase) and self.__dict__ == other.__dict
 
     def load_common_strings(self):
         self.strings.update(COMMON_STRINGS)
