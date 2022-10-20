@@ -26,15 +26,17 @@ If you want to join the development, please contact us through github issues.
 
 The architecture consists of the following components:
 
+#### Library
+Reflects the contents of a parsed bibtex files, including all comments, entries, strings, preamples and their metadata (e.g. order). 
+
 #### A Splitter
 Splits a bibtex string into basic blocks (Entry, String, Preamble, ...), with correspondingly split content (e.g. fields on Entry, key-value on String, ...).
 The splitter aims to be forgiving when facing invalid bibtex: A line starting with a block definition (`@....`) ends the previous block, even if not yet every bracket is closed, failing the parsing of the previous block. Correspondingly, one block type is "ParsingFailedBlock".
 
 #### Middleware
-TODO Describe
+Middleware layers transform a library and its blocks, for example by decoding latex special characters, interpolating string references, resoling crossreferences or re-ordering blocks. Thus, the choice of middleware allows to customize parsing and writing to ones specific usecase. Note: Middlewares, by default, no not mutate their input, but return a modified copy. 
 
 #### Writer
-TODO Describe
+Writes the content of a bibtex library to a `.bib` file. Optional formatting parameters can be passed using a corresponding dedicated data structure.
 
-#### Library
-TODO Describe
+
