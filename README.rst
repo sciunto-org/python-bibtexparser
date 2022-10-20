@@ -1,20 +1,16 @@
 python-bibtexparser
 ===================
 
-Python library to parse `bibtex <https://en.wikipedia.org/wiki/BibTeX>`_ files.
+Python 3 library to parse `bibtex <https://en.wikipedia.org/wiki/BibTeX>`_ files.
 
 
 .. contents::
 
 
-Bibtexparser relies on `pyparsing <https://pypi.python.org/pypi/pyparsing>`_ and is compatible with Python 3.3 or newer.
-
 Documentation
 -------------
 
-Our documentation includes the installation procedure, a tutorial, the API and advices to report a bug.
-References, related projects and softwares based on bibtexparser are also listed. If you would like to appear on this list, feel free to open a ticket or send an email.
-
+Our documentation includes the installation procedure, a tutorial, the API and advices to report a bug: 
 `Documentation on readthedocs.io <https://bibtexparser.readthedocs.io/>`_
 
 Upgrading
@@ -39,6 +35,21 @@ The original source code was part of bibserver from `OKFN <http://github.com/okf
 
 The parser evolved to a new core based on pyparsing.
 
-News (July 7h, 2022): This library has a new maintainer (`@MiWeiss <https://github.com/MiWeiss>`_).
-Versions 1.x will be mostly bugfixes and maintenance.
-In the meantime, we are working on a new version 2.0.0 which will be a complete rewrite of the library.
+Since 2022, after a long stale period, this library has a new maintainer (`@MiWeiss <https://github.com/MiWeiss>`_).
+
+
+`v2` Announcement
+-----------------
+
+Version 1.x, is trusted and used by more than 1300 projects, with much of its code being ~10 years old. Our primary objective in maintaining v1.x is to provide stability and backwards compatibility to these projects - such that they can safely and easily migrate to new versions.
+
+Still, there's much room for large-scale improvements and changes to modernize bibtexparser. Hence, we are working on a new version 2.0.0 which is a complete rewrite of the library, providing amongst other the following advantages:
+
+- Order of magnitudes faster
+- Type-Hints and extensive documentation
+- Easily customizable parsing **and** writing
+- Access to raw, unparsed bibtex.
+- Fault-Tolerant: Able to parse files with syntax errors
+- Massively simplified, robuster handling of de- and encoding (special chars, ...).
+
+Check out the `v2 dev branch <https://github.com/sciunto-org/python-bibtexparser/tree/v2>`_ and the `v2 coordination issue <https://github.com/sciunto-org/python-bibtexparser/issues/318>`_ to get a sneak preview. Also - if you're keen - we're always looking for contributors. Do not hesitate to get in contact with us.
