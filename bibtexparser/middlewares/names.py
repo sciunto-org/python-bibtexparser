@@ -1,19 +1,118 @@
-"""Middlewares regarding person names."""
+"""Middlewares regarding person names.
+
+Much of the code is taken from Blair Bonnetts never merged v0 pull request
+(https://github.com/sciunto-org/python-bibtexparser/pull/140).
+"""
+import abc
+import dataclasses
+from typing import Tuple, List, Optional
+
+from bibtexparser.middlewares.middleware import BlockMiddleware
+from bibtexparser.model import Entry, Block, Field
 
 
-class InvalidName(ValueError):
-    """Exception raised by :py:func:`utils.parsename` when an invalid name is input.
+class InvalidNameError(ValueError):
+    """Exception raised by :py:func:`parse_single_name_into_parts` when facing an invalid name.
 
     """
-    pass
+
+    def __init__(self, name: str, reason: str):
+        message: str = f"Cannot split the following name `{name}` into parts: {reason}"
+        super().__init__(message)
 
 
-def parse_single_name_into_parts(name, strict_mode=True):
+class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
+
+    def __init__(self,
+                 allow_inplace_modification: bool,
+                 allow_parallel_execution: bool,
+                 name_fields: Tuple[str] = ('author', 'editor', 'translator')):
+        """
+
+        :param allow_inplace_modification: See corresponding property.
+        :param allow_parallel_execution: See corresponding property.
+        :param name_fields: The fields that contain names, considered by this middleware.
+        """
+        super().__init__(allow_inplace_modification=allow_inplace_modification,
+                         allow_parallel_execution=allow_parallel_execution)
+        self._name_fields = name_fields
+
+    @abc.abstractmethod
+    def _transform_field_value(self, name):
+        raise NotImplementedError("called abstract method")
+
+    # docstr-coverage: inherited
+    def transform_entry(self, entry: Entry, *args, **kwargs) -> Block:
+        field: Field
+        # TODO wrap in try/except to catch exceptions and create failed block if needed
+        for field in entry.fields:
+            if field.key in entry:
+                field.value = self._transform_field_value(field.value)
+        return entry
+
+
+class SeparateCoAuthors(_NameTransformerMiddleware):
+
+    # docstr-coverage: inherited
+    @staticmethod
+    def _transform_field_value(name) -> List[str]:
+        return split_multiple_persons_names(name)
+
+
+class MergeCoAuthors(_NameTransformerMiddleware):
+
+    # docstr-coverage: inherited
+    @staticmethod
+    def _transform_field_value(name):
+        if isinstance(name, list):
+            return " and ".join(name)
+        return name
+
+
+@dataclasses.dataclass
+class NameParts:
+    first: str = Optional[List[str]]
+    von: str = Optional[List[str]]
+    last: str = Optional[List[str]]
+    jr: str = Optional[List[str]]
+
+
+class SplitNameParts(_NameTransformerMiddleware):
+
+    @staticmethod
+    def _transform_field_value(name) -> List[NameParts]:
+        if not isinstance(name, list):
+            raise ValueError("Expected a list of strings, got {}. "
+                             "Make sure to use `SeparateCoAuthors` middleware"
+                             "before using `SplitNameParts` middleware".format(name))
+
+        return [parse_single_name_into_parts(n) for n in name]
+
+
+class MergeNameParts(_NameTransformerMiddleware):
+
+    @staticmethod
+    def _parts_to_string(parts: NameParts) -> str:
+        return " ".join((
+            " ".join(parts.first) + " " if parts.first else "",
+            " ".join(parts.von) + " " if parts.von else "",
+            " ".join(parts.last) + " " if parts.last else "",
+            " ".join(parts.jr) + " " if parts.jr else "",
+        ))
+
+    def _transform_field_value(self, name) -> List[str]:
+        if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):
+            raise ValueError("Expected a list of NameParts, got {}. ".format(name))
+
+        return [self._parts_to_string(n) for n in name]
+
+
+def parse_single_name_into_parts(name, strict=True):
     """
     Parse a name into its constituent parts: First, von, Last, and Jr.
 
     :param string name: a string containing a single name
-    :param Boolean strict_mode: whether to use strict mode
+    :param Boolean strict: whether to use strict mode
     :returns: dictionary of constituent parts
     :raises `utils.InvalidName`: If an invalid name is given and
                                  ``strict_mode = True``.
@@ -127,8 +226,9 @@ def parse_single_name_into_parts(name, strict_mode=True):
             if level:
                 level -= 1
             else:
-                if strict_mode:
-                    raise InvalidName("Unmatched closing brace in name {{{0}}}.".format(name))
+                if strict:
+                    raise InvalidNameError(name=name,
+                                           reason="Unmatched closing brace")
                 word.insert(0, '{')
 
             # Update the state, append the character, and move on.
@@ -173,8 +273,9 @@ def parse_single_name_into_parts(name, strict_mode=True):
                 if len(sections) < 3:
                     sections.append([])
                     cases.append([])
-                elif strict_mode:
-                    raise InvalidName("Too many commas in the name {{{0}}}.".format(name))
+                elif strict:
+                    raise InvalidNameError(name=name,
+                                           reason="Too many commas")
             continue
 
         # Regular character.
@@ -187,8 +288,9 @@ def parse_single_name_into_parts(name, strict_mode=True):
 
     # Unterminated brace?
     if level:
-        if strict_mode:
-            raise InvalidName("Unterminated opening brace in the name {{{0}}}.".format(name))
+        if strict:
+            raise InvalidNameError(name=name,
+                                   reason="Unterminated opening brace")
         while level:
             word.append('}')
             level -= 1
@@ -201,17 +303,18 @@ def parse_single_name_into_parts(name, strict_mode=True):
     # Get rid of trailing sections.
     if not sections[-1]:
         # Trailing comma?
-        if (len(sections) > 1) and strict_mode:
-            raise InvalidName("Trailing comma at end of name {{{0}}}.".format(name))
+        if (len(sections) > 1) and strict:
+            raise InvalidNameError(name=name,
+                                   reason="Trailing comma at end of name")
         sections.pop(-1)
         cases.pop(-1)
 
     # No non-whitespace input.
     if not sections or not any(bool(section) for section in sections):
-        return {}
+        return NameParts()
 
     # Initialise the output dictionary.
-    parts = {'first': [], 'last': [], 'von': [], 'jr': []}
+    parts = NameParts()
 
     # Form 1: "First von Last"
     if len(sections) == 1:
@@ -219,12 +322,12 @@ def parse_single_name_into_parts(name, strict_mode=True):
 
         # One word only: last cannot be empty.
         if len(p0) == 1:
-            parts['last'] = p0
+            parts.last = p0
 
         # Two words: must be first and last.
         elif len(p0) == 2:
-            parts['first'] = p0[:1]
-            parts['last'] = p0[1:]
+            parts.first = p0[:1]
+            parts.last = p0[1:]
 
         # Need to use the cases to figure it out.
         else:
@@ -244,33 +347,33 @@ def parse_single_name_into_parts(name, strict_mode=True):
                     lastl -= 1  # Cannot consume the rest of the string.
 
                 # Pull the parts out.
-                parts['first'] = p0[:firstl]
-                parts['von'] = p0[firstl:lastl + 1]
-                parts['last'] = p0[lastl + 1:]
+                parts.first = p0[:firstl]
+                parts.von = p0[firstl:lastl + 1]
+                parts.last = p0[lastl + 1:]
 
             # No lowercase: last is the last word, first is everything else.
             else:
-                parts['first'] = p0[:-1]
-                parts['last'] = p0[-1:]
+                parts.first = p0[:-1]
+                parts.last = p0[-1:]
 
     # Form 2 ("von Last, First") or 3 ("von Last, jr, First")
     else:
         # As long as there is content in the first name partition, use it as-is.
         first = sections[-1]
         if first and first[0]:
-            parts['first'] = first
+            parts.first = first
 
         # And again with the jr part.
         if len(sections) == 3:
             jr = sections[-2]
             if jr and jr[0]:
-                parts['jr'] = jr
+                parts.jr = jr
 
         # Last name cannot be empty; if there is only one word in the first
         # partition, we have to use it for the last name.
         last = sections[0]
         if len(last) == 1:
-            parts['last'] = last
+            parts.last = last
 
         # Have to look at the cases to figure it out.
         else:
@@ -281,12 +384,12 @@ def parse_single_name_into_parts(name, strict_mode=True):
                 split = len(lcases) - lcases[::-1].index(0)
                 if split == len(lcases):
                     split = 0  # Last cannot be empty.
-                parts['von'] = sections[0][:split]
-                parts['last'] = sections[0][split:]
+                parts.von = sections[0][:split]
+                parts.last = sections[0][split:]
 
             # All uppercase => all last.
             else:
-                parts['last'] = sections[0]
+                parts.last = sections[0]
 
     # Done.
     return parts

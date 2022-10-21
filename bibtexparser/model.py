@@ -201,6 +201,19 @@ class ParsingFailedBlock(Block):
         return self._error
 
 
+class MiddlewareErrorBlock(ParsingFailedBlock):
+    """A block that could not be parsed due to a middleware error."""
+
+    def __init__(self, block: Block, error: Exception):
+        super().__init__(start_line=block.start_line,
+                         raw=block.raw, error=error)
+        self._block = block
+
+    @property
+    def block(self) -> Block:
+        return self._block
+
+
 class DuplicateKeyBlock(Block):
     """A block that has a duplicate key."""
 
