@@ -1,17 +1,19 @@
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 from bibtexparser.middlewares.middleware import BlockMiddleware
-from bibtexparser.model import String, Entry, Field
+from bibtexparser.model import Entry, Field, String
 
 STRINGS_CAN_BE_UNESCAPED_INTS = False
-ENTRY_POTENTIALLY_INT_FIELDS = ['year',
-                                'month',
-                                'volume',
-                                'number',
-                                'pages',
-                                'edition',
-                                'chapter',
-                                'issue']
+ENTRY_POTENTIALLY_INT_FIELDS = [
+    "year",
+    "month",
+    "volume",
+    "number",
+    "pages",
+    "edition",
+    "chapter",
+    "issue",
+]
 
 
 class RemoveEnclosingMiddleware(BlockMiddleware):
@@ -26,8 +28,10 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     """
 
     def __init__(self, allow_inplace_modification: bool):
-        super().__init__(allow_inplace_modification=allow_inplace_modification,
-                         allow_parallel_execution=True)
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=True,
+        )
 
     @staticmethod
     def metadata_key() -> str:
@@ -36,13 +40,13 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     @staticmethod
     def _strip_enclosing(value: str) -> Tuple[str, Union[str, None]]:
         value = value.strip()
-        if value.startswith('{') and value.endswith('}'):
-            return value[1:-1], '{'
+        if value.startswith("{") and value.endswith("}"):
+            return value[1:-1], "{"
         if value.startswith('"') and value.endswith('"'):
             return value[1:-1], '"'
         return value, "no-enclosing"
 
-    def transform_entry(self, entry: Entry, library: 'Library') -> Entry:
+    def transform_entry(self, entry: Entry, library: "Library") -> Entry:
         field: Field
         metadata = dict()
         for field in entry.fields.values():
@@ -52,7 +56,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         entry.parser_metadata[self.metadata_key()] = metadata
         return entry
 
-    def transform_string(self, string: String, library: 'Library') -> String:
+    def transform_string(self, string: String, library: "Library") -> String:
         stripped, enclosing = self._strip_enclosing(string.value)
         string.value = stripped
         string.parser_metadata[self.metadata_key()] = enclosing
@@ -66,11 +70,13 @@ class AddEnclosingMiddleware(BlockMiddleware):
     It is useful when the field value is enclosed in braces or quotes.
     """
 
-    def __init__(self,
-                 reuse_previous_enclosing: bool,
-                 enclose_integers: bool,
-                 default_enclosing: str,
-                 allow_inplace_modification: bool):
+    def __init__(
+        self,
+        reuse_previous_enclosing: bool,
+        enclose_integers: bool,
+        default_enclosing: str,
+        allow_inplace_modification: bool,
+    ):
         """
         :param reuse_previous_enclosing: Whether to reuse the previous enclosing character,
             i.e., the enclosing removed by the RemoveEnclosingMiddleware.
@@ -82,12 +88,16 @@ class AddEnclosingMiddleware(BlockMiddleware):
         :param allow_inplace_modification: Whether to allow inplace modification
             (see BlockMiddleware docs).
         """
-        super().__init__(allow_inplace_modification=allow_inplace_modification,
-                         allow_parallel_execution=True)
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=True,
+        )
 
-        if default_enclosing not in ('{', '"'):
-            raise ValueError("default_enclosing must be either '{' or '\"'"
-                             f"not '{default_enclosing}'")
+        if default_enclosing not in ("{", '"'):
+            raise ValueError(
+                "default_enclosing must be either '{' or '\"'"
+                f"not '{default_enclosing}'"
+            )
         self._default_enclosing = default_enclosing
         self._reuse_previous_enclosing = reuse_previous_enclosing
         self._enclose_integers = enclose_integers
@@ -96,33 +106,48 @@ class AddEnclosingMiddleware(BlockMiddleware):
     def metadata_key() -> str:
         return "remove_enclosing"
 
-    def _enclose(self, value: str, metadata_enclosing: str, apply_int_rule: bool) -> str:
+    def _enclose(
+        self, value: str, metadata_enclosing: str, apply_int_rule: bool
+    ) -> str:
         enclosing = self._default_enclosing
         if self._reuse_previous_enclosing and metadata_enclosing is not None:
             enclosing = metadata_enclosing
         elif apply_int_rule and not self._enclose_integers and value.isdigit():
             return value
 
-        if enclosing == '{':
-            return f'{{{value}}}'
+        if enclosing == "{":
+            return f"{{{value}}}"
         if enclosing == '"':
             return f'"{value}"'
-        if enclosing == 'no-enclosing':
+        if enclosing == "no-enclosing":
             return value
-        raise ValueError(f"enclosing must be either '{{' or '\"' or 'no-enclosing', "
-                         f"not '{enclosing}'")
+        raise ValueError(
+            f"enclosing must be either '{{' or '\"' or 'no-enclosing', "
+            f"not '{enclosing}'"
+        )
 
     def transform_entry(self, entry: Entry, *args, **kwargs) -> Entry:
         field: Field
-        metadata_enclosing = entry.parser_metadata.pop(RemoveEnclosingMiddleware.metadata_key(), None)
+        metadata_enclosing = entry.parser_metadata.pop(
+            RemoveEnclosingMiddleware.metadata_key(), None
+        )
         for field in entry.fields.values():
             apply_int_rule = field.key in ENTRY_POTENTIALLY_INT_FIELDS
-            prev_encoding = metadata_enclosing.get(field.key, None) if metadata_enclosing is not None else None
-            field.value = self._enclose(field.value, prev_encoding, apply_int_rule=apply_int_rule)
+            prev_encoding = (
+                metadata_enclosing.get(field.key, None)
+                if metadata_enclosing is not None
+                else None
+            )
+            field.value = self._enclose(
+                field.value, prev_encoding, apply_int_rule=apply_int_rule
+            )
         return entry
 
     def transform_string(self, string: String, *args, **kwargs) -> String:
         metadata_key = RemoveEnclosingMiddleware.metadata_key()
-        string.value = self._enclose(string.value, string.parser_metadata.get(metadata_key),
-                                     apply_int_rule=STRINGS_CAN_BE_UNESCAPED_INTS)
+        string.value = self._enclose(
+            string.value,
+            string.parser_metadata.get(metadata_key),
+            apply_int_rule=STRINGS_CAN_BE_UNESCAPED_INTS,
+        )
         return string

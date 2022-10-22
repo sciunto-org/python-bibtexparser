@@ -108,7 +108,7 @@ class ImplicitComment(Block):
 class Field:
     """A field of a Bibtex entry, e.g. `author = {John Doe}`."""
 
-    def __init__(self, start_line: int, key: str, value: str):
+    def __init__(self, start_line: int, key: str, value: Any):
         self._start_line = start_line
         self._key = key
         self._value = value
@@ -122,11 +122,11 @@ class Field:
         self._key = value
 
     @property
-    def value(self) -> str:
+    def value(self) -> Any:
         return self._value
 
     @value.setter
-    def value(self, value: str):
+    def value(self, value: Any):
         self._value = value
 
     @property
@@ -199,6 +199,19 @@ class ParsingFailedBlock(Block):
     @property
     def error(self) -> Exception:
         return self._error
+
+
+class MiddlewareErrorBlock(ParsingFailedBlock):
+    """A block that could not be parsed due to a middleware error."""
+
+    def __init__(self, block: Block, error: Exception):
+        super().__init__(start_line=block.start_line,
+                         raw=block.raw, error=error)
+        self._block = block
+
+    @property
+    def block(self) -> Block:
+        return self._block
 
 
 class DuplicateKeyBlock(Block):
