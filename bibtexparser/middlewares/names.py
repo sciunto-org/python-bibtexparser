@@ -37,6 +37,11 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
                          allow_parallel_execution=allow_parallel_execution)
         self._name_fields = name_fields
 
+    @property
+    def name_fields(self) -> Tuple[str]:
+        """The fields that contain names, considered by this middleware."""
+        return self._name_fields
+
     @abc.abstractmethod
     def _transform_field_value(self, name):
         raise NotImplementedError("called abstract method")
@@ -45,25 +50,31 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
     def transform_entry(self, entry: Entry, *args, **kwargs) -> Block:
         field: Field
         # TODO wrap in try/except to catch exceptions and create failed block if needed
-        for field in entry.fields:
-            if field.key in entry:
+        for field in entry.fields.values():
+            if field.key in self.name_fields:
                 field.value = self._transform_field_value(field.value)
         return entry
 
 
 class SeparateCoAuthors(_NameTransformerMiddleware):
 
-    # docstr-coverage: inherited
     @staticmethod
-    def _transform_field_value(name) -> List[str]:
+    def metadata_key() -> str:
+        return 'separate_coauthors'
+
+    # docstr-coverage: inherited
+    def _transform_field_value(self, name) -> List[str]:
         return split_multiple_persons_names(name)
 
 
 class MergeCoAuthors(_NameTransformerMiddleware):
 
-    # docstr-coverage: inherited
     @staticmethod
-    def _transform_field_value(name):
+    def metadata_key() -> str:
+        return 'merge_coauthors'
+
+    # docstr-coverage: inherited
+    def _transform_field_value(self, name):
         if isinstance(name, list):
             return " and ".join(name)
         return name
@@ -80,7 +91,10 @@ class NameParts:
 class SplitNameParts(_NameTransformerMiddleware):
 
     @staticmethod
-    def _transform_field_value(name) -> List[NameParts]:
+    def metadata_key() -> str:
+        return "split_name_parts"
+
+    def _transform_field_value(self, name) -> List[NameParts]:
         if not isinstance(name, list):
             raise ValueError("Expected a list of strings, got {}. "
                              "Make sure to use `SeparateCoAuthors` middleware"
@@ -92,13 +106,17 @@ class SplitNameParts(_NameTransformerMiddleware):
 class MergeNameParts(_NameTransformerMiddleware):
 
     @staticmethod
+    def metadata_key() -> str:
+        return "merge_name_parts"
+
+    @staticmethod
     def _parts_to_string(parts: NameParts) -> str:
-        return " ".join((
-            " ".join(parts.first) + " " if parts.first else "",
-            " ".join(parts.von) + " " if parts.von else "",
-            " ".join(parts.last) + " " if parts.last else "",
-            " ".join(parts.jr) + " " if parts.jr else "",
-        ))
+        return " ".join([part for part in (
+            " ".join(parts.first) if parts.first else None,
+            " ".join(parts.von) if parts.von else None,
+            " ".join(parts.last) if parts.last else None,
+            " ".join(parts.jr) if parts.jr else None,
+        ) if part is not None])
 
     def _transform_field_value(self, name) -> List[str]:
         if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):

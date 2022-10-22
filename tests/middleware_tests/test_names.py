@@ -1,9 +1,14 @@
+from copy import deepcopy
 from typing import List, Dict
 
 import pytest as pytest
 
+from bibtexparser.library import Library
 from bibtexparser.middlewares.names import split_multiple_persons_names, NameParts, parse_single_name_into_parts, \
-    InvalidNameError
+    InvalidNameError, SeparateCoAuthors, MergeCoAuthors, SplitNameParts, MergeNameParts
+from bibtexparser.model import Entry, Field
+from tests.middleware_tests.middleware_test_util import assert_inplace_is_respected, \
+    assert_nonfield_entry_attributes_unchanged
 
 
 @pytest.mark.parametrize("field_value, expected", [
@@ -645,3 +650,142 @@ def test_split_name_into_parts(name, expected_as_dict, strict):
     result = parse_single_name_into_parts(name, strict=strict)
     expected = _dict_to_nameparts(expected_as_dict)
     assert result == expected
+
+
+@pytest.mark.parametrize('inplace', [True, False], ids=['inplace', 'copy'])
+def test_separate_co_names_middleware(inplace):
+    """Test coauthor, co-editor, splitting middleware.
+
+     Note: exact splitting behavior is tested above,
+     this just verifies the Middleware-wrapper calls the
+     corresponding spliting function correctly."""
+    input_entry = Entry(
+        start_line=0,
+        raw="irrelevant-for-this-test",
+        entry_type="article",
+        key="articleKey",
+        fields={
+            'title': Field(start_line=0, key='title', value='A Test and Some More'),
+            'author': Field(start_line=1, key='author', value='A. Author and B. Author'),
+            'editor': Field(start_line=2, key='editor', value='C. Editor and D. Editor'),
+        }
+    )
+    original_copy = deepcopy(input_entry)
+
+    middleware = SeparateCoAuthors(allow_inplace_modification=inplace, allow_parallel_execution=False)
+    transformed_library = middleware.transform(Library([input_entry]))
+
+    assert len(transformed_library.entries) == 1
+    assert len(transformed_library.blocks) == 1
+
+    transformed_entry = transformed_library.entries[0]
+    assert transformed_entry.fields['title'] == original_copy.fields['title']
+    assert transformed_entry.fields['author'].value == ["A. Author", "B. Author"]
+    assert transformed_entry.fields['editor'].value == ["C. Editor", "D. Editor"]
+
+    # Make sure other attributes are not changed
+    assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
+
+    # Assert `allow_inplace_modification` is respected
+    assert_inplace_is_respected(inplace, input_entry, transformed_entry)
+
+
+@pytest.mark.parametrize('inplace', [True, False], ids=['inplace', 'copy'])
+def test_merge_co_names_middleware(inplace: bool):
+    input_entry = Entry(
+        start_line=0,
+        raw="irrelevant-for-this-test",
+        entry_type="article",
+        key="articleKey",
+        fields={
+            'title': Field(start_line=0, key='title', value='A Test and Some More'),
+            'author': Field(start_line=1, key='author', value=["A. Author", "B. Author"]),
+            'editor': Field(start_line=2, key='editor', value=["C. Editor", "D. Editor"]),
+        }
+    )
+    original_copy = deepcopy(input_entry)
+
+    middleware = MergeCoAuthors(allow_inplace_modification=inplace, allow_parallel_execution=False)
+    transformed_library = middleware.transform(Library([input_entry]))
+
+    assert len(transformed_library.entries) == 1
+    assert len(transformed_library.blocks) == 1
+
+    transformed_entry = transformed_library.entries[0]
+    assert transformed_entry.fields['title'] == original_copy.fields['title']
+    assert transformed_entry.fields['author'].value == 'A. Author and B. Author'
+    assert transformed_entry.fields['editor'].value == 'C. Editor and D. Editor'
+
+    # Make sure other attributes are not changed
+    assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
+
+    # Assert `allow_inplace_modification` is respected
+    assert_inplace_is_respected(inplace, input_entry, transformed_entry)
+
+
+@pytest.mark.parametrize('inplace', [True, False], ids=['inplace', 'copy'])
+def test_split_name_parts(inplace: bool):
+    input_entry = Entry(
+        start_line=0,
+        raw="irrelevant-for-this-test",
+        entry_type="article",
+        key="articleKey",
+        fields={
+            'title': Field(start_line=0, key='title', value='A Test and Some More'),
+            'author': Field(start_line=1, key='author', value=["Amy Author", "Ben Bystander"]),
+        }
+    )
+    original_copy = deepcopy(input_entry)
+
+    middleware = SplitNameParts(allow_inplace_modification=inplace, allow_parallel_execution=False)
+    transformed_library = middleware.transform(Library([input_entry]))
+
+    assert len(transformed_library.entries) == 1
+    assert len(transformed_library.blocks) == 1
+
+    transformed_entry = transformed_library.entries[0]
+    assert transformed_entry.fields['title'] == original_copy.fields['title']
+    assert transformed_entry.fields['author'].value == [
+        NameParts(first=['Amy'], last=['Author'], von=[], jr=[]),
+        NameParts(first=['Ben'], last=['Bystander'], von=[], jr=[]),
+    ]
+
+    # Make sure other attributes are not changed
+    assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
+
+    # Assert `allow_inplace_modification` is respected
+    assert_inplace_is_respected(inplace, input_entry, transformed_entry)
+
+
+@pytest.mark.parametrize('inplace', [True, False], ids=['inplace', 'copy'])
+def test_merge_name_parts(inplace: bool):
+    input_entry = Entry(
+        start_line=0,
+        raw="irrelevant-for-this-test",
+        entry_type="article",
+        key="articleKey",
+        fields={
+            'title': Field(start_line=0, key='title', value='A Test and Some More'),
+            'author': Field(start_line=1, key='author', value=[
+                NameParts(first=['Amy'], last=['Author'], von=[], jr=[]),
+                NameParts(first=['Ben'], last=['Bystander'], von=[], jr=[]),
+            ]),
+        }
+    )
+    original_copy = deepcopy(input_entry)
+
+    middleware = MergeNameParts(allow_inplace_modification=inplace, allow_parallel_execution=False)
+    transformed_library = middleware.transform(Library([input_entry]))
+
+    assert len(transformed_library.entries) == 1
+    assert len(transformed_library.blocks) == 1
+
+    transformed_entry = transformed_library.entries[0]
+    assert transformed_entry.fields['title'] == original_copy.fields['title']
+    assert transformed_entry.fields['author'].value == ["Amy Author", "Ben Bystander"]
+
+    # Make sure other attributes are not changed
+    assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
+
+    # Assert `allow_inplace_modification` is respected
+    assert_inplace_is_respected(inplace, input_entry, transformed_entry)

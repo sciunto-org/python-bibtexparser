@@ -6,7 +6,8 @@ import pytest
 from bibtexparser.library import Library
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware, AddEnclosingMiddleware
 from bibtexparser.model import String, Entry, Field, Block
-from tests.middleware_tests.middleware_test_util import assert_block_does_not_change
+from tests.middleware_tests.middleware_test_util import assert_block_does_not_change, assert_inplace_is_respected, \
+    assert_nonfield_entry_attributes_unchanged
 from tests.resources import ENCLOSINGS, EDGE_CASE_VALUES
 
 
@@ -58,7 +59,7 @@ def test_removal_of_enclosing_on_string(enclosing, value, inplace):
     assert transformed.raw == raw
 
     # Assert `allow_inplace_modification` is respected
-    _assert_inplace_is_respected(inplace, original, transformed)
+    assert_inplace_is_respected(inplace, original, transformed)
 
 
 @pytest.mark.parametrize("enclosing", ENCLOSINGS)
@@ -96,13 +97,10 @@ def test_removal_of_enclosing_on_entry(enclosing: str, inplace: bool):
     assert transformed_fields["month"].value == "1"
 
     # Assert remaining fields are unchanged
-    assert transformed_library.entries[0].start_line == input_entry_copy.start_line
-    assert transformed_library.entries[0].entry_type == input_entry_copy.entry_type
-    assert transformed_library.entries[0].raw == input_entry_copy.raw
-    assert transformed_library.entries[0].key == input_entry_copy.key
+    assert_nonfield_entry_attributes_unchanged(input_entry, transformed_library.entries[0])
 
     # Assert `allow_inplace_modification` is respected
-    _assert_inplace_is_respected(inplace, input_entry, transformed_library.entries[0])
+    assert_inplace_is_respected(inplace, input_entry, transformed_library.entries[0])
 
 
 @pytest.mark.parametrize("block", [
@@ -182,13 +180,10 @@ def test_addition_of_enclosing_on_entry(metadata_enclosing: str,
     assert used_enclosing == expected_enclosing
 
     # Assert remaining fields are unchanged
-    assert transformed.start_line == input_entry_copy.start_line
-    assert transformed.entry_type == input_entry_copy.entry_type
-    assert transformed.raw == input_entry_copy.raw
-    assert transformed.key == input_entry_copy.key
+    assert_nonfield_entry_attributes_unchanged(input_entry, transformed)
 
     # Assert `allow_inplace_modification` is respected
-    _assert_inplace_is_respected(inplace, input_entry, transformed)
+    assert_inplace_is_respected(inplace, input_entry, transformed)
 
 
 def _figure_out_added_enclosing(changed_value, value):
@@ -258,18 +253,7 @@ def test_addition_of_enclosing_on_string(metadata_enclosing: str,
     assert transformed.key == input_string_copy.key
 
     # Assert `allow_inplace_modification` is respected
-    _assert_inplace_is_respected(inplace, input_string, transformed)
-
-
-def _assert_inplace_is_respected(inplace: bool, input_block: Block, transformed_block: Block):
-    if inplace:
-        # Note that this is not a strict requirement,
-        #   as "allow_inplace" does not mandate inplace modification,
-        #   but it should be implemented as such for this middleware
-        #   for performance reasons.
-        assert transformed_block is input_block
-    else:
-        assert transformed_block is not input_block
+    assert_inplace_is_respected(inplace, input_string, transformed)
 
 
 @pytest.mark.parametrize("block", ["preamble", "implicit_comment", "explicit_comment"])

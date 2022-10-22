@@ -108,7 +108,7 @@ class ImplicitComment(Block):
 class Field:
     """A field of a Bibtex entry, e.g. `author = {John Doe}`."""
 
-    def __init__(self, start_line: int, key: str, value: str):
+    def __init__(self, start_line: int, key: str, value: Any):
         self._start_line = start_line
         self._key = key
         self._value = value
@@ -122,11 +122,11 @@ class Field:
         self._key = value
 
     @property
-    def value(self) -> str:
+    def value(self) -> Any:
         return self._value
 
     @value.setter
-    def value(self, value: str):
+    def value(self, value: Any):
         self._value = value
 
     @property
