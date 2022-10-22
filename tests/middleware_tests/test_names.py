@@ -866,9 +866,7 @@ def test_separate_co_names_middleware(inplace):
     )
     original_copy = deepcopy(input_entry)
 
-    middleware = SeparateCoAuthors(
-        allow_inplace_modification=inplace, allow_parallel_execution=False
-    )
+    middleware = SeparateCoAuthors(allow_inplace_modification=inplace)
     transformed_library = middleware.transform(Library([input_entry]))
 
     assert len(transformed_library.entries) == 1
@@ -905,9 +903,7 @@ def test_merge_co_names_middleware(inplace: bool):
     )
     original_copy = deepcopy(input_entry)
 
-    middleware = MergeCoAuthors(
-        allow_inplace_modification=inplace, allow_parallel_execution=False
-    )
+    middleware = MergeCoAuthors(allow_inplace_modification=inplace)
     transformed_library = middleware.transform(Library([input_entry]))
 
     assert len(transformed_library.entries) == 1
@@ -941,9 +937,7 @@ def test_split_name_parts(inplace: bool):
     )
     original_copy = deepcopy(input_entry)
 
-    middleware = SplitNameParts(
-        allow_inplace_modification=inplace, allow_parallel_execution=False
-    )
+    middleware = SplitNameParts(allow_inplace_modification=inplace)
     transformed_library = middleware.transform(Library([input_entry]))
 
     assert len(transformed_library.entries) == 1
@@ -984,9 +978,7 @@ def test_merge_name_parts(inplace: bool):
     )
     original_copy = deepcopy(input_entry)
 
-    middleware = MergeNameParts(
-        allow_inplace_modification=inplace, allow_parallel_execution=False
-    )
+    middleware = MergeNameParts(allow_inplace_modification=inplace)
     transformed_library = middleware.transform(Library([input_entry]))
 
     assert len(transformed_library.entries) == 1

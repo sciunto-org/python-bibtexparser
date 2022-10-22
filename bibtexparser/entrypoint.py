@@ -1,11 +1,11 @@
 import warnings
 from typing import Iterable, List, Optional, TextIO, Union
 
-from bibtexparser import BibtexFormat, writer
 from bibtexparser.library import Library
 from bibtexparser.middlewares.default import default_parse_stack
 from bibtexparser.middlewares.middleware import Middleware
 from bibtexparser.splitter import Splitter
+from bibtexparser.writer import BibtexFormat, write_string
 
 
 def _build_stack(
