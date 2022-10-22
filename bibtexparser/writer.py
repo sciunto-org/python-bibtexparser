@@ -1,28 +1,15 @@
-from typing import TextIO, Union, Optional
+from typing import Optional
 
 from bibtexparser.library import Library
 
 
-def write(file: Union[str, TextIO],
-          library: Library,
-          bibtex_format: Optional['BibtexFormat']) -> None:
-    """Write a BibTeX database to a file.
-
-    :param file: File to write to. Can be a file name or a file object.
-    :param library: BibTeX database to serialize.
-    :param bibtex_format: Customized BibTeX format to use (optional)."""
-    bibtex_str = to_bibtex(library=library,
-                           bibtex_format=bibtex_format)
-    if isinstance(file, str):
-        with open(file, 'w') as f:
-            f.write(bibtex_str)
-    else:
-        file.write(bibtex_str)
-
-
-def to_bibtex(library: Library,
-              bibtex_format: Optional['BibtexFormat']) -> str:
+def write_string(
+    library: Library, bibtex_format: Optional["BibtexFormat"] = None
+) -> str:
     """Serialize a BibTeX database to a string.
+
+    Note: This is not the exposed writing entrypoint.
+    The exposed entrypoint is `bibtexparser.write_string` (in entrypoint.py).
 
     :param library: BibTeX database to serialize.
     :param bibtex_format: Customized BibTeX format to use (optional)."""
@@ -34,7 +21,7 @@ def to_bibtex(library: Library,
     #    and we thus *may* have to change the structure of the file a bit
     #    (e.g. using a static methods on a class)
 
-    raise NotImplementedError
+    raise NotImplementedError("Bibtex string writing not yet implemented")
 
 
 class BibtexFormat:
@@ -45,10 +32,10 @@ class BibtexFormat:
     """
 
     def __init__(self):
-        self._indent: str = ' '
+        self._indent: str = " "
         self._align_values: bool = False
         self._align_multiline_values: bool = False
-        self._entry_separator: str = '\n'
+        self._entry_separator: str = "\n"
         self._comma_first: bool = False
         self._trailing_comma: bool = False
 

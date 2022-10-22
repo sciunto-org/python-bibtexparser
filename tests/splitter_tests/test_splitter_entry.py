@@ -9,12 +9,15 @@ from bibtexparser.splitter import Splitter
 from tests.resources import EDGE_CASE_VALUES, ENCLOSINGS
 
 
-@pytest.mark.parametrize("field_key,value,line", [
-    ("year", "2019", 1),
-    ("month", "1", 2),
-    ("author", '"John Doe"', 3),
-    ("journal", "someJournalReference", 4),
-])
+@pytest.mark.parametrize(
+    "field_key,value,line",
+    [
+        ("year", "2019", 1),
+        ("month", "1", 2),
+        ("author", '"John Doe"', 3),
+        ("journal", "someJournalReference", 4),
+    ],
+)
 def test_field_enclosings(field_key: str, value: str, line: int):
     """Test that the enclosings of the fields are correctly parsed.
 
@@ -41,23 +44,26 @@ def test_field_enclosings(field_key: str, value: str, line: int):
     assert tested_field.start_line == line
 
 
-@pytest.mark.parametrize("declared_block_type,expected", [
-    ("@article", "article"),
-    ("@ARTICLE", "article"),
-    ("@Article", "article"),
-    ("@book", "book"),
-    ("@BOOK", "book"),
-    ("@Book", "book"),
-    ("@inbook", "inbook"),
-    ("@INBOOK", "inbook"),
-    ("@Inbook", "inbook"),
-    ("@incollection", "incollection"),
-    ("@INCOLLECTION", "incollection"),
-    ("@Incollection", "incollection"),
-    ("@inproceedings", "inproceedings"),
-    ("@INPROCEEDINGS", "inproceedings"),
-    ("@InprocEEdings", "inproceedings"),
-])
+@pytest.mark.parametrize(
+    "declared_block_type,expected",
+    [
+        ("@article", "article"),
+        ("@ARTICLE", "article"),
+        ("@Article", "article"),
+        ("@book", "book"),
+        ("@BOOK", "book"),
+        ("@Book", "book"),
+        ("@inbook", "inbook"),
+        ("@INBOOK", "inbook"),
+        ("@Inbook", "inbook"),
+        ("@incollection", "incollection"),
+        ("@INCOLLECTION", "incollection"),
+        ("@Incollection", "incollection"),
+        ("@inproceedings", "inproceedings"),
+        ("@INPROCEEDINGS", "inproceedings"),
+        ("@InprocEEdings", "inproceedings"),
+    ],
+)
 def test_entry_type(declared_block_type, expected):
     """Test that the entry type is case insensitive."""
     bibtex_str = """@article{test,
@@ -93,25 +99,34 @@ def test_field_value(field_value: str, enclosing: str):
     assert library.entries[0].fields["firstfield"].value == expected
 
 
-@pytest.mark.parametrize("enclosing", ENCLOSINGS + [
-    pytest.param("{0}", id="no enclosing"),
-])
+@pytest.mark.parametrize(
+    "enclosing",
+    ENCLOSINGS
+    + [
+        pytest.param("{0}", id="no enclosing"),
+    ],
+)
 def test_trailing_comma(enclosing: str):
     """Test that a trailing comma is correctly parsed (i.e., ignored)."""
     value_before_trailing_comma = enclosing.format("valueBeforeTrailingComma")
-    bibtex_str = dedent(f"""\
+    bibtex_str = dedent(
+        f"""\
     @article{{test,
         firstfield = {{some value}},
         fieldBeforeTrailingComma = {value_before_trailing_comma},
     }}
     
-    @string{{someString = "some value"}}""")
+    @string{{someString = "some value"}}"""
+    )
     library: Library = Splitter(bibtex_str).split()
     assert len(library.failed_blocks) == 0
     assert len(library.entries) == 1
     assert len(library.entries[0].fields) == 2
     assert library.entries[0].fields["firstfield"].value == "{some value}"
-    assert library.entries[0].fields["fieldBeforeTrailingComma"].value == value_before_trailing_comma
+    assert (
+        library.entries[0].fields["fieldBeforeTrailingComma"].value
+        == value_before_trailing_comma
+    )
 
     # Make sure that subsequent blocks are still parsed correctly
     assert len(library.strings) == 1

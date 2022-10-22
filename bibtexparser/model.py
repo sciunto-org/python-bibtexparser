@@ -3,10 +3,12 @@ from typing import Any, Dict, List, Optional
 
 
 class Block(abc.ABC):
-    def __init__(self,
-                 start_line: int,
-                 raw: str,
-                 parser_metadata: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        start_line: int,
+        raw: str,
+        parser_metadata: Optional[Dict[str, Any]] = None,
+    ):
         self._start_line_in_file = start_line
         self._raw = raw
         self._parser_metadata: Dict[str, Any] = parser_metadata
@@ -27,9 +29,11 @@ class Block(abc.ABC):
 
     def __eq__(self, other):
         # make sure they have the same type and same content
-        return (isinstance(other, self.__class__) and
-                isinstance(self, other.__class__) and
-                self.__dict__ == other.__dict__)
+        return (
+            isinstance(other, self.__class__)
+            and isinstance(self, other.__class__)
+            and self.__dict__ == other.__dict__
+        )
 
 
 class String(Block):
@@ -135,21 +139,23 @@ class Field:
 
     def __eq__(self, other):
         # make sure they have the same type and same content
-        return (isinstance(other, self.__class__) and
-                isinstance(self, other.__class__) and
-                self.__dict__ == other.__dict__)
+        return (
+            isinstance(other, self.__class__)
+            and isinstance(self, other.__class__)
+            and self.__dict__ == other.__dict__
+        )
 
 
 class Entry(Block):
     """Bibtex Blocks of the `@entry` type, e.g. @article{Cesar2013, ...}."""
 
     def __init__(
-            self,
-            start_line: int,
-            raw: str,
-            entry_type: str,
-            key: str,
-            fields: Dict[str, Field],
+        self,
+        start_line: int,
+        raw: str,
+        entry_type: str,
+        key: str,
+        fields: Dict[str, Field],
     ):
         super().__init__(start_line, raw)
 
@@ -205,8 +211,7 @@ class MiddlewareErrorBlock(ParsingFailedBlock):
     """A block that could not be parsed due to a middleware error."""
 
     def __init__(self, block: Block, error: Exception):
-        super().__init__(start_line=block.start_line,
-                         raw=block.raw, error=error)
+        super().__init__(start_line=block.start_line, raw=block.raw, error=error)
         self._block = block
 
     @property
@@ -218,12 +223,12 @@ class DuplicateKeyBlock(Block):
     """A block that has a duplicate key."""
 
     def __init__(
-            self,
-            start_line: int,
-            raw: str,
-            key: str,
-            previous_block: Block,
-            duplicate_block: Block,
+        self,
+        start_line: int,
+        raw: str,
+        key: str,
+        previous_block: Block,
+        duplicate_block: Block,
     ):
         super().__init__(start_line, raw)
         self._key = key
