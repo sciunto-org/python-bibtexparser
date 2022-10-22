@@ -71,10 +71,10 @@ class MergeCoAuthors(_NameTransformerMiddleware):
 
 @dataclasses.dataclass
 class NameParts:
-    first: str = Optional[List[str]]
-    von: str = Optional[List[str]]
-    last: str = Optional[List[str]]
-    jr: str = Optional[List[str]]
+    first: List[str] = dataclasses.field(default_factory=list)
+    von: List[str] = dataclasses.field(default_factory=list)
+    last: List[str] = dataclasses.field(default_factory=list)
+    jr: List[str] = dataclasses.field(default_factory=list)
 
 
 class SplitNameParts(_NameTransformerMiddleware):
