@@ -20,23 +20,19 @@ class InvalidNameError(ValueError):
 
 
 class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
-    """Internal utility class - superclass for all name-transforming middlewares."""
+    """Internal utility class - superclass for all name-transforming middlewares.
+
+    :param allow_inplace_modification: See corresponding property.
+    :param name_fields: The fields that contain names, considered by this middleware."""
 
     def __init__(
         self,
         allow_inplace_modification: bool,
-        allow_parallel_execution: bool,
         name_fields: Tuple[str] = ("author", "editor", "translator"),
     ):
-        """
-
-        :param allow_inplace_modification: See corresponding property.
-        :param allow_parallel_execution: See corresponding property.
-        :param name_fields: The fields that contain names, considered by this middleware.
-        """
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
-            allow_parallel_execution=allow_parallel_execution,
+            allow_parallel_execution=True,
         )
         self._name_fields = name_fields
 

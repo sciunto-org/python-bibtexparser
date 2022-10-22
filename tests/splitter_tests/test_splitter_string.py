@@ -5,12 +5,15 @@ from bibtexparser.splitter import Splitter
 from tests.resources import EDGE_CASE_VALUES, ENCLOSINGS
 
 
-@pytest.mark.parametrize("key", [
-    "ICSE2022",
-    "ICSE2022-with-dash",
-    "ICSE2022_with_underscore",
-    "ICSE2022_with_underscore_and-dash",
-])
+@pytest.mark.parametrize(
+    "key",
+    [
+        "ICSE2022",
+        "ICSE2022-with-dash",
+        "ICSE2022_with_underscore",
+        "ICSE2022_with_underscore_and-dash",
+    ],
+)
 @pytest.mark.parametrize("value", EDGE_CASE_VALUES)
 @pytest.mark.parametrize("enclosing", ENCLOSINGS)
 def test_parse_string_key_val(key: str, value: str, enclosing: str):
@@ -37,4 +40,3 @@ def test_parse_empty_string(enclosing: str):
     assert len(library.strings) == 1
     assert library.strings[0].key == "key"
     assert library.strings[0].value == empty_enclosing
-

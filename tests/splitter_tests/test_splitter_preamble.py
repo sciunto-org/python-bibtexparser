@@ -2,15 +2,13 @@ import pytest
 
 from bibtexparser.model import Preamble
 from bibtexparser.splitter import Splitter
-from tests.resources import VALID_BIBTEX_SNIPPETS, PREAMBLES
+from tests.resources import PREAMBLES, VALID_BIBTEX_SNIPPETS
 
 
 @pytest.mark.parametrize("bibtex_before", VALID_BIBTEX_SNIPPETS)
 @pytest.mark.parametrize("bibtex_after", VALID_BIBTEX_SNIPPETS)
 @pytest.mark.parametrize("preamble_content", PREAMBLES)
-def test_preamble_parsing(bibtex_before: str,
-                          bibtex_after: str,
-                          preamble_content: str):
+def test_preamble_parsing(bibtex_before: str, bibtex_after: str, preamble_content: str):
     num_before = bibtex_before.lower().count("@preamble{")
     num_after = bibtex_after.lower().count("@preamble{")
 
