@@ -87,6 +87,17 @@ class NameParts:
     last: List[str] = dataclasses.field(default_factory=list)
     jr: List[str] = dataclasses.field(default_factory=list)
 
+    @property
+    def first_name_first(self) -> str:
+        return " ".join([part for part in (
+            " ".join(self.first) if self.first else None,
+            " ".join(self.von) if self.von else None,
+            " ".join(self.last) if self.last else None,
+            " ".join(self.jr) if self.jr else None,
+        ) if part is not None])
+
+    # TODO comma based name representation property
+
 
 class SplitNameParts(_NameTransformerMiddleware):
 
@@ -109,20 +120,11 @@ class MergeNameParts(_NameTransformerMiddleware):
     def metadata_key() -> str:
         return "merge_name_parts"
 
-    @staticmethod
-    def _parts_to_string(parts: NameParts) -> str:
-        return " ".join([part for part in (
-            " ".join(parts.first) if parts.first else None,
-            " ".join(parts.von) if parts.von else None,
-            " ".join(parts.last) if parts.last else None,
-            " ".join(parts.jr) if parts.jr else None,
-        ) if part is not None])
-
     def _transform_field_value(self, name) -> List[str]:
         if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):
             raise ValueError("Expected a list of NameParts, got {}. ".format(name))
 
-        return [self._parts_to_string(n) for n in name]
+        return [n.first_name_first for n in name]
 
 
 def parse_single_name_into_parts(name, strict=True):
