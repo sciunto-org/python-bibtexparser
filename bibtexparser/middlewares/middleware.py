@@ -1,7 +1,7 @@
 import abc
 import logging
 from copy import deepcopy
-from typing import Union, Collection
+from typing import Collection, Union
 
 from bibtexparser.library import Library
 from bibtexparser.model import (
@@ -20,9 +20,9 @@ class Middleware(abc.ABC):
     Abstract Class. You should extend either BlockMiddleware
     or LibraryMiddleware"""
 
-    def __init__(self,
-                 allow_inplace_modification: bool,
-                 allow_parallel_execution: bool):
+    def __init__(
+        self, allow_inplace_modification: bool, allow_parallel_execution: bool
+    ):
         """
 
         :param allow_inplace_modification: See corresponding property.
@@ -35,8 +35,8 @@ class Middleware(abc.ABC):
     def allow_inplace_modification(self) -> bool:
         """If true, the middleware **may** modify the block in-place.
 
-         I.e., if true, the output of `transform` may be the same instance
-         as the input. If false, new instances must be returned.
+        I.e., if true, the output of `transform` may be the same instance
+        as the input. If false, new instances must be returned.
         """
         return self._allow_inplace_modification
 
@@ -46,7 +46,7 @@ class Middleware(abc.ABC):
         return self._allow_parallel_execution
 
     @abc.abstractmethod
-    def transform(self, library: 'Library') -> 'Library':
+    def transform(self, library: "Library") -> "Library":
         raise NotImplementedError("called abstract method")
 
 
@@ -70,13 +70,13 @@ class BlockMiddleware(Middleware, abc.ABC):
         pass
 
     # docstr-coverage: inherited
-    def transform(self, library: 'Library') -> 'Library':
+    def transform(self, library: "Library") -> "Library":
         # TODO Multiprocessing (only for large library and if allow_multi..)
         blocks = [self.transform_block(b, library) for b in library.blocks]
         return Library(blocks=blocks)
 
     def transform_block(
-            self, block: Block, library: 'Library'
+        self, block: Block, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         """Transform a block.
 
@@ -111,27 +111,27 @@ class BlockMiddleware(Middleware, abc.ABC):
         return block
 
     def transform_entry(
-            self, entry: Entry, library: 'Library'
+        self, entry: Entry, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return entry
 
     def transform_string(
-            self, string: String, library: 'Library'
+        self, string: String, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return string
 
     def transform_preamble(
-            self, preamble: Preamble, library: 'Library'
+        self, preamble: Preamble, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return preamble
 
     def transform_explicit_comment(
-            self, explicit_comment: ExplicitComment, library: 'Library'
+        self, explicit_comment: ExplicitComment, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return explicit_comment
 
     def transform_implicit_comment(
-            self, implicit_comment: ImplicitComment, library: 'Library'
+        self, implicit_comment: ImplicitComment, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return implicit_comment
 
@@ -153,7 +153,7 @@ class LibraryMiddleware(Middleware, abc.ABC):
         #   it cannot be parallelized.
         super().__init__(allow_inplace_modification, allow_parallel_execution=False)
 
-    def transform(self, library: 'Library') -> 'Library':
+    def transform(self, library: "Library") -> "Library":
         """Transform a library.
 
         :param library: Library to transform.
