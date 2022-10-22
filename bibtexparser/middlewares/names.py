@@ -5,16 +5,14 @@ Much of the code is taken from Blair Bonnetts never merged v0 pull request
 """
 import abc
 import dataclasses
-from typing import Tuple, List, Optional
+from typing import List, Optional, Tuple
 
 from bibtexparser.middlewares.middleware import BlockMiddleware
-from bibtexparser.model import Entry, Block, Field
+from bibtexparser.model import Block, Entry, Field
 
 
 class InvalidNameError(ValueError):
-    """Exception raised by :py:func:`parse_single_name_into_parts` when facing an invalid name.
-
-    """
+    """Exception raised by :py:func:`parse_single_name_into_parts` when facing an invalid name."""
 
     def __init__(self, name: str, reason: str):
         message: str = f"Cannot split the following name `{name}` into parts: {reason}"
@@ -24,18 +22,22 @@ class InvalidNameError(ValueError):
 class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
     """Internal utility class - superclass for all name-transforming middlewares."""
 
-    def __init__(self,
-                 allow_inplace_modification: bool,
-                 allow_parallel_execution: bool,
-                 name_fields: Tuple[str] = ('author', 'editor', 'translator')):
+    def __init__(
+        self,
+        allow_inplace_modification: bool,
+        allow_parallel_execution: bool,
+        name_fields: Tuple[str] = ("author", "editor", "translator"),
+    ):
         """
 
         :param allow_inplace_modification: See corresponding property.
         :param allow_parallel_execution: See corresponding property.
         :param name_fields: The fields that contain names, considered by this middleware.
         """
-        super().__init__(allow_inplace_modification=allow_inplace_modification,
-                         allow_parallel_execution=allow_parallel_execution)
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=allow_parallel_execution,
+        )
         self._name_fields = name_fields
 
     @property
@@ -62,7 +64,7 @@ class SeparateCoAuthors(_NameTransformerMiddleware):
 
     @staticmethod
     def metadata_key() -> str:
-        return 'separate_coauthors'
+        return "separate_coauthors"
 
     # docstr-coverage: inherited
     def _transform_field_value(self, name) -> List[str]:
@@ -74,7 +76,7 @@ class MergeCoAuthors(_NameTransformerMiddleware):
 
     @staticmethod
     def metadata_key() -> str:
-        return 'merge_coauthors'
+        return "merge_coauthors"
 
     # docstr-coverage: inherited
     def _transform_field_value(self, name):
@@ -98,12 +100,18 @@ class NameParts:
     @property
     def merge_first_name_first(self) -> str:
         """Merging the name parts into a single string, first-name-first (no comma) format."""
-        return " ".join([part for part in (
-            " ".join(self.first) if self.first else None,
-            " ".join(self.von) if self.von else None,
-            " ".join(self.last) if self.last else None,
-            " ".join(self.jr) if self.jr else None,
-        ) if part is not None])
+        return " ".join(
+            [
+                part
+                for part in (
+                    " ".join(self.first) if self.first else None,
+                    " ".join(self.von) if self.von else None,
+                    " ".join(self.last) if self.last else None,
+                    " ".join(self.jr) if self.jr else None,
+                )
+                if part is not None
+            ]
+        )
 
 
 class SplitNameParts(_NameTransformerMiddleware):
@@ -118,9 +126,11 @@ class SplitNameParts(_NameTransformerMiddleware):
 
     def _transform_field_value(self, name) -> List[NameParts]:
         if not isinstance(name, list):
-            raise ValueError("Expected a list of strings, got {}. "
-                             "Make sure to use `SeparateCoAuthors` middleware"
-                             "before using `SplitNameParts` middleware".format(name))
+            raise ValueError(
+                "Expected a list of strings, got {}. "
+                "Make sure to use `SeparateCoAuthors` middleware"
+                "before using `SplitNameParts` middleware".format(name)
+            )
 
         return [parse_single_name_into_parts(n) for n in name]
 
@@ -195,7 +205,7 @@ def parse_single_name_into_parts(name, strict=True):
     # http://tug.ctan.org/info/bibtex/tamethebeast/ttb_en.pdf
 
     # Whitespace characters that can separate words.
-    whitespace = set(' ~\r\n\t')
+    whitespace = set(" ~\r\n\t")
 
     # We'll iterate over the input once, dividing it into a list of words for
     # each comma-separated section. We'll also calculate the case of each word
@@ -213,7 +223,7 @@ def parse_single_name_into_parts(name, strict=True):
     nameiter = iter(name)
     for char in nameiter:
         # An escape.
-        if char == '\\':
+        if char == "\\":
             escaped = next(nameiter)
 
             # BibTeX doesn't allow whitespace escaping. Copy the slash and fall
@@ -243,7 +253,7 @@ def parse_single_name_into_parts(name, strict=True):
                 continue
 
         # Start of a braced expression.
-        if char == '{':
+        if char == "{":
             level += 1
             word.append(char)
             bracestart = True
@@ -255,15 +265,14 @@ def parse_single_name_into_parts(name, strict=True):
         bracestart = False
 
         # End of a braced expression.
-        if char == '}':
+        if char == "}":
             # Check and reduce the level.
             if level:
                 level -= 1
             else:
                 if strict:
-                    raise InvalidNameError(name=name,
-                                           reason="Unmatched closing brace")
-                word.insert(0, '{')
+                    raise InvalidNameError(name=name, reason="Unmatched closing brace")
+                word.insert(0, "{")
 
             # Update the state, append the character, and move on.
             controlseq = False
@@ -292,10 +301,10 @@ def parse_single_name_into_parts(name, strict=True):
 
         # End of a word.
         # NB. we know we're not in a brace here due to the previous case.
-        if char == ',' or char in whitespace:
+        if char == "," or char in whitespace:
             # Don't add empty words due to repeated whitespace.
             if word:
-                sections[-1].append(''.join(word))
+                sections[-1].append("".join(word))
                 word = []
                 cases[-1].append(case)
                 case = -1
@@ -303,13 +312,12 @@ def parse_single_name_into_parts(name, strict=True):
                 specialchar = False
 
             # End of a section.
-            if char == ',':
+            if char == ",":
                 if len(sections) < 3:
                     sections.append([])
                     cases.append([])
                 elif strict:
-                    raise InvalidNameError(name=name,
-                                           reason="Too many commas")
+                    raise InvalidNameError(name=name, reason="Too many commas")
             continue
 
         # Regular character.
@@ -323,23 +331,21 @@ def parse_single_name_into_parts(name, strict=True):
     # Unterminated brace?
     if level:
         if strict:
-            raise InvalidNameError(name=name,
-                                   reason="Unterminated opening brace")
+            raise InvalidNameError(name=name, reason="Unterminated opening brace")
         while level:
-            word.append('}')
+            word.append("}")
             level -= 1
 
     # Handle the final word.
     if word:
-        sections[-1].append(''.join(word))
+        sections[-1].append("".join(word))
         cases[-1].append(case)
 
     # Get rid of trailing sections.
     if not sections[-1]:
         # Trailing comma?
         if (len(sections) > 1) and strict:
-            raise InvalidNameError(name=name,
-                                   reason="Trailing comma at end of name")
+            raise InvalidNameError(name=name, reason="Trailing comma at end of name")
         sections.pop(-1)
         cases.pop(-1)
 
@@ -382,8 +388,8 @@ def parse_single_name_into_parts(name, strict=True):
 
                 # Pull the parts out.
                 parts.first = p0[:firstl]
-                parts.von = p0[firstl:lastl + 1]
-                parts.last = p0[lastl + 1:]
+                parts.von = p0[firstl : lastl + 1]
+                parts.last = p0[lastl + 1 :]
 
             # No lowercase: last is the last word, first is everything else.
             else:
@@ -413,7 +419,7 @@ def parse_single_name_into_parts(name, strict=True):
         else:
             lcases = cases[0]
 
-            #  
+            #
             if 0 in lcases:
                 split = len(lcases) - lcases[::-1].index(0)
                 if split == len(lcases):
@@ -464,12 +470,19 @@ def split_multiple_persons_names(names):
 
     """
     # Sanity check for empty string.
-    names = names.strip(' \r\n\t')
+    names = names.strip(" \r\n\t")
     if not names:
         return []
 
     # Steps to find the ' and ' token.
-    START_WHITESPACE, FIND_A, FIND_N, FIND_D, END_WHITESPACE, NEXT_WORD = 0, 1, 2, 3, 4, 5
+    START_WHITESPACE, FIND_A, FIND_N, FIND_D, END_WHITESPACE, NEXT_WORD = (
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+    )
 
     # Processing variables.
     step = START_WHITESPACE  # Current step.
@@ -477,7 +490,7 @@ def split_multiple_persons_names(names):
     bracelevel = 0  # Current bracelevel.
     spans = [[0]]  # Spans of names within the string.
     possible_end = 0  # Possible end position of a name.
-    whitespace = set(' \r\n\t')  # Allowed whitespace characters.
+    whitespace = set(" \r\n\t")  # Allowed whitespace characters.
 
     # Loop over the string.
     namesiter = iter(names)
@@ -485,17 +498,17 @@ def split_multiple_persons_names(names):
         pos += 1
 
         # Escaped character.
-        if char == '\\':
+        if char == "\\":
             next(namesiter)
             pos += 1
             continue
 
         # Change in brace level.
-        if char == '{':
+        if char == "{":
             bracelevel += 1
             step = START_WHITESPACE
             continue
-        if char == '}':
+        if char == "}":
             if bracelevel:
                 bracelevel -= 1
             step = START_WHITESPACE
@@ -516,21 +529,21 @@ def split_multiple_persons_names(names):
         # Looking for the letter a. NB., we can have multiple whitespace
         # characters so we need to handle that here.
         elif step == FIND_A:
-            if char in ('a', 'A'):
+            if char in ("a", "A"):
                 step = FIND_N
             elif char not in whitespace:
                 step = START_WHITESPACE
 
         # Looking for the letter n.
         elif step == FIND_N:
-            if char in ('n', 'N'):
+            if char in ("n", "N"):
                 step = FIND_D
             else:
                 step = START_WHITESPACE
 
         # Looking for the letter d.
         elif step == FIND_D:
-            if char in ('d', 'D'):
+            if char in ("d", "D"):
                 step = END_WHITESPACE
             else:
                 step = START_WHITESPACE
