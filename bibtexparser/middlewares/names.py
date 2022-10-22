@@ -22,6 +22,7 @@ class InvalidNameError(ValueError):
 
 
 class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
+    """Internal utility class - superclass for all name-transforming middlewares."""
 
     def __init__(self,
                  allow_inplace_modification: bool,
@@ -57,6 +58,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
 
 
 class SeparateCoAuthors(_NameTransformerMiddleware):
+    """Middleware to separate multi-person fields (e.g. co-authors, co-editors)."""
 
     @staticmethod
     def metadata_key() -> str:
@@ -68,6 +70,7 @@ class SeparateCoAuthors(_NameTransformerMiddleware):
 
 
 class MergeCoAuthors(_NameTransformerMiddleware):
+    """Middleware to merge multi-person-list fields (e.g. co-authors, co-editors)."""
 
     @staticmethod
     def metadata_key() -> str:
@@ -82,13 +85,19 @@ class MergeCoAuthors(_NameTransformerMiddleware):
 
 @dataclasses.dataclass
 class NameParts:
+    """A dataclass representing the parts of a person name.
+
+    The different parts are defined according to BibTex's implementation
+    of name parts (first, von, last, jr)."""
+
     first: List[str] = dataclasses.field(default_factory=list)
     von: List[str] = dataclasses.field(default_factory=list)
     last: List[str] = dataclasses.field(default_factory=list)
     jr: List[str] = dataclasses.field(default_factory=list)
 
     @property
-    def first_name_first(self) -> str:
+    def merge_first_name_first(self) -> str:
+        """Merging the name parts into a single string, first-name-first (no comma) format."""
         return " ".join([part for part in (
             " ".join(self.first) if self.first else None,
             " ".join(self.von) if self.von else None,
@@ -96,10 +105,12 @@ class NameParts:
             " ".join(self.jr) if self.jr else None,
         ) if part is not None])
 
-    # TODO comma based name representation property
-
 
 class SplitNameParts(_NameTransformerMiddleware):
+    """Middleware to split a persons name into its parts (first, von, last, jr).
+
+    Name fields (e.g. author, editor, translator) are expected to be lists of strings,
+    which can be achieved by using the `SeparateCoAuthors` middleware before this one."""
 
     @staticmethod
     def metadata_key() -> str:
@@ -115,6 +126,9 @@ class SplitNameParts(_NameTransformerMiddleware):
 
 
 class MergeNameParts(_NameTransformerMiddleware):
+    """Middleware to merge a persons name parts (first, von, last, jr) into a single string.
+
+    Name fields (e.g. author, editor, translator) are expected to be lists of NameParts."""
 
     @staticmethod
     def metadata_key() -> str:
@@ -124,7 +138,7 @@ class MergeNameParts(_NameTransformerMiddleware):
         if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):
             raise ValueError("Expected a list of NameParts, got {}. ".format(name))
 
-        return [n.first_name_first for n in name]
+        return [n.merge_first_name_first for n in name]
 
 
 def parse_single_name_into_parts(name, strict=True):
