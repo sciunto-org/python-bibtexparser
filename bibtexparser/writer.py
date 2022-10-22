@@ -3,8 +3,9 @@ from typing import Optional
 from bibtexparser.library import Library
 
 
-def write_string(library: Library,
-                 bibtex_format: Optional['BibtexFormat'] = None) -> str:
+def write_string(
+    library: Library, bibtex_format: Optional["BibtexFormat"] = None
+) -> str:
     """Serialize a BibTeX database to a string.
 
     Note: This is not the exposed writing entrypoint.
@@ -31,10 +32,10 @@ class BibtexFormat:
     """
 
     def __init__(self):
-        self._indent: str = ' '
+        self._indent: str = " "
         self._align_values: bool = False
         self._align_multiline_values: bool = False
-        self._entry_separator: str = '\n'
+        self._entry_separator: str = "\n"
         self._comma_first: bool = False
         self._trailing_comma: bool = False
 

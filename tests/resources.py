@@ -5,12 +5,11 @@ import pytest
 
 EDGE_CASE_VALUES: List[str] = [
     "John Doe",
-    r'à {\`a} \`{a}',
-    r'{\`a} {\`a} {\`a}',
+    r"à {\`a} \`{a}",
+    r"{\`a} {\`a} {\`a}",
     r"Two Gedenk\"uberlieferung der Angelsachsen",
     r"\texttimes{}{\texttimes}\texttimes",
-    r"p\^{a}t\'{e}"
-    r"Title with \{ a curly brace",
+    r"p\^{a}t\'{e}" r"Title with \{ a curly brace",
     r"Title with \} a curly brace",
     r"Title with \{ a curly brace and \} a curly brace",
     r"Title with \{ a curly brace and \} a curly brace and \{ another curly brace",
@@ -24,27 +23,26 @@ ENCLOSINGS: List[pytest.param] = [
 
 VALID_BIBTEX_SNIPPETS: List[str] = [
     # A small, regular article
-    dedent(f"""\
+    dedent(
+        f"""\
     @article{{test,
         author = "John Doe",
         title = "Some title",
-    }}"""),
-
+    }}"""
+    ),
     # A string definition
     dedent(f"""@string{{someString = "some value"}}"""),
-
     # A string definition with a comment
-    dedent(f"""\
+    dedent(
+        f"""\
     @string{{someString = "some value"}}
     
-    % This is a comment"""),
-
+    % This is a comment"""
+    ),
     # A preamble
     dedent(f"""@preamble{{some preamble}}"""),
-
     # A an empty line
     "\n",
-
     # A comment
     "% This is a comment",
 ]
