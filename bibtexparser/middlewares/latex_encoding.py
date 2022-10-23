@@ -1,10 +1,12 @@
 import abc
 import logging
+import re
 from typing import Optional
 
-from pylatexenc import latexencode
-from pylatexenc.latex2text import LatexNodes2Text
-from pylatexenc.latexencode import unicode_to_latex
+import pylatexenc
+from pylatexenc import latexencode, latexwalker
+from pylatexenc.latex2text import LatexNodes2Text, MacroTextSpec
+from pylatexenc.latexencode import unicode_to_latex, UnicodeToLatexEncoder, UnicodeToLatexConversionRule, RULE_REGEX
 
 from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.middlewares.names import NameParts
@@ -19,6 +21,7 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
         """Called for every python (value, not key) string found on Entry and String blocks"""
         raise NotImplementedError("called abstract method")
 
+    # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, library: "Library") -> Block:
         for field in entry.fields.values():
             if isinstance(field.value, str):
@@ -33,6 +36,7 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
                              f" with value type {type(field.value)}")
         return entry
 
+    # docstr-coverage: inherited
     def transform_string(self, string: String, library: "Library") -> Block:
         if isinstance(string.value, str):
             string.value = self._transform_python_value_string(string.value)
@@ -45,11 +49,38 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
 class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
     """Latex-Encodes all strings in the library"""
 
+    def __init__(self,
+                 allow_inplace_modification: bool,
+                 keep_math: bool = None,
+                 encoder: Optional[UnicodeToLatexEncoder] = None):
+        super().__init__(allow_inplace_modification, allow_parallel_execution=True)
+
+        if encoder is not None and keep_math is not None:
+            raise ValueError("Cannot specify both encoder and keep_math_mode_untouched."
+                             "If you want to use a custom encoder, you have to specify it completely.")
+
+        # Defaults (not specified as defaults in args,
+        #   to make sure we can identify if they were specified)
+        keep_math = keep_math if keep_math is not None else True
+
+        # Build encoder if no encoder was specified
+        if encoder is None:
+            keep_math_intact_rule = UnicodeToLatexConversionRule(
+                rule_type=RULE_REGEX,
+                rule=[(re.compile(r"(?<!\\)(\$.*[^\\]\$)"), r"\1")]  # keep math mode parts as is
+            )
+            conversion_rules = [] if keep_math is False else [keep_math_intact_rule]
+            conversion_rules.append('defaults')
+            encoder = UnicodeToLatexEncoder(conversion_rules=conversion_rules)
+        self._encoder = encoder
+
+    # docstr-coverage: inherited
     def metadata_key(self) -> str:
         return "latex_encoding"
 
+    # docstr-coverage: inherited
     def _transform_python_value_string(self, python_string: str) -> str:
-        return unicode_to_latex(python_string)
+        return self._encoder.unicode_to_latex(python_string)
 
 
 class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
@@ -60,7 +91,19 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
                  decoder: Optional[LatexNodes2Text] = None):
         super().__init__(allow_inplace_modification, allow_parallel_execution=True)
         if decoder is None:
+            lw_context_db = pylatexenc.latex2text.get_default_latex_context_db()
+            lw_context_db.add_context_category(
+                'bibtexparse-default-context',
+                prepend=True,
+                macros=[
+                    # Do not wrap urls in '< ... >'
+                    MacroTextSpec("url", simplify_repl="%s")
+                ],
+            )
+
             decoder = LatexNodes2Text(
+                # Use custom latex context
+                latex_context=lw_context_db,
                 # Do not remove curly braces
                 keep_braced_groups=True,
                 # Do not remove math formatted stuff (common e.g. in abstracts)
@@ -69,8 +112,12 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
 
         self._decoder = decoder
 
+    # docstr-coverage: inherited
     def metadata_key(self) -> str:
         return "latex_decoding"
 
+    # docstr-coverage: inherited
     def _transform_python_value_string(self, python_string: str) -> str:
+        # TODO this fails for invalid latex.
+        #   We have to create modes to keep original or to create a failed block
         return self._decoder.latex_to_text(python_string)
