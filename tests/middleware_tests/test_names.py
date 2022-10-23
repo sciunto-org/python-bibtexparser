@@ -443,7 +443,7 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
     ),
     (
         r"Bogus{\l}aw Jackowski",
-        {"first": ["Bogus{\l}aw"], "von": [], "last": ["Jackowski"], "jr": []},
+        {"first": [r"Bogus{\l}aw"], "von": [], "last": ["Jackowski"], "jr": []},
     ),
     (
         r"Christina A. L.\ Thiele",
@@ -510,7 +510,7 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
     ),
     (
         r"Herbert Vo{\ss}",
-        {"first": ["Herbert"], "von": [], "last": ["Vo{\ss}"], "jr": []},
+        {"first": ["Herbert"], "von": [], "last": [r"Vo{\ss}"], "jr": []},
     ),
     (
         r"H{\'a}n Th{\^e}\llap{\raise 0.5ex\hbox{\'{\relax}}} Th{\'a}nh",
@@ -720,7 +720,7 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
     (
         r"TUG {\sltt DVI} Driver Standards Committee",
         {
-            "first": ["TUG", "{\sltt DVI}", "Driver", "Standards"],
+            "first": ["TUG", r"{\sltt DVI}", "Driver", "Standards"],
             "von": [],
             "last": ["Committee"],
             "jr": [],
@@ -730,7 +730,7 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
         r"TUG {\sltt xDVIx} Driver Standards Committee",
         {
             "first": ["TUG"],
-            "von": ["{\sltt xDVIx}"],
+            "von": [r"{\sltt xDVIx}"],
             "last": ["Driver", "Standards", "Committee"],
             "jr": [],
         },
@@ -766,7 +766,7 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
     ),
     (
         r"{Kristoffer H\o{}gsbro Rose}",
-        {"first": [], "von": [], "last": ["{Kristoffer H\o{}gsbro Rose}"], "jr": []},
+        {"first": [], "von": [], "last": [r"{Kristoffer H\o{}gsbro Rose}"], "jr": []},
     ),
     (
         r"{TUG} {Working} {Group} on a {\TeX} {Directory} {Structure}",
