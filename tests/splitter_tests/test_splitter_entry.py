@@ -4,7 +4,7 @@ from textwrap import dedent
 import pytest as pytest
 
 from bibtexparser.library import Library
-from bibtexparser.model import Field, DuplicateFieldKeyBlock
+from bibtexparser.model import DuplicateFieldKeyBlock, Field
 from bibtexparser.splitter import Splitter
 from tests.resources import EDGE_CASE_VALUES, ENCLOSINGS
 
