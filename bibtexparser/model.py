@@ -194,12 +194,16 @@ class Entry(Block):
         self._key = value
 
     @property
-    def fields(self):
+    def fields(self) -> Dict[str, Field]:
         return copy(self._fields)
 
     @fields.setter
-    def fields(self, value: List[Field]):
+    def fields(self, value: Dict[str, Field]):
         self._fields = value
+
+    def set_field(self, field: Field):
+        """Adds a new field, or replaces existing with same key."""
+        self._fields[field.key] = field
 
     def get_parser_metadata(self, key: str) -> Optional[Any]:
         return self._parsing_metadata.get(key, None)
