@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 from bibtexparser.exceptions import (
     BlockAbortedException,
@@ -9,6 +9,7 @@ from bibtexparser.exceptions import (
 )
 from bibtexparser.library import Library
 from bibtexparser.model import (
+    DuplicateFieldKeyBlock,
     Entry,
     ExplicitComment,
     Field,
@@ -135,16 +136,17 @@ class Splitter:
 
     def _move_to_end_of_entry(
         self, first_key_start: int
-    ) -> Tuple[Dict[str, Field], int]:
+    ) -> Tuple[Dict[str, Field], int, Set[str]]:
         """Move to the end of the entry and return the fields and the end index."""
         result = dict()
+        duplicate_keys = set()
 
         key_start = first_key_start
         while True:
             equals_mark = self._next_mark(accept_eof=False)
             if equals_mark.group(0) == "}":
                 # End of entry
-                return result, equals_mark.end()
+                return result, equals_mark.end(), duplicate_keys
 
             if equals_mark.group(0) != "=":
                 self._unaccepted_mark = equals_mark
@@ -187,6 +189,15 @@ class Splitter:
 
             key = self.bibstr[key_start:key_end].strip()
             value = self.bibstr[value_start:value_end].strip()
+
+            if key in result:
+                duplicate_keys.add(key)
+                duplicate_count = 1
+                while f"{key}_duplicate_{duplicate_count}" in result:
+                    duplicate_count += 1
+
+                key = f"{key}_duplicate_{duplicate_count}"
+
             result[key] = Field(start_line=start_line, key=key, value=value)
 
             # If next mark is a comma, continue
@@ -308,7 +319,7 @@ class Splitter:
             raw=self.bibstr[start_index : end_bracket_index + 1],
         )
 
-    def _handle_entry(self, m, m_val) -> Entry:
+    def _handle_entry(self, m, m_val) -> Union[Entry, ParsingFailedBlock]:
         """Handle entry block. Return end index"""
         start_line = self._current_line
         entry_type = m_val[1:]
@@ -331,15 +342,21 @@ class Splitter:
             )
         self._open_brackets += 1
         key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
-        fields, end_index = self._move_to_end_of_entry(comma_mark.end())
+        fields, end_index, duplicate_keys = self._move_to_end_of_entry(comma_mark.end())
 
-        return Entry(
+        entry = Entry(
             start_line=start_line,
             entry_type=entry_type,
             key=key,
             fields=fields,
             raw=self.bibstr[m.start() : end_index + 1],
         )
+
+        # If there were duplicate field keys, we return a DuplicateFieldKeyBlock wrapping
+        if len(duplicate_keys) > 0:
+            return DuplicateFieldKeyBlock(duplicate_keys=duplicate_keys, entry=entry)
+        else:
+            return entry
 
     def _handle_string(self, m) -> String:
         """Handle string block. Return end index"""
