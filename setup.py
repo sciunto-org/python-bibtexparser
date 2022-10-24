@@ -31,7 +31,9 @@ setup(
     long_description_content_type="text/x-rst",
     long_description=load_readme(),
     packages=['bibtexparser'],
-    install_requires=[],
+    install_requires=[
+        'pylatexenc>=2.10',
+    ],
     extras_require={
         'test': [
             'pytest',  # Test runner
