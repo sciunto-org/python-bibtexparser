@@ -2,7 +2,7 @@ from typing import Collection, Dict, List, Union
 
 from bibtexparser.model import (
     Block,
-    DuplicateKeyBlock,
+    DuplicateEntryKeyBlock,
     Entry,
     ExplicitComment,
     ImplicitComment,
@@ -75,7 +75,7 @@ class Library:
 
         if (
             new_block is not block_after_add
-            and isinstance(new_block, DuplicateKeyBlock)
+            and isinstance(new_block, DuplicateEntryKeyBlock)
             and fail_on_duplicate_key
         ):
             # Revert changes to old_block
@@ -102,7 +102,7 @@ class Library:
             prev_block_with_same_key.key == duplicate.key
         ), "Internal BibtexParser Error. Duplicate blocks have different keys."
 
-        return DuplicateKeyBlock(
+        return DuplicateEntryKeyBlock(
             start_line=duplicate.start_line,
             raw=duplicate.raw,
             key=duplicate.key,
