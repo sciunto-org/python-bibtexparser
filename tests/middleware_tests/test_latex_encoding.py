@@ -18,7 +18,7 @@ from tests.middleware_tests.middleware_test_util import assert_nonfield_entry_at
     pytest.param(r"Kristoffer H\o{}gsbro Rose", "Kristoffer Høgsbro Rose", id=r"\o{}"),
     pytest.param(r"Einstein $ e=m_c^2 $", "Einstein $ e=m_c^2 $", id=r"Keep math mode"),
     pytest.param(r"I payed \$10", "I payed $10", id=r"Keep \$"),
-    pytest.param(r"{Walther Andreas} Muller", "{Walther Andreas} Muller", id=r"Keep braces"),
+    pytest.param(r"{Walther Andreas} Muller", "Walther Andreas Muller", id=r"Remove braces-wrapping"),
     pytest.param(r"See \url{mweiss.ch}", r"See mweiss.ch", id=r"Remove \url{...}"),
     pytest.param(r"See \url{https://human_resources.com", r"See https://human_resources.com",
                  id="Keep special chars in url")
@@ -50,9 +50,6 @@ def test_latex_special_chars_decoding(latex_string, expected_decoded_string):
     pytest.param("Kristoffer Høgsbro Rose", r"Kristoffer H{\o}gsbro Rose", id=r"\o{}"),
     pytest.param(r"Einstein $ e=m_c^2 $", r"Einstein $ e=m_c^2 $", id=r"Keep math mode"),
     pytest.param(r"I payed $10", r"I payed \$10", id=r"Escape $"),
-    # TODO the following case rightfully fails. I have to think about that.
-    #   Maybe I'll have to change the decoding defaults (to remove brackets) for consistency.
-    pytest.param(r"{Walther Andreas} Muller", r"{Walther Andreas} Muller", id=r"Keep braces"),
 ])
 def test_latex_special_chars_encoding(human_string, expected_latex_string):
     """Test that latex special chars are encoded correctly,

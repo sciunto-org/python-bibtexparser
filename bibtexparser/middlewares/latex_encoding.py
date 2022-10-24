@@ -88,8 +88,25 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
 
     def __init__(self,
                  allow_inplace_modification: bool,
+                 keep_braced_groups: bool = None,
+                 keep_math_mode: bool = None,
                  decoder: Optional[LatexNodes2Text] = None):
         super().__init__(allow_inplace_modification, allow_parallel_execution=True)
+
+        if decoder is not None and (
+                keep_braced_groups is not None
+                or keep_math_mode is not None
+        ):
+            raise ValueError("Cannot specify both encoder and one of "
+                             "`keep_braced_groups` or `keep_braced_groups`."
+                             "If you want to use a custom encoder, "
+                             "you have to specify it completely.")
+
+        # Defaults (not specified as defaults in args,
+        #   to make sure we can identify if they were specified)
+        keep_braced_groups = keep_braced_groups if keep_braced_groups is not None else False
+        keep_math_mode = keep_math_mode if keep_math_mode is not None else True
+
         if decoder is None:
             lw_context_db = pylatexenc.latex2text.get_default_latex_context_db()
             lw_context_db.add_context_category(
@@ -104,10 +121,10 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
             decoder = LatexNodes2Text(
                 # Use custom latex context
                 latex_context=lw_context_db,
-                # Do not remove curly braces
-                keep_braced_groups=True,
-                # Do not remove math formatted stuff (common e.g. in abstracts)
-                math_mode='verbatim'
+                # Optionally, do not remove curly braces
+                keep_braced_groups=keep_braced_groups,
+                # Optionally, decode math notation
+                math_mode='verbatim' if keep_math_mode is True else 'text'
             )
 
         self._decoder = decoder
