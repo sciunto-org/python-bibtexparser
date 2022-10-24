@@ -21,6 +21,9 @@ lib64
 # Installer logs
 pip-log.txt
 
+# Poetry
+poetry.lock
+
 # Unit test / coverage reports
 .coverage
 .tox

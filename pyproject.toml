@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "bibtexparser"
+version = "2.0.0.dev0"
+description = "Bibtex parser for python 3."
+authors = [
+    "Fancois Boulgne and other contributors <code@mweiss.ch>",
+]
+#license = {file = "LICENSE.txt"}
+readme = "README.md"
+
+homepage = "https://github.com/sciunto-org/python-bibtexparser"
+documentation = "https://bibtexparser.readthedocs.io/en/master/"
+repository = "https://github.com/sciunto-org/python-bibtexparser"
+
+[tool.poetry.dependencies]
+python = ">=3.6"
+pyparsing = ">=2.0.3"
+
+[tool.poetry.group.dev.dependencies]
+black = {version = "^22.8.0", python = ">=3.6.2"}
+isort = {version = "^5.10.1", python = ">=3.6.1, <4.0"}
+pytest = {version = "^7.1.3", python = ">=3.7"}
+mypy = "^0.971"
+flake8 = {version = "^5.0.4", python = ">=3.6.1"}
+pycln = {version = "2.1.1", python = " >=3.6.2, <4.0"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+extend-ignore = [
+    "E203",
+]
+
+[tool.isort]
+profile = "black"
+
