@@ -193,7 +193,7 @@ class Splitter:
             if key in result:
                 duplicate_keys.add(key)
                 duplicate_count = 1
-                while f"{key}_{duplicate_count}" in result:
+                while f"{key}_duplicate_{duplicate_count}"in result:
                     duplicate_count += 1
 
                 key = f"{key}_duplicate_{duplicate_count}"
