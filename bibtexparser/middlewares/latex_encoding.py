@@ -52,24 +52,40 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
     def __init__(self,
                  allow_inplace_modification: bool,
                  keep_math: bool = None,
+                 enclose_urls: bool = None,
                  encoder: Optional[UnicodeToLatexEncoder] = None):
         super().__init__(allow_inplace_modification, allow_parallel_execution=True)
 
-        if encoder is not None and keep_math is not None:
-            raise ValueError("Cannot specify both encoder and keep_math_mode_untouched."
+        if encoder is not None and (
+                keep_math is not None
+                or enclose_urls is not None
+        ):
+            raise ValueError("Cannot specify both encoder and keep_math or enclose_urls."
                              "If you want to use a custom encoder, you have to specify it completely.")
 
         # Defaults (not specified as defaults in args,
         #   to make sure we can identify if they were specified)
         keep_math = keep_math if keep_math is not None else True
+        enclose_urls = enclose_urls if enclose_urls is not None else True
 
         # Build encoder if no encoder was specified
         if encoder is None:
-            keep_math_intact_rule = UnicodeToLatexConversionRule(
-                rule_type=RULE_REGEX,
-                rule=[(re.compile(r"(?<!\\)(\$.*[^\\]\$)"), r"\1")]  # keep math mode parts as is
-            )
-            conversion_rules = [] if keep_math is False else [keep_math_intact_rule]
+            conversion_rules = []
+            if keep_math is True:
+                conversion_rules.append(UnicodeToLatexConversionRule(
+                    rule_type=RULE_REGEX,
+                    # keep math mode parts as is
+                    rule=[(re.compile(r"(?<!\\)(\$.*[^\\]\$)"), r"\1")]
+                ))
+            if enclose_urls is True:
+                conversion_rules.append(UnicodeToLatexConversionRule(
+                    rule_type=RULE_REGEX,
+                    rule=[
+                        (re.compile(r"(https?://\S*\.\S*)"), r"\\url{\1}"),
+                        (re.compile(r"(www.\S*\.\S*)"), r"\\url{\1}")
+                    ]
+                ))
+
             conversion_rules.append('defaults')
             encoder = UnicodeToLatexEncoder(conversion_rules=conversion_rules)
         self._encoder = encoder

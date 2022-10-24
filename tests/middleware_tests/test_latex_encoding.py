@@ -10,7 +10,8 @@ import pytest
 from bibtexparser import Library
 from bibtexparser.middlewares.latex_encoding import LatexDecodingMiddleware, LatexEncodingMiddleware
 from bibtexparser.model import Entry, Field
-from tests.middleware_tests.middleware_test_util import assert_nonfield_entry_attributes_unchanged
+from tests.middleware_tests.middleware_test_util import assert_nonfield_entry_attributes_unchanged, \
+    assert_inplace_is_respected
 
 
 @pytest.mark.parametrize("latex_string,expected_decoded_string", [
@@ -50,6 +51,10 @@ def test_latex_special_chars_decoding(latex_string, expected_decoded_string):
     pytest.param("Kristoffer Høgsbro Rose", r"Kristoffer H{\o}gsbro Rose", id=r"\o{}"),
     pytest.param(r"Einstein $ e=m_c^2 $", r"Einstein $ e=m_c^2 $", id=r"Keep math mode"),
     pytest.param(r"I payed $10", r"I payed \$10", id=r"Escape $"),
+    pytest.param(r"See https://mweiss.ch", r"See \url{https://mweiss.ch}", id=r"\url{...} for https"),
+    pytest.param(r"See http://mweiss.ch", r"See \url{http://mweiss.ch}", id=r"\url{...} for http"),
+    pytest.param(r"See www.mweiss.ch", r"See \url{www.mweiss.ch}", id=r"\url{...} for www."),
+    pytest.param(r"See https://www.mweiss.ch", r"See \url{https://www.mweiss.ch}", id=r"\url{...} for https://www."),
 ])
 def test_latex_special_chars_encoding(human_string, expected_latex_string):
     """Test that latex special chars are encoded correctly,
@@ -72,6 +77,27 @@ def test_latex_special_chars_encoding(human_string, expected_latex_string):
 
     # Make sure other attributes are not changed
     assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
+
+
+@pytest.mark.parametrize("inplace", [True, False])
+@pytest.mark.parametrize("middleware_class", [
+    LatexEncodingMiddleware,
+    LatexDecodingMiddleware
+])
+def test_inplace(inplace: bool, middleware_class):
+    """Make sure that inplace conversion is done iff inplace is True"""
+    input_entry = _entry_with_latex_string("Some string")
+    library = Library([input_entry])
+    original_copy = deepcopy(input_entry)
+
+    middleware = middleware_class(allow_inplace_modification=inplace)
+    transformed_library = middleware.transform(library)
+
+    assert len(transformed_library.entries) == 1
+    assert len(transformed_library.blocks) == 1
+
+    # Assert `allow_inplace_modification` is respected
+    assert_inplace_is_respected(inplace, input_entry, transformed_library.entries[0])
 
 
 def _entry_with_latex_string(latex_string):
