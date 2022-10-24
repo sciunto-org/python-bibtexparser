@@ -15,7 +15,7 @@ def test_entry_equality():
     entry_1 = Entry(
         "article",
         "key",
-        {"field": Field(1, "field", "value")},
+        {"field": Field("field", "value", 1)},
         1,
         "raw",
     )
@@ -24,7 +24,7 @@ def test_entry_equality():
     entry_2 = Entry(
         "article",
         "key",
-        {"field": Field(1, "field", "value")},
+        {"field": Field("field", "value", 1)},
         1,
         "raw",
     )
@@ -33,7 +33,7 @@ def test_entry_equality():
     entry_3 = Entry(
         "book",
         "key",
-        {"field": Field(1, "field", "value")},
+        {"field": Field("field", "value", 1)},
         1,
         "raw",
     )
@@ -42,7 +42,7 @@ def test_entry_equality():
     entry_4 = Entry(
         "article",
         "key",
-        {"field": Field(1, "field", "value"), "field2": Field(1, "field2", "value")},
+        {"field": Field("field", "value", 1), "field2": Field("field2", "value", 2)},
         1,
         "raw",
     )
@@ -53,7 +53,7 @@ def test_entry_copy():
     entry_1 = Entry(
         "article",
         "key",
-        {"field": Field(1, "field", "value")},
+        {"field": Field("field", "value", 1)},
         1,
         "raw",
     )
@@ -65,7 +65,7 @@ def test_entry_copy():
 
 
 def test_entry_deepcopy():
-    entry_1 = Entry("article", "key", {"field": Field(1, "field", "value")}, 1, "raw")
+    entry_1 = Entry("article", "key", {"field": Field("field", "value", 1)}, 1, "raw")
     entry_2 = deepcopy(entry_1)
     assert entry_1 == entry_2
     assert entry_1 is not entry_2
