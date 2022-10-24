@@ -71,7 +71,7 @@ class BibDatabase(object):
         """Equality == method."""
         # uses .__dict__ attribute to avoid handling attributes which might not
         # be defined, e.g. _crossref_updated
-        return isinstance(other, BibDatabase) and self.__dict__ == other.__dict
+        return isinstance(other, BibDatabase) and self.__dict__ == other.__dict__
 
     def load_common_strings(self):
         self.strings.update(COMMON_STRINGS)
