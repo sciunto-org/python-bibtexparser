@@ -86,17 +86,15 @@ class BibDatabase(object):
             result.append(str(entry.get(field, '')).lower())  # Sorting always as string
         return tuple(result)
 
-    def _make_entries_dict(self):
+    def get_entry_dict(self):
+        """Return a dictionary of BibTeX entries, where dict key is the BibTeX entry key.
+        
+        This method re-creates the dict every time it is called,
+        hence subsequent calls should be avoided with large databases.
+        """
+        self._entries_dict = dict()
         for entry in self.entries:
             self._entries_dict[entry['ID']] = entry
-
-    def get_entry_dict(self):
-        """Return a dictionary of BibTeX entries.
-        The dict key is the BibTeX entry key
-        """
-        # If the hash has never been made, make it
-        if not self._entries_dict:
-            self._make_entries_dict()
         return self._entries_dict
 
     entries_dict = property(get_entry_dict)
