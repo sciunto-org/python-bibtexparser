@@ -31,6 +31,7 @@ class TestBibtexParserMethod(unittest.TestCase):
                  'Foo B{\'a}r',
                  r'{G{\'{e}}rard} {Ben Arous}',
                  'Incorrect {{name}',
+                 '{Company Inc.}',
                  #'Jean de la Tour',
                  #'Johannes Diderik van der Waals',
                  ]
@@ -53,6 +54,7 @@ class TestBibtexParserMethod(unittest.TestCase):
                     'B{\'a}r, Foo',
                     r'{Ben Arous}, {G{\'{e}}rard}',
                     'Incorrect {{name}',
+                    '{Company Inc.}',
                     #'de la Tour, Jean',
                     #'van der Waals, Johannes Diderik',
                     ]
