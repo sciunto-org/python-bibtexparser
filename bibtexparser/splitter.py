@@ -217,19 +217,14 @@ class Splitter:
                 )
 
     def split(self, library: Optional[Library] = None) -> Library:
-        marks = [
-            e
-            for e in re.finditer(
-                r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*(?={)", self.bibstr, re.MULTILINE
-            )
-        ]
+        self._markiter = re.finditer(
+            r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*(?={)", self.bibstr, re.MULTILINE
+        )
 
         if library is None:
             library = Library()
         else:
             logging.info("Adding blocks to existing library.")
-
-        self._markiter = iter(marks)
 
         while True:
             m = self._next_mark(accept_eof=True)
