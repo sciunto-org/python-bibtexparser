@@ -149,7 +149,7 @@ class LibraryMiddleware(Middleware, abc.ABC):
     """
 
     def __init__(self, allow_inplace_modification: bool):
-        # As library middleware is run only once per library (not per block)
+        # As library middleware is per library (not per block individually),
         #   it cannot be parallelized.
         super().__init__(allow_inplace_modification, allow_parallel_execution=False)
 
