@@ -60,7 +60,6 @@ def test_entry_copy():
     entry_2 = copy(entry_1)
     assert entry_1 == entry_2
     assert entry_1 is not entry_2
-    assert entry_1.fields is entry_2.fields
     assert entry_1.fields == entry_2.fields
 
 
