@@ -50,7 +50,7 @@ class Splitter:
         if self._implicit_comment_start is None:
             return  # No implicit comment started
 
-        comment = self.bibstr[self._implicit_comment_start: end_char_index]
+        comment = self.bibstr[self._implicit_comment_start : end_char_index]
 
         # Clear leading and trailing empty lines,
         #   and count how many lines were removed, to adapt start_line below
@@ -115,7 +115,7 @@ class Splitter:
                 self._unaccepted_mark = m
                 raise BlockAbortedException(
                     abort_reason=f"Unexpected block start: `{m.group(0)}`. "
-                                 f"Was still looking for closing bracket",
+                    f"Was still looking for closing bracket",
                     end_index=m.start() - 1,
                 )
 
@@ -130,12 +130,12 @@ class Splitter:
                 self._unaccepted_mark = m
                 raise BlockAbortedException(
                     abort_reason=f"Unexpected block start: `{m.group(0)}`. "
-                                 f'Was still looking for field-value closing `"`',
+                    f'Was still looking for field-value closing `"`',
                     end_index=m.start() - 1,
                 )
 
     def _move_to_end_of_entry(
-            self, first_key_start: int
+        self, first_key_start: int
     ) -> Tuple[Dict[str, Field], int, Set[str]]:
         """Move to the end of the entry and return the fields and the end index."""
         result = dict()
@@ -152,7 +152,7 @@ class Splitter:
                 self._unaccepted_mark = equals_mark
                 raise BlockAbortedException(
                     abort_reason="Expected a `=` after entry key, "
-                                 f"but found `{equals_mark.group(0)}`.",
+                    f"but found `{equals_mark.group(0)}`.",
                     end_index=equals_mark.start(),
                 )
 
@@ -181,7 +181,7 @@ class Splitter:
                     self._unaccepted_mark = value_start_mark
                     raise BlockAbortedException(
                         abort_reason=f"Unexpected character `{value_start_mark.group(0)}` "
-                                     f"after field-value. Expected a comma or closing bracket.",
+                        f"after field-value. Expected a comma or closing bracket.",
                         end_index=value_start_mark.start(),
                     )
                 # Put comma back into stream, as still expected.
@@ -212,7 +212,7 @@ class Splitter:
                 self._unaccepted_mark = after_field_mark
                 raise BlockAbortedException(
                     abort_reason="Expected either a `,` or `}` after a closed entry field value, "
-                                 f"but found a {after_field_mark.group(0)} before.",
+                    f"but found a {after_field_mark.group(0)} before.",
                     end_index=after_field_mark.start(),
                 )
 
@@ -264,7 +264,7 @@ class Splitter:
                     library.add(
                         ParsingFailedBlock(
                             start_line=start_line,
-                            raw=self.bibstr[m.start(): e.end_index],
+                            raw=self.bibstr[m.start() : e.end_index],
                             error=e,
                         )
                     )
@@ -307,11 +307,11 @@ class Splitter:
                 second_match=start_bracket_mark.group(0),
             )
         end_bracket_index = self._move_to_closed_bracket()
-        comment_str = self.bibstr[start_bracket_mark.end(): end_bracket_index].strip()
+        comment_str = self.bibstr[start_bracket_mark.end() : end_bracket_index].strip()
         return ExplicitComment(
             start_line=start_line,
             comment=comment_str,
-            raw=self.bibstr[start_index: end_bracket_index + 1],
+            raw=self.bibstr[start_index : end_bracket_index + 1],
         )
 
     def _handle_entry(self, m, m_val) -> Union[Entry, ParsingFailedBlock]:
@@ -324,19 +324,19 @@ class Splitter:
             # Note: The following should never happen, as we check for the "{" in the regex
             raise ParserStateException(
                 message="matched a regex that should end with `{`, "
-                        "e.g. `@article{`, "
-                        "but no closing bracket was found."
+                "e.g. `@article{`, "
+                "but no closing bracket was found."
             )
         comma_mark = self._next_mark(accept_eof=False)
         if comma_mark.group(0) != ",":
             self._unaccepted_mark = comma_mark
             raise BlockAbortedException(
                 abort_reason="Expected comma after entry key,"
-                             f" but found {comma_mark.group(0)}",
+                f" but found {comma_mark.group(0)}",
                 end_index=comma_mark.end(),
             )
         self._open_brackets += 1
-        key = self.bibstr[m.end() + 1: comma_mark.start()].strip()
+        key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
         fields, end_index, duplicate_keys = self._move_to_end_of_entry(comma_mark.end())
 
         entry = Entry(
@@ -344,7 +344,7 @@ class Splitter:
             entry_type=entry_type,
             key=key,
             fields=fields,
-            raw=self.bibstr[m.start(): end_index + 1],
+            raw=self.bibstr[m.start() : end_index + 1],
         )
 
         # If there were duplicate field keys, we return a DuplicateFieldKeyBlock wrapping
@@ -364,17 +364,17 @@ class Splitter:
             # Note: The following should never happen, as we check for the "{" in the regex
             raise ParserStateException(
                 message="matched a string def regex (`@string{`) that "
-                        "should end with `{`, but no closing bracket was found."
+                "should end with `{`, but no closing bracket was found."
             )
         equals_mark = self._next_mark(accept_eof=False)
         if equals_mark.group(0) != "=":
             self._unaccepted_mark = equals_mark
             raise BlockAbortedException(
                 abort_reason="Expected equals sign after field key,"
-                             f" but found {equals_mark.group(0)}",
+                f" but found {equals_mark.group(0)}",
                 end_index=equals_mark.end(),
             )
-        key = self.bibstr[m.end() + 1: equals_mark.start()].strip()
+        key = self.bibstr[m.end() + 1 : equals_mark.start()].strip()
         value_start = equals_mark.end()
         end_i = self._move_to_closed_bracket()
         value = self.bibstr[value_start:end_i].strip()
@@ -382,7 +382,7 @@ class Splitter:
             start_line=start_line,
             key=key,
             value=value,
-            raw=self.bibstr[start_i: end_i + 1],
+            raw=self.bibstr[start_i : end_i + 1],
         )
 
     def _handle_preamble(self) -> Preamble:
@@ -395,13 +395,13 @@ class Splitter:
             # Note: The following should never happen, as we check for the "{" in the regex
             raise ParserStateException(
                 message="matched a preamble def regex (`@preamble{`) that "
-                        "should end with `{`, but no closing bracket was found."
+                "should end with `{`, but no closing bracket was found."
             )
 
         end_bracket_index = self._move_to_closed_bracket()
-        preamble = self.bibstr[start_bracket_mark.end(): end_bracket_index]
+        preamble = self.bibstr[start_bracket_mark.end() : end_bracket_index]
         return Preamble(
             start_line=start_line,
             value=preamble,
-            raw=self.bibstr[start_i: end_bracket_index + 1],
+            raw=self.bibstr[start_i : end_bracket_index + 1],
         )
