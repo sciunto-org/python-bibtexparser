@@ -1,7 +1,9 @@
+import warnings
 from copy import deepcopy
 from typing import Any
 
 from bibtexparser import Library
+from bibtexparser.middlewares.enclosing import REMOVED_ENCLOSING_KEY
 from bibtexparser.middlewares.middleware import LibraryMiddleware
 from bibtexparser.model import Entry, Field
 
@@ -24,24 +26,43 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
     def __init__(self, allow_inplace_modification: bool):
         super().__init__(allow_inplace_modification)
 
+    @staticmethod
+    def metadata_key() -> str:
+        return "ResolveStringReferences"
+
     # docstr-coverage: inherited
     def transform(self, library: Library) -> Library:
         if not self.allow_inplace_modification:
             library = deepcopy(library)
 
         entry: Entry
+        raised_enclosing_warning = False
         for entry in library.entries:
+            resolved_fields = list()
+            if not raised_enclosing_warning and REMOVED_ENCLOSING_KEY in entry.parser_metadata:
+                raised_enclosing_warning = True
+                warnings.warn((
+                    "The RemoveEnclosingMiddleware must not run before "
+                    "the ResolveStringReferencesMiddleware."
+                    "We continue, but string interpolation is likely to fail,"
+                    "or to be too aggressive (i.e., replace too many strings)."
+                ), UserWarning)
+
+
             field: Field
             for field in entry.fields.values():
                 if _value_is_nonstring_or_enclosed(field.value):
                     continue
-                if field.value not in library.strings:
+                if field.value not in library.strings_dict:
                     continue
-                field.value = library.strings[field.value].value
+                field.value = library.strings_dict[field.value].value
+                resolved_fields.append(field.key)
+
+            if resolved_fields:
+                entry.parser_metadata[self.metadata_key()] = resolved_fields
 
         return library
 
+# TODO Middleware to replace field values with string reference, if found
 
-# TODO Replace field values with string reference, if found
-
-# TODO Crossref can be put here as well
+# TODO Middleware to resolve Crossref
