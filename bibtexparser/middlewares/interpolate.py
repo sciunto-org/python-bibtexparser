@@ -63,6 +63,6 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
 
         return library
 
-# TODO Middleware to replace field values with string reference, if found
+# TODO Middleware to replace field values with string references, if found
 
 # TODO Middleware to resolve Crossref
