@@ -7,6 +7,19 @@ class ParsingException(Exception):
     pass
 
 
+    def __copy__(self):
+        # We do not copy or deepcopy ParsingExceptions
+        # because they are used as immutables,
+        # and because default memo fails.
+        return self
+
+    def __deepcopy__(self, memo):
+        # We do not copy or deepcopy ParsingExceptions
+        # because they are used as immutables,
+        # and because default memo fails.
+        return self
+
+
 class BlockAbortedException(ParsingException):
     """Exception where a invalid bibtex file led to an aborted block."""
 
