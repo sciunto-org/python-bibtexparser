@@ -3,6 +3,8 @@ from typing import Tuple, Union
 from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import Entry, Field, String
 
+REMOVED_ENCLOSING_KEY = "removed_enclosing"
+
 STRINGS_CAN_BE_UNESCAPED_INTS = False
 ENTRY_POTENTIALLY_INT_FIELDS = [
     "year",
@@ -35,7 +37,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
 
     @staticmethod
     def metadata_key() -> str:
-        return "removed_enclosing"
+        return REMOVED_ENCLOSING_KEY
 
     @staticmethod
     def _strip_enclosing(value: str) -> Tuple[str, Union[str, None]]:
