@@ -30,29 +30,18 @@ Slightly more involved example:
 ```python
 
 # Lets parse some bibtex string.
-bib_database = bibtexparser.parse_string(
-    # The following string is your bibtex string
-    bibtex_string,
+bib_database = bibtexparser.parse_string(bibtex_string,
     # Middleware layers to transform parsed entries.
-    #    Here, we split multiple authors from each other,
-    #    and then extract first name, last name, ... for each
-    append_middleware=[
-        SeparateCoAuthors(allow_inplace_modification=True),
-        SplitNameParts(allow_inplace_modification=True),
-    ],
+    # Here, we split multiple authors from each other and then extract first name, last name, ... for each
+    append_middleware=[SeparateCoAuthors(), SplitNameParts()],
 )
 
 # Here you have a `bib_database` with all parsed bibtex blocks.
 
 # Let's transform it back to a bibtex_string.
-new_bibtex_string = bibtexparser.write_string(
-    bib_database,
-    # Middleware layers to transform the authors info 
-    #    back into a single bibtex-compatible string.
-    prepend_middleware=[
-        MergeNameParts(allow_inplace_modification=True),
-        MergeCoAuthors(allow_inplace_modification=True),
-    ],
+new_bibtex_string = bibtexparser.write_string(bib_database,
+    # Revert aboves transfomration
+    prepend_middleware=[MergeNameParts(), MergeCoAuthors()]
 )
 ```
 
