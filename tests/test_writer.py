@@ -10,6 +10,7 @@ _DUMMY_PREAMBLE = Preamble(value='"myValue"')
 _DUMMY_EXPLICIT_COMMENT = ExplicitComment(comment="myValue")
 _DUMMY_IMPLICIT_COMMENT = ImplicitComment(comment="#myValue")
 
+
 def _dummy_entry():
     return Entry(
         entry_type="article",
@@ -88,6 +89,7 @@ def test_entry_value_column(value_column):
         assert f'{bib_format.indent}author               = "myAuthor"' in string
         assert f'{bib_format.indent}veryverylongkeyfield = 2020' in string
 
+
 @pytest.mark.parametrize("block_separator", [None, "\n\n", "\n-----\n"])
 def test_block_separator(block_separator):
     library = Library(blocks=[_DUMMY_STRING, _DUMMY_PREAMBLE])
@@ -95,7 +97,7 @@ def test_block_separator(block_separator):
     if block_separator is not None:
         bib_format.block_separator = block_separator
     else:
-        block_separator = "\n\n" # default
+        block_separator = "\n\n"  # default
     string = writer.write_string(library, bib_format)
     lines = string.splitlines()
 
@@ -106,8 +108,8 @@ def test_block_separator(block_separator):
         assert lines[1] == '@preamble{"myValue"}'
     else:
         # Case where blocks are separated by at least one line
-        expected_lines = block_separator.splitlines(   )
+        expected_lines = block_separator.splitlines()
         for i, l in enumerate(expected_lines):
-            assert lines[1+i] == l
+            assert lines[1 + i] == l
 
-        assert lines[1+len(expected_lines)] == '@preamble{"myValue"}'
+        assert lines[1 + len(expected_lines)] == '@preamble{"myValue"}'
