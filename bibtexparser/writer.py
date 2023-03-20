@@ -1,5 +1,4 @@
 from copy import deepcopy
-from functools import lru_cache
 from typing import Optional, List, Union
 
 from bibtexparser.library import Library
@@ -15,8 +14,8 @@ def _treat_entry(block:Entry, bibtex_format) -> List[str]:
     for i, field in enumerate(block.fields.values()):
         res.append(bibtex_format.indent)
         res.append(field.key)
-        res.append(VAL_SEP)
         res.append(_val_intent_string(bibtex_format, field.key))
+        res.append(VAL_SEP)
         # TODO handle multiline indentation
         res.append(field.value)
         if bibtex_format.trailing_comma or i < len(block.fields) - 1:
@@ -33,10 +32,7 @@ def _val_intent_string(bibtex_format: "BibtexFormat", key: str) -> str:
 
 
 def _treat_string(block: String, bibtex_format) -> List[str]:
-    # TODO handle multiline indentation
-    val_intend_len = _val_intent_string(bibtex_format, block.key)
-    val_intend = "" if val_intend_len <= 0 else " " * val_intend_len
-    return ["@string{", block.key, VAL_SEP, val_intend, block.value, "}", ]
+    return ["@string{", block.key, VAL_SEP, block.value, "}", ]
 
 
 def _treat_preamble(block: Preamble, bibtex_format: "BibtexFormat") -> List[str]:
@@ -63,8 +59,6 @@ def _calculate_auto_value_align(library: Library) -> int:
     for entry in library.entries:
         for key in entry.fields:
             max_key_len = max(max_key_len, len(key))
-    for string in library.strings:
-        max_key_len = max(max_key_len, len(string.key))
     return max_key_len + len(VAL_SEP)
 
 
@@ -96,7 +90,7 @@ def write_string(
         string_pieces.extend(string_block_pieces)
         # Separate Blocks
         if i < len(library.blocks) - 1:
-            string_pieces.append(bibtex_format.entry_separator)
+            string_pieces.append(bibtex_format.block_separator)
 
     return "".join(string_pieces)
 
@@ -130,7 +124,7 @@ class BibtexFormat:
         self._indent: str = "\t"
         self._align_field_values: Union[int, str] = 0
         self._align_multiline_values: bool = False
-        self._entry_separator: str = "\n"
+        self._block_separator: str = "\n"
         self._trailing_comma: bool = False
         self._parsing_failed_comment: str = PARSING_FAILED_COMMENT
 
@@ -149,8 +143,8 @@ class BibtexFormat:
 
         This impacts String and Entry blocks.
 
-        An integer value x specifies that spaces should be added after the " = ",
-        such that, if possible, the value is written at column `self.intent + x`.
+        An integer value x specifies that spaces should be added before the " = ",
+        such that, if possible, the value is written at column `len(self.indent) + x`.
         Note that for long keys, the value may be written at a later column.
 
         Thus, a value of 0 means that the value is written directly after the " = ".
@@ -182,13 +176,13 @@ class BibtexFormat:
         self._align_multiline_values = align_multiline_values
 
     @property
-    def entry_separator(self) -> str:
+    def block_separator(self) -> str:
         """Character(s) for separating BibTeX entries. Default: single new line."""
-        return self._entry_separator
+        return self._block_separator
 
-    @entry_separator.setter
-    def entry_separator(self, entry_separator: str):
-        self._entry_separator = entry_separator
+    @block_separator.setter
+    def block_separator(self, entry_separator: str):
+        self._block_separator = entry_separator
 
     @property
     def trailing_comma(self) -> bool:
