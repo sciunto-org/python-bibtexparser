@@ -23,10 +23,10 @@ def _dummy_entry():
 
 
 @pytest.mark.parametrize("block, expected_string", [
-    (_DUMMY_STRING, '@string{myKey = "myValue"}'),
-    (_DUMMY_PREAMBLE, '@preamble{"myValue"}'),
-    (_DUMMY_EXPLICIT_COMMENT, '@comment{myValue}'),
-    (_DUMMY_IMPLICIT_COMMENT, '#myValue'),
+    (_DUMMY_STRING, '@string{myKey = "myValue"}\n'),
+    (_DUMMY_PREAMBLE, '@preamble{"myValue"}\n'),
+    (_DUMMY_EXPLICIT_COMMENT, '@comment{myValue}\n'),
+    (_DUMMY_IMPLICIT_COMMENT, '#myValue\n'),
 ])
 def test_single_simple_blocks(block, expected_string):
     """Test the @string serializer."""
@@ -47,7 +47,7 @@ def test_write_entry_with_indent(indent):
 
     string = writer.write_string(library, bib_format)
     assert string == f'@article{{myKey,\n{expected_indent}title = "myTitle",' \
-                     f'\n{expected_indent}author = "myAuthor"\n}}'
+                     f'\n{expected_indent}author = "myAuthor"\n}}\n'
 
 
 @pytest.mark.parametrize("trailing_comma", [None, True, False])
@@ -63,7 +63,7 @@ def test_write_entry_with_trailing_comma(trailing_comma):
 
     string = writer.write_string(library, bib_format)
     assert string == f'@article{{myKey,\n\ttitle = "myTitle",' \
-                     f'\n\tauthor = "myAuthor"{expected}\n}}'
+                     f'\n\tauthor = "myAuthor"{expected}\n}}\n'
 
 
 @pytest.mark.parametrize("value_column", [None, 10, "auto"])
