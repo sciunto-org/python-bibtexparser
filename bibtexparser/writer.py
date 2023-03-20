@@ -8,7 +8,7 @@ VAL_SEP = " = "
 PARSING_FAILED_COMMENT = "% WARNING Parsing failed for the following {n} lines."
 
 
-def _treat_entry(block:Entry, bibtex_format) -> List[str]:
+def _treat_entry(block: Entry, bibtex_format) -> List[str]:
     res = ["@", block.entry_type, "{", block.key, ",\n"]
     field: Field
     for i, field in enumerate(block.fields.values()):
@@ -16,7 +16,6 @@ def _treat_entry(block:Entry, bibtex_format) -> List[str]:
         res.append(field.key)
         res.append(_val_intent_string(bibtex_format, field.key))
         res.append(VAL_SEP)
-        # TODO handle multiline indentation
         res.append(field.value)
         if bibtex_format.trailing_comma or i < len(block.fields) - 1:
             res.append(",")
@@ -27,7 +26,7 @@ def _treat_entry(block:Entry, bibtex_format) -> List[str]:
 
 def _val_intent_string(bibtex_format: "BibtexFormat", key: str) -> str:
     """The spaces which have to be added after the ` = `."""
-    length =  bibtex_format.value_column - len(key) - len(VAL_SEP)
+    length = bibtex_format.value_column - len(key) - len(VAL_SEP)
     return "" if length <= 0 else " " * length
 
 
@@ -123,7 +122,6 @@ class BibtexFormat:
     def __init__(self):
         self._indent: str = "\t"
         self._align_field_values: Union[int, str] = 0
-        self._align_multiline_values: bool = False
         self._block_separator: str = "\n\n"
         self._trailing_comma: bool = False
         self._parsing_failed_comment: str = PARSING_FAILED_COMMENT
@@ -162,18 +160,6 @@ class BibtexFormat:
         elif align_values != "auto":
             raise ValueError("align_field_values must be an integer or 'auto'")
         self._align_field_values = align_values
-
-    @property
-    def align_multiline_values(self) -> bool:
-        """Specifies whether multi-line values should be aligned. Default: False
-
-        If `true`, multi-line values are formatted such that multiline text is
-         aligned exactly on top of each other."""
-        return self._align_multiline_values
-
-    @align_multiline_values.setter
-    def align_multiline_values(self, align_multiline_values: bool):
-        self._align_multiline_values = align_multiline_values
 
     @property
     def block_separator(self) -> str:
