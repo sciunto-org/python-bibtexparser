@@ -1,10 +1,6 @@
 from textwrap import dedent
 
-import pytest
-
 import bibtexparser
-from bibtexparser import parse_string
-from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
 from bibtexparser.middlewares.names import (
     MergeCoAuthors,
     MergeNameParts,
@@ -29,8 +25,8 @@ bibtex_string = dedent(
 )
 
 
-@pytest.mark.skip("Writing is not yet implemented")  # TODO activate this example
 def test_example():
+    """A simplistic end-to-end parse-and-write example."""
     bib_database = bibtexparser.parse_string(
         bibtex_string,
         append_middleware=[
@@ -39,12 +35,30 @@ def test_example():
         ],
     )
 
-    print(bib_database)
-
     new_bibtex_string = bibtexparser.write_string(
         bib_database,
-        append_middleware=[
+        prepend_middleware=[
             MergeNameParts(allow_inplace_modification=True),
             MergeCoAuthors(allow_inplace_modification=True),
         ],
+    )
+
+    # Note: As defaults change, this assertion may need to be updated.
+    assert (
+        new_bibtex_string.strip()
+        == dedent(
+            """
+    @article{Muller2020,
+    \ttitle = {Some Paper Title},
+    \tauthor = {John Muller and Jane Doe},
+    \tjournal = {Nature Reviews Materials},
+    \tyear = {2019}
+    }
+    
+    
+    @comment{This is a comment.}
+    
+    
+    @preamble{e = mc^2}"""
+        ).strip()
     )
