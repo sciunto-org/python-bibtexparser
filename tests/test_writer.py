@@ -5,37 +5,33 @@ import pytest
 from bibtexparser import Library, writer, BibtexFormat
 from bibtexparser.model import String, Preamble, ExplicitComment, ImplicitComment, Entry, Field
 
+_DUMMY_STRING = String(key="myKey", value='"myValue"')
+_DUMMY_PREAMBLE = Preamble(value='"myValue"')
+_DUMMY_EXPLICIT_COMMENT = ExplicitComment(comment="myValue")
+_DUMMY_IMPLICIT_COMMENT = ImplicitComment(comment="#myValue")
 
-def test_write_string():
+def _dummy_entry():
+    return Entry(
+        entry_type="article",
+        key="myKey",
+        fields={
+            "title": Field(key="title", value='"myTitle"'),
+            "author": Field(key="author", value='"myAuthor"'),
+        },
+    )
+
+
+@pytest.mark.parametrize("block, expected_string", [
+    (_DUMMY_STRING, '@string{myKey = "myValue"}'),
+    (_DUMMY_PREAMBLE, '@preamble{"myValue"}'),
+    (_DUMMY_EXPLICIT_COMMENT, '@comment{myValue}'),
+    (_DUMMY_IMPLICIT_COMMENT, '#myValue'),
+])
+def test_single_simple_blocks(block, expected_string):
     """Test the @string serializer."""
-    string_block = String(key="myKey", value='"myValue"')
-    library = Library(blocks=[string_block])
+    library = Library(blocks=[block])
     string = writer.write_string(library)
-    assert string == f'@string{{myKey = "myValue"}}'
-
-
-def test_write_preamble():
-    """Test the @preamble serializer."""
-    preamble_block = Preamble(value='"myValue"')
-    library = Library(blocks=[preamble_block])
-    string = writer.write_string(library)
-    assert string == f'@preamble{{"myValue"}}'
-
-
-def test_write_explicit_comment():
-    """Test the @comment serializer."""
-    comment_block = ExplicitComment(comment="myValue")
-    library = Library(blocks=[comment_block])
-    string = writer.write_string(library)
-    assert string == f'@comment{{myValue}}'
-
-
-def test_write_implicit_comment():
-    """Test the implicit comment serializer."""
-    comment_block = ImplicitComment(comment="#myValue")
-    library = Library(blocks=[comment_block])
-    string = writer.write_string(library)
-    assert string == f'#myValue'
+    assert string == expected_string
 
 
 @pytest.mark.parametrize("indent", [None, "", " ", "\t"])
@@ -92,14 +88,26 @@ def test_entry_value_column(value_column):
         assert f'{bib_format.indent}author               = "myAuthor"' in string
         assert f'{bib_format.indent}veryverylongkeyfield = 2020' in string
 
+@pytest.mark.parametrize("block_separator", [None, "\n\n", "\n-----\n"])
+def test_block_separator(block_separator):
+    library = Library(blocks=[_DUMMY_STRING, _DUMMY_PREAMBLE])
+    bib_format = BibtexFormat()
+    if block_separator is not None:
+        bib_format.block_separator = block_separator
+    else:
+        block_separator = "\n\n" # default
+    string = writer.write_string(library, bib_format)
+    lines = string.splitlines()
 
+    if block_separator == "\n":
+        # Case where the next line immediately is the next block
+        assert len(lines) == 2
+        assert lines[0] == '@string{myKey = "myValue"}'
+        assert lines[1] == '@preamble{"myValue"}'
+    else:
+        # Case where blocks are separated by at least one line
+        expected_lines = block_separator.splitlines(   )
+        for i, l in enumerate(expected_lines):
+            assert lines[1+i] == l
 
-def _dummy_entry():
-    return Entry(
-        entry_type="article",
-        key="myKey",
-        fields={
-            "title": Field(key="title", value='"myTitle"'),
-            "author": Field(key="author", value='"myAuthor"'),
-        },
-    )
+        assert lines[1+len(expected_lines)] == '@preamble{"myValue"}'

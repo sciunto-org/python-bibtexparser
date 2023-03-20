@@ -21,7 +21,7 @@ def _treat_entry(block:Entry, bibtex_format) -> List[str]:
         if bibtex_format.trailing_comma or i < len(block.fields) - 1:
             res.append(",")
         res.append("\n")
-    res.append("}")
+    res.append("}\n")
     return res
 
 
@@ -32,26 +32,26 @@ def _val_intent_string(bibtex_format: "BibtexFormat", key: str) -> str:
 
 
 def _treat_string(block: String, bibtex_format) -> List[str]:
-    return ["@string{", block.key, VAL_SEP, block.value, "}", ]
+    return ["@string{", block.key, VAL_SEP, block.value, "}\n", ]
 
 
 def _treat_preamble(block: Preamble, bibtex_format: "BibtexFormat") -> List[str]:
-    return [f"@preamble{{{block.value}}}"]
+    return [f"@preamble{{{block.value}}}\n"]
 
 
 def _treat_impl_comment(block: ImplicitComment, bibtex_format: "BibtexFormat") -> List[str]:
     # Note: No explicit escaping is done here - that should be done in middleware
-    return [block.comment]
+    return [block.comment, "\n"]
 
 
 def _treat_expl_comment(block: ExplicitComment, bibtex_format: "BibtexFormat") -> List[str]:
-    return ["@comment{", block.comment, "}"]
+    return ["@comment{", block.comment, "}\n"]
 
 
 def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat") -> List[str]:
     lines = len(block.raw.splitlines())
     parsing_failed_comment = PARSING_FAILED_COMMENT.format({"n": lines})
-    return [parsing_failed_comment, block.raw]
+    return [parsing_failed_comment, block.raw, "\n"]
 
 
 def _calculate_auto_value_align(library: Library) -> int:
@@ -124,7 +124,7 @@ class BibtexFormat:
         self._indent: str = "\t"
         self._align_field_values: Union[int, str] = 0
         self._align_multiline_values: bool = False
-        self._block_separator: str = "\n"
+        self._block_separator: str = "\n\n"
         self._trailing_comma: bool = False
         self._parsing_failed_comment: str = PARSING_FAILED_COMMENT
 
@@ -177,7 +177,9 @@ class BibtexFormat:
 
     @property
     def block_separator(self) -> str:
-        """Character(s) for separating BibTeX entries. Default: single new line."""
+        """Character(s) for separating BibTeX entries.
+
+        Default: Two lines breaks, i.e., two blank lines."""
         return self._block_separator
 
     @block_separator.setter
