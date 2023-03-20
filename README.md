@@ -10,15 +10,54 @@ If you want to join the development, please contact us through github issues.
 ## Advantages of V2
 
 - :rocket: Order of magnitudes faster
-- :blue_book: Type-Hints and extensive documentation
 - :wrench: Easily customizable parsing **and** writing
 - :herb: Access to raw, unparsed bibtex.
 - :hankey: Fault-Tolerant: Able to parse files with syntax errors
 - :mahjong: Massively simplified, robuster handling of de- and encoding (special chars, ...).
+- :copyright: Permissive MIT license
 
 ## TLDR Usage Example
- 
-*TODO*
+
+```python
+# Parsing a bibtex string with default values
+bib_database = bibtexparser.parse_string(bibtex_string)
+# Converting it back to a bibtex string, again with default values
+new_bibtex_string = bibtexparser.write_string(bib_database)
+```
+
+Slightly more involved example:
+
+```python
+
+# Lets parse some bibtex string.
+bib_database = bibtexparser.parse_string(
+    # The following string is your bibtex string
+    bibtex_string,
+    # Middleware layers to transform parsed entries.
+    #    Here, we split multiple authors from each other,
+    #    and then extract first name, last name, ... for each
+    append_middleware=[
+        SeparateCoAuthors(allow_inplace_modification=True),
+        SplitNameParts(allow_inplace_modification=True),
+    ],
+)
+
+# Here you have a `bib_database` with all parsed bibtex blocks.
+
+# Let's transform it back to a bibtex_string.
+new_bibtex_string = bibtexparser.write_string(
+    bib_database,
+    # Middleware layers to transform the authors info 
+    #    back into a single bibtex-compatible string.
+    prepend_middleware=[
+        MergeNameParts(allow_inplace_modification=True),
+        MergeCoAuthors(allow_inplace_modification=True),
+    ],
+)
+```
+
+These examples really only show the bare minimum. 
+Consult the documentation for a list of available middleware, parsing options and write-formatting options.
 
 ## V2 Architecture and Terminology
 
