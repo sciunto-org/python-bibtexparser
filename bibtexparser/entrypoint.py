@@ -1,16 +1,17 @@
 import warnings
 from typing import Iterable, List, Optional, TextIO, Union
 
+from bibtexparser import writer
 from bibtexparser.library import Library
-from bibtexparser.middlewares.default import default_parse_stack
+from bibtexparser.middlewares.default import default_parse_stack, default_unparse_stack
 from bibtexparser.middlewares.middleware import Middleware
 from bibtexparser.splitter import Splitter
 from bibtexparser.writer import BibtexFormat, write_string
 
 
-def _build_stack(
-    parse_stack: Optional[Iterable[Middleware]],
-    append_middleware: Optional[Iterable[Middleware]],
+def _build_parse_stack(
+        parse_stack: Optional[Iterable[Middleware]],
+        append_middleware: Optional[Iterable[Middleware]],
 ) -> List[Middleware]:
     if parse_stack is not None and append_middleware is not None:
         raise ValueError(
@@ -40,26 +41,58 @@ def _build_stack(
     return list(parse_stack) + list(append_middleware)
 
 
+def _build_unparse_stack(
+        unparse_stack: Optional[Iterable[Middleware]],
+        prepend_middleware: Optional[Iterable[Middleware]],
+) -> List[Middleware]:
+    if unparse_stack is not None and prepend_middleware is not None:
+        raise ValueError(
+            "Provided both parse_stack and append_middleware."
+            "Only one should be provided."
+            "(prepend_middleware should only be used with the default parse_stack,"
+            "i.e., when the passed parse_stack is None.)"
+        )
+
+    if unparse_stack is None:
+        unparse_stack = default_unparse_stack(
+            allow_inplace_modification=True, allow_multithreading=True
+        )
+
+    if prepend_middleware is None:
+        return list(unparse_stack)
+
+    parse_stack_types = [type(m) for m in unparse_stack]
+    append_stack_types = set([type(m) for m in prepend_middleware])
+    stack_types_intersect = set(parse_stack_types).intersection(append_stack_types)
+    if len(stack_types_intersect) > 0:
+        warnings.warn(
+            "Some middleware passed in append_middleware are "
+            f"already in the default parse_stack ({stack_types_intersect})."
+        )
+
+    return list(prepend_middleware) + list(unparse_stack)
+
+
 def parse_string(
-    bibtex_str: str,
-    parse_stack: Optional[Iterable[Middleware]] = None,
-    append_middleware: Optional[Iterable[Middleware]] = None,
-    library: Optional[Library] = None,
+        bibtex_str: str,
+        parse_stack: Optional[Iterable[Middleware]] = None,
+        append_middleware: Optional[Iterable[Middleware]] = None,
+        library: Optional[Library] = None,
 ):
     splitter = Splitter(bibstr=bibtex_str)
     library = splitter.split(library=library)
 
     middleware: Middleware
-    for middleware in _build_stack(parse_stack, append_middleware):
+    for middleware in _build_parse_stack(parse_stack, append_middleware):
         library = middleware.transform(library=library)
 
     return library
 
 
 def parse_file(
-    path: str,
-    parse_stack: Optional[Iterable[Middleware]] = None,
-    append_middleware: Optional[Iterable[Middleware]] = None,
+        path: str,
+        parse_stack: Optional[Iterable[Middleware]] = None,
+        append_middleware: Optional[Iterable[Middleware]] = None,
 ):
     with open(path) as f:
         bibtex_str = f.read()
@@ -69,11 +102,11 @@ def parse_file(
 
 
 def write_file(
-    file: Union[str, TextIO],
-    library: Library,
-    parse_stack: Optional[Iterable[Middleware]] = None,
-    append_middleware: Optional[Iterable[Middleware]] = None,
-    bibtex_format: Optional[BibtexFormat] = None,
+        file: Union[str, TextIO],
+        library: Library,
+        parse_stack: Optional[Iterable[Middleware]] = None,
+        append_middleware: Optional[Iterable[Middleware]] = None,
+        bibtex_format: Optional[BibtexFormat] = None,
 ) -> None:
     """Write a BibTeX database to a file.
 
@@ -86,8 +119,8 @@ def write_file(
     :param bibtex_format: Customized BibTeX format to use (optional)."""
     bibtex_str = write_string(
         library=library,
-        parse_stack=parse_stack,
-        append_middleware=append_middleware,
+        unparse_stack=parse_stack,
+        prepend_middleware=append_middleware,
         bibtex_format=bibtex_format,
     )
     if isinstance(file, str):
@@ -98,21 +131,21 @@ def write_file(
 
 
 def write_string(
-    library: Library,
-    parse_stack: Optional[Iterable[Middleware]] = None,
-    append_middleware: Optional[Iterable[Middleware]] = None,
-    bibtex_format: Optional["BibtexFormat"] = None,
+        library: Library,
+        unparse_stack: Optional[Iterable[Middleware]] = None,
+        prepend_middleware: Optional[Iterable[Middleware]] = None,
+        bibtex_format: Optional["BibtexFormat"] = None,
 ) -> str:
     """Serialize a BibTeX database to a string.
 
     :param library: BibTeX database to serialize.
-    :param parse_stack: List of middleware to apply to the database before writing.
+    :param unparse_stack: List of middleware to apply to the database before writing.
                         If None, a default stack will be used.
-    :param append_middleware: List of middleware to append to the default stack.
+    :param prepend_middleware: List of middleware to prepend to the default stack.
                         Only applicable if `parse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional)."""
     middleware: Middleware
-    for middleware in _build_stack(parse_stack, append_middleware):
+    for middleware in _build_unparse_stack(unparse_stack, prepend_middleware):
         library = middleware.transform(library=library)
 
     return writer.write_string(library, bibtex_format=bibtex_format)
