@@ -21,7 +21,8 @@ from bibtexparser.model import (
 
 
 class Splitter:
-    def __init__(self, bibstr: str):
+    def __init__(self,
+                 bibstr: str):
         # Add a newline at the beginning to simplify parsing
         #   (we only allow "@"-block starts after a newline)
         self.bibstr = f"\n{bibstr}"
@@ -136,9 +137,10 @@ class Splitter:
 
     def _move_to_end_of_entry(
         self, first_key_start: int
-    ) -> Tuple[Dict[str, Field], int, Set[str]]:
+    ) -> Tuple[List[Field], int, Set[str]]:
         """Move to the end of the entry and return the fields and the end index."""
-        result = dict()
+        result = []
+        keys = set()
         duplicate_keys = set()
 
         key_start = first_key_start
@@ -169,7 +171,7 @@ class Splitter:
                 value_end = self._move_to_end_of_double_quoted_string() + 1
             else:
                 # e.g.  String reference or integer. Ended by the observed mark
-                #       (as there is not start mark).
+                #       (as there is no start mark).
                 #       Should be either a comma or a "}"
                 value_start = equals_mark.end()
                 value_end = value_start_mark.start()
@@ -190,15 +192,11 @@ class Splitter:
             key = self.bibstr[key_start:key_end].strip()
             value = self.bibstr[value_start:value_end].strip()
 
-            if key in result:
+            if key in keys:
                 duplicate_keys.add(key)
-                duplicate_count = 1
-                while f"{key}_duplicate_{duplicate_count}" in result:
-                    duplicate_count += 1
 
-                key = f"{key}_duplicate_{duplicate_count}"
-
-            result[key] = Field(start_line=start_line, key=key, value=value)
+            keys.add(key)
+            result.append(Field(start_line=start_line, key=key, value=value))
 
             # If next mark is a comma, continue
             after_field_mark = self._next_mark(accept_eof=False)

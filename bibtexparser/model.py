@@ -1,5 +1,5 @@
 import abc
-from copy import copy
+from copy import copy, deepcopy
 from typing import Any, Dict, List, Optional, Set
 
 
@@ -166,12 +166,11 @@ class Entry(Block):
             self,
             entry_type: str,
             key: str,
-            fields: Dict[str, Field],
+            fields: List[Field],
             start_line: Optional[int] = None,
             raw: Optional[str] = None,
     ):
         super().__init__(start_line, raw)
-
         self._entry_type = entry_type
         self._key = key
         self._fields = fields
@@ -194,17 +193,27 @@ class Entry(Block):
         self._key = value
 
     @property
-    def fields(self) -> Dict[str, Field]:
-        return copy(self._fields)
+    def fields(self) -> List[Field]:
+        return self._fields
 
     @fields.setter
-    def fields(self, value: Dict[str, Field]):
+    def fields(self, value: List[Field]):
         self._fields = value
 
+    @property
+    def fields_dict(self) -> Dict[str, Field]:
+        """Returns a dict of fields, with field keys as keys.
+
+        Note that with duplicate field keys, the behavior is undefined."""
+        return {field.key: field for field in self._fields}
 
     def set_field(self, field: Field):
         """Adds a new field, or replaces existing with same key."""
-        self._fields[field.key] = field
+        if field.key in self.fields_dict:
+            i = [f.key for f in self._fields].index(field.key)
+            self._fields[i] = field
+        else:
+            self._fields.append(field)
 
     def get_parser_metadata(self, key: str) -> Optional[Any]:
         return self._parsing_metadata.get(key, None)
@@ -213,15 +222,18 @@ class Entry(Block):
         self._parsing_metadata[key] = value
 
     def __getitem__(self, key: str) -> Any:
-        """Dict-mimicking index, for partial v1.x backwards compatibility.
+        """Dict-mimicking index.
 
-        For newly written code, it's recommended to use `entry.entry_type`,
-        `entry.key` and `entry.fields[<<field-key>>].value` instead."""
+        This serves for partial v1.x backwards compatibility,
+        as well as for a shorthand for accessing field values.
+
+        Note that with duplicate field keys, the behavior is undefined.
+        """
         if key == "ENTRYTYPE":
             return self.entry_type
         if key == "ID":
             return self.key
-        return self._fields[key].value
+        return self.fields_dict[key].value
 
     def items(self):
         """Dict-mimicking, for partial v1.x backwards compatibility.
@@ -231,7 +243,7 @@ class Entry(Block):
         return [
             ("ENTRYTYPE", self.entry_type),
             ("ID", self.key),
-        ] + [(f.key, f.value) for f in self.fields.values()]
+        ] + [(f.key, f.value) for f in self.fields]
 
 
 class ParsingFailedBlock(Block):

@@ -49,7 +49,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
     def transform_entry(self, entry: Entry, *args, **kwargs) -> Block:
         field: Field
         # TODO wrap in try/except to catch exceptions and create failed block if needed
-        for field in entry.fields.values():
+        for field in entry.fields:
             if field.key in self.name_fields:
                 field.value = self._transform_field_value(field.value)
         return entry

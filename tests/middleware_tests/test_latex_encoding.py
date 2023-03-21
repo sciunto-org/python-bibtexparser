@@ -58,7 +58,7 @@ def test_latex_special_chars_decoding(latex_string, expected_decoded_string):
     assert len(transformed_library.blocks) == 1
 
     transformed_entry = transformed_library.entries[0]
-    transformed_field = transformed_entry.fields["tested_field"]
+    transformed_field = transformed_entry.fields_dict["tested_field"]
 
     assert transformed_field.value == expected_decoded_string
 
@@ -111,7 +111,7 @@ def test_latex_special_chars_encoding(human_string, expected_latex_string):
     assert len(transformed_library.blocks) == 1
 
     transformed_entry = transformed_library.entries[0]
-    transformed_field = transformed_entry.fields["tested_field"]
+    transformed_field = transformed_entry.fields_dict["tested_field"]
 
     assert transformed_field.value == expected_latex_string
 
@@ -145,11 +145,11 @@ def _entry_with_latex_string(latex_string):
         raw="Not relevant for this test",
         entry_type="article",
         key="someEntry",
-        fields={
-            "tested_field": Field(
+        fields=[
+            Field(
                 start_line=1,
                 key="tested_field",
                 value=latex_string,
             )
-        },
+        ],
     )
