@@ -22,13 +22,13 @@ def test_string_interpolation_middleware_interpolates_string():
     original_library = Splitter(bibtex_string).split()
 
     # Prerequisite
-    assert original_library.entries_dict["test_article"].fields["note"].value == "test_note"
+    assert original_library.entries_dict["test_article"].fields_dict["note"].value == "test_note"
 
     # Apply middleware
     changed_library = ResolveStringReferencesMiddleware(allow_inplace_modification=False).transform(original_library)
 
     assert original_library is not changed_library
-    assert changed_library.entries_dict["test_article"].fields["note"].value == '"This is a test note."'
+    assert changed_library.entries_dict["test_article"].fields_dict["note"].value == '"This is a test note."'
 
 
 def test_warning_is_raised_if_enclosings_are_removed():

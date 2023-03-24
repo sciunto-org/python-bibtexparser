@@ -20,7 +20,7 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
     # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, library: "Library") -> Block:
         try:
-            month = entry.fields["month"]
+            month = entry.fields_dict["month"]
         except KeyError:
             return entry
 

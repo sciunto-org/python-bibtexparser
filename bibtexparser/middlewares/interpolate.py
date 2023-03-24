@@ -50,7 +50,7 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
 
 
             field: Field
-            for field in entry.fields.values():
+            for field in entry.fields:
                 if _value_is_nonstring_or_enclosed(field.value):
                     continue
                 if field.value not in library.strings_dict:

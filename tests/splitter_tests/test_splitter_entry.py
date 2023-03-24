@@ -38,7 +38,7 @@ def test_field_enclosings(field_key: str, value: str, line: int):
     assert len(library.entries) == 1
     assert len(library.entries[0].fields) == 4
 
-    tested_field: Field = library.entries[0].fields[field_key]
+    tested_field: Field = library.entries[0].fields_dict[field_key]
     assert tested_field.key == field_key
     assert tested_field.value == value
     assert tested_field.start_line == line
@@ -96,7 +96,7 @@ def test_field_value(field_value: str, enclosing: str):
     assert len(library.failed_blocks) == 0
     assert len(library.entries) == 1
     assert len(library.entries[0].fields) == 2
-    assert library.entries[0].fields["firstfield"].value == expected
+    assert library.entries[0].fields_dict["firstfield"].value == expected
 
 
 @pytest.mark.parametrize(
@@ -122,9 +122,9 @@ def test_trailing_comma(enclosing: str):
     assert len(library.failed_blocks) == 0
     assert len(library.entries) == 1
     assert len(library.entries[0].fields) == 2
-    assert library.entries[0].fields["firstfield"].value == "{some value}"
+    assert library.entries[0].fields_dict["firstfield"].value == "{some value}"
     assert (
-        library.entries[0].fields["fieldBeforeTrailingComma"].value
+        library.entries[0].fields_dict["fieldBeforeTrailingComma"].value
         == value_before_trailing_comma
     )
 
@@ -157,12 +157,18 @@ def test_multiple_identical_field_keys():
 
     assert "author, title" in str(block.error)
 
-    assert block.entry.fields["title"].value == "{The first title}"
-    assert block.entry.fields["title_duplicate_1"].value == "{The second title}"
-    assert block.entry.fields["title_duplicate_2"].value == "{The third title}"
-    assert block.entry.fields["author"].value == "{The first author}"
-    assert block.entry.fields["author_duplicate_1"].value == "{The second author}"
-    assert block.entry.fields["journal"].value == "{Some journal}"
-    assert len(block.entry.fields) == 6
-    assert block.entry.entry_type == "article"
-    assert block.entry.key == "test"
+    title_fields = [f for f in block.entry.fields if f.key == "title"]
+    assert len(title_fields) == 3
+    assert title_fields[0].value == "{The first title}"
+    assert title_fields[1].value == "{The second title}"
+    assert title_fields[2].value == "{The third title}"
+
+    author_fields = [f for f in block.entry.fields if f.key == "author"]
+    assert len(author_fields) == 2
+    assert author_fields[0].value == "{The first author}"
+    assert author_fields[1].value == "{The second author}"
+
+    journal_field = [f for f in block.entry.fields if f.key == "journal"]
+    assert len(journal_field) == 1
+    assert journal_field[0].value == "{Some journal}"
+

@@ -51,7 +51,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     def transform_entry(self, entry: Entry, library: "Library") -> Entry:
         field: Field
         metadata = dict()
-        for field in entry.fields.values():
+        for field in entry.fields:
             stripped, enclosing = self._strip_enclosing(field.value)
             field.value = stripped
             metadata[field.key] = enclosing
@@ -133,7 +133,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
         metadata_enclosing = entry.parser_metadata.pop(
             RemoveEnclosingMiddleware.metadata_key(), None
         )
-        for field in entry.fields.values():
+        for field in entry.fields:
             apply_int_rule = field.key in ENTRY_POTENTIALLY_INT_FIELDS
             prev_encoding = (
                 metadata_enclosing.get(field.key, None)
