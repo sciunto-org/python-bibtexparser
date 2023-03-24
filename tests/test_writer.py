@@ -15,10 +15,10 @@ def _dummy_entry():
     return Entry(
         entry_type="article",
         key="myKey",
-        fields={
-            "title": Field(key="title", value='"myTitle"'),
-            "author": Field(key="author", value='"myAuthor"'),
-        },
+        fields=[
+            Field(key="title", value='"myTitle"'),
+            Field(key="author", value='"myAuthor"'),
+        ]
     )
 
 

@@ -143,7 +143,7 @@ def test_entry(expected: Dict[str, Any]):
     assert entry.entry_type == expected["type"]
     assert len(entry.fields) == len(expected["fields"])
     for field_name, field_value in expected["fields"].items():
-        field = entry.fields[field_name]
+        field = entry.fields_dict[field_name]
         assert field.key == field_name
         assert field.value == field_value
     assert entry.start_line == expected["start_line"]

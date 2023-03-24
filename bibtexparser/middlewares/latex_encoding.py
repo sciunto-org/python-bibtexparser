@@ -28,7 +28,7 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
 
     # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, library: "Library") -> Block:
-        for field in entry.fields.values():
+        for field in entry.fields:
             if isinstance(field.value, str):
                 field.value = self._transform_python_value_string(field.value)
             elif isinstance(field.value, NameParts):

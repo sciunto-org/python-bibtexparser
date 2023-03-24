@@ -11,7 +11,7 @@ PARSING_FAILED_COMMENT = "% WARNING Parsing failed for the following {n} lines."
 def _treat_entry(block: Entry, bibtex_format) -> List[str]:
     res = ["@", block.entry_type, "{", block.key, ",\n"]
     field: Field
-    for i, field in enumerate(block.fields.values()):
+    for i, field in enumerate(block.fields):
         res.append(bibtex_format.indent)
         res.append(field.key)
         res.append(_val_intent_string(bibtex_format, field.key))
@@ -56,7 +56,7 @@ def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat"
 def _calculate_auto_value_align(library: Library) -> int:
     max_key_len = 0
     for entry in library.entries:
-        for key in entry.fields:
+        for key in entry.fields_dict:
             max_key_len = max(max_key_len, len(key))
     return max_key_len + len(VAL_SEP)
 

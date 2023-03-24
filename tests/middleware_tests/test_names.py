@@ -35,8 +35,8 @@ from tests.middleware_tests.middleware_test_util import (
         ("{Simon and Schuster}", ["{Simon and Schuster}"]),
         ("Something \\and Other", ["Something \\and Other"]),
         (
-            "Name One and Two, Name and Name Three",
-            ["Name One", "Two, Name", "Name Three"],
+                "Name One and Two, Name and Name Three",
+                ["Name One", "Two, Name", "Name Three"],
         ),
         ("P. M. Sutherland and Smith, J.", ["P. M. Sutherland", "Smith, J."]),
         ("P. M. Sutherland and\tSmith, J.", ["P. M. Sutherland", "Smith, J."]),
@@ -48,8 +48,8 @@ from tests.middleware_tests.middleware_test_util import (
         ("P. M. Sutherland aNd\tSmith, J.", ["P. M. Sutherland", "Smith, J."]),
         ("P. M. Sutherland aNd\nSmith, J.", ["P. M. Sutherland", "Smith, J."]),
         (
-            "Fake Name an{d brace in an}d and Somebody Else",
-            ["Fake Name an{d brace in an}d", "Somebody Else"],
+                "Fake Name an{d brace in an}d and Somebody Else",
+                ["Fake Name an{d brace in an}d", "Somebody Else"],
         ),
         ("and John Smith", ["and John Smith"]),
         (" and John Smith", ["and John Smith"]),
@@ -134,61 +134,61 @@ def _dict_to_nameparts(as_dict):
 @pytest.mark.parametrize(
     "name, expected",
     (
-        pytest.param(
-            "BB,",
-            {"first": [], "von": [], "last": ["BB"], "jr": []},
-            id="trailing comma",
-        ),
-        pytest.param(
-            "BB, ",
-            {"first": [], "von": [], "last": ["BB"], "jr": []},
-            id="trailing comma and space",
-        ),
-        pytest.param(
-            "BB, ~\t",
-            {"first": [], "von": [], "last": ["BB"], "jr": []},
-            id="trailing comma and tab",
-        ),
-        pytest.param(
-            ", ~\t",
-            {"first": [], "von": [], "last": [], "jr": []},
-            id="empty with trailing comma and tab",
-        ),
-        pytest.param(
-            "AA, BB, CC, DD",
-            {"first": ["CC", "DD"], "von": [], "last": ["AA"], "jr": ["BB"]},
-            id="too many commas",
-        ),
-        pytest.param(
-            "AA {BB CC",
-            {"first": ["AA"], "von": [], "last": ["{BB CC}"], "jr": []},
-            id="unterminated opening brace 1",
-        ),
-        pytest.param(
-            "AA {{{BB CC",
-            {"first": ["AA"], "von": [], "last": ["{{{BB CC}}}"], "jr": []},
-            id="unterminated opening brace 2",
-        ),
-        pytest.param(
-            "AA {{{BB} CC}",
-            {"first": ["AA"], "von": [], "last": ["{{{BB} CC}}"], "jr": []},
-            id="unterminated opening brace 3",
-        ),
-        pytest.param(
-            "AA BB CC}",
-            {"first": ["AA", "BB"], "von": [], "last": ["{CC}"], "jr": []},
-            id="unmatched closing brace 1",
-        ),
-        pytest.param(
-            "AA BB CC}}}",
-            {"first": ["AA", "BB"], "von": [], "last": ["{{{CC}}}"], "jr": []},
-            id="unmatched closing brace 2",
-        ),
-        pytest.param(
-            "{AA {BB CC}}}",
-            {"first": [], "von": [], "last": ["{{AA {BB CC}}}"], "jr": []},
-            id="unmatched closing brace 3",
-        ),
+            pytest.param(
+                "BB,",
+                {"first": [], "von": [], "last": ["BB"], "jr": []},
+                id="trailing comma",
+            ),
+            pytest.param(
+                "BB, ",
+                {"first": [], "von": [], "last": ["BB"], "jr": []},
+                id="trailing comma and space",
+            ),
+            pytest.param(
+                "BB, ~\t",
+                {"first": [], "von": [], "last": ["BB"], "jr": []},
+                id="trailing comma and tab",
+            ),
+            pytest.param(
+                ", ~\t",
+                {"first": [], "von": [], "last": [], "jr": []},
+                id="empty with trailing comma and tab",
+            ),
+            pytest.param(
+                "AA, BB, CC, DD",
+                {"first": ["CC", "DD"], "von": [], "last": ["AA"], "jr": ["BB"]},
+                id="too many commas",
+            ),
+            pytest.param(
+                "AA {BB CC",
+                {"first": ["AA"], "von": [], "last": ["{BB CC}"], "jr": []},
+                id="unterminated opening brace 1",
+            ),
+            pytest.param(
+                "AA {{{BB CC",
+                {"first": ["AA"], "von": [], "last": ["{{{BB CC}}}"], "jr": []},
+                id="unterminated opening brace 2",
+            ),
+            pytest.param(
+                "AA {{{BB} CC}",
+                {"first": ["AA"], "von": [], "last": ["{{{BB} CC}}"], "jr": []},
+                id="unterminated opening brace 3",
+            ),
+            pytest.param(
+                "AA BB CC}",
+                {"first": ["AA", "BB"], "von": [], "last": ["{CC}"], "jr": []},
+                id="unmatched closing brace 1",
+            ),
+            pytest.param(
+                "AA BB CC}}}",
+                {"first": ["AA", "BB"], "von": [], "last": ["{{{CC}}}"], "jr": []},
+                id="unmatched closing brace 2",
+            ),
+            pytest.param(
+                "{AA {BB CC}}}",
+                {"first": [], "von": [], "last": ["{{AA {BB CC}}}"], "jr": []},
+                id="unmatched closing brace 3",
+            ),
     ),
 )
 def test_name_splitting_no_strict_mode(name: str, expected: Dict[str, List[str]]):
@@ -205,9 +205,6 @@ def test_name_splitting_commas_at_higher_brace_level(strict: bool):
         {"first": ["{AA, BB}"], "von": [], "last": ["CC"], "jr": ["dd"]}
     )
     assert result == expected
-
-
-# TODO continue adapting tests from https://github.com/bcbnz/python-bibtexparser/blob/utils/bibtexparser/tests/test_parsename.py#L49
 
 
 REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
@@ -854,15 +851,15 @@ def test_separate_co_names_middleware(inplace):
         raw="irrelevant-for-this-test",
         entry_type="article",
         key="articleKey",
-        fields={
-            "title": Field(start_line=0, key="title", value="A Test and Some More"),
-            "author": Field(
+        fields=[
+            Field(start_line=0, key="title", value="A Test and Some More"),
+            Field(
                 start_line=1, key="author", value="A. Author and B. Author"
             ),
-            "editor": Field(
+            Field(
                 start_line=2, key="editor", value="C. Editor and D. Editor"
             ),
-        },
+        ],
     )
     original_copy = deepcopy(input_entry)
 
@@ -873,9 +870,9 @@ def test_separate_co_names_middleware(inplace):
     assert len(transformed_library.blocks) == 1
 
     transformed_entry = transformed_library.entries[0]
-    assert transformed_entry.fields["title"] == original_copy.fields["title"]
-    assert transformed_entry.fields["author"].value == ["A. Author", "B. Author"]
-    assert transformed_entry.fields["editor"].value == ["C. Editor", "D. Editor"]
+    assert transformed_entry.fields_dict["title"] == original_copy.fields_dict["title"]
+    assert transformed_entry.fields_dict["author"].value == ["A. Author", "B. Author"]
+    assert transformed_entry.fields_dict["editor"].value == ["C. Editor", "D. Editor"]
 
     # Make sure other attributes are not changed
     assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
@@ -891,15 +888,15 @@ def test_merge_co_names_middleware(inplace: bool):
         raw="irrelevant-for-this-test",
         entry_type="article",
         key="articleKey",
-        fields={
-            "title": Field(start_line=0, key="title", value="A Test and Some More"),
-            "author": Field(
+        fields=[
+            Field(start_line=0, key="title", value="A Test and Some More"),
+            Field(
                 start_line=1, key="author", value=["A. Author", "B. Author"]
             ),
-            "editor": Field(
+            Field(
                 start_line=2, key="editor", value=["C. Editor", "D. Editor"]
             ),
-        },
+        ]
     )
     original_copy = deepcopy(input_entry)
 
@@ -910,9 +907,9 @@ def test_merge_co_names_middleware(inplace: bool):
     assert len(transformed_library.blocks) == 1
 
     transformed_entry = transformed_library.entries[0]
-    assert transformed_entry.fields["title"] == original_copy.fields["title"]
-    assert transformed_entry.fields["author"].value == "A. Author and B. Author"
-    assert transformed_entry.fields["editor"].value == "C. Editor and D. Editor"
+    assert transformed_entry.fields_dict["title"] == original_copy.fields_dict["title"]
+    assert transformed_entry.fields_dict["author"].value == "A. Author and B. Author"
+    assert transformed_entry.fields_dict["editor"].value == "C. Editor and D. Editor"
 
     # Make sure other attributes are not changed
     assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
@@ -928,12 +925,12 @@ def test_split_name_parts(inplace: bool):
         raw="irrelevant-for-this-test",
         entry_type="article",
         key="articleKey",
-        fields={
-            "title": Field(start_line=0, key="title", value="A Test and Some More"),
-            "author": Field(
+        fields=[
+            Field(start_line=0, key="title", value="A Test and Some More"),
+            Field(
                 start_line=1, key="author", value=["Amy Author", "Ben Bystander"]
             ),
-        },
+        ],
     )
     original_copy = deepcopy(input_entry)
 
@@ -944,8 +941,8 @@ def test_split_name_parts(inplace: bool):
     assert len(transformed_library.blocks) == 1
 
     transformed_entry = transformed_library.entries[0]
-    assert transformed_entry.fields["title"] == original_copy.fields["title"]
-    assert transformed_entry.fields["author"].value == [
+    assert transformed_entry.fields_dict["title"] == original_copy.fields_dict["title"]
+    assert transformed_entry.fields_dict["author"].value == [
         NameParts(first=["Amy"], last=["Author"], von=[], jr=[]),
         NameParts(first=["Ben"], last=["Bystander"], von=[], jr=[]),
     ]
@@ -964,9 +961,9 @@ def test_merge_name_parts(inplace: bool):
         raw="irrelevant-for-this-test",
         entry_type="article",
         key="articleKey",
-        fields={
-            "title": Field(start_line=0, key="title", value="A Test and Some More"),
-            "author": Field(
+        fields=[
+            Field(start_line=0, key="title", value="A Test and Some More"),
+            Field(
                 start_line=1,
                 key="author",
                 value=[
@@ -974,7 +971,7 @@ def test_merge_name_parts(inplace: bool):
                     NameParts(first=["Ben"], last=["Bystander"], von=[], jr=[]),
                 ],
             ),
-        },
+        ],
     )
     original_copy = deepcopy(input_entry)
 
@@ -985,8 +982,8 @@ def test_merge_name_parts(inplace: bool):
     assert len(transformed_library.blocks) == 1
 
     transformed_entry = transformed_library.entries[0]
-    assert transformed_entry.fields["title"] == original_copy.fields["title"]
-    assert transformed_entry.fields["author"].value == ["Amy Author", "Ben Bystander"]
+    assert transformed_entry.fields_dict["title"] == original_copy.fields_dict["title"]
+    assert transformed_entry.fields_dict["author"].value == ["Amy Author", "Ben Bystander"]
 
     # Make sure other attributes are not changed
     assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
