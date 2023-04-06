@@ -6,7 +6,6 @@ class ParsingException(Exception):
 
     pass
 
-
     def __copy__(self):
         # We do not copy or deepcopy ParsingExceptions
         # because they are used as immutables,

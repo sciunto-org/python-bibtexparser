@@ -10,8 +10,8 @@ from bibtexparser.writer import BibtexFormat, write_string
 
 
 def _build_parse_stack(
-        parse_stack: Optional[Iterable[Middleware]],
-        append_middleware: Optional[Iterable[Middleware]],
+    parse_stack: Optional[Iterable[Middleware]],
+    append_middleware: Optional[Iterable[Middleware]],
 ) -> List[Middleware]:
     if parse_stack is not None and append_middleware is not None:
         raise ValueError(
@@ -42,8 +42,8 @@ def _build_parse_stack(
 
 
 def _build_unparse_stack(
-        unparse_stack: Optional[Iterable[Middleware]],
-        prepend_middleware: Optional[Iterable[Middleware]],
+    unparse_stack: Optional[Iterable[Middleware]],
+    prepend_middleware: Optional[Iterable[Middleware]],
 ) -> List[Middleware]:
     if unparse_stack is not None and prepend_middleware is not None:
         raise ValueError(
@@ -74,10 +74,10 @@ def _build_unparse_stack(
 
 
 def parse_string(
-        bibtex_str: str,
-        parse_stack: Optional[Iterable[Middleware]] = None,
-        append_middleware: Optional[Iterable[Middleware]] = None,
-        library: Optional[Library] = None,
+    bibtex_str: str,
+    parse_stack: Optional[Iterable[Middleware]] = None,
+    append_middleware: Optional[Iterable[Middleware]] = None,
+    library: Optional[Library] = None,
 ):
     splitter = Splitter(bibstr=bibtex_str)
     library = splitter.split(library=library)
@@ -90,9 +90,9 @@ def parse_string(
 
 
 def parse_file(
-        path: str,
-        parse_stack: Optional[Iterable[Middleware]] = None,
-        append_middleware: Optional[Iterable[Middleware]] = None,
+    path: str,
+    parse_stack: Optional[Iterable[Middleware]] = None,
+    append_middleware: Optional[Iterable[Middleware]] = None,
 ):
     with open(path) as f:
         bibtex_str = f.read()
@@ -102,11 +102,11 @@ def parse_file(
 
 
 def write_file(
-        file: Union[str, TextIO],
-        library: Library,
-        parse_stack: Optional[Iterable[Middleware]] = None,
-        append_middleware: Optional[Iterable[Middleware]] = None,
-        bibtex_format: Optional[BibtexFormat] = None,
+    file: Union[str, TextIO],
+    library: Library,
+    parse_stack: Optional[Iterable[Middleware]] = None,
+    append_middleware: Optional[Iterable[Middleware]] = None,
+    bibtex_format: Optional[BibtexFormat] = None,
 ) -> None:
     """Write a BibTeX database to a file.
 
@@ -131,10 +131,10 @@ def write_file(
 
 
 def write_string(
-        library: Library,
-        unparse_stack: Optional[Iterable[Middleware]] = None,
-        prepend_middleware: Optional[Iterable[Middleware]] = None,
-        bibtex_format: Optional["BibtexFormat"] = None,
+    library: Library,
+    unparse_stack: Optional[Iterable[Middleware]] = None,
+    prepend_middleware: Optional[Iterable[Middleware]] = None,
+    bibtex_format: Optional["BibtexFormat"] = None,
 ) -> str:
     """Serialize a BibTeX database to a string.
 

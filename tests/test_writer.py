@@ -2,8 +2,15 @@
 
 import pytest
 
-from bibtexparser import Library, writer, BibtexFormat
-from bibtexparser.model import String, Preamble, ExplicitComment, ImplicitComment, Entry, Field
+from bibtexparser import BibtexFormat, Library, writer
+from bibtexparser.model import (
+    Entry,
+    ExplicitComment,
+    Field,
+    ImplicitComment,
+    Preamble,
+    String,
+)
 
 _DUMMY_STRING = String(key="myKey", value='"myValue"')
 _DUMMY_PREAMBLE = Preamble(value='"myValue"')
@@ -18,16 +25,19 @@ def _dummy_entry():
         fields=[
             Field(key="title", value='"myTitle"'),
             Field(key="author", value='"myAuthor"'),
-        ]
+        ],
     )
 
 
-@pytest.mark.parametrize("block, expected_string", [
-    (_DUMMY_STRING, '@string{myKey = "myValue"}\n'),
-    (_DUMMY_PREAMBLE, '@preamble{"myValue"}\n'),
-    (_DUMMY_EXPLICIT_COMMENT, '@comment{myValue}\n'),
-    (_DUMMY_IMPLICIT_COMMENT, '#myValue\n'),
-])
+@pytest.mark.parametrize(
+    "block, expected_string",
+    [
+        (_DUMMY_STRING, '@string{myKey = "myValue"}\n'),
+        (_DUMMY_PREAMBLE, '@preamble{"myValue"}\n'),
+        (_DUMMY_EXPLICIT_COMMENT, "@comment{myValue}\n"),
+        (_DUMMY_IMPLICIT_COMMENT, "#myValue\n"),
+    ],
+)
 def test_single_simple_blocks(block, expected_string):
     """Test the @string serializer."""
     library = Library(blocks=[block])
@@ -46,8 +56,10 @@ def test_write_entry_with_indent(indent):
         expected_indent = indent
 
     string = writer.write_string(library, bib_format)
-    assert string == f'@article{{myKey,\n{expected_indent}title = "myTitle",' \
-                     f'\n{expected_indent}author = "myAuthor"\n}}\n'
+    assert (
+        string == f'@article{{myKey,\n{expected_indent}title = "myTitle",'
+        f'\n{expected_indent}author = "myAuthor"\n}}\n'
+    )
 
 
 @pytest.mark.parametrize("trailing_comma", [None, True, False])
@@ -62,8 +74,10 @@ def test_write_entry_with_trailing_comma(trailing_comma):
             expected = ","
 
     string = writer.write_string(library, bib_format)
-    assert string == f'@article{{myKey,\n\ttitle = "myTitle",' \
-                     f'\n\tauthor = "myAuthor"{expected}\n}}\n'
+    assert (
+        string == f'@article{{myKey,\n\ttitle = "myTitle",'
+        f'\n\tauthor = "myAuthor"{expected}\n}}\n'
+    )
 
 
 @pytest.mark.parametrize("value_column", [None, 10, "auto"])
@@ -79,15 +93,15 @@ def test_entry_value_column(value_column):
         # Make sure there are no unneeded spaces
         assert f'{bib_format.indent}title = "myTitle"' in string
         assert f'{bib_format.indent}author = "myAuthor"' in string
-        assert f'{bib_format.indent}veryverylongkeyfield = 2020' in string
+        assert f"{bib_format.indent}veryverylongkeyfield = 2020" in string
     elif value_column == 10:
         assert f'{bib_format.indent}title   = "myTitle"' in string
         assert f'{bib_format.indent}author  = "myAuthor"' in string
-        assert f'{bib_format.indent}veryverylongkeyfield = 2020' in string
+        assert f"{bib_format.indent}veryverylongkeyfield = 2020" in string
     if value_column == "auto":
         assert f'{bib_format.indent}title                = "myTitle"' in string
         assert f'{bib_format.indent}author               = "myAuthor"' in string
-        assert f'{bib_format.indent}veryverylongkeyfield = 2020' in string
+        assert f"{bib_format.indent}veryverylongkeyfield = 2020" in string
 
 
 @pytest.mark.parametrize("block_separator", [None, "\n\n", "\n-----\n"])

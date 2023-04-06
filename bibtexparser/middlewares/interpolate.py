@@ -14,7 +14,7 @@ def _value_is_nonstring_or_enclosed(value: Any) -> bool:
         return True
     if value.startswith('"') and value.endswith('"'):
         return True
-    if value.startswith('{') and value.endswith('}'):
+    if value.startswith("{") and value.endswith("}"):
         return True
     return False
 
@@ -39,15 +39,20 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
         raised_enclosing_warning = False
         for entry in library.entries:
             resolved_fields = list()
-            if not raised_enclosing_warning and REMOVED_ENCLOSING_KEY in entry.parser_metadata:
+            if (
+                not raised_enclosing_warning
+                and REMOVED_ENCLOSING_KEY in entry.parser_metadata
+            ):
                 raised_enclosing_warning = True
-                warnings.warn((
-                    "The RemoveEnclosingMiddleware must not run before "
-                    "the ResolveStringReferencesMiddleware."
-                    "We continue, but string interpolation is likely to fail,"
-                    "or to be too aggressive (i.e., replace too many strings)."
-                ), UserWarning)
-
+                warnings.warn(
+                    (
+                        "The RemoveEnclosingMiddleware must not run before "
+                        "the ResolveStringReferencesMiddleware."
+                        "We continue, but string interpolation is likely to fail,"
+                        "or to be too aggressive (i.e., replace too many strings)."
+                    ),
+                    UserWarning,
+                )
 
             field: Field
             for field in entry.fields:
@@ -62,6 +67,7 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
                 entry.parser_metadata[self.metadata_key()] = resolved_fields
 
         return library
+
 
 # TODO Middleware to replace field values with string references, if found
 

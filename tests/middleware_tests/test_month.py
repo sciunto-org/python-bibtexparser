@@ -1,5 +1,9 @@
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
-from bibtexparser.middlewares.month import MonthLongStringMiddleware, MonthAbbreviationMiddleware, MonthIntMiddleware
+from bibtexparser.middlewares.month import (
+    MonthAbbreviationMiddleware,
+    MonthIntMiddleware,
+    MonthLongStringMiddleware,
+)
 from bibtexparser.splitter import Splitter
 
 test_bibtex_string = """
@@ -40,16 +44,26 @@ test_bibtex_string = """
 def test_long_string_months():
     original_library = Splitter(test_bibtex_string).split()
 
-    new_library = MonthLongStringMiddleware(allow_inplace_modification=False).transform(original_library)
+    new_library = MonthLongStringMiddleware(allow_inplace_modification=False).transform(
+        original_library
+    )
 
-    assert new_library.entries_dict["smith2022"]["month"] == '"jan"', "enclosed values should not be not changed"
+    assert (
+        new_library.entries_dict["smith2022"]["month"] == '"jan"'
+    ), "enclosed values should not be not changed"
     assert new_library.entries_dict["doe2021"]["month"] == "April"
     assert new_library.entries_dict["jones2023"]["month"] == "August"
-    assert new_library.entries_dict["smith2021"]["month"] == '"November"', "enclosed values should not be not changed"
+    assert (
+        new_library.entries_dict["smith2021"]["month"] == '"November"'
+    ), "enclosed values should not be not changed"
 
     # Test the same after enclosing is removed
-    no_enclosing_library = RemoveEnclosingMiddleware(allow_inplace_modification=False).transform(original_library)
-    new_library = MonthLongStringMiddleware(allow_inplace_modification=False).transform(no_enclosing_library)
+    no_enclosing_library = RemoveEnclosingMiddleware(
+        allow_inplace_modification=False
+    ).transform(original_library)
+    new_library = MonthLongStringMiddleware(allow_inplace_modification=False).transform(
+        no_enclosing_library
+    )
 
     assert new_library.entries_dict["smith2022"]["month"] == "January"
     assert new_library.entries_dict["doe2021"]["month"] == "April"
@@ -60,16 +74,26 @@ def test_long_string_months():
 def test_short_string_months():
     original_library = Splitter(test_bibtex_string).split()
 
-    new_library = MonthAbbreviationMiddleware(allow_inplace_modification=False).transform(original_library)
+    new_library = MonthAbbreviationMiddleware(
+        allow_inplace_modification=False
+    ).transform(original_library)
 
-    assert new_library.entries_dict["smith2022"]["month"] == '"jan"', "enclosed values should not be not changed"
+    assert (
+        new_library.entries_dict["smith2022"]["month"] == '"jan"'
+    ), "enclosed values should not be not changed"
     assert new_library.entries_dict["doe2021"]["month"] == "apr"
     assert new_library.entries_dict["jones2023"]["month"] == "aug"
-    assert new_library.entries_dict["smith2021"]["month"] == '"November"', "enclosed values should not be not changed"
+    assert (
+        new_library.entries_dict["smith2021"]["month"] == '"November"'
+    ), "enclosed values should not be not changed"
 
     # Test the same after enclosing is removed
-    no_enclosing_library = RemoveEnclosingMiddleware(allow_inplace_modification=False).transform(original_library)
-    new_library = MonthAbbreviationMiddleware(allow_inplace_modification=False).transform(no_enclosing_library)
+    no_enclosing_library = RemoveEnclosingMiddleware(
+        allow_inplace_modification=False
+    ).transform(original_library)
+    new_library = MonthAbbreviationMiddleware(
+        allow_inplace_modification=False
+    ).transform(no_enclosing_library)
 
     assert new_library.entries_dict["smith2022"]["month"] == "jan"
     assert new_library.entries_dict["doe2021"]["month"] == "apr"
@@ -77,20 +101,29 @@ def test_short_string_months():
     assert new_library.entries_dict["smith2021"]["month"] == "nov"
 
 
-
 def test_int_months():
     original_library = Splitter(test_bibtex_string).split()
 
-    new_library = MonthIntMiddleware(allow_inplace_modification=False).transform(original_library)
+    new_library = MonthIntMiddleware(allow_inplace_modification=False).transform(
+        original_library
+    )
 
-    assert new_library.entries_dict["smith2022"]["month"] == '"jan"', "enclosed values should not be not changed"
+    assert (
+        new_library.entries_dict["smith2022"]["month"] == '"jan"'
+    ), "enclosed values should not be not changed"
     assert new_library.entries_dict["doe2021"]["month"] == 4
     assert new_library.entries_dict["jones2023"]["month"] == 8
-    assert new_library.entries_dict["smith2021"]["month"] == '"November"', "enclosed values should not be not changed"
+    assert (
+        new_library.entries_dict["smith2021"]["month"] == '"November"'
+    ), "enclosed values should not be not changed"
 
     # Test the same after enclosing is removed
-    no_enclosing_library = RemoveEnclosingMiddleware(allow_inplace_modification=False).transform(original_library)
-    new_library = MonthIntMiddleware(allow_inplace_modification=False).transform(no_enclosing_library)
+    no_enclosing_library = RemoveEnclosingMiddleware(
+        allow_inplace_modification=False
+    ).transform(original_library)
+    new_library = MonthIntMiddleware(allow_inplace_modification=False).transform(
+        no_enclosing_library
+    )
 
     assert new_library.entries_dict["smith2022"]["month"] == 1
     assert new_library.entries_dict["doe2021"]["month"] == 4
