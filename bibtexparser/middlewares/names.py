@@ -27,7 +27,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
 
     def __init__(
         self,
-        allow_inplace_modification: bool,
+        allow_inplace_modification: bool = True,
         name_fields: Tuple[str] = ("author", "editor", "translator"),
     ):
         super().__init__(
