@@ -1,12 +1,5 @@
 #!/usr/bin/env python
-
-# TODO This needs to be replaced!
-
-try:
-    from setuptools import setup
-except ImportError as ex:
-    print('[python-bibtexparser] setuptools not found. Falling back to distutils.core')
-    from distutils.core import setup
+import setuptools
 
 with open('bibtexparser/__init__.py') as fh:
     for line in fh:
@@ -20,17 +13,24 @@ def load_readme():
         return f.read()
 
 
-setup(
+setuptools.setup(
     name='bibtexparser',
     version=version,
     url="https://github.com/sciunto-org/python-bibtexparser",
-    author="Francois Boulogne and other contributors",
-    license="LGPLv3 or BSD",
+    author="Michael Weiss and other contributors",
+    license="MIT",
     author_email="code@mweiss.ch",
     description="Bibtex parser for python 3",
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/markdown",
     long_description=load_readme(),
     packages=['bibtexparser'],
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 3",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
     install_requires=[
         'pylatexenc>=2.10',
     ],
