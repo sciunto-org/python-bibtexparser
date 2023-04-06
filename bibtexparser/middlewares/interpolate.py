@@ -23,7 +23,7 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
     """Replace strings references with their values."""
 
     # docstr-coverage: inherited
-    def __init__(self, allow_inplace_modification: bool):
+    def __init__(self, allow_inplace_modification: bool = True):
         super().__init__(allow_inplace_modification)
 
     @staticmethod

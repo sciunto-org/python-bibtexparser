@@ -21,7 +21,7 @@ class Middleware(abc.ABC):
     or LibraryMiddleware"""
 
     def __init__(
-        self, allow_inplace_modification: bool, allow_parallel_execution: bool
+            self, allow_parallel_execution: bool, allow_inplace_modification: bool = True
     ):
         """
 
@@ -76,7 +76,7 @@ class BlockMiddleware(Middleware, abc.ABC):
         return Library(blocks=blocks)
 
     def transform_block(
-        self, block: Block, library: "Library"
+            self, block: Block, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         """Transform a block.
 
@@ -111,27 +111,27 @@ class BlockMiddleware(Middleware, abc.ABC):
         return block
 
     def transform_entry(
-        self, entry: Entry, library: "Library"
+            self, entry: Entry, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return entry
 
     def transform_string(
-        self, string: String, library: "Library"
+            self, string: String, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return string
 
     def transform_preamble(
-        self, preamble: Preamble, library: "Library"
+            self, preamble: Preamble, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return preamble
 
     def transform_explicit_comment(
-        self, explicit_comment: ExplicitComment, library: "Library"
+            self, explicit_comment: ExplicitComment, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return explicit_comment
 
     def transform_implicit_comment(
-        self, implicit_comment: ImplicitComment, library: "Library"
+            self, implicit_comment: ImplicitComment, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
         return implicit_comment
 
@@ -148,10 +148,10 @@ class LibraryMiddleware(Middleware, abc.ABC):
     for performance reasons (e.g. deleting blocks, ...).
     """
 
-    def __init__(self, allow_inplace_modification: bool):
+    def __init__(self, allow_inplace_modification: bool = True):
         # As library middleware is run per library (not per block individually),
         #   it cannot be parallelized.
-        super().__init__(allow_inplace_modification, allow_parallel_execution=False)
+        super().__init__(allow_inplace_modification=allow_inplace_modification, allow_parallel_execution=False)
 
     def transform(self, library: "Library") -> "Library":
         """Transform a library.
