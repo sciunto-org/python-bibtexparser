@@ -15,7 +15,7 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
 
     # docstr-coverage: inherited
     def __init__(self, allow_inplace_modification: bool):
-        super().__init__(allow_inplace_modification, allow_parallel_execution=True)
+        super().__init__(allow_inplace_modification=allow_inplace_modification, allow_parallel_execution=True)
 
     # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, library: "Library") -> Block:
