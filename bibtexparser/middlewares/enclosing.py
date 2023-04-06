@@ -29,7 +29,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     before removing any enclosing.
     """
 
-    def __init__(self, allow_inplace_modification: bool):
+    def __init__(self, allow_inplace_modification: bool = True):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
             allow_parallel_execution=True,
@@ -77,7 +77,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
         reuse_previous_enclosing: bool,
         enclose_integers: bool,
         default_enclosing: str,
-        allow_inplace_modification: bool,
+        allow_inplace_modification: bool = True,
     ):
         """
         :param reuse_previous_enclosing: Whether to reuse the previous enclosing character,
