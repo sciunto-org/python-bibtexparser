@@ -2,19 +2,20 @@ from typing import List, Tuple
 
 from bibtexparser import Library
 from bibtexparser.middlewares.middleware import BlockMiddleware
-from bibtexparser.model import Entry, Block
+from bibtexparser.model import Block, Entry
 
 
 class SortFieldsAlphabeticallyMiddleware(BlockMiddleware):
     """Sorts the fields of an entry alphabetically by key."""
 
     def __init__(self, allow_inplace_modification: bool = True):
-        super().__init__(allow_inplace_modification=allow_inplace_modification, allow_parallel_execution=True)
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=True,
+        )
 
     # docstr-coverage: inherited
-    def transform_entry(self,
-                        entry: Entry,
-                        library: Library) -> Block:
+    def transform_entry(self, entry: Entry, library: Library) -> Block:
         entry.fields = sorted(entry.fields, key=lambda f: f.key)
         entry.parser_metadata[self.metadata_key()] = True
         return entry
@@ -29,8 +30,16 @@ class SortFieldsCustomMiddleware(BlockMiddleware):
 
     The order is a list of field keys. Fields not in the list are put at the end."""
 
-    def __init__(self, order: Tuple[str, ...], case_sensitive: bool = False, allow_inplace_modification: bool = True):
-        super().__init__(allow_inplace_modification=allow_inplace_modification, allow_parallel_execution=True)
+    def __init__(
+        self,
+        order: Tuple[str, ...],
+        case_sensitive: bool = False,
+        allow_inplace_modification: bool = True,
+    ):
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=True,
+        )
         self._case_sensitive = case_sensitive
         if not case_sensitive:
             self._order = [x.lower() for x in order]
@@ -39,14 +48,14 @@ class SortFieldsCustomMiddleware(BlockMiddleware):
 
         if len(self._order) != len(set(self._order)):
             duplicate_keys = set([x for x in self._order if self._order.count(x) > 1])
-            raise ValueError("Order list must not contain duplicates. "
-                             "The following keys are duplicated: "
-                             f"{', '.join(duplicate_keys)}")
+            raise ValueError(
+                "Order list must not contain duplicates. "
+                "The following keys are duplicated: "
+                f"{', '.join(duplicate_keys)}"
+            )
 
     # docstr-coverage: inherited
-    def transform_entry(self,
-                        entry: Entry,
-                        library: Library) -> Block:
+    def transform_entry(self, entry: Entry, library: Library) -> Block:
         def _sort_key(field):
             try:
                 key = field.key.lower() if not self._case_sensitive else field.key

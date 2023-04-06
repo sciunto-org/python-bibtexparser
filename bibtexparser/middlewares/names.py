@@ -114,7 +114,8 @@ class SplitNameParts(_NameTransformerMiddleware):
     """Middleware to split a persons name into its parts (first, von, last, jr).
 
     Name fields (e.g. author, editor, translator) are expected to be lists of strings,
-    which can be achieved by using the `SeparateCoAuthors` middleware before this one."""
+    which can be achieved by using the `SeparateCoAuthors` middleware before this one.
+    """
 
     @staticmethod
     def metadata_key() -> str:
@@ -134,7 +135,8 @@ class SplitNameParts(_NameTransformerMiddleware):
 class MergeNameParts(_NameTransformerMiddleware):
     """Middleware to merge a persons name parts (first, von, last, jr) into a single string.
 
-    Name fields (e.g. author, editor, translator) are expected to be lists of NameParts."""
+    Name fields (e.g. author, editor, translator) are expected to be lists of NameParts.
+    """
 
     @staticmethod
     def metadata_key() -> str:

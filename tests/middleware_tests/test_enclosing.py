@@ -77,9 +77,7 @@ def test_removal_of_enclosing_on_entry(enclosing: str, inplace: bool):
 
     fields = [
         # Enclosed string value
-        Field(
-            value=enclosing.format("Michael Weiss"), start_line=6, key="author"
-        ),
+        Field(value=enclosing.format("Michael Weiss"), start_line=6, key="author"),
         # Unenclosed int value
         Field(value="2019", start_line=7, key="year"),
         # Enclosed int value
@@ -136,12 +134,12 @@ def test_no_removal_blocktypes(block: str, inplace: bool):
 @pytest.mark.parametrize("value", EDGE_CASE_VALUES + ["1990"])
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
 def test_addition_of_enclosing_on_entry(
-        metadata_enclosing: str,
-        default_enclosing: str,
-        enclose_ints: bool,
-        reuse_previous_enclosing: bool,
-        value: Union[str, int],
-        inplace: bool,
+    metadata_enclosing: str,
+    default_enclosing: str,
+    enclose_ints: bool,
+    reuse_previous_enclosing: bool,
+    value: Union[str, int],
+    inplace: bool,
 ):
     """Extensive Matrix-Testing of the AddEnclosingMiddleware on Entries.
 
@@ -222,11 +220,11 @@ def _figure_out_added_enclosing(changed_value, value):
 )
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
 def test_addition_of_enclosing_on_string(
-        metadata_enclosing: str,
-        default_enclosing: str,
-        enclose_ints: bool,
-        reuse_previous_enclosing: bool,
-        inplace: bool,
+    metadata_enclosing: str,
+    default_enclosing: str,
+    enclose_ints: bool,
+    reuse_previous_enclosing: bool,
+    inplace: bool,
 ):
     input_string = String(
         start_line=5,
@@ -284,7 +282,7 @@ def test_addition_of_enclosing_on_string(
 @pytest.mark.parametrize("default_enc", ["{", '"'])
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
 def test_no_addition_block_types(
-        block: str, reuse_encoding: bool, enclose_int: bool, default_enc: str, inplace: bool
+    block: str, reuse_encoding: bool, enclose_int: bool, default_enc: str, inplace: bool
 ):
     assert_block_does_not_change(
         block_type=block,
@@ -296,5 +294,6 @@ def test_no_addition_block_types(
         ),
         same_instance=inplace,
     )
+
 
 # TODO round-trip tests (removal -> addition -> removal)

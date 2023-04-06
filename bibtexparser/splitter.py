@@ -21,8 +21,7 @@ from bibtexparser.model import (
 
 
 class Splitter:
-    def __init__(self,
-                 bibstr: str):
+    def __init__(self, bibstr: str):
         # Add a newline at the beginning to simplify parsing
         #   (we only allow "@"-block starts after a newline)
         self.bibstr = f"\n{bibstr}"

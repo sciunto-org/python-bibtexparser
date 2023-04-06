@@ -171,4 +171,3 @@ def test_multiple_identical_field_keys():
     journal_field = [f for f in block.entry.fields if f.key == "journal"]
     assert len(journal_field) == 1
     assert journal_field[0].value == "{Some journal}"
-
