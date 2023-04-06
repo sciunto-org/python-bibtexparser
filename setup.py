@@ -9,7 +9,7 @@ with open('bibtexparser/__init__.py') as fh:
 
 
 def load_readme():
-    with open("README.rst") as f:
+    with open("README.md") as f:
         return f.read()
 
 
@@ -40,5 +40,10 @@ setuptools.setup(
             'pytest-xdist',  # Parallel tests: `pytest -n <num-workers>`
             'pytest-cov',  # Code coverage
         ],
+        "lint": [
+            "black==23.3.0",
+            "isort==5.12.0",
+        ]
+
     }
 )
