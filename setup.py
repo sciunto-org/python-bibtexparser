@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 import setuptools
 
-with open('bibtexparser/__init__.py') as fh:
+with open("bibtexparser/__init__.py") as fh:
     for line in fh:
-        if line.startswith('__version__'):
+        if line.startswith("__version__"):
             version = line.strip().split()[-1][1:-1]
             break
 
 
 def load_readme():
-    with open("README.rst") as f:
+    with open("README.md") as f:
         return f.read()
 
 
 setuptools.setup(
-    name='bibtexparser',
+    name="bibtexparser",
     version=version,
     url="https://github.com/sciunto-org/python-bibtexparser",
     author="Michael Weiss and other contributors",
@@ -23,7 +23,7 @@ setuptools.setup(
     description="Bibtex parser for python 3",
     long_description_content_type="text/markdown",
     long_description=load_readme(),
-    packages=['bibtexparser'],
+    packages=["bibtexparser"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
@@ -32,13 +32,17 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'pylatexenc>=2.10',
+        "pylatexenc>=2.10",
     ],
     extras_require={
-        'test': [
-            'pytest',  # Test runner
-            'pytest-xdist',  # Parallel tests: `pytest -n <num-workers>`
-            'pytest-cov',  # Code coverage
+        "test": [
+            "pytest",  # Test runner
+            "pytest-xdist",  # Parallel tests: `pytest -n <num-workers>`
+            "pytest-cov",  # Code coverage
         ],
-    }
+        "lint": [
+            "black==23.3.0",
+            "isort==5.12.0",
+        ],
+    },
 )

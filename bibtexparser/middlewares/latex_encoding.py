@@ -73,7 +73,10 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
         encoder: Optional[UnicodeToLatexEncoder] = None,
         allow_inplace_modification: bool = True,
     ):
-        super().__init__(allow_inplace_modification=allow_inplace_modification, allow_parallel_execution=True)
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=True,
+        )
 
         if encoder is not None and (keep_math is not None or enclose_urls is not None):
             raise ValueError(
@@ -131,7 +134,10 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
         keep_math_mode: bool = None,
         decoder: Optional[LatexNodes2Text] = None,
     ):
-        super().__init__(allow_inplace_modification=allow_inplace_modification, allow_parallel_execution=True)
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=True,
+        )
 
         if decoder is not None and (
             keep_braced_groups is not None or keep_math_mode is not None

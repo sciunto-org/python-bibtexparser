@@ -1,8 +1,16 @@
 from copy import deepcopy
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
 from bibtexparser.library import Library
-from bibtexparser.model import Entry, String, Preamble, ExplicitComment, ImplicitComment, ParsingFailedBlock, Field
+from bibtexparser.model import (
+    Entry,
+    ExplicitComment,
+    Field,
+    ImplicitComment,
+    ParsingFailedBlock,
+    Preamble,
+    String,
+)
 
 VAL_SEP = " = "
 PARSING_FAILED_COMMENT = "% WARNING Parsing failed for the following {n} lines."
@@ -31,23 +39,35 @@ def _val_intent_string(bibtex_format: "BibtexFormat", key: str) -> str:
 
 
 def _treat_string(block: String, bibtex_format) -> List[str]:
-    return ["@string{", block.key, VAL_SEP, block.value, "}\n", ]
+    return [
+        "@string{",
+        block.key,
+        VAL_SEP,
+        block.value,
+        "}\n",
+    ]
 
 
 def _treat_preamble(block: Preamble, bibtex_format: "BibtexFormat") -> List[str]:
     return [f"@preamble{{{block.value}}}\n"]
 
 
-def _treat_impl_comment(block: ImplicitComment, bibtex_format: "BibtexFormat") -> List[str]:
+def _treat_impl_comment(
+    block: ImplicitComment, bibtex_format: "BibtexFormat"
+) -> List[str]:
     # Note: No explicit escaping is done here - that should be done in middleware
     return [block.comment, "\n"]
 
 
-def _treat_expl_comment(block: ExplicitComment, bibtex_format: "BibtexFormat") -> List[str]:
+def _treat_expl_comment(
+    block: ExplicitComment, bibtex_format: "BibtexFormat"
+) -> List[str]:
     return ["@comment{", block.comment, "}\n"]
 
 
-def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat") -> List[str]:
+def _treat_failed_block(
+    block: ParsingFailedBlock, bibtex_format: "BibtexFormat"
+) -> List[str]:
     lines = len(block.raw.splitlines())
     parsing_failed_comment = PARSING_FAILED_COMMENT.format({"n": lines})
     return [parsing_failed_comment, block.raw, "\n"]
@@ -62,7 +82,7 @@ def _calculate_auto_value_align(library: Library) -> int:
 
 
 def write_string(
-        library: Library, bibtex_format: Optional["BibtexFormat"] = None
+    library: Library, bibtex_format: Optional["BibtexFormat"] = None
 ) -> str:
     """Serialize a BibTeX database to a string.
 
@@ -187,8 +207,8 @@ class BibtexFormat:
 
     @property
     def parsing_failed_comment(self) -> str:
-        f"""Comment to use for blocks that could not be parsed. 
-        
+        f"""Comment to use for blocks that could not be parsed.
+
         Default: {PARSING_FAILED_COMMENT}"""
         return self._parsing_failed_comment
 

@@ -1,13 +1,10 @@
 import abc
 from collections import OrderedDict
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 from bibtexparser.library import Library
 from bibtexparser.middlewares.middleware import BlockMiddleware
-from bibtexparser.model import (
-    Block,
-    Entry, Field,
-)
+from bibtexparser.model import Block, Entry, Field
 
 
 class _MonthInterpolator(BlockMiddleware, abc.ABC):
@@ -15,7 +12,10 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
 
     # docstr-coverage: inherited
     def __init__(self, allow_inplace_modification: bool):
-        super().__init__(allow_inplace_modification=allow_inplace_modification, allow_parallel_execution=True)
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=True,
+        )
 
     # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, library: "Library") -> Block:
@@ -30,7 +30,9 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
         return entry
 
     @abc.abstractmethod
-    def resolve_month_field_val(self, month_field: Field) -> Tuple[Union[str, int], str]:
+    def resolve_month_field_val(
+        self, month_field: Field
+    ) -> Tuple[Union[str, int], str]:
         """Transform the month field.
 
         Args:
@@ -41,20 +43,22 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
         raise NotImplementedError("Abstract method")
 
 
-_MONTH_ABBREV_TO_FULL = OrderedDict([
-    ('jan', "January"),
-    ('feb', "February"),
-    ('mar', "March"),
-    ('apr', "April"),
-    ('may', "May"),
-    ('jun', "June"),
-    ('jul', "July"),
-    ('aug', "August"),
-    ('sep', "September"),
-    ('oct', "October"),
-    ('nov', "November"),
-    ('dec', "December"),
-])
+_MONTH_ABBREV_TO_FULL = OrderedDict(
+    [
+        ("jan", "January"),
+        ("feb", "February"),
+        ("mar", "March"),
+        ("apr", "April"),
+        ("may", "May"),
+        ("jun", "June"),
+        ("jul", "July"),
+        ("aug", "August"),
+        ("sep", "September"),
+        ("oct", "October"),
+        ("nov", "November"),
+        ("dec", "December"),
+    ]
+)
 
 _MONTH_ABBREV = list(_MONTH_ABBREV_TO_FULL.keys())
 
@@ -85,13 +89,19 @@ class MonthLongStringMiddleware(_MonthInterpolator):
             v = int(v)
         if isinstance(v, int):
             if v < 1 or v > 12:
-                return month_field, f"month-field unchanged - unknown month {v}"  # Nothing we can do here
+                return (
+                    month_field,
+                    f"month-field unchanged - unknown month {v}",
+                )  # Nothing we can do here
             return _MONTH_FULL[v - 1], "transformed int-month to str-month"
         elif isinstance(v, str):
             v_lower = v.lower()
 
             if v_lower in _MONTH_ABBREV_TO_FULL:
-                return _MONTH_ABBREV_TO_FULL[v_lower], "transformed abbreviated month to full month"
+                return (
+                    _MONTH_ABBREV_TO_FULL[v_lower],
+                    "transformed abbreviated month to full month",
+                )
             elif v_lower in _LOWERCASE_FULL:
                 default_casing = _MONTH_ABBREV_TO_FULL[v_lower[:3]]
                 if v != default_casing:
@@ -124,7 +134,7 @@ class MonthAbbreviationMiddleware(_MonthInterpolator):
             if v < 1 or v > 12:
                 # Nothing we can do here
                 return month_field, f"month-field unchanged - unknown month {v}"
-            return _MONTH_ABBREV[v-1], "transformed int-month to abbreviated month"
+            return _MONTH_ABBREV[v - 1], "transformed int-month to abbreviated month"
         elif isinstance(v, str):
             v_lower = v.lower()
             if v_lower in _LOWERCASE_FULL:
@@ -155,9 +165,15 @@ class MonthIntMiddleware(_MonthInterpolator):
         if isinstance(v, str):
             v_lower = v.lower()
             if v_lower in _MONTH_ABBREV:
-                return _MONTH_ABBREV.index(v_lower[:3]) + 1, "transformed full month to int-month"
+                return (
+                    _MONTH_ABBREV.index(v_lower[:3]) + 1,
+                    "transformed full month to int-month",
+                )
             elif v_lower in _LOWERCASE_FULL:
-                return _LOWERCASE_FULL.index(v_lower) + 1, "transformed abbreviated month to int-month"
+                return (
+                    _LOWERCASE_FULL.index(v_lower) + 1,
+                    "transformed abbreviated month to int-month",
+                )
 
         if isinstance(v, str) and v.isdigit():
             if 1 <= int(v) <= 12:
