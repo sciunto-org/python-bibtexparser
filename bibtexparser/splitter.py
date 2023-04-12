@@ -21,6 +21,15 @@ from bibtexparser.model import (
 
 
 class Splitter:
+    """Object responsible for splitting a BibTeX string into blocks.
+
+    For each bibtex string, a new Splitter object should be created.
+    The splitter is kept as basic as possible in its functionality
+    (e.g., enclosing such as `{...}` are not removed).
+
+    This allows for maximum flexibility in the parsing process,
+    by subsequently applying middleware."""
+
     def __init__(self, bibstr: str):
         # Add a newline at the beginning to simplify parsing
         #   (we only allow "@"-block starts after a newline)
@@ -214,6 +223,13 @@ class Splitter:
                 )
 
     def split(self, library: Optional[Library] = None) -> Library:
+        """Split the bibtex-string into blocks and add them to the library.
+
+        Args:
+            library: The library to add the blocks to. If None, a new library is created.
+        Returns:
+            The library with the added blocks.
+        """
         self._markiter = re.finditer(
             r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*(?={)", self.bibstr, re.MULTILINE
         )
