@@ -26,9 +26,9 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
     :param name_fields: The fields that contain names, considered by this middleware."""
 
     def __init__(
-        self,
-        allow_inplace_modification: bool = True,
-        name_fields: Tuple[str] = ("author", "editor", "translator"),
+            self,
+            allow_inplace_modification: bool = True,
+            name_fields: Tuple[str] = ("author", "editor", "translator"),
     ):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
@@ -58,6 +58,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
 class SeparateCoAuthors(_NameTransformerMiddleware):
     """Middleware to separate multi-person fields (e.g. co-authors, co-editors)."""
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "separate_coauthors"
@@ -70,6 +71,7 @@ class SeparateCoAuthors(_NameTransformerMiddleware):
 class MergeCoAuthors(_NameTransformerMiddleware):
     """Middleware to merge multi-person-list fields (e.g. co-authors, co-editors)."""
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "merge_coauthors"
@@ -100,11 +102,11 @@ class NameParts:
             [
                 part
                 for part in (
-                    " ".join(self.first) if self.first else None,
-                    " ".join(self.von) if self.von else None,
-                    " ".join(self.last) if self.last else None,
-                    " ".join(self.jr) if self.jr else None,
-                )
+                " ".join(self.first) if self.first else None,
+                " ".join(self.von) if self.von else None,
+                " ".join(self.last) if self.last else None,
+                " ".join(self.jr) if self.jr else None,
+            )
                 if part is not None
             ]
         )
@@ -117,6 +119,7 @@ class SplitNameParts(_NameTransformerMiddleware):
     which can be achieved by using the `SeparateCoAuthors` middleware before this one.
     """
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "split_name_parts"
@@ -138,6 +141,7 @@ class MergeNameParts(_NameTransformerMiddleware):
     Name fields (e.g. author, editor, translator) are expected to be lists of NameParts.
     """
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "merge_name_parts"
@@ -386,8 +390,8 @@ def parse_single_name_into_parts(name, strict=True):
 
                 # Pull the parts out.
                 parts.first = p0[:firstl]
-                parts.von = p0[firstl : lastl + 1]
-                parts.last = p0[lastl + 1 :]
+                parts.von = p0[firstl: lastl + 1]
+                parts.last = p0[lastl + 1:]
 
             # No lowercase: last is the last word, first is everything else.
             else:

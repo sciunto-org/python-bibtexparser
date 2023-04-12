@@ -26,6 +26,7 @@ class _BlockJunk:
 
     @property
     def main_block_type(self) -> type:
+        """Returns the type of the main (i.e., non-comment) block."""
         try:
             return type(self.blocks[-1])
         except IndexError:

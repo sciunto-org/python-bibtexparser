@@ -3,7 +3,7 @@ from typing import Iterable, List, Optional, TextIO, Union
 
 from bibtexparser import writer
 from bibtexparser.library import Library
-from bibtexparser.middlewares.default import default_parse_stack, default_unparse_stack
+from bibtexparser.middlewares.parsestack import default_parse_stack, default_unparse_stack
 from bibtexparser.middlewares.middleware import Middleware
 from bibtexparser.splitter import Splitter
 from bibtexparser.writer import BibtexFormat, write_string
@@ -79,6 +79,23 @@ def parse_string(
     append_middleware: Optional[Iterable[Middleware]] = None,
     library: Optional[Library] = None,
 ):
+    """Parse a BibTeX string
+
+    Args:
+        bibtex_str (str): BibTeX string to parse
+        parse_stack (Optional[Iterable[Middleware]], optional):
+            List of middleware to apply to the database after splitting.
+            If None (default), a default stack will be used providing simple
+            standard functionality will be used.
+        append_middleware (Optional[Iterable[Middleware]], optional):
+            List of middleware to append to the default stack
+            (ignored if a not-None parse_stack is passed).
+        library (Optional[Library], optional):
+            Library to add entries to. If None (default), a new library will be created.
+
+    Returns:
+        Library: Parsed BibTeX database
+    """
     splitter = Splitter(bibstr=bibtex_str)
     library = splitter.split(library=library)
 
@@ -93,7 +110,22 @@ def parse_file(
     path: str,
     parse_stack: Optional[Iterable[Middleware]] = None,
     append_middleware: Optional[Iterable[Middleware]] = None,
-):
+) -> Library:
+    """Parse a BibTeX file
+
+    Args:
+        path (str): Path to BibTeX file
+        parse_stack (Optional[Iterable[Middleware]], optional):
+            List of middleware to apply to the database after splitting.
+            If None (default), a default stack will be used providing simple
+            standard functionality will be used.
+        append_middleware (Optional[Iterable[Middleware]], optional):
+            List of middleware to append to the default stack
+            (ignored if a not-None parse_stack is passed).
+
+    Returns:
+        Library: Parsed BibTeX library
+    """
     with open(path) as f:
         bibtex_str = f.read()
         return parse_string(

@@ -4,11 +4,15 @@ from typing import Any, Dict, List, Optional, Set
 
 
 class Block(abc.ABC):
+    """A abstract superclass of all top-level building blocks of a bibtex file.
+
+    E.g. a `@string` block, a `@preamble` block, an `@entry` block, a comment, etc."""
+
     def __init__(
-        self,
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
-        parser_metadata: Optional[Dict[str, Any]] = None,
+            self,
+            start_line: Optional[int] = None,
+            raw: Optional[str] = None,
+            parser_metadata: Optional[Dict[str, Any]] = None,
     ):
         self._start_line_in_file = start_line
         self._raw = raw
@@ -18,22 +22,53 @@ class Block(abc.ABC):
 
     @property
     def start_line(self) -> Optional[int]:
+        """The line number of the first line of this block in the parsed string."""
         return self._start_line_in_file
 
     @property
     def raw(self) -> Optional[str]:
+        """The raw, unmodified string (bibtex) representation of this block.
+
+        Note: Middleware does not update this field, hence, after applying middleware
+        to a library, this field may be outdated.
+        """
         return self._raw
 
     @property
     def parser_metadata(self) -> Dict[str, Any]:
+        """EXPERIMENTAL: field for middleware to store auxiliary information.
+
+        As an end-user, as long as you are not writing middleware, you probably
+        do not need to use this field.
+
+        ** Warning (experimental) **
+        The content of this field is undefined and may change at any time.
+
+        This field is intended for middleware to store auxiliary information.
+        It is a key-value store, where the key is a string and the value is any
+        python object.
+        This allows for example to pass information between different middleware.
+        """
         return self._parser_metadata
+
+    def get_parser_metadata(self, key: str) -> Optional[Any]:
+        """EXPERIMENTAL: get auxiliary information stored in `parser_metadata`.
+
+        See attribute `parser_metadata` for more information."""
+        return self._parser_metadata.get(key, None)
+
+    def set_parser_metadata(self, key: str, value: Any):
+        """EXPERIMENTAL: set auxiliary information stored in `parser_metadata`.
+
+        See attribute `parser_metadata` for more information."""
+        self._parser_metadata[key] = value
 
     def __eq__(self, other):
         # make sure they have the same type and same content
         return (
-            isinstance(other, self.__class__)
-            and isinstance(self, other.__class__)
-            and self.__dict__ == other.__dict__
+                isinstance(other, self.__class__)
+                and isinstance(self, other.__class__)
+                and self.__dict__ == other.__dict__
         )
 
 
@@ -41,11 +76,11 @@ class String(Block):
     """Bibtex Blocks of the `@string` type, e.g. @string{me = "My Name"}."""
 
     def __init__(
-        self,
-        key: str,
-        value: str,
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
+            self,
+            key: str,
+            value: str,
+            start_line: Optional[int] = None,
+            raw: Optional[str] = None,
     ):
         super().__init__(start_line, raw)
         self._key = key
@@ -53,6 +88,7 @@ class String(Block):
 
     @property
     def key(self) -> str:
+        """The key of the string, e.g. `me` in `@string{me = "My Name"}`."""
         return self._key
 
     @key.setter
@@ -61,6 +97,7 @@ class String(Block):
 
     @property
     def value(self) -> str:
+        """The value of the string, e.g. `"My Name"` in `@string{me = "My Name"}`."""
         return self._value
 
     @value.setter
@@ -72,13 +109,14 @@ class Preamble(Block):
     """Bibtex Blocks of the `@preamble` type, e.g. @preamble{This is a preamble}."""
 
     def __init__(
-        self, value: str, start_line: Optional[int] = None, raw: Optional[str] = None
+            self, value: str, start_line: Optional[int] = None, raw: Optional[str] = None
     ):
         super().__init__(start_line, raw)
         self._value = value
 
     @property
     def value(self) -> str:
+        """The value of the preamble, e.g. `blabla` in `@preamble{blabla}`."""
         return self._value
 
     @value.setter
@@ -90,13 +128,14 @@ class ExplicitComment(Block):
     """Bibtex Blocks of the `@comment` type, e.g. @comment{This is a comment}."""
 
     def __init__(
-        self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
+            self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
     ):
         super().__init__(start_line, raw)
         self._comment = comment
 
     @property
     def comment(self) -> str:
+        """The value of the comment, e.g. `blabla` in `@comment{blabla}`."""
         return self._comment
 
     @comment.setter
@@ -108,13 +147,14 @@ class ImplicitComment(Block):
     """Bibtex outside of an @{...} block, which is treated as a comment."""
 
     def __init__(
-        self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
+            self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
     ):
         super().__init__(start_line, raw)
         self._comment = comment
 
     @property
     def comment(self) -> str:
+        """The (possibly multi-line) comment."""
         return self._comment
 
     @comment.setter
@@ -132,6 +172,7 @@ class Field:
 
     @property
     def key(self) -> str:
+        """The key of the field, e.g. `author` in `author = {John Doe}`."""
         return self._key
 
     @key.setter
@@ -140,6 +181,7 @@ class Field:
 
     @property
     def value(self) -> Any:
+        """The value of the field, e.g. `{John Doe}` in `author = {John Doe}`."""
         return self._value
 
     @value.setter
@@ -148,14 +190,15 @@ class Field:
 
     @property
     def start_line(self) -> int:
+        """The line number of the first line of this field in the originally parsed string."""
         return self._start_line
 
     def __eq__(self, other):
         # make sure they have the same type and same content
         return (
-            isinstance(other, self.__class__)
-            and isinstance(self, other.__class__)
-            and self.__dict__ == other.__dict__
+                isinstance(other, self.__class__)
+                and isinstance(self, other.__class__)
+                and self.__dict__ == other.__dict__
         )
 
 
@@ -163,21 +206,21 @@ class Entry(Block):
     """Bibtex Blocks of the `@entry` type, e.g. @article{Cesar2013, ...}."""
 
     def __init__(
-        self,
-        entry_type: str,
-        key: str,
-        fields: List[Field],
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
+            self,
+            entry_type: str,
+            key: str,
+            fields: List[Field],
+            start_line: Optional[int] = None,
+            raw: Optional[str] = None,
     ):
         super().__init__(start_line, raw)
         self._entry_type = entry_type
         self._key = key
         self._fields = fields
-        self._parsing_metadata: Dict[str, Any] = {}
 
     @property
     def entry_type(self):
+        """The type of the entry, e.g. `article` in `@article{Cesar2013, ...}`."""
         return self._entry_type
 
     @entry_type.setter
@@ -186,6 +229,7 @@ class Entry(Block):
 
     @property
     def key(self):
+        """The key of the entry, e.g. `Cesar2013` in `@article{Cesar2013, ...}`."""
         return self._key
 
     @key.setter
@@ -194,6 +238,7 @@ class Entry(Block):
 
     @property
     def fields(self) -> List[Field]:
+        """The key-value attributes of an entry, as `Field` instances."""
         return self._fields
 
     @fields.setter
@@ -202,7 +247,7 @@ class Entry(Block):
 
     @property
     def fields_dict(self) -> Dict[str, Field]:
-        """Returns a dict of fields, with field keys as keys.
+        """A dict of fields, with field keys as keys.
 
         Note that with duplicate field keys, the behavior is undefined."""
         return {field.key: field for field in self._fields}
@@ -214,12 +259,6 @@ class Entry(Block):
             self._fields[i] = field
         else:
             self._fields.append(field)
-
-    def get_parser_metadata(self, key: str) -> Optional[Any]:
-        return self._parsing_metadata.get(key, None)
-
-    def set_parser_metadata(self, key: str, value: Any):
-        self._parsing_metadata[key] = value
 
     def __getitem__(self, key: str) -> Any:
         """Dict-mimicking index.
@@ -247,19 +286,20 @@ class Entry(Block):
 
 
 class ParsingFailedBlock(Block):
-    """A block that could not be parsed."""
+    """A block that could not be parsed due to some raised exception."""
 
     def __init__(
-        self,
-        error: Exception,
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
+            self,
+            error: Exception,
+            start_line: Optional[int] = None,
+            raw: Optional[str] = None,
     ):
         super().__init__(start_line, raw)
         self._error = error
 
     @property
     def error(self) -> Exception:
+        """The exception that was raised during parsing."""
         return self._error
 
 
@@ -272,19 +312,20 @@ class MiddlewareErrorBlock(ParsingFailedBlock):
 
     @property
     def block(self) -> Block:
+        """The block that could not be parsed."""
         return self._block
 
 
 class DuplicateEntryKeyBlock(ParsingFailedBlock):
-    """A block that has a duplicate key."""
+    """An error-indicating block created for blocks with keys present in the library already."""
 
     def __init__(
-        self,
-        key: str,
-        previous_block: Block,
-        duplicate_block: Block,
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
+            self,
+            key: str,
+            previous_block: Block,
+            duplicate_block: Block,
+            start_line: Optional[int] = None,
+            raw: Optional[str] = None,
     ):
         super().__init__(
             error=Exception(f"Duplicate entry key '{key}'"),
@@ -297,6 +338,7 @@ class DuplicateEntryKeyBlock(ParsingFailedBlock):
 
     @property
     def key(self) -> str:
+        """The key of the entry, e.g. `Cesar2013` in `@article{Cesar2013, ...}`."""
         return self._key
 
     @key.setter
@@ -305,14 +347,18 @@ class DuplicateEntryKeyBlock(ParsingFailedBlock):
 
     @property
     def previous_block(self) -> Block:
+        """A reference to a previous block with the same key."""
         return self._previous_block
 
     @property
     def duplicate_block(self) -> Block:
+        """A reference to a non-error instance of this block."""
         return self._duplicate_block
 
 
 class DuplicateFieldKeyBlock(ParsingFailedBlock):
+    """An error-indicating block indicating a duplicate field key in an entry."""
+
     def __init__(self, duplicate_keys: Set[str], entry: Entry):
         sorted_duplicate_keys = sorted(list(duplicate_keys))
         super().__init__(
@@ -328,8 +374,12 @@ class DuplicateFieldKeyBlock(ParsingFailedBlock):
 
     @property
     def duplicate_keys(self) -> Set[str]:
+        """The field-keys that occured more than once in the entry."""
         return self._duplicate_keys
 
     @property
     def entry(self) -> Entry:
+        """A reference to the entry that contained the duplicate field keys.
+
+        (Parsed as if there were no errors, containing all duplicates.)"""
         return self._entry

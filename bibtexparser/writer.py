@@ -207,9 +207,7 @@ class BibtexFormat:
 
     @property
     def parsing_failed_comment(self) -> str:
-        f"""Comment to use for blocks that could not be parsed.
-
-        Default: {PARSING_FAILED_COMMENT}"""
+        """Comment to use for blocks that could not be parsed."""
         return self._parsing_failed_comment
 
     @parsing_failed_comment.setter

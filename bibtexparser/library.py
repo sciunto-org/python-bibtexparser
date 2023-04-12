@@ -15,6 +15,7 @@ from bibtexparser.model import (
 
 
 class Library:
+    """A collection of parsed bibtex blocks."""
     def __init__(self, blocks: Union[List[Block], None] = None):
         self._blocks = []
         self._entries_by_key = dict()
@@ -138,34 +139,42 @@ class Library:
 
     @property
     def blocks(self) -> List[Block]:
-        return self._blocks.copy()
+        """All blocks in the library, preserving order of insertion."""
+        return self._blocks
 
     @property
     def failed_blocks(self) -> List[ParsingFailedBlock]:
+        """All blocks that could not be parsed, preserving order of insertion."""
         return [b for b in self._blocks if isinstance(b, ParsingFailedBlock)]
 
     @property
     def strings(self) -> List[String]:
+        """All @string blocks in the library, preserving order of insertion."""
         return list(self._strings_by_key.values())
 
     @property
     def strings_dict(self) -> Dict[str, String]:
-        return self._strings_by_key.copy()
+        """Dict representation of all @string blocks in the library."""
+        return self._strings_by_key
 
     @property
     def entries(self) -> List[Entry]:
+        """All entry (@article, ...) blocks in the library, preserving order of insertion."""
         return list(self._entries_by_key.values())
 
     @property
     def entries_dict(self) -> Dict[str, Entry]:
+        """Dict representation of all entry blocks in the library."""
         return self._entries_by_key.copy()
 
     @property
     def preambles(self) -> List[Preamble]:
+        """All @preamble blocks in the library, preserving order of insertion."""
         return [block for block in self._blocks if isinstance(block, Preamble)]
 
     @property
     def comments(self) -> List[Union[ExplicitComment, ImplicitComment]]:
+        """All comment blocks in the library, preserving order of insertion."""
         return [
             block
             for block in self._blocks
