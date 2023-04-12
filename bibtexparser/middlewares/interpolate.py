@@ -26,6 +26,7 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
     def __init__(self, allow_inplace_modification: bool = True):
         super().__init__(allow_inplace_modification)
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "ResolveStringReferences"

@@ -78,11 +78,12 @@ class MonthLongStringMiddleware(_MonthInterpolator):
     Full names returned by this middleware are always capitalized
     and unenclosed."""
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "MonthLongStringMiddleware"
 
-    # docstr-coverage: in
+    # docstr-coverage: inherited
     def resolve_month_field_val(self, month_field: Field):
         v = month_field.value
         if isinstance(v, str) and v.isdigit():
@@ -121,6 +122,7 @@ class MonthAbbreviationMiddleware(_MonthInterpolator):
 
     The created abbreviations are always lowercase and unenclosed."""
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "MonthAbbreviationMiddleware"
@@ -155,6 +157,7 @@ class MonthIntMiddleware(_MonthInterpolator):
 
     The created int-months are always integers and unenclosed."""
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "MonthIntMiddleware"

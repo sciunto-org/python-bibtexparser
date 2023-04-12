@@ -47,6 +47,7 @@ class Middleware(abc.ABC):
 
     @abc.abstractmethod
     def transform(self, library: "Library") -> "Library":
+        """Main entrypoint of the middleware. Applies transformation to a library."""
         raise NotImplementedError("called abstract method")
 
 
@@ -113,26 +114,56 @@ class BlockMiddleware(Middleware, abc.ABC):
     def transform_entry(
         self, entry: Entry, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
+        """Transform an entry. Called by `transform_block` if the block is an entry.
+
+        Note: This method modifies the passed entry. For a method
+        respecting the `allow_inplace_modification` property,
+        you should use `transform` or `transform_block` instead.
+        """
         return entry
 
     def transform_string(
         self, string: String, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
+        """Transform a string. Called by `transform_block` if the block is a string.
+
+        Note: This method modifies the passed string. For a method
+        respecting the `allow_inplace_modification` property,
+        you should use `transform` or `transform_block` instead.
+        """
         return string
 
     def transform_preamble(
         self, preamble: Preamble, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
+        """Transform a preamble. Called by `transform_block` if the block is a preamble.
+
+        Note: This method modifies the passed preamble. For a method
+        respecting the `allow_inplace_modification` property,
+        you should use `transform` or `transform_block` instead.
+        """
         return preamble
 
     def transform_explicit_comment(
         self, explicit_comment: ExplicitComment, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
+        """Transform an explicit comment. Called by `transform_block` if the block is an explicit comment.
+
+        Note: This method modifies the passed explicit comment. For a method
+        respecting the `allow_inplace_modification` property,
+        you should use `transform` or `transform_block` instead.
+        """
         return explicit_comment
 
     def transform_implicit_comment(
         self, implicit_comment: ImplicitComment, library: "Library"
     ) -> Union[Block, Collection[Block], None]:
+        """Transform an implicit comment. Called by `transform_block` if the block is an implicit comment.
+
+        Note: This method modifies the passed implicit comment. For a method
+        respecting the `allow_inplace_modification` property,
+        you should use `transform` or `transform_block` instead.
+        """
         return implicit_comment
 
 

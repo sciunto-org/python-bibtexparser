@@ -43,6 +43,7 @@ setuptools.setup(
         "lint": [
             "black==23.3.0",
             "isort==5.12.0",
+            "docstr-coverage==2.2.0",
         ],
     },
 )

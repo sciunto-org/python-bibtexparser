@@ -58,6 +58,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
 class SeparateCoAuthors(_NameTransformerMiddleware):
     """Middleware to separate multi-person fields (e.g. co-authors, co-editors)."""
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "separate_coauthors"
@@ -70,6 +71,7 @@ class SeparateCoAuthors(_NameTransformerMiddleware):
 class MergeCoAuthors(_NameTransformerMiddleware):
     """Middleware to merge multi-person-list fields (e.g. co-authors, co-editors)."""
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "merge_coauthors"
@@ -117,6 +119,7 @@ class SplitNameParts(_NameTransformerMiddleware):
     which can be achieved by using the `SeparateCoAuthors` middleware before this one.
     """
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "split_name_parts"
@@ -138,6 +141,7 @@ class MergeNameParts(_NameTransformerMiddleware):
     Name fields (e.g. author, editor, translator) are expected to be lists of NameParts.
     """
 
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "merge_name_parts"
