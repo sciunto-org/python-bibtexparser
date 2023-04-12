@@ -20,7 +20,7 @@ class SortFieldsAlphabeticallyMiddleware(BlockMiddleware):
         entry.parser_metadata[self.metadata_key()] = True
         return entry
 
-    #docstr-coverage: inherited
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "sorted_fields_alphabetically"
@@ -69,7 +69,7 @@ class SortFieldsCustomMiddleware(BlockMiddleware):
         entry.parser_metadata[self.metadata_key()] = self._order
         return entry
 
-    #docstr-coverage: inherited
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "sorted_fields_custom"

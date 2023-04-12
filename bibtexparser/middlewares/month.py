@@ -31,7 +31,7 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
 
     @abc.abstractmethod
     def resolve_month_field_val(
-            self, month_field: Field
+        self, month_field: Field
     ) -> Tuple[Union[str, int], str]:
         """Transform the month field.
 

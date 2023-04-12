@@ -35,7 +35,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
             allow_parallel_execution=True,
         )
 
-    #docstr-coverage: inherited
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return REMOVED_ENCLOSING_KEY
@@ -49,7 +49,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
             return value[1:-1], '"'
         return value, "no-enclosing"
 
-    #docstr-coverage: inherited
+    # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, library: "Library") -> Entry:
         field: Field
         metadata = dict()
@@ -60,7 +60,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         entry.parser_metadata[self.metadata_key()] = metadata
         return entry
 
-    #docstr-coverage: inherited
+    # docstr-coverage: inherited
     def transform_string(self, string: String, library: "Library") -> String:
         stripped, enclosing = self._strip_enclosing(string.value)
         string.value = stripped
@@ -107,7 +107,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
         self._reuse_previous_enclosing = reuse_previous_enclosing
         self._enclose_integers = enclose_integers
 
-    #docstr-coverage: inherited
+    # docstr-coverage: inherited
     @staticmethod
     def metadata_key() -> str:
         return "remove_enclosing"
@@ -132,7 +132,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
             f"not '{enclosing}'"
         )
 
-    #docstr-coverage: inherited
+    # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, *args, **kwargs) -> Entry:
         field: Field
         metadata_enclosing = entry.parser_metadata.pop(
@@ -150,7 +150,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
             )
         return entry
 
-    #docstr-coverage: inherited
+    # docstr-coverage: inherited
     def transform_string(self, string: String, *args, **kwargs) -> String:
         metadata_key = RemoveEnclosingMiddleware.metadata_key()
         string.value = self._enclose(

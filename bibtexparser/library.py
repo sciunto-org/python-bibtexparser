@@ -16,6 +16,7 @@ from bibtexparser.model import (
 
 class Library:
     """A collection of parsed bibtex blocks."""
+
     def __init__(self, blocks: Union[List[Block], None] = None):
         self._blocks = []
         self._entries_by_key = dict()

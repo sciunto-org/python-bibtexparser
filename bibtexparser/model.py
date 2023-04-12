@@ -9,10 +9,10 @@ class Block(abc.ABC):
     E.g. a `@string` block, a `@preamble` block, an `@entry` block, a comment, etc."""
 
     def __init__(
-            self,
-            start_line: Optional[int] = None,
-            raw: Optional[str] = None,
-            parser_metadata: Optional[Dict[str, Any]] = None,
+        self,
+        start_line: Optional[int] = None,
+        raw: Optional[str] = None,
+        parser_metadata: Optional[Dict[str, Any]] = None,
     ):
         self._start_line_in_file = start_line
         self._raw = raw
@@ -66,9 +66,9 @@ class Block(abc.ABC):
     def __eq__(self, other):
         # make sure they have the same type and same content
         return (
-                isinstance(other, self.__class__)
-                and isinstance(self, other.__class__)
-                and self.__dict__ == other.__dict__
+            isinstance(other, self.__class__)
+            and isinstance(self, other.__class__)
+            and self.__dict__ == other.__dict__
         )
 
 
@@ -76,11 +76,11 @@ class String(Block):
     """Bibtex Blocks of the `@string` type, e.g. @string{me = "My Name"}."""
 
     def __init__(
-            self,
-            key: str,
-            value: str,
-            start_line: Optional[int] = None,
-            raw: Optional[str] = None,
+        self,
+        key: str,
+        value: str,
+        start_line: Optional[int] = None,
+        raw: Optional[str] = None,
     ):
         super().__init__(start_line, raw)
         self._key = key
@@ -109,7 +109,7 @@ class Preamble(Block):
     """Bibtex Blocks of the `@preamble` type, e.g. @preamble{This is a preamble}."""
 
     def __init__(
-            self, value: str, start_line: Optional[int] = None, raw: Optional[str] = None
+        self, value: str, start_line: Optional[int] = None, raw: Optional[str] = None
     ):
         super().__init__(start_line, raw)
         self._value = value
@@ -128,7 +128,7 @@ class ExplicitComment(Block):
     """Bibtex Blocks of the `@comment` type, e.g. @comment{This is a comment}."""
 
     def __init__(
-            self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
+        self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
     ):
         super().__init__(start_line, raw)
         self._comment = comment
@@ -147,7 +147,7 @@ class ImplicitComment(Block):
     """Bibtex outside of an @{...} block, which is treated as a comment."""
 
     def __init__(
-            self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
+        self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
     ):
         super().__init__(start_line, raw)
         self._comment = comment
@@ -196,9 +196,9 @@ class Field:
     def __eq__(self, other):
         # make sure they have the same type and same content
         return (
-                isinstance(other, self.__class__)
-                and isinstance(self, other.__class__)
-                and self.__dict__ == other.__dict__
+            isinstance(other, self.__class__)
+            and isinstance(self, other.__class__)
+            and self.__dict__ == other.__dict__
         )
 
 
@@ -206,12 +206,12 @@ class Entry(Block):
     """Bibtex Blocks of the `@entry` type, e.g. @article{Cesar2013, ...}."""
 
     def __init__(
-            self,
-            entry_type: str,
-            key: str,
-            fields: List[Field],
-            start_line: Optional[int] = None,
-            raw: Optional[str] = None,
+        self,
+        entry_type: str,
+        key: str,
+        fields: List[Field],
+        start_line: Optional[int] = None,
+        raw: Optional[str] = None,
     ):
         super().__init__(start_line, raw)
         self._entry_type = entry_type
@@ -289,10 +289,10 @@ class ParsingFailedBlock(Block):
     """A block that could not be parsed due to some raised exception."""
 
     def __init__(
-            self,
-            error: Exception,
-            start_line: Optional[int] = None,
-            raw: Optional[str] = None,
+        self,
+        error: Exception,
+        start_line: Optional[int] = None,
+        raw: Optional[str] = None,
     ):
         super().__init__(start_line, raw)
         self._error = error
@@ -320,12 +320,12 @@ class DuplicateEntryKeyBlock(ParsingFailedBlock):
     """An error-indicating block created for blocks with keys present in the library already."""
 
     def __init__(
-            self,
-            key: str,
-            previous_block: Block,
-            duplicate_block: Block,
-            start_line: Optional[int] = None,
-            raw: Optional[str] = None,
+        self,
+        key: str,
+        previous_block: Block,
+        duplicate_block: Block,
+        start_line: Optional[int] = None,
+        raw: Optional[str] = None,
     ):
         super().__init__(
             error=Exception(f"Duplicate entry key '{key}'"),

@@ -3,8 +3,11 @@ from typing import Iterable, List, Optional, TextIO, Union
 
 from bibtexparser import writer
 from bibtexparser.library import Library
-from bibtexparser.middlewares.parsestack import default_parse_stack, default_unparse_stack
 from bibtexparser.middlewares.middleware import Middleware
+from bibtexparser.middlewares.parsestack import (
+    default_parse_stack,
+    default_unparse_stack,
+)
 from bibtexparser.splitter import Splitter
 from bibtexparser.writer import BibtexFormat, write_string
 
