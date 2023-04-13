@@ -58,7 +58,8 @@ class BlockMiddleware(Middleware, abc.ABC):
     new (transformed) blocks.
 
     Changes may rely on the state of the overall library,
-    but must not change the state of the library directly.
+    but must not change the state of the library directly,
+    except if `allow_inplace_modification` is true.
     """
 
     @staticmethod

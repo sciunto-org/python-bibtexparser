@@ -293,9 +293,11 @@ class ParsingFailedBlock(Block):
         error: Exception,
         start_line: Optional[int] = None,
         raw: Optional[str] = None,
+        ignore_error_block: Optional[Block] = None
     ):
         super().__init__(start_line, raw)
         self._error = error
+        self._ignore_error_block = ignore_error_block
 
     @property
     def error(self) -> Exception:
@@ -303,21 +305,31 @@ class ParsingFailedBlock(Block):
         return self._error
 
 
+    @property
+    def ignore_error_block(self) -> Optional[Block]:
+        """The possibly faulty block when ignoring the error.
+
+        This may be None, as it may not always be possible to ignore the error.
+        For errors caused by middleware, this is typically the block without
+        the middleware applied."""
+        return self._ignore_error_block
+
+
 class MiddlewareErrorBlock(ParsingFailedBlock):
-    """A block that could not be parsed due to a middleware error."""
+    """A block that could not be parsed due to a middleware error.
+
+    To get the block that caused this error, call `block.ignore_error_block`
+    (which is the block with the middleware not or only partially applied)."""
 
     def __init__(self, block: Block, error: Exception):
-        super().__init__(start_line=block.start_line, raw=block.raw, error=error)
-        self._block = block
-
-    @property
-    def block(self) -> Block:
-        """The block that could not be parsed."""
-        return self._block
+        super().__init__(start_line=block.start_line, raw=block.raw, error=error,
+                         ignore_error_block=block)
 
 
 class DuplicateEntryKeyBlock(ParsingFailedBlock):
-    """An error-indicating block created for blocks with keys present in the library already."""
+    """An error-indicating block created for blocks with keys present in the library already.
+
+    To get the block that caused this error, call `block.ignore_error_block`."""
 
     def __init__(
         self,
@@ -331,10 +343,10 @@ class DuplicateEntryKeyBlock(ParsingFailedBlock):
             error=Exception(f"Duplicate entry key '{key}'"),
             start_line=start_line,
             raw=raw,
+            ignore_error_block=duplicate_block,
         )
         self._key = key
         self._previous_block = previous_block
-        self._duplicate_block = duplicate_block
 
     @property
     def key(self) -> str:
@@ -350,10 +362,6 @@ class DuplicateEntryKeyBlock(ParsingFailedBlock):
         """A reference to a previous block with the same key."""
         return self._previous_block
 
-    @property
-    def duplicate_block(self) -> Block:
-        """A reference to a non-error instance of this block."""
-        return self._duplicate_block
 
 
 class DuplicateFieldKeyBlock(ParsingFailedBlock):
@@ -368,18 +376,12 @@ class DuplicateFieldKeyBlock(ParsingFailedBlock):
             ),
             start_line=entry.start_line,
             raw=entry.raw,
+            ignore_error_block=entry,
         )
         self._duplicate_keys: Set[str] = duplicate_keys
-        self._entry: Entry = entry
 
     @property
     def duplicate_keys(self) -> Set[str]:
-        """The field-keys that occured more than once in the entry."""
+        """The field-keys that occurred more than once in the entry."""
         return self._duplicate_keys
 
-    @property
-    def entry(self) -> Entry:
-        """A reference to the entry that contained the duplicate field keys.
-
-        (Parsed as if there were no errors, containing all duplicates.)"""
-        return self._entry

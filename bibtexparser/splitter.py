@@ -283,13 +283,18 @@ class Splitter:
                     )
 
                 except ParserStateException as e:
+                    # This is a bug in the parser, not in the bibtex. We should not continue.
+                    logging.error("python-bibtexparser detected an invalid state. "
+                                  "Please report this bug.")
                     logging.error(e.message)
-                    raise e  # TODO consider allowing to continue
+                    raise e
                 except Exception as e:
+                    # For unknown exeptions, we want to fail hard and get the info in our issue tracker.
                     logging.error(
                         f"Unexpected exception while parsing `{m_val}` block (line {start_line})"
+                        "Please report this bug."
                     )
-                    raise e  # TODO consider allowing to continue
+                    raise e
 
                 self._reset_block_status(
                     current_char_index=self._current_char_index + 1
