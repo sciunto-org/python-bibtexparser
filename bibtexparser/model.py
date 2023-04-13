@@ -293,7 +293,7 @@ class ParsingFailedBlock(Block):
         error: Exception,
         start_line: Optional[int] = None,
         raw: Optional[str] = None,
-        ignore_error_block: Optional[Block] = None
+        ignore_error_block: Optional[Block] = None,
     ):
         super().__init__(start_line, raw)
         self._error = error
@@ -303,7 +303,6 @@ class ParsingFailedBlock(Block):
     def error(self) -> Exception:
         """The exception that was raised during parsing."""
         return self._error
-
 
     @property
     def ignore_error_block(self) -> Optional[Block]:
@@ -322,8 +321,12 @@ class MiddlewareErrorBlock(ParsingFailedBlock):
     (which is the block with the middleware not or only partially applied)."""
 
     def __init__(self, block: Block, error: Exception):
-        super().__init__(start_line=block.start_line, raw=block.raw, error=error,
-                         ignore_error_block=block)
+        super().__init__(
+            start_line=block.start_line,
+            raw=block.raw,
+            error=error,
+            ignore_error_block=block,
+        )
 
 
 class DuplicateEntryKeyBlock(ParsingFailedBlock):
@@ -363,7 +366,6 @@ class DuplicateEntryKeyBlock(ParsingFailedBlock):
         return self._previous_block
 
 
-
 class DuplicateFieldKeyBlock(ParsingFailedBlock):
     """An error-indicating block indicating a duplicate field key in an entry."""
 
@@ -384,4 +386,3 @@ class DuplicateFieldKeyBlock(ParsingFailedBlock):
     def duplicate_keys(self) -> Set[str]:
         """The field-keys that occurred more than once in the entry."""
         return self._duplicate_keys
-

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List, Optional
 
 
 class ParsingException(Exception):
@@ -21,10 +21,10 @@ class BlockAbortedException(ParsingException):
     """Exception where a invalid bibtex file led to an aborted block."""
 
     def __init__(
-            self,
-            abort_reason: str,
-            # Not provided if end of file is reached
-            end_index: Optional[int] = None,
+        self,
+        abort_reason: str,
+        # Not provided if end of file is reached
+        end_index: Optional[int] = None,
     ):
         self.abort_reason = abort_reason
         self.end_index = end_index
@@ -61,6 +61,4 @@ class PartialMiddlewareException(ParsingException):
 
     def __init__(self, reasons: List[str]):
         reasons_string = "\n\n=====\n\n".join(reasons)
-        super().__init__(
-            f"Middleware could not be fully applied: {reasons_string}"
-        )
+        super().__init__(f"Middleware could not be fully applied: {reasons_string}")

@@ -1,7 +1,7 @@
 import abc
 import logging
 import re
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 import pylatexenc
 from pylatexenc import latexencode, latexwalker
@@ -17,7 +17,7 @@ from bibtexparser import Library
 from bibtexparser.exceptions import PartialMiddlewareException
 from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.middlewares.names import NameParts
-from bibtexparser.model import Block, Entry, String, MiddlewareErrorBlock
+from bibtexparser.model import Block, Entry, MiddlewareErrorBlock, String
 
 
 class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
@@ -34,7 +34,9 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
         raise NotImplementedError("called abstract method")
 
     # docstr-coverage: inherited
-    def _transform_all_strings(self, list_of_strings: List[str], errors: List[str]) -> List[str]:
+    def _transform_all_strings(
+        self, list_of_strings: List[str], errors: List[str]
+    ) -> List[str]:
         """Called for every python (value, not key) string found on Entry and String blocks"""
         res = []
         for s in list_of_strings:
@@ -43,7 +45,6 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
             errors.append(e)
         return res
 
-
     def transform_entry(self, entry: Entry, library: Library) -> Block:
         errors = []
         for field in entry.fields:
@@ -51,7 +52,9 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
                 field.value, e = self._transform_python_value_string(field.value)
                 errors.append(e)
             elif isinstance(field.value, NameParts):
-                field.value.first = self._transform_all_strings(field.value.first, errors)
+                field.value.first = self._transform_all_strings(
+                    field.value.first, errors
+                )
                 field.value.last = self._transform_all_strings(field.value.last, errors)
                 field.value.von = self._transform_all_strings(field.value.von, errors)
                 field.value.jr = self._transform_all_strings(field.value.jr, errors)
@@ -84,11 +87,11 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
     """Latex-Encodes all strings in the library"""
 
     def __init__(
-            self,
-            keep_math: bool = None,
-            enclose_urls: bool = None,
-            encoder: Optional[UnicodeToLatexEncoder] = None,
-            allow_inplace_modification: bool = True,
+        self,
+        keep_math: bool = None,
+        enclose_urls: bool = None,
+        encoder: Optional[UnicodeToLatexEncoder] = None,
+        allow_inplace_modification: bool = True,
     ):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
@@ -144,16 +147,15 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
             return python_string, str(e)
 
 
-
 class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
     """Latex-Decodes all strings in the library"""
 
     def __init__(
-            self,
-            allow_inplace_modification: bool = True,
-            keep_braced_groups: bool = None,
-            keep_math_mode: bool = None,
-            decoder: Optional[LatexNodes2Text] = None,
+        self,
+        allow_inplace_modification: bool = True,
+        keep_braced_groups: bool = None,
+        keep_math_mode: bool = None,
+        decoder: Optional[LatexNodes2Text] = None,
     ):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
@@ -161,7 +163,7 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
         )
 
         if decoder is not None and (
-                keep_braced_groups is not None or keep_math_mode is not None
+            keep_braced_groups is not None or keep_math_mode is not None
         ):
             raise ValueError(
                 "Cannot specify both encoder and one of "

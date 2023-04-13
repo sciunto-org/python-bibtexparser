@@ -284,8 +284,10 @@ class Splitter:
 
                 except ParserStateException as e:
                     # This is a bug in the parser, not in the bibtex. We should not continue.
-                    logging.error("python-bibtexparser detected an invalid state. "
-                                  "Please report this bug.")
+                    logging.error(
+                        "python-bibtexparser detected an invalid state. "
+                        "Please report this bug."
+                    )
                     logging.error(e.message)
                     raise e
                 except Exception as e:
