@@ -45,6 +45,7 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
             errors.append(e)
         return res
 
+    # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, library: Library) -> Block:
         errors = []
         for field in entry.fields:
