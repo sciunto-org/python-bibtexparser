@@ -157,17 +157,19 @@ def test_multiple_identical_field_keys():
 
     assert "author, title" in str(block.error)
 
-    title_fields = [f for f in block.entry.fields if f.key == "title"]
+    assert block.ignore_error_block is not None
+
+    title_fields = [f for f in block.ignore_error_block.fields if f.key == "title"]
     assert len(title_fields) == 3
     assert title_fields[0].value == "{The first title}"
     assert title_fields[1].value == "{The second title}"
     assert title_fields[2].value == "{The third title}"
 
-    author_fields = [f for f in block.entry.fields if f.key == "author"]
+    author_fields = [f for f in block.ignore_error_block.fields if f.key == "author"]
     assert len(author_fields) == 2
     assert author_fields[0].value == "{The first author}"
     assert author_fields[1].value == "{The second author}"
 
-    journal_field = [f for f in block.entry.fields if f.key == "journal"]
+    journal_field = [f for f in block.ignore_error_block.fields if f.key == "journal"]
     assert len(journal_field) == 1
     assert journal_field[0].value == "{Some journal}"

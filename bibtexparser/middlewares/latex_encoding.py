@@ -1,7 +1,7 @@
 import abc
 import logging
 import re
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import pylatexenc
 from pylatexenc import latexencode, latexwalker
@@ -13,43 +13,64 @@ from pylatexenc.latexencode import (
     unicode_to_latex,
 )
 
+from bibtexparser import Library
+from bibtexparser.exceptions import PartialMiddlewareException
 from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.middlewares.names import NameParts
-from bibtexparser.model import Block, Entry, String
+from bibtexparser.model import Block, Entry, MiddlewareErrorBlock, String
 
 
 class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
     """Abstract utility class allowing to modify python-strings"""
 
     @abc.abstractmethod
-    def _transform_python_value_string(self, python_string: str) -> str:
-        """Called for every python (value, not key) string found on Entry and String blocks"""
+    def _transform_python_value_string(self, python_string: str) -> Tuple[str, str]:
+        """Called for every python (value, not key) string found on Entry and String blocks.
+
+        Returns:
+            - The transformed string, if the transformation was successful
+            - An error message, if any, or an empty string
+        """
         raise NotImplementedError("called abstract method")
 
     # docstr-coverage: inherited
-    def transform_entry(self, entry: Entry, library: "Library") -> Block:
+    def _transform_all_strings(
+        self, list_of_strings: List[str], errors: List[str]
+    ) -> List[str]:
+        """Called for every python (value, not key) string found on Entry and String blocks"""
+        res = []
+        for s in list_of_strings:
+            r, e = self._transform_python_value_string(s)
+            res.append(r)
+            errors.append(e)
+        return res
+
+    # docstr-coverage: inherited
+    def transform_entry(self, entry: Entry, library: Library) -> Block:
+        errors = []
         for field in entry.fields:
             if isinstance(field.value, str):
-                field.value = self._transform_python_value_string(field.value)
+                field.value, e = self._transform_python_value_string(field.value)
+                errors.append(e)
             elif isinstance(field.value, NameParts):
-                field.value.first = [
-                    self._transform_python_value_string(f) for f in field.value.first
-                ]
-                field.value.last = [
-                    self._transform_python_value_string(n) for n in field.value.last
-                ]
-                field.value.von = [
-                    self._transform_python_value_string(v) for v in field.value.von
-                ]
-                field.value.jr = [
-                    self._transform_python_value_string(j) for j in field.value.jr
-                ]
+                field.value.first = self._transform_all_strings(
+                    field.value.first, errors
+                )
+                field.value.last = self._transform_all_strings(field.value.last, errors)
+                field.value.von = self._transform_all_strings(field.value.von, errors)
+                field.value.jr = self._transform_all_strings(field.value.jr, errors)
             else:
                 logging.info(
                     f" [{self.metadata_key()}] Cannot python-str transform field {field.key}"
                     f" with value type {type(field.value)}"
                 )
-        return entry
+
+        errors = [e for e in errors if e != ""]
+        if len(errors) > 0:
+            errors = PartialMiddlewareException(errors)
+            return MiddlewareErrorBlock(block=entry, error=errors)
+        else:
+            return entry
 
     # docstr-coverage: inherited
     def transform_string(self, string: String, library: "Library") -> Block:
@@ -120,8 +141,11 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
         return "latex_encoding"
 
     # docstr-coverage: inherited
-    def _transform_python_value_string(self, python_string: str) -> str:
-        return self._encoder.unicode_to_latex(python_string)
+    def _transform_python_value_string(self, python_string: str) -> Tuple[str, str]:
+        try:
+            return self._encoder.unicode_to_latex(python_string), ""
+        except Exception as e:
+            return python_string, str(e)
 
 
 class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
@@ -183,7 +207,13 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
         return "latex_decoding"
 
     # docstr-coverage: inherited
-    def _transform_python_value_string(self, python_string: str) -> str:
-        # TODO this fails for invalid latex.
-        #   We have to create modes to keep original or to create a failed block
-        return self._decoder.latex_to_text(python_string)
+    def _transform_python_value_string(self, python_string: str) -> Tuple[str, str]:
+        """Transforms a python string to a latex string
+
+        Returns:
+            Tuple[str, str]: The transformed string and a possible error message
+        """
+        try:
+            return self._decoder.latex_to_text(python_string), ""
+        except Exception as e:
+            return python_string, str(e)
