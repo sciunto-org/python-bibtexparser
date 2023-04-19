@@ -1,36 +1,38 @@
+import io
 import logging
 import logging.config
-import io
 
 logger = logging.getLogger(__name__)
 
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'standard': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s %(funcName)s:%(lineno)d: %(message)s'
+logging.config.dictConfig(
+    {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {
+                "format": "%(asctime)s [%(levelname)s] %(name)s %(funcName)s:%(lineno)d: %(message)s"
+            },
         },
-    },
-    'handlers': {
-        'default': {
-            'level':'DEBUG',
-            'formatter': 'standard',
-            'class':'logging.StreamHandler',
+        "handlers": {
+            "default": {
+                "level": "DEBUG",
+                "formatter": "standard",
+                "class": "logging.StreamHandler",
+            },
         },
-    },
-    'loggers': {
-        '': {
-            'handlers': ['default'],
-            'level': 'DEBUG',
-            'formatter': 'standard',
-            'propagate': True
-        }
+        "loggers": {
+            "": {
+                "handlers": ["default"],
+                "level": "DEBUG",
+                "formatter": "standard",
+                "propagate": True,
+            }
+        },
     }
-})
+)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bibtex_source = """@ARTICLE{Cesar2013,
       author = {Jean César},
       title = {An amazing title},
