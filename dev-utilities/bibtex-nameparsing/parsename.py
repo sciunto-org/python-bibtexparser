@@ -12,14 +12,11 @@ try:
     from tempfile import TemporaryDirectory
 except ImportError:
     from tempfile import mkdtemp
-
     class TemporaryDirectory(object):
         def __init__(self):
             self.name = mkdtemp()
-
         def __enter__(self):
             return self.name
-
         def __exit__(self, exc, value, tb):
             shutil.rmtree(self.name)
 
@@ -45,16 +42,12 @@ def evaluate_bibtex_parsename(tempdir, names):
     # Write entries for each string in the list.
     with open(os.path.join(tempdir, "parsename.bib"), "w") as bibfile:
         for i, name in enumerate(names):
-            bibfile.write("@parsename{{case{0:d}, author={{{1:s}}}}}\n".format(i, name))
+            bibfile.write('@parsename{{case{0:d}, author={{{1:s}}}}}\n'.format(i, name))
 
     # Run BibTeX.
-    proc = subprocess.Popen(
-        ["bibtex", "parsename"],
-        cwd=tempdir,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        universal_newlines=True,
-    )
+    proc = subprocess.Popen(["bibtex", "parsename"], cwd=tempdir,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            universal_newlines=True)
     proc.wait()
 
     # Error.
