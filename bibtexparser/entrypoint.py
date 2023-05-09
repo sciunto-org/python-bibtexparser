@@ -2,7 +2,7 @@ import warnings
 from typing import Iterable, List, Optional, TextIO, Union
 
 from bibtexparser import writer
-from bibtexparser.library import Library
+from bibtexparser import Library
 from bibtexparser.middlewares.middleware import Middleware
 from bibtexparser.middlewares.parsestack import (
     default_parse_stack,
@@ -26,7 +26,7 @@ def _build_parse_stack(
 
     if parse_stack is None:
         parse_stack = default_parse_stack(
-            allow_inplace_modification=True, allow_multithreading=True
+            allow_inplace_modification=True
         )
 
     if append_middleware is None:
@@ -58,7 +58,7 @@ def _build_unparse_stack(
 
     if unparse_stack is None:
         unparse_stack = default_unparse_stack(
-            allow_inplace_modification=True, allow_multithreading=True
+            allow_inplace_modification=True
         )
 
     if prepend_middleware is None:
@@ -82,19 +82,13 @@ def parse_string(
     append_middleware: Optional[Iterable[Middleware]] = None,
     library: Optional[Library] = None,
 ):
-    """Parse a BibTeX string
+    """Parse a BibTeX string.
 
     Args:
         bibtex_str (str): BibTeX string to parse
-        parse_stack (Optional[Iterable[Middleware]], optional):
-            List of middleware to apply to the database after splitting.
-            If None (default), a default stack will be used providing simple
-            standard functionality will be used.
-        append_middleware (Optional[Iterable[Middleware]], optional):
-            List of middleware to append to the default stack
-            (ignored if a not-None parse_stack is passed).
-        library (Optional[Library], optional):
-            Library to add entries to. If None (default), a new library will be created.
+        parse_stack (Optional[Iterable[Middleware]], optional): List of middleware to apply to the database after splitting. If None (default), a default stack will be used providing simple standard functionality will be used.
+        append_middleware (Optional[Iterable[Middleware]], optional): List of middleware to append to the default stack (ignored if a not-None parse_stack is passed).
+        library (Optional[Library], optional): Library to add entries to. If None (default), a new library will be created.
 
     Returns:
         Library: Parsed BibTeX database
@@ -118,13 +112,8 @@ def parse_file(
 
     Args:
         path (str): Path to BibTeX file
-        parse_stack (Optional[Iterable[Middleware]], optional):
-            List of middleware to apply to the database after splitting.
-            If None (default), a default stack will be used providing simple
-            standard functionality will be used.
-        append_middleware (Optional[Iterable[Middleware]], optional):
-            List of middleware to append to the default stack
-            (ignored if a not-None parse_stack is passed).
+        parse_stack (Optional[Iterable[Middleware]], optional): List of middleware to apply to the database after splitting. If None (default), a default stack will be used providing simple standard functionality will be used.
+        append_middleware (Optional[Iterable[Middleware]], optional): List of middleware to append to the default stack (ignored if a not-None parse_stack is passed).
 
     Returns:
         Library: Parsed BibTeX library
@@ -178,7 +167,8 @@ def write_string(
                         If None, a default stack will be used.
     :param prepend_middleware: List of middleware to prepend to the default stack.
                         Only applicable if `parse_stack` is None.
-    :param bibtex_format: Customized BibTeX format to use (optional)."""
+    :param bibtex_format: Customized BibTeX format to use (optional).
+    """
     middleware: Middleware
     for middleware in _build_unparse_stack(unparse_stack, prepend_middleware):
         library = middleware.transform(library=library)
