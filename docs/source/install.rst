@@ -2,77 +2,43 @@
 How to install and test?
 ========================
 
-How to install?
-===============
 
 Requirements
 ------------
 
-* python **2.7** or python **3.3** or newer
-* pyparsing **2.0.3** or newer
+Bibtexparsers only requirement is a python interpreter which is not yet EOL (currently >= 3.7).
 
-Package manager (recommended for those OS users)
-------------------------------------------------
+As of version 2.0.0, bibtexparser is a pure-python project (no direct bindings to C libraries).
+As such, it should be rather easy to install on any platform.
 
-* `Archlinux <https://aur.archlinux.org/packages/python-bibtexparser/>`_
-* `Debian <https://packages.debian.org/en/sid/main/python-bibtexparser>`_
 
-pip (recommended to other users)
----------------------------------
+Installation from PyPI
+--------------------------
 
-To install with pip:
+To install the latest release candidate (currently required to use v2) using pip:
 
 .. code-block:: sh
 
-    pip install bibtexparser
+    pip install --pre bibtexparser
+
+without the ``--pre`` option, you will get the latest `v1` version.
+It has a different API and is not directly compatible with v2.
 
 
-Manual installation (recommended for packagers)
------------------------------------------------
+Installation from source
+----------------------------
 
-Download the archive on `Pypi <http://pypi.python.org/pypi/bibtexparser/>`_.
-
-.. code-block:: sh
-
-    python setup.py install
-
-
-How to run the test suite?
-==========================
-
-This paragraph briefly describes how to run the test suite.
-This is useful for contributors, for packagers but also for users who wants to check their environment.
-
-
-Virtualenv
-----------
-
-You can make a virtualenv. I like `pew <https://pypi.python.org/pypi/pew/>`_ for that because the API is easier.
-
-The first time, you need to make a virtualenv
+Download the source from `Github <https://github.com/sciunto-org/python-bibtexparser/>`_.
+Navigate to the root of the project and run the following command:
 
 .. code-block:: sh
 
-    pew mkproject bibtexparser
-    pip install -r requirements.txt
-    python setup.py install
-    nosetest
+    pip install .
 
-
-If you already have a virtualenv, you can use workon
+Or, if you want to install dev dependencies:
 
 .. code-block:: sh
 
-    pew workon bibtexparser
+    pip install .[test,lint,docs]
 
 
-Tox
----
-
-The advantage of `Tox <https://pypi.python.org/pypi/tox>`_ is that you can build and test the code against several versions of python.
-Of course, you need tox to be installed on your system.
-The configuration file is tox.ini, in the root of the project. There, you can change the python versions.
-
-.. code-block:: sh
-
-    tox # and nothing more :)

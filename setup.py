@@ -18,8 +18,10 @@ setuptools.setup(
     version=version,
     url="https://github.com/sciunto-org/python-bibtexparser",
     author="Michael Weiss and other contributors",
+    maintainer="Michael Weiss",
     license="MIT",
     author_email="code@mweiss.ch",
+    maintainer_email="code@mweiss.ch",
     description="Bibtex parser for python 3",
     long_description_content_type="text/markdown",
     long_description=load_readme(),
@@ -39,11 +41,15 @@ setuptools.setup(
             "pytest",  # Test runner
             "pytest-xdist",  # Parallel tests: `pytest -n <num-workers>`
             "pytest-cov",  # Code coverage
+            "jupyter",  # For runnable examples
         ],
         "lint": [
             "black==23.3.0",
             "isort==5.12.0",
             "docstr-coverage==2.2.0",
         ],
+        "docs": [
+            "sphinx",
+        ]
     },
 )
