@@ -256,9 +256,11 @@ def test_preable_str():
     preamble = Preamble("myNewPreamble")
     assert str(preamble) == "Preamble (line: None): `myNewPreamble`"
 
+
 def test_implicit_comment_str():
     comment = ImplicitComment("myComment", 1)
     assert str(comment) == "ImplicitComment (line: 1): `myComment`"
+
 
 def test_explicit_comment_str():
     comment = ExplicitComment("myComment", 1)
@@ -271,11 +273,17 @@ def test_field_str():
 
 
 def test_entry_str():
-    entry = Entry(entry_type="article", key="myEntry",
-                  fields=[Field("myFirstField", "firstValue"),
-                          Field("mySecondField", "secondValue")])
+    entry = Entry(
+        entry_type="article",
+        key="myEntry",
+        fields=[
+            Field("myFirstField", "firstValue"),
+            Field("mySecondField", "secondValue"),
+        ],
+    )
 
-    expected = dedent("""\
+    expected = dedent(
+        """\
     Entry (line: None, type: `article`, key: `myEntry`):
     \t`myFirstField` = `firstValue`
     \t`mySecondField` = `secondValue`"""
