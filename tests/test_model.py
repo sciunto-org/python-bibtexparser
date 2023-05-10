@@ -1,4 +1,5 @@
 from copy import copy, deepcopy
+from textwrap import dedent
 
 from bibtexparser.model import (
     Entry,
@@ -241,3 +242,51 @@ def test_implicit_and_explicit_comment_equality():
     )
     assert comment_1 != comment_2
     assert comment_2 != comment_1
+
+
+def test_string_str():
+    string = String("myKey", "myValue", 1, "raw")
+    assert str(string) == "String (line: 1, key: `myKey`): `myValue`"
+
+
+def test_preable_str():
+    preamble = Preamble("myValue", 1)
+    assert str(preamble) == "Preamble (line: 1): `myValue`"
+
+    preamble = Preamble("myNewPreamble")
+    assert str(preamble) == "Preamble (line: None): `myNewPreamble`"
+
+
+def test_implicit_comment_str():
+    comment = ImplicitComment("myComment", 1)
+    assert str(comment) == "ImplicitComment (line: 1): `myComment`"
+
+
+def test_explicit_comment_str():
+    comment = ExplicitComment("myComment", 1)
+    assert str(comment) == "ExplicitComment (line: 1): `myComment`"
+
+
+def test_field_str():
+    field = Field("myKey", "myValue")
+    assert str(field) == "Field (line: None, key: `myKey`): `myValue`"
+
+
+def test_entry_str():
+    entry = Entry(
+        entry_type="article",
+        key="myEntry",
+        fields=[
+            Field("myFirstField", "firstValue"),
+            Field("mySecondField", "secondValue"),
+        ],
+    )
+
+    expected = dedent(
+        """\
+    Entry (line: None, type: `article`, key: `myEntry`):
+    \t`myFirstField` = `firstValue`
+    \t`mySecondField` = `secondValue`"""
+    )
+
+    assert str(entry) == expected
