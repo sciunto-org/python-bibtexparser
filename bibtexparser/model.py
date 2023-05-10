@@ -104,6 +104,12 @@ class String(Block):
     def value(self, value: str):
         self._value = value
 
+    def __str__(self):
+        return f'String (line: {self.start_line}, key: `{self.key}`): `{self.value}`'
+
+    def __repr__(self):
+        return f'String(key=`{self.key}`, value=`{self.value}`, ' \
+               f'start_line={self.start_line}, raw=`{self.raw}`)'
 
 class Preamble(Block):
     """Bibtex Blocks of the `@preamble` type, e.g. @preamble{This is a preamble}."""
@@ -123,6 +129,12 @@ class Preamble(Block):
     def value(self, value: str):
         self._value = value
 
+    def __str__(self):
+        return f'Preamble (line: {self.start_line}): `{self.value}`'
+
+    def __repr__(self):
+        return f'Preamble(value=`{self.value}`, ' \
+               f'start_line={self.start_line}, raw=`{self.raw}`)'
 
 class ExplicitComment(Block):
     """Bibtex Blocks of the `@comment` type, e.g. @comment{This is a comment}."""
@@ -143,6 +155,13 @@ class ExplicitComment(Block):
         self._comment = value
 
 
+    def __str__(self):
+        return f'ExplicitComment (line: {self.start_line}): `{self.comment}`'
+
+    def __repr__(self):
+        return f'ExplicitComment(comment=`{self.comment}`, ' \
+               f'start_line={self.start_line}, raw=`{self.raw}`)'
+
 class ImplicitComment(Block):
     """Bibtex outside of an @{...} block, which is treated as a comment."""
 
@@ -161,6 +180,12 @@ class ImplicitComment(Block):
     def comment(self, value: str):
         self._comment = value
 
+    def __str__(self):
+        return f'ImplicitComment (line: {self.start_line}): `{self.comment}`'
+
+    def __repr__(self):
+        return f'ImplicitComment(comment=`{self.comment}`, ' \
+               f'start_line={self.start_line}, raw=`{self.raw}`)'
 
 class Field:
     """A field of a Bibtex entry, e.g. `author = {John Doe}`."""
@@ -201,6 +226,12 @@ class Field:
             and self.__dict__ == other.__dict__
         )
 
+    def __str__(self):
+        return f'Field (line: {self.start_line}, key: `{self.key}`): `{self.value}`'
+
+    def __repr__(self):
+        return f'Field(key=`{self.key}`, value=`{self.value}`, ' \
+                  f'start_line={self.start_line})'
 
 class Entry(Block):
     """Bibtex Blocks of the `@entry` type, e.g. @article{Cesar2013, ...}."""
@@ -283,6 +314,17 @@ class Entry(Block):
             ("ENTRYTYPE", self.entry_type),
             ("ID", self.key),
         ] + [(f.key, f.value) for f in self.fields]
+
+    def __str__(self):
+        lines = [
+            f'Entry (line: {self.start_line}, type: `{self.entry_type}`, key: `{self.key}`):'
+        ]
+        lines.extend([f"\t`{f.key}` = `{f.value}`" for f in self.fields])
+        return "\n".join(lines)
+
+    def __repr__(self):
+        return f'Entry(entry_type=`{self.entry_type}`, key=`{self.key}`, ' \
+               f'fields=`{self.fields.__repr__()}`, start_line={self.start_line})'
 
 
 class ParsingFailedBlock(Block):
