@@ -25,7 +25,7 @@ From a user perspective `v2` has the following advantages over `v1`:
 * Easily customizable parsing and writing
 * Access to more information, such as raw, unparsed bibtex.
 * Fault-Tolerant: Able to parse files with syntax errors
-* Massively simplified, robuster handling of de- and encoding (special chars, ...).
+* Robuster handling of de- and encoding (special chars, ...).
 * Permissive MIT license
 
 Implementation-wise, the main difference of `v2` is that it does not depend on `pyparsing` anymore.

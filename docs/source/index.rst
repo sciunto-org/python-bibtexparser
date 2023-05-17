@@ -23,8 +23,8 @@ Contents:
     :maxdepth: 2
 
     install.rst
-    architecture.rst
     quickstart.rst
+    middleware.rst
     migrate.rst
     bibtexparser.rst
     bibtex_conv.rst
