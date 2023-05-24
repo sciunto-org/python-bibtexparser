@@ -5,6 +5,8 @@ Quickstart
 This section provides a TLDR-style overview of the high-level features of bibtexparser.
 For more detailed information, please refer to the corresponding sections of the documentation.
 
+.. _vocab:
+
 Prerequisite: Vocabulary
 ========================
 
@@ -12,7 +14,7 @@ Prerequisite: Vocabulary
 * A **preamble** is a `@preamble{...}` block.
 * A **string** is `@string{...}`.
 * An **explicit comment** is written as `@comment{...}`.
-* An **implicit comment** is any collection of lines not within any `@...{...}` block.
+* An **implicit comment** is any text not within any `@...{...}` block.
 * Each of the above is called a **block**, i.e., any .bib file is a collection of blocks of the above types.
 
 In an entry, you can find
@@ -49,6 +51,7 @@ First, we prepare a BibTeX sample file. This is just for the purpose of illustra
 
 Let's attempt to parse this string using the default bibtexparser configuration:
 
+.. _entrypoint:
 
 .. code-block:: python
 
@@ -90,14 +93,14 @@ Example of exposed attributes:
     # Entries have more attributes
     first_entry = library.entries[0]
     first_entry.key # The entry key
-    first_entry.entry_type # The entry type
+    first_entry.entry_type # The entry type, e.g. "article"
     first_entry.fields # The entry fields (e.g. author, title, etc. with their values)
     first_entry.fields_dict # The entry fields, as a dictionary by field key
 
     # Each field of the entry is a `bibtexparser.model.Field` instance
     first_field = first_entry.fields[0]
-    first_field.key # The field key
-    first_field.value # The field value
+    first_field.key # The field key, e.g. "author"
+    first_field.value # The field value, e.g. "Albert Einstein and Boris Johnson"
 
 For a list of all available attributes, see the documentation of the `bibtexparser.model` module.
 
@@ -150,5 +153,4 @@ This can be quickly achieved using the following:
     # }
 
 As you can see, the content (besides some white-spacing and other layout) is identical to the original string.
-Same as the parser, the writer can be configured to your needs, but also by creating a custom writer instance.
-For a detailed description of the writer, see the corresponding section of the docs.
+Naturally, the writer can be configured to your needs. For more information on that, see :ref:`the customization documentation <customizing>`.

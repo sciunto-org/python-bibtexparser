@@ -32,9 +32,10 @@ Implementation-wise, the main difference of `v2` is that it does not depend on `
 Also, it does not implement any en-/decoding of special characters, but relies on external libraries for this.
 
 To implement these changes, we had to make some breaking changes to the API. Amongst others, be aware that:
-* The used vocabulary has slightly changed (TODO link).
-* The parameters of the library entrypoint have changed (TODO link).
-* `bibtexparser.customizations` is gone, and has been replaced by `bibtexparser.middleware`, which are a bit different in their use. (TODO Link)
+
+* The used vocabulary has slightly changed. [:ref:`docs <vocab>`]
+* The primary entrypoints have changed. [:ref:`docs <entrypoint>`]
+* The module `bibtexparser.customizations` been replaced by the module `bibtexparser.middleware` [:ref:`docs <customizing>`]
 
 Minimal Migration Guide
 -----------------------
@@ -43,8 +44,8 @@ The following code snippets show how to migrate from `v1` to `v2` for the most c
 It aims to provide the quickest way to get `v1` code running with `v2`.
 As such, it makes reduced use of the new features of `v2` and makes use of backwards compatibility APIs where possible.
 
-Changing the entrypoint
-~~~~~~~~~~~~~~~~~~~~~~~
+Changing the entrypoint with default settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 TODO
 
 Customizing the parser

@@ -1,3 +1,5 @@
+.. _customizing:
+
 =================================
 Customizing the Parser and Writer
 =================================
@@ -41,7 +43,7 @@ This example adds three new middleware layers to the parse stack:
 Default Parse-Stack
 ^^^^^^^^^^^^^^^^^^^
 
-BibtexParser forsees a default parse stack; i.e., some middleware is automatically applied as we assume it to be
+BibtexParser foresees a default parse stack; i.e., some middleware is automatically applied as we assume it to be
 part of the expected functionality for most users.
 
 Currently, the default parse stack consists of the following layers:
@@ -86,7 +88,7 @@ Middleware Layers Regarding Value References and Representation
 
 Middleware Layers Regarding Names
 
-* :mod:`bibtexparser.middlewares.SeperateCoAuthors`
+* :mod:`bibtexparser.middlewares.SeparateCoAuthors`
 * :mod:`bibtexparser.middlewares.MergeCoAuthors`
 * :mod:`bibtexparser.middlewares.SplitNameParts` (requires SeperateCoAuthors to be applied first)
 * :mod:`bibtexparser.middlewares.MergeNameParts`
@@ -137,6 +139,7 @@ These options are instead specified as arguments to the :code:`bibtexparser.writ
 Specifically, a user may pass a :class:`bibtexparser.BibtexFormatter` object to the :code:`bibtex_format` argument of :code:`bibtexparser.write`.
 
 .. code-block:: python
+
     bibtex_format = bibtexparser.BibtexFormat()
     bibtex_format.indent = '    '
     bibtex_format.block_separator = '\n\n'

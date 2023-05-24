@@ -24,7 +24,7 @@ Contents:
 
     install.rst
     quickstart.rst
-    middleware.rst
+    customize.rst
     migrate.rst
     bibtexparser.rst
     bibtex_conv.rst
