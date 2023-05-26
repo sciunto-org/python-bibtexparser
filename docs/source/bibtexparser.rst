@@ -2,46 +2,39 @@
 
 .. contents::
 
-bibtexparser: API
-=================
+========
+Full API
+========
 
-:mod:`bibtexparser` --- Parsing and writing BibTeX files
---------------------------------------------------------
+:mod:`bibtexparser` --- High-Level Entrypoints
+----------------------------------------------
 
 .. automodule:: bibtexparser
-    :members: load, loads, dumps, dump
+    :members: parse_string, parse_file, write_string, write_file
 
-:mod:`bibtexparser.bibdatabase` --- The bibliographic database object
----------------------------------------------------------------------
 
-.. autoclass:: bibtexparser.bibdatabase.BibDatabase
-    :members: entries, entries_dict, comments, strings, preambles
+:mod:`bibtexparser.Library` --- The class containing the parsed library
+-----------------------------------------------------------------------
 
-:mod:`bibtexparser.bparser` --- Tune the default parser
---------------------------------------------------------
+.. autoclass:: bibtexparser.Library
+    :members: entries, entries_dict, comments, strings, preambles, blocks
 
-.. automodule:: bibtexparser.bparser
-    :members:
 
-:mod:`bibtexparser.customization` --- Functions to customize records
---------------------------------------------------------------------
+:mod:`bibtexparser.model` --- The classes used in the library
+-------------------------------------------------------------
+.. automodule:: bibtexparser.model
+    :members: Entry, String, Preamble, Block, ExplicitComment, ImplicitComment, Field
 
-.. automodule:: bibtexparser.customization
-    :members:
 
-Exception classes
-^^^^^^^^^^^^^^^^^
-.. autoclass:: bibtexparser.customization.InvalidName
-
-:mod:`bibtexparser.bwriter` --- Tune the default writer
--------------------------------------------------------
-
-.. autoclass:: bibtexparser.bwriter.BibTexWriter
-    :members:
-
-:mod:`bibtexparser.bibtexexpression` --- Parser's core relying on pyparsing
+:mod:`bibtexparser.middlewares` --- Customizers to transform parsed library
 ---------------------------------------------------------------------------
 
-.. automodule:: bibtexparser.bibtexexpression
+.. automodule:: bibtexparser.middlewares
     :members:
 
+
+:mod:`bibtexparser.BibtexFormat` --- Formatting options for writer
+------------------------------------------------------------------
+
+.. autoclass:: bibtexparser.BibtexFormat
+    :members:

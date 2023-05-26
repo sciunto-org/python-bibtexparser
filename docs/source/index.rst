@@ -7,15 +7,14 @@ Welcome to BibtexParser's documentation!
 ========================================
 
 
-:Author: François Boulogne, Olivier Mangin, Lucas Verney, and other contributors.
+:Author: Michael Weiss and other contributors.
 :Source Code: `github.com project <https://github.com/sciunto-org/python-bibtexparser>`_
 :Bugs: `github.com <https://github.com/sciunto-org/python-bibtexparser/issues>`_
 :Generated: |today|
-:License: LGPL v3 or BSD
+:License: MIT
 :Version: |release|
 
-BibtexParser is a python library to parse bibtex files. The code relies on `pyparsing <http://pyparsing.wikispaces.com/>`_ and is tested with unittests.
-BibtexParser is used in more than 1300 open-source `repositories <https://github.com/sciunto-org/python-bibtexparser/network/dependents?package_id=UGFja2FnZS01MDI4NzgxNg%3D%3D>`_.
+BibtexParser is a python library to parse bibtex files. It is used by more than 1600 open-source `repositories <https://github.com/sciunto-org/python-bibtexparser/network/dependents?package_id=UGFja2FnZS01MDI4NzgxNg%3D%3D>`_.
 
 
 Contents:
@@ -24,18 +23,13 @@ Contents:
     :maxdepth: 2
 
     install.rst
-    tutorial.rst
+    quickstart.rst
+    customize.rst
+    migrate.rst
+    biber.rst
     bibtexparser.rst
-    logging.rst
     bibtex_conv.rst
 
-
-Other projects
-==============
-
-* http://pybtex.sourceforge.net/
-* http://pybliographer.org/
-* https://github.com/matthew-brett/babybib
 
 Indices and tables
 ==================

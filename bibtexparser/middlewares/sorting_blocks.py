@@ -2,7 +2,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import List, Tuple, Type
 
-from bibtexparser import Library
+from bibtexparser.library import Library
 from bibtexparser.middlewares.middleware import LibraryMiddleware
 from bibtexparser.model import (
     Block,
