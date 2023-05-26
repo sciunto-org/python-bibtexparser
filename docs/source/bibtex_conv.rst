@@ -1,6 +1,6 @@
-==================================
-Interesting resources about bibtex
-==================================
+==============
+.bib resources
+==============
 
 This page presents various interesting links regarding .bib-based libraries.
 

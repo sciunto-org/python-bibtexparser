@@ -2,8 +2,9 @@
 
 .. contents::
 
-bibtexparser: Full API
-======================
+========
+Full API
+========
 
 :mod:`bibtexparser` --- High-Level Entrypoints
 ----------------------------------------------

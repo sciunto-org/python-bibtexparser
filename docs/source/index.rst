@@ -26,6 +26,7 @@ Contents:
     quickstart.rst
     customize.rst
     migrate.rst
+    biber.rst
     bibtexparser.rst
     bibtex_conv.rst
 

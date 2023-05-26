@@ -1,6 +1,6 @@
-========================
-How to install and test?
-========================
+============
+Installation
+============
 
 
 Requirements

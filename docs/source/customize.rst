@@ -1,8 +1,8 @@
 .. _customizing:
 
-=================================
-Customizing the Parser and Writer
-=================================
+===========
+Customizing
+===========
 
 
 .. image:: https://user-images.githubusercontent.com/4815944/193734283-f19f94e8-7986-4acf-b1a3-1d215e297224.png
@@ -29,8 +29,8 @@ Middleware Layers
     # We want to add three new middleware layers to our parse stack:
     layers = [
         m.MonthIntMiddleware(True), # Months should be represented as int (0-12)
-        m.SeparateCoAuthors(True), # Co-authors should be separated
-        m.SplitNameParts(True) # Names should be split into first, von, last, jr parts
+        m.SeparateCoAuthors(True), # Co-authors should be separated as list of strings
+        m.SplitNameParts(True) # Individual Names should be split into first, von, last, jr parts
     ]
     library = bibtexparser.parse_file('bibtex.bib', append_middleware=layers)
 
@@ -129,6 +129,7 @@ The metadata attribute and its exact specification is still experimental and sub
 even within minor/path versions. Even when not experimental anymore, it is not intended to be used by users directly,
 and may be changed as needed by the corresponding middleware maintainers.
 
+.. _writing_formatting:
 
 Formatting Options for Writing
 ------------------------------

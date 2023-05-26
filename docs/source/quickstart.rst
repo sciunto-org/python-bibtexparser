@@ -10,7 +10,7 @@ For more detailed information, please refer to the corresponding sections of the
 Prerequisite: Vocabulary
 ========================
 
-* An **entry** designates for example `@book{...}`, `@article{...}`, etc.
+* An **entry** refers to a citable item, e.g. `@book{...}`, `@article{...}`, etc.
 * A **preamble** is a `@preamble{...}` block.
 * A **string** is `@string{...}`.
 * An **explicit comment** is written as `@comment{...}`.
@@ -126,6 +126,8 @@ when faced with failed_blocks.
 Here, the actual failed blocks provided in `library.failed_blocks`
 will provide you some more information
 (exceeding this tutorial, see the corresponding section of the docs for more detail).
+
+.. _writing_quickstart:
 
 Step 3: Exporting with Defaults
 ===============================
