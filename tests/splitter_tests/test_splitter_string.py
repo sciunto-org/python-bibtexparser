@@ -14,7 +14,7 @@ from tests.resources import EDGE_CASE_VALUES, ENCLOSINGS
         "ICSE2022_with_underscore_and-dash",
     ],
 )
-@pytest.mark.parametrize("value", EDGE_CASE_VALUES)
+@pytest.mark.parametrize("value", EDGE_CASE_VALUES+[""])
 @pytest.mark.parametrize("enclosing", ENCLOSINGS)
 def test_parse_string_key_val(key: str, value: str, enclosing: str):
     """Test that the string is correctly parsed."""
