@@ -50,6 +50,6 @@ setuptools.setup(
         ],
         "docs": [
             "sphinx",
-        ]
+        ],
     },
 )
