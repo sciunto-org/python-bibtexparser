@@ -1,14 +1,28 @@
 # python-bibtexparser v2
 
-This is the development branch of python-bibtexparser v2.
-It is not yet ready for production use, and some breaking changes and refactoring may still to come.
+Welcome to python-bibtexparser, a parser for `.bib` files with a long history and wide adaption.
 
-However, the majority of functionality is implemented and as bibtexparser v1 will soon stop getting updates, 
-it might be worth to check out this branch and give it a try.
+Bibtexparser is available in two versions: V1 and V2. For new projects, we recommend using v2 which provides an overall more robust and faster experience.
+Install it using pip:
 
 ```bash
-pip install git+https://github.com/sciunto-org/python-bibtexparser@v2
+pip install git+https://github.com/sciunto-org/python-bibtexparser@main
 ```
+
+If instead, you want to use v1, install it using:
+
+```bash
+pip install bibtexparser~=1.0
+```
+
+Note that all development and maintenance effort is focussed on v2. 
+Small PRs for v1 are still accepted, but only as long as they are backwards compatible and don't introduce much additional technical debt.
+Development of version one happens on the dedicated v1 branch. 
+
+The remainder of this README is specific to v2. 
+
+## Documentation
+Go check out our documentation on [https://bibtexparser.readthedocs.io/en/main/](https://bibtexparser.readthedocs.io/en/main/).
 
 ## Advantages of V2
 
