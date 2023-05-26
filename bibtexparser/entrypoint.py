@@ -54,7 +54,7 @@ def _build_unparse_stack(
         )
 
     if unparse_stack is None:
-        unparse_stack = default_unparse_stack(allow_inplace_modification=True)
+        unparse_stack = default_unparse_stack(allow_inplace_modification=False)
 
     if prepend_middleware is None:
         return list(unparse_stack)
