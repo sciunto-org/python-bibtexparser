@@ -25,7 +25,7 @@ setuptools.setup(
     description="Bibtex parser for python 3",
     long_description_content_type="text/markdown",
     long_description=load_readme(),
-    packages=["bibtexparser"],
+    packages=setuptools.find_packages("bibtexparser"),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
