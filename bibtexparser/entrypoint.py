@@ -1,8 +1,7 @@
 import warnings
 from typing import Iterable, List, Optional, TextIO, Union
 
-from bibtexparser import writer
-from bibtexparser import Library
+from bibtexparser import Library, writer
 from bibtexparser.middlewares.middleware import Middleware
 from bibtexparser.middlewares.parsestack import (
     default_parse_stack,
@@ -25,9 +24,7 @@ def _build_parse_stack(
         )
 
     if parse_stack is None:
-        parse_stack = default_parse_stack(
-            allow_inplace_modification=True
-        )
+        parse_stack = default_parse_stack(allow_inplace_modification=True)
 
     if append_middleware is None:
         return list(parse_stack)
@@ -57,9 +54,7 @@ def _build_unparse_stack(
         )
 
     if unparse_stack is None:
-        unparse_stack = default_unparse_stack(
-            allow_inplace_modification=True
-        )
+        unparse_stack = default_unparse_stack(allow_inplace_modification=True)
 
     if prepend_middleware is None:
         return list(unparse_stack)
