@@ -17,7 +17,7 @@ pip install bibtexparser~=1.0
 
 Note that all development and maintenance effort is focussed on v2. 
 Small PRs for v1 are still accepted, but only as long as they are backwards compatible and don't introduce much additional technical debt.
-Development of version one happens on the dedicated v1 branch. 
+Development of version one happens on the dedicated [v1 branch](https://github.com/sciunto-org/python-bibtexparser/tree/v1). 
 
 The remainder of this README is specific to v2. 
 

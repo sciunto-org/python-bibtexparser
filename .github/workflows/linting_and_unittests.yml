@@ -5,7 +5,7 @@ on:
     paths:
       - '**.py'
   pull_request:
-    branches: [ "master", "v2" ]
+    branches: ["main"]
 
 jobs:
   lint:
