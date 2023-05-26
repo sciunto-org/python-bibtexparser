@@ -24,3 +24,5 @@ from bibtexparser.middlewares.sorting_entry_fields import (
     SortFieldsAlphabeticallyMiddleware,
     SortFieldsCustomMiddleware,
 )
+
+from .parsestack import default_parse_stack, default_unparse_stack

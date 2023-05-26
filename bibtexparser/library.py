@@ -1,6 +1,6 @@
 from typing import Dict, List, Union
 
-from bibtexparser.model import (
+from .model import (
     Block,
     DuplicateEntryKeyBlock,
     Entry,

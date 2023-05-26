@@ -5,7 +5,8 @@ from bibtexparser.middlewares.enclosing import (
     AddEnclosingMiddleware,
     RemoveEnclosingMiddleware,
 )
-from bibtexparser.middlewares.middleware import Middleware
+
+from .middleware import Middleware
 
 
 def default_parse_stack(allow_inplace_modification: bool = True) -> List[Middleware]:

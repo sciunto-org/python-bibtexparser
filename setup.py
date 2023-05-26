@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import setuptools
 
+version = "2.0.0b1"
+
 with open("bibtexparser/__init__.py") as fh:
     for line in fh:
         if line.startswith("__version__"):
@@ -25,7 +27,7 @@ setuptools.setup(
     description="Bibtex parser for python 3",
     long_description_content_type="text/markdown",
     long_description=load_readme(),
-    packages=["bibtexparser"],
+    packages=setuptools.find_packages(include=["bibtexparser", "bibtexparser.*"]),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",

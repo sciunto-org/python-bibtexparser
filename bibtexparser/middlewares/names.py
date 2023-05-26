@@ -5,10 +5,11 @@ Much of the code is taken from Blair Bonnetts never merged v0 pull request
 """
 import abc
 import dataclasses
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
-from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import Block, Entry, Field
+
+from .middleware import BlockMiddleware
 
 
 class InvalidNameError(ValueError):

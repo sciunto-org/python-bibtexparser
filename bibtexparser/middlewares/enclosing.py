@@ -1,7 +1,8 @@
 from typing import Tuple, Union
 
-from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import Entry, Field, String
+
+from .middleware import BlockMiddleware
 
 REMOVED_ENCLOSING_KEY = "removed_enclosing"
 

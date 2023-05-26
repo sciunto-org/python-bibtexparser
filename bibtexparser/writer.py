@@ -1,8 +1,8 @@
 from copy import deepcopy
 from typing import List, Optional, Union
 
-from bibtexparser.library import Library
-from bibtexparser.model import (
+from .library import Library
+from .model import (
     Entry,
     ExplicitComment,
     Field,
