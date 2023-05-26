@@ -1,4 +1,4 @@
-from typing import Collection, Dict, List, Union
+from typing import Dict, List, Union
 
 from bibtexparser.model import (
     Block,

@@ -1,11 +1,14 @@
 # python-bibtexparser v2
 
-This is the (very early) development version of python-bibtexparser v2. 
-It is not yet ready for production use, and major breaking changes and refactoring are still to come.
+This is the development branch of python-bibtexparser v2.
+It is not yet ready for production use, and some breaking changes and refactoring may still to come.
 
-The files in here are also still buggy, so don't copy-paste snippets either :-)
+However, the majority of functionality is implemented and as bibtexparser v1 will soon stop getting updates, 
+it might be worth to check out this branch and give it a try.
 
-If you want to join the development, please contact us through github issues. 
+```bash
+pip install git+https://github.com/sciunto-org/python-bibtexparser@v2
+```
 
 ## Advantages of V2
 
