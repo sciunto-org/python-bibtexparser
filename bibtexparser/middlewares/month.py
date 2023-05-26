@@ -3,8 +3,9 @@ from collections import OrderedDict
 from typing import Tuple, Union
 
 from bibtexparser.library import Library
-from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import Block, Entry, Field
+
+from .middleware import BlockMiddleware
 
 
 class _MonthInterpolator(BlockMiddleware, abc.ABC):

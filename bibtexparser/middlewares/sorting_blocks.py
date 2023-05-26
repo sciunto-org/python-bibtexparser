@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from typing import List, Tuple, Type
 
 from bibtexparser.library import Library
-from bibtexparser.middlewares.middleware import LibraryMiddleware
 from bibtexparser.model import (
     Block,
     Entry,
@@ -12,6 +11,8 @@ from bibtexparser.model import (
     Preamble,
     String,
 )
+
+from .middleware import LibraryMiddleware
 
 DEFAULT_BLOCK_TYPE_ORDER = (String, Preamble, Entry, ImplicitComment, ExplicitComment)
 

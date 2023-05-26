@@ -1,8 +1,9 @@
-from typing import List, Tuple
+from typing import Tuple
 
 from bibtexparser.library import Library
-from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import Block, Entry
+
+from .middleware import BlockMiddleware
 
 
 class SortFieldsAlphabeticallyMiddleware(BlockMiddleware):

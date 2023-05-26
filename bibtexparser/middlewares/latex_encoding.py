@@ -4,20 +4,19 @@ import re
 from typing import List, Optional, Tuple
 
 import pylatexenc
-from pylatexenc import latexencode, latexwalker
 from pylatexenc.latex2text import LatexNodes2Text, MacroTextSpec
 from pylatexenc.latexencode import (
     RULE_REGEX,
     UnicodeToLatexConversionRule,
     UnicodeToLatexEncoder,
-    unicode_to_latex,
 )
 
 from bibtexparser.exceptions import PartialMiddlewareException
 from bibtexparser.library import Library
-from bibtexparser.middlewares.middleware import BlockMiddleware
-from bibtexparser.middlewares.names import NameParts
 from bibtexparser.model import Block, Entry, MiddlewareErrorBlock, String
+
+from .middleware import BlockMiddleware
+from .names import NameParts
 
 
 class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):

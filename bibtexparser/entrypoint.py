@@ -1,14 +1,11 @@
 import warnings
 from typing import Iterable, List, Optional, TextIO, Union
 
-from bibtexparser.library import Library
-from bibtexparser.middlewares.middleware import Middleware
-from bibtexparser.middlewares.parsestack import (
-    default_parse_stack,
-    default_unparse_stack,
-)
-from bibtexparser.splitter import Splitter
-from bibtexparser.writer import BibtexFormat, write_string
+from .library import Library
+from .middlewares.middleware import Middleware
+from .middlewares.parsestack import default_parse_stack, default_unparse_stack
+from .splitter import Splitter
+from .writer import BibtexFormat, write_string
 
 
 def _build_parse_stack(

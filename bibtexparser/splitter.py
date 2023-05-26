@@ -1,14 +1,14 @@
 import logging
 import re
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import List, Optional, Set, Tuple, Union
 
-from bibtexparser.exceptions import (
+from .exceptions import (
     BlockAbortedException,
     ParserStateException,
     RegexMismatchException,
 )
-from bibtexparser.library import Library
-from bibtexparser.model import (
+from .library import Library
+from .model import (
     DuplicateFieldKeyBlock,
     Entry,
     ExplicitComment,
