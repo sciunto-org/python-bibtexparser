@@ -41,6 +41,11 @@ from tests.middleware_tests.middleware_test_util import (
             r"See https://human_resources.com",
             id="Keep special chars in url",
         ),
+        pytest.param(
+            r"One Two and Three{\'\i}abc-Four{\'\i}def",
+            "One Two and Threeíabc-Fourídef",
+            id=r"Remove braces-wrapping",
+        ),
     ],
 )
 def test_latex_special_chars_decoding(latex_string, expected_decoded_string):
