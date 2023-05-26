@@ -1,7 +1,7 @@
 import warnings
 from typing import Iterable, List, Optional, TextIO, Union
 
-from bibtexparser.library import  Library
+from bibtexparser.library import Library
 from bibtexparser.middlewares.middleware import Middleware
 from bibtexparser.middlewares.parsestack import (
     default_parse_stack,
