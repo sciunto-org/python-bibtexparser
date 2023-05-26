@@ -13,7 +13,7 @@ from pylatexenc.latexencode import (
     unicode_to_latex,
 )
 
-from bibtexparser import Library
+from bibtexparser.library import Library
 from bibtexparser.exceptions import PartialMiddlewareException
 from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.middlewares.names import NameParts

@@ -1,7 +1,7 @@
 import warnings
 from typing import Iterable, List, Optional, TextIO, Union
 
-from bibtexparser import Library, writer
+from bibtexparser.library import  Library
 from bibtexparser.middlewares.middleware import Middleware
 from bibtexparser.middlewares.parsestack import (
     default_parse_stack,
@@ -168,4 +168,4 @@ def write_string(
     for middleware in _build_unparse_stack(unparse_stack, prepend_middleware):
         library = middleware.transform(library=library)
 
-    return writer.write_string(library, bibtex_format=bibtex_format)
+    return write_string(library, bibtex_format=bibtex_format)

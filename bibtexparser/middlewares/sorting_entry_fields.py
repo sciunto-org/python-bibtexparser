@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from bibtexparser import Library
+from bibtexparser.library import Library
 from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import Block, Entry
 

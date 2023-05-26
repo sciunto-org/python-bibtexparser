@@ -2,7 +2,7 @@ import warnings
 from copy import deepcopy
 from typing import Any
 
-from bibtexparser import Library
+from bibtexparser.library import Library
 from bibtexparser.middlewares.enclosing import REMOVED_ENCLOSING_KEY
 from bibtexparser.middlewares.middleware import LibraryMiddleware
 from bibtexparser.model import Entry, Field
