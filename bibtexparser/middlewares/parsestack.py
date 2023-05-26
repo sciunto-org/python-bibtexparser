@@ -20,7 +20,7 @@ def default_parse_stack(allow_inplace_modification: bool = True) -> List[Middlew
     ]
 
 
-def default_unparse_stack(allow_inplace_modification: bool = True) -> List[Middleware]:
+def default_unparse_stack(allow_inplace_modification: bool = False) -> List[Middleware]:
     """The default unparse stack to be applied before writing, if not specified otherwise."""
     return [
         AddEnclosingMiddleware(
