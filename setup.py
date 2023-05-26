@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import setuptools
 
-version = "2.0.0b5"
+version = "2.0.0b1"
 
 with open("bibtexparser/__init__.py") as fh:
     for line in fh:
