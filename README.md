@@ -6,7 +6,7 @@ Bibtexparser is available in two versions: V1 and V2. For new projects, we recom
 Install it using pip:
 
 ```bash
-pip install git+https://github.com/sciunto-org/python-bibtexparser@main
+pip install --no-cache-dir git+https://github.com/sciunto-org/python-bibtexparser@main
 ```
 
 If instead, you want to use v1, install it using:
