@@ -81,9 +81,7 @@ def _calculate_auto_value_align(library: Library) -> int:
     return max_key_len + len(VAL_SEP)
 
 
-def write_string(
-    library: Library, bibtex_format: Optional["BibtexFormat"] = None
-) -> str:
+def write(library: Library, bibtex_format: Optional["BibtexFormat"] = None) -> str:
     """Serialize a BibTeX database to a string.
 
     Note: This is not the exposed writing entrypoint.

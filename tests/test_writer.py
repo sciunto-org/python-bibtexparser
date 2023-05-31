@@ -41,7 +41,7 @@ def _dummy_entry():
 def test_single_simple_blocks(block, expected_string):
     """Test the @string serializer."""
     library = Library(blocks=[block])
-    string = writer.write_string(library)
+    string = writer.write(library)
     assert string == expected_string
 
 
@@ -55,7 +55,7 @@ def test_write_entry_with_indent(indent):
         bib_format.indent = indent
         expected_indent = indent
 
-    string = writer.write_string(library, bib_format)
+    string = writer.write(library, bib_format)
     assert (
         string == f'@article{{myKey,\n{expected_indent}title = "myTitle",'
         f'\n{expected_indent}author = "myAuthor"\n}}\n'
@@ -73,7 +73,7 @@ def test_write_entry_with_trailing_comma(trailing_comma):
         if trailing_comma:
             expected = ","
 
-    string = writer.write_string(library, bib_format)
+    string = writer.write(library, bib_format)
     assert (
         string == f'@article{{myKey,\n\ttitle = "myTitle",'
         f'\n\tauthor = "myAuthor"{expected}\n}}\n'
@@ -88,7 +88,7 @@ def test_entry_value_column(value_column):
     bib_format = BibtexFormat()
     if value_column is not None:
         bib_format.value_column = value_column
-    string = writer.write_string(library, bib_format)
+    string = writer.write(library, bib_format)
     if value_column is None:
         # Make sure there are no unneeded spaces
         assert f'{bib_format.indent}title = "myTitle"' in string
@@ -112,7 +112,7 @@ def test_block_separator(block_separator):
         bib_format.block_separator = block_separator
     else:
         block_separator = "\n\n"  # default
-    string = writer.write_string(library, bib_format)
+    string = writer.write(library, bib_format)
     lines = string.splitlines()
 
     if block_separator == "\n":
