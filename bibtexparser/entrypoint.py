@@ -5,7 +5,7 @@ from .library import Library
 from .middlewares.middleware import Middleware
 from .middlewares.parsestack import default_parse_stack, default_unparse_stack
 from .splitter import Splitter
-from .writer import BibtexFormat, write_string
+from .writer import BibtexFormat, write
 
 
 def _build_parse_stack(
@@ -165,4 +165,4 @@ def write_string(
     for middleware in _build_unparse_stack(unparse_stack, prepend_middleware):
         library = middleware.transform(library=library)
 
-    return write_string(library, bibtex_format=bibtex_format)
+    return write(library, bibtex_format=bibtex_format)
