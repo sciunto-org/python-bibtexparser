@@ -386,7 +386,7 @@ class MiddlewareErrorBlock(ParsingFailedBlock):
         )
 
 
-class DuplicateEntryKeyBlock(ParsingFailedBlock):
+class DuplicateBlockKeyBlock(ParsingFailedBlock):
     """An error-indicating block created for blocks with keys present in the library already.
 
     To get the block that caused this error, call `block.ignore_error_block`."""

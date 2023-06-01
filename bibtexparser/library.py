@@ -2,7 +2,7 @@ from typing import Dict, List, Union
 
 from .model import (
     Block,
-    DuplicateEntryKeyBlock,
+    DuplicateBlockKeyBlock,
     Entry,
     ExplicitComment,
     ImplicitComment,
@@ -37,6 +37,7 @@ class Library:
             blocks = [blocks]
 
         for block in blocks:
+            # This may replace block with a DuplicateEntryKeyBlock
             block = self._add_to_dicts(block)
             self._blocks.append(block)
 
@@ -77,7 +78,7 @@ class Library:
 
         if (
             new_block is not block_after_add
-            and isinstance(new_block, DuplicateEntryKeyBlock)
+            and isinstance(new_block, DuplicateBlockKeyBlock)
             and fail_on_duplicate_key
         ):
             # Revert changes to old_block
@@ -104,7 +105,7 @@ class Library:
             prev_block_with_same_key.key == duplicate.key
         ), "Internal BibtexParser Error. Duplicate blocks have different keys."
 
-        return DuplicateEntryKeyBlock(
+        return DuplicateBlockKeyBlock(
             start_line=duplicate.start_line,
             raw=duplicate.raw,
             key=duplicate.key,
@@ -116,25 +117,23 @@ class Library:
         """Safely add block references to private dict structures.
 
         :param block: Block to add.
-        :returns: The block that was added to the library, except if a block
-            of same type and with same key already exists, in which case a
-            DuplicateKeyBlock is returned.
+        :returns: The block that was added to the library. If a block
+            of same type and with same key already existed, a
+            DuplicateKeyBlock is returned (not added to dict).
         """
         if isinstance(block, Entry):
             try:
                 prev_block_with_same_key = self._entries_by_key[block.key]
                 block = self._cast_to_duplicate(prev_block_with_same_key, block)
             except KeyError:
-                pass  # No previous entry with same key
-            finally:
+                # No duplicate found
                 self._entries_by_key[block.key] = block
         elif isinstance(block, String):
             try:
                 prev_block_with_same_key = self._strings_by_key[block.key]
                 block = self._cast_to_duplicate(prev_block_with_same_key, block)
             except KeyError:
-                pass  # No previous string with same key
-            finally:
+                # No duplicate found
                 self._strings_by_key[block.key] = block
         return block
 
