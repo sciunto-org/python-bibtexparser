@@ -37,7 +37,9 @@ class Library:
             blocks = [blocks]
 
         for block in blocks:
-            block = self._add_to_dicts(block) # This may replace block with a DuplicateEntryKeyBlock
+            block = self._add_to_dicts(
+                block
+            )  # This may replace block with a DuplicateEntryKeyBlock
             self._blocks.append(block)
 
     def remove(self, blocks: Union[List[Block], Block]):

@@ -263,3 +263,32 @@ def test_failed_block():
         'Was still looking for field-value closing `"`'
         in failed_block.error.abort_reason
     )
+
+
+duplicate_bibtex_entry_keys = """
+@article{duplicate,
+  author = {Duplicate, A.},
+  title = {Duplicate article 1},
+  year = {2021},
+}
+@article{duplicate,
+  author = {Duplicate, B.},
+  title = {Duplicate article 2},
+  year = {2022},
+}"""
+
+
+def test_handles_duplicates():
+    """Makes sure that duplicate keys are handled correctly."""
+    import bibtexparser
+
+    lib = bibtexparser.parse_string(duplicate_bibtex_entry_keys)
+    assert len(lib.blocks) == 2
+    assert len(lib.entries) == 1
+    assert len(lib.entries_dict) == 1
+    assert len(lib.failed_blocks) == 1
+
+    assert lib.entries[0]["title"] == "Duplicate article 1"
+    assert isinstance(lib.failed_blocks[0], bibtexparser.model.DuplicateEntryKeyBlock)
+    assert lib.failed_blocks[0].previous_block["title"] == "Duplicate article 1"
+    assert lib.failed_blocks[0].ignore_error_block["title"] == "{Duplicate article 2}"
