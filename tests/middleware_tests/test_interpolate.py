@@ -58,15 +58,15 @@ def test_handles_duplicates():
     """Test case of #378, which failed in interpolation middleware"""
     import bibtexparser
     bibtex = """@article{duplicate,
-      author = {Duplicate, A.},
-      title = {Duplicate article},
-      year = {2022},
-    }
-    @article{duplicate,
-      author = {Duplicate, A.},
-      title = {Duplicate article},
-      year = {2022},
-    }"""
+  author = {Duplicate, A.},
+  title = {Duplicate article},
+  year = {2022},
+}
+@article{duplicate,
+  author = {Duplicate, A.},
+  title = {Duplicate article},
+  year = {2022},
+}"""
 
     lib = bibtexparser.parse_string(bibtex)
     return lib
