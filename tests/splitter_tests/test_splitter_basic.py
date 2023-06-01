@@ -278,7 +278,7 @@ duplicate_bibtex_entry_keys = """
 }"""
 
 
-def test_handles_duplicates():
+def test_handles_duplicate_entries():
     """Makes sure that duplicate keys are handled correctly."""
     import bibtexparser
 
@@ -289,6 +289,33 @@ def test_handles_duplicates():
     assert len(lib.failed_blocks) == 1
 
     assert lib.entries[0]["title"] == "Duplicate article 1"
-    assert isinstance(lib.failed_blocks[0], bibtexparser.model.DuplicateEntryKeyBlock)
+    assert isinstance(lib.failed_blocks[0], bibtexparser.model.DuplicateBlockKeyBlock)
     assert lib.failed_blocks[0].previous_block["title"] == "Duplicate article 1"
     assert lib.failed_blocks[0].ignore_error_block["title"] == "{Duplicate article 2}"
+    assert isinstance(lib.failed_blocks[0].ignore_error_block, bibtexparser.model.Entry)
+
+
+duplicate_bibtex_string_keys = """
+@string{duplicate = "Duplicate string 1"}
+@string{duplicate = "Duplicate string 2"}
+@string{duplicate = "Duplicate string 3"}
+"""
+
+
+def test_handles_duplicate_strings():
+    """Makes sure that duplicate string keys are handled correctly."""
+    import bibtexparser
+
+    lib = bibtexparser.parse_string(duplicate_bibtex_string_keys)
+    assert len(lib.blocks) == 3
+    assert len(lib.strings) == 1
+    assert len(lib.strings_dict) == 1
+    assert len(lib.failed_blocks) == 2
+
+    assert lib.strings[0].value == "Duplicate string 1"
+    assert isinstance(lib.failed_blocks[0], bibtexparser.model.DuplicateBlockKeyBlock)
+    assert lib.failed_blocks[0].previous_block.value == "Duplicate string 1"
+    assert lib.failed_blocks[0].ignore_error_block.value == '"Duplicate string 2"'
+    assert isinstance(
+        lib.failed_blocks[0].ignore_error_block, bibtexparser.model.String
+    )

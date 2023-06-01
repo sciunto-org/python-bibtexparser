@@ -2,7 +2,7 @@ from typing import Dict, List, Union
 
 from .model import (
     Block,
-    DuplicateEntryKeyBlock,
+    DuplicateBlockKeyBlock,
     Entry,
     ExplicitComment,
     ImplicitComment,
@@ -37,9 +37,8 @@ class Library:
             blocks = [blocks]
 
         for block in blocks:
-            block = self._add_to_dicts(
-                block
-            )  # This may replace block with a DuplicateEntryKeyBlock
+            # This may replace block with a DuplicateEntryKeyBlock
+            block = self._add_to_dicts(block)
             self._blocks.append(block)
 
     def remove(self, blocks: Union[List[Block], Block]):
@@ -79,7 +78,7 @@ class Library:
 
         if (
             new_block is not block_after_add
-            and isinstance(new_block, DuplicateEntryKeyBlock)
+            and isinstance(new_block, DuplicateBlockKeyBlock)
             and fail_on_duplicate_key
         ):
             # Revert changes to old_block
@@ -106,7 +105,7 @@ class Library:
             prev_block_with_same_key.key == duplicate.key
         ), "Internal BibtexParser Error. Duplicate blocks have different keys."
 
-        return DuplicateEntryKeyBlock(
+        return DuplicateBlockKeyBlock(
             start_line=duplicate.start_line,
             raw=duplicate.raw,
             key=duplicate.key,
