@@ -37,7 +37,7 @@ class Library:
             blocks = [blocks]
 
         for block in blocks:
-            block = self._add_to_dicts(block)
+            block = self._add_to_dicts(block) # This may replace block with a DuplicateEntryKeyBlock
             self._blocks.append(block)
 
     def remove(self, blocks: Union[List[Block], Block]):
@@ -116,25 +116,23 @@ class Library:
         """Safely add block references to private dict structures.
 
         :param block: Block to add.
-        :returns: The block that was added to the library, except if a block
-            of same type and with same key already exists, in which case a
-            DuplicateKeyBlock is returned.
+        :returns: The block that was added to the library. If a block
+            of same type and with same key already existed, a
+            DuplicateKeyBlock is returned (not added to dict).
         """
         if isinstance(block, Entry):
             try:
                 prev_block_with_same_key = self._entries_by_key[block.key]
                 block = self._cast_to_duplicate(prev_block_with_same_key, block)
             except KeyError:
-                pass  # No previous entry with same key
-            finally:
+                # No duplicate found
                 self._entries_by_key[block.key] = block
         elif isinstance(block, String):
             try:
                 prev_block_with_same_key = self._strings_by_key[block.key]
                 block = self._cast_to_duplicate(prev_block_with_same_key, block)
             except KeyError:
-                pass  # No previous string with same key
-            finally:
+                # No duplicate found
                 self._strings_by_key[block.key] = block
         return block
 
