@@ -55,9 +55,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
                     field.value = self._transform_field_value(field.value)
             return entry
         except InvalidNameError as e:
-            return MiddlewareErrorBlock(
-                entry, e
-            )
+            return MiddlewareErrorBlock(entry, e)
 
 
 class SeparateCoAuthors(_NameTransformerMiddleware):
