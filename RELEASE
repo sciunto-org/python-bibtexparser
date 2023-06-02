@@ -1,0 +1,19 @@
+How to release
+==============
+
+* Update CHANGELOG
+* Update version in __init__.py
+* Commit and open PR on Github to see that all tests pass,
+  and then merge the PR.
+* Check out master locally
+* Build wheel
+    python setup.py sdist upload
+* Check long description
+    twine check dist/*
+* Upload to pypi-test
+    twine upload --repository testpypi dist/*
+* Upload to pypi
+    twine upload dist/*
+* Create release on Github
+* Verify docs are automatically updated
+
