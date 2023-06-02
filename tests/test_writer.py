@@ -129,12 +129,20 @@ def test_block_separator(block_separator):
 
         assert lines[1 + len(expected_lines)] == '@preamble{"myValue"}'
 
-@pytest
 def test_write_failed_block():
-    entry = ParsingFailedBlock(
+    raw = "@article{irrelevant-for-this-test,\nexcept = {that-there-need-to-be},\nother = {multiple-lines}\n}"
+    block = ParsingFailedBlock(
         error=ValueError("Some error"),
-        start_line=0,
-        raw="irrelevant-for-this-test",
+        raw=raw,
         ignore_error_block=None
     )
-    library = Library([entry])
+    library = Library(blocks=[block])
+    string = writer.write(library)
+    lines = string.splitlines()
+    
+    assert len(lines) == 5
+    assert lines[0].startswith("% WARNING")
+    assert lines[1] == "@article{irrelevant-for-this-test,"
+    assert lines[2] == "except = {that-there-need-to-be},"
+    assert lines[3] == "other = {multiple-lines}"
+    assert lines[4] == "}"
