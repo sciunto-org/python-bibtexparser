@@ -70,7 +70,7 @@ def _treat_failed_block(
 ) -> List[str]:
     lines = len(block.raw.splitlines())
     parsing_failed_comment = PARSING_FAILED_COMMENT.format(n=lines)
-    return [parsing_failed_comment, block.raw, "\n"]
+    return [parsing_failed_comment, "\n", block.raw, "\n"]
 
 
 def _calculate_auto_value_align(library: Library) -> int:
