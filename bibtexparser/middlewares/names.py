@@ -7,7 +7,7 @@ import abc
 import dataclasses
 from typing import List, Tuple
 
-from bibtexparser.model import Block, Entry, Field
+from bibtexparser.model import Block, Entry, Field, MiddlewareErrorBlock
 
 from .middleware import BlockMiddleware
 
@@ -49,11 +49,13 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
     # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, *args, **kwargs) -> Block:
         field: Field
-        # TODO wrap in try/except to catch exceptions and create failed block if needed
-        for field in entry.fields:
-            if field.key in self.name_fields:
-                field.value = self._transform_field_value(field.value)
-        return entry
+        try:
+            for field in entry.fields:
+                if field.key in self.name_fields:
+                    field.value = self._transform_field_value(field.value)
+            return entry
+        except InvalidNameError as e:
+            return MiddlewareErrorBlock(entry, e)
 
 
 class SeparateCoAuthors(_NameTransformerMiddleware):
