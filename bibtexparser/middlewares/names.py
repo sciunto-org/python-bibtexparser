@@ -54,7 +54,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
                 if field.key in self.name_fields:
                     field.value = self._transform_field_value(field.value)
             return entry
-        except ValueError as e:
+        except InvalidNameError as e:
             return MiddlewareErrorBlock(
                 entry, e
             )
