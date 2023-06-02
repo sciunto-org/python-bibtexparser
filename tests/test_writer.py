@@ -8,6 +8,7 @@ from bibtexparser.model import (
     ExplicitComment,
     Field,
     ImplicitComment,
+    ParsingFailedBlock,
     Preamble,
     String,
 )
@@ -127,3 +128,21 @@ def test_block_separator(block_separator):
             assert lines[1 + i] == l
 
         assert lines[1 + len(expected_lines)] == '@preamble{"myValue"}'
+
+def test_write_failed_block():
+    raw = "@article{irrelevant-for-this-test,\nexcept = {that-there-need-to-be},\nother = {multiple-lines}\n}"
+    block = ParsingFailedBlock(
+        error=ValueError("Some error"),
+        raw=raw,
+        ignore_error_block=None
+    )
+    library = Library(blocks=[block])
+    string = writer.write(library)
+    lines = string.splitlines()
+    
+    assert len(lines) == 5
+    assert lines[0].startswith("% WARNING")
+    assert lines[1] == "@article{irrelevant-for-this-test,"
+    assert lines[2] == "except = {that-there-need-to-be},"
+    assert lines[3] == "other = {multiple-lines}"
+    assert lines[4] == "}"
