@@ -983,3 +983,48 @@ def test_merge_name_parts(inplace: bool):
 
     # Assert `allow_inplace_modification` is respected
     assert_inplace_is_respected(inplace, input_entry, transformed_entry)
+
+
+@pytest.mark.parametrize(
+    "name, reason",
+    [
+        ("BB,", "Trailing comma at end of name"),
+        ("BB, ", "Trailing comma at end of name"),
+        ("BB, ~\t", "Trailing comma at end of name"),
+        (", ~\t", "Trailing comma at end of name"),
+        ("AA, BB, CC, DD", "Too many commas"),
+        ("AA {BB CC", "Unterminated opening brace"),
+        ("AA {{{BB CC", "Unterminated opening brace"),
+        ("AA {{{BB} CC}", "Unterminated opening brace"),
+        ("AA BB CC}", "Unmatched closing brace"),
+        ("AA BB CC}}}", "Unmatched closing brace"),
+        ("{AA {BB CC}}}", "Unmatched closing brace"),
+    ],
+)
+def test_split_name_parts_exception(name: str, reason: str):
+    input_entry = Entry(
+        start_line=0,
+        raw="irrelevant-for-this-test",
+        entry_type="article",
+        key="articleKey",
+        fields=[
+            Field(start_line=0, key="title", value="A Test and Some More"),
+            Field(start_line=1, key="author", value=[name]),
+        ],
+    )
+
+    middleware = SplitNameParts()
+
+    # SplitNameParts always runs parse_single_name_into_parts(strict=True).
+    # As such we should get the same errors as in test_name_splitting_strict_mode
+    # but with the exceptions caught and wrapped in a MiddlewareErrorBlock.
+    transformed_library = middleware.transform(Library([input_entry]))
+
+    # No valid entries now but 1 (failed) block
+    assert len(transformed_library.entries) == 0
+    assert len(transformed_library.blocks) == 1
+    assert len(transformed_library.failed_blocks) == 1
+
+    # Using same test as in test_name_splitting_strict_mode
+    with pytest.raises(InvalidNameError, match=f".*{name}.*{reason}.*"):
+        raise transformed_library.failed_blocks[0].error
