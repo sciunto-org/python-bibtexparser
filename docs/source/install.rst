@@ -11,9 +11,22 @@ Bibtexparsers only requirement is a python interpreter which is not yet EOL (cur
 As of version 2.0.0, bibtexparser is a pure-python project (no direct bindings to C libraries).
 As such, it should be rather easy to install on any platform.
 
+Installation of current development version
+-------------------------------------------
+
+To install the latest version on the main branch (without manually cloning it), run:
+
+.. code-block:: sh
+
+    pip install --no-cache-dir --force-reinstall git+https://github.com/sciunto-org/python-bibtexparser@main
+
 
 Installation from PyPI
 --------------------------
+
+.. warning::
+    Installation of v2 via PyPI is not yet supported. We will start releasing v2 pre-versions soon, then you'll be able to use the installation method below.
+    Until then, please use the "installation of current development version" as described above.
 
 To install the latest release candidate (currently required to use v2) using pip:
 
