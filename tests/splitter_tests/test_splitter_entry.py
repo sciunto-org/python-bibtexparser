@@ -179,8 +179,8 @@ def test_multiple_identical_field_keys():
     "entry_without_fields",
     [
         # common in revtex, see issue #384
-        pytest.param("@CONTROL{REVTEX41Control}", id="without comma"),
-        pytest.param("@article{articleWithoutFields,}", id="with comma"),
+        pytest.param("@article{articleTestKey}", id="without comma"),
+        pytest.param("@article{articleTestKey,}", id="with comma"),
     ],
 )
 def test_entry_without_fields(entry_without_fields: str):
@@ -190,3 +190,9 @@ def test_entry_without_fields(entry_without_fields: str):
     library: Library = Splitter(full_bibtex).split()
     assert len(library.entries) == 2
     assert len(library.failed_blocks) == 0
+
+    assert library.entries[0].key == "articleTestKey"
+    assert len(library.entries[0].fields) == 0
+
+    assert library.entries[1].key == "subsequentArticle"
+    assert len(library.entries[1].fields) == 1
