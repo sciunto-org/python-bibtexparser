@@ -348,16 +348,24 @@ class Splitter:
                 "but no closing bracket was found."
             )
         comma_mark = self._next_mark(accept_eof=False)
-        if comma_mark.group(0) != ",":
+        if comma_mark.group(0) == "}":
+            # This is an entry without any comma after the key, and with no fields
+            #   Used e.g. by RefTeX (see issue #384)
+            key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
+            fields, end_index, duplicate_keys = [], comma_mark.end(), []
+        elif comma_mark.group(0) != ",":
             self._unaccepted_mark = comma_mark
             raise BlockAbortedException(
                 abort_reason="Expected comma after entry key,"
                 f" but found {comma_mark.group(0)}",
                 end_index=comma_mark.end(),
             )
-        self._open_brackets += 1
-        key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
-        fields, end_index, duplicate_keys = self._move_to_end_of_entry(comma_mark.end())
+        else:
+            self._open_brackets += 1
+            key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
+            fields, end_index, duplicate_keys = self._move_to_end_of_entry(
+                comma_mark.end()
+            )
 
         entry = Entry(
             start_line=start_line,

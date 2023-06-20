@@ -173,3 +173,20 @@ def test_multiple_identical_field_keys():
     journal_field = [f for f in block.ignore_error_block.fields if f.key == "journal"]
     assert len(journal_field) == 1
     assert journal_field[0].value == "{Some journal}"
+
+
+@pytest.mark.parametrize(
+    "entry_without_fields",
+    [
+        # common in revtex, see issue #384
+        pytest.param("@CONTROL{REVTEX41Control}", id="without comma"),
+        pytest.param("@article{articleWithoutFields,}", id="with comma"),
+    ],
+)
+def test_entry_without_fields(entry_without_fields: str):
+    """For motivation why we need this, please see issue #384"""
+    subsequent_article = "@Article{subsequentArticle, title = {Some title}}"
+    full_bibtex = f"{entry_without_fields}\n\n{subsequent_article}"
+    library: Library = Splitter(full_bibtex).split()
+    assert len(library.entries) == 2
+    assert len(library.failed_blocks) == 0
