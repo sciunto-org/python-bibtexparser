@@ -18,7 +18,6 @@ BLOCKS = [
 ]
 
 def test_returning_none_removes_block():
-
     class AlwaysNoneBlockMiddleware(BlockMiddleware):
         """A middleware that returns None for every block."""
         def __init__(self):
@@ -32,6 +31,36 @@ def test_returning_none_removes_block():
     library = AlwaysNoneBlockMiddleware().transform(library)
 
     assert library.blocks == []
+
+def test_returning_empty_removes_block():
+    class AlwaysEmptyBlockMiddleware(BlockMiddleware):
+        """A middleware that returns an empty list for every block."""
+        def __init__(self):
+            super().__init__(allow_parallel_execution = True, allow_inplace_modification = True)
+        def transform_block(self, block, library):
+            return []
+        def metadata_key():
+            return "AlwaysEmptyBlockMiddleware"
+    
+    library = Library(blocks=BLOCKS)
+    library = AlwaysEmptyBlockMiddleware().transform(library)
+
+    assert library.blocks == []
+
+def test_returning_singleton_keeps_block():
+    class SingletonBlockMiddleware(BlockMiddleware):
+        """A middleware that returns a singleton list for every block."""
+        def __init__(self):
+            super().__init__(allow_parallel_execution = True, allow_inplace_modification = True)
+        def transform_block(self, block, library):
+            return [block]
+        def metadata_key():
+            return "SingletonBlockMiddleware"
+    
+    library = Library(blocks=BLOCKS)
+    library = SingletonBlockMiddleware().transform(library)
+
+    assert library.blocks == BLOCKS
 
 def test_returning_list_adds_all():
     class PrefixBlockMiddleware(BlockMiddleware):
