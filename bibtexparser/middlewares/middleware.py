@@ -74,7 +74,13 @@ class BlockMiddleware(Middleware, abc.ABC):
     # docstr-coverage: inherited
     def transform(self, library: "Library") -> "Library":
         # TODO Multiprocessing (only for large library and if allow_multi..)
-        blocks = [self.transform_block(b, library) for b in library.blocks]
+        blocks = []
+        for b in library.blocks:
+            transformed = self.transform_block(b, library)
+            if transformed is None:
+                pass
+            else:
+                blocks.append(transformed)
         return Library(blocks=blocks)
 
     def transform_block(
