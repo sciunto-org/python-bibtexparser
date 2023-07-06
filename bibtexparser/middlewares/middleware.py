@@ -77,10 +77,15 @@ class BlockMiddleware(Middleware, abc.ABC):
         blocks = []
         for b in library.blocks:
             transformed = self.transform_block(b, library)
+            # Case 1: None. Skip it.
             if transformed is None:
                 pass
-            else:
+            # Case 2: A single block. Add it to the list.
+            elif isinstance(transformed, Block):
                 blocks.append(transformed)
+            # Case 3: Something else. Assume it's a collection and append them all.
+            else:
+                blocks.extend(transformed)
         return Library(blocks=blocks)
 
     def transform_block(
