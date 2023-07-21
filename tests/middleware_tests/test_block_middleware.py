@@ -19,87 +19,59 @@ BLOCKS = [
     ImplicitComment("% implicit_comment_c"),
 ]
 
+class ConstantBlockMiddleware(BlockMiddleware):
+    """A middleware that always returns the same result for every block."""
+
+    def __init__(self, const):
+        self._const = const
+        super().__init__(
+            allow_parallel_execution=True, allow_inplace_modification=True
+        )
+
+    def transform_block(self, block, library):
+        return self._const
+
+    def metadata_key():
+        return "ConstantBlockMiddleware"
+
+class LambdaBlockMiddleware(BlockMiddleware):
+    """A middleware that applies a lambda to the input block"""
+    def __init__(self, f):
+        self._f = f
+        super().__init__(
+            allow_parallel_execution=True, allow_inplace_modification=True
+        )
+
+    def transform_block(self, block, library):
+        return self._f(block)
+
+    def metadata_key():
+        return "LambdaBlockMiddleware"
 
 def test_returning_none_removes_block():
-    class AlwaysNoneBlockMiddleware(BlockMiddleware):
-        """A middleware that returns None for every block."""
-
-        def __init__(self):
-            super().__init__(
-                allow_parallel_execution=True, allow_inplace_modification=True
-            )
-
-        def transform_block(self, block, library):
-            return None
-
-        def metadata_key():
-            return "AlwaysNoneBlockMiddleware"
-
     library = Library(blocks=BLOCKS)
-    library = AlwaysNoneBlockMiddleware().transform(library)
+    library = ConstantBlockMiddleware(None).transform(library)
 
     assert library.blocks == []
 
 
 def test_returning_empty_removes_block():
-    class AlwaysEmptyBlockMiddleware(BlockMiddleware):
-        """A middleware that returns an empty list for every block."""
-
-        def __init__(self):
-            super().__init__(
-                allow_parallel_execution=True, allow_inplace_modification=True
-            )
-
-        def transform_block(self, block, library):
-            return []
-
-        def metadata_key():
-            return "AlwaysEmptyBlockMiddleware"
-
     library = Library(blocks=BLOCKS)
-    library = AlwaysEmptyBlockMiddleware().transform(library)
+    library = ConstantBlockMiddleware([]).transform(library)
 
     assert library.blocks == []
 
 
 def test_returning_singleton_keeps_block():
-    class SingletonBlockMiddleware(BlockMiddleware):
-        """A middleware that returns a singleton list for every block."""
-
-        def __init__(self):
-            super().__init__(
-                allow_parallel_execution=True, allow_inplace_modification=True
-            )
-
-        def transform_block(self, block, library):
-            return [block]
-
-        def metadata_key():
-            return "SingletonBlockMiddleware"
-
     library = Library(blocks=BLOCKS)
-    library = SingletonBlockMiddleware().transform(library)
+    library = LambdaBlockMiddleware(lambda b: [b]).transform(library)
 
     assert library.blocks == BLOCKS
 
 
 def test_returning_list_adds_all():
-    class PrefixBlockMiddleware(BlockMiddleware):
-        """A middleware that prefixes every block with a comment."""
-
-        def __init__(self):
-            super().__init__(
-                allow_parallel_execution=True, allow_inplace_modification=True
-            )
-
-        def transform_block(self, block, library):
-            return [ImplicitComment("% Block"), block]
-
-        def metadata_key():
-            return "PrefixBlockMiddleware"
-
     library = Library(blocks=BLOCKS)
-    library = PrefixBlockMiddleware().transform(library)
+    library = LambdaBlockMiddleware(lambda b: [ImplicitComment("% Block"), b]).transform(library)
 
     expected = [
         ImplicitComment("% Block"),
@@ -132,60 +104,18 @@ def test_returning_list_adds_all():
 
 
 def test_returning_bool_raises_error():
-    class AlwaysTrueBlockMiddleware(BlockMiddleware):
-        """A middleware that returns True for every block."""
-
-        def __init__(self):
-            super().__init__(
-                allow_parallel_execution=True, allow_inplace_modification=True
-            )
-
-        def transform_block(self, block, library):
-            return True
-
-        def metadata_key():
-            return "AlwaysTrueBlockMiddleware"
-
     library = Library(blocks=BLOCKS)
     with pytest.raises(TypeError):
-        library = AlwaysTrueBlockMiddleware().transform(library)
+        library = ConstantBlockMiddleware(True).transform(library)
 
 
 def test_returning_bool_list_raises_error():
-    class AlwaysTrueListBlockMiddleware(BlockMiddleware):
-        """A middleware that returns [True] for every block."""
-
-        def __init__(self):
-            super().__init__(
-                allow_parallel_execution=True, allow_inplace_modification=True
-            )
-
-        def transform_block(self, block, library):
-            return [True]
-
-        def metadata_key():
-            return "AlwaysTrueListBlockMiddleware"
-
     library = Library(blocks=BLOCKS)
     with pytest.raises(TypeError):
-        library = AlwaysTrueListBlockMiddleware().transform(library)
+        library = ConstantBlockMiddleware([True]).transform(library)
 
 
 def test_returning_generator_raises_error():
-    class SingletonGeneratorBlockMiddleware(BlockMiddleware):
-        """A middleware that returns a generator for every block."""
-
-        def __init__(self):
-            super().__init__(
-                allow_parallel_execution=True, allow_inplace_modification=True
-            )
-
-        def transform_block(self, block, library):
-            return (b for b in [block])
-
-        def metadata_key():
-            return "SingletonGeneratorBlockMiddleware"
-
     library = Library(blocks=BLOCKS)
     with pytest.raises(TypeError):
-        library = SingletonGeneratorBlockMiddleware().transform(library)
+        library = LambdaBlockMiddleware(lambda block: (b for b in [block])).transform(library)
