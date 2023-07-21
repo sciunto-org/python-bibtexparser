@@ -88,11 +88,15 @@ class BlockMiddleware(Middleware, abc.ABC):
                 # check that all the items are indeed blocks
                 for item in transformed:
                     if not isinstance(item, Block):
-                        raise TypeError(f"Non-Block type found in transformed collection: {type(item)}")
+                        raise TypeError(
+                            f"Non-Block type found in transformed collection: {type(item)}"
+                        )
                 blocks.extend(transformed)
             # Case 4: Something else. Error.
             else:
-                raise TypeError(f"Illegal output type from transform_block: {type(transformed)}")
+                raise TypeError(
+                    f"Illegal output type from transform_block: {type(transformed)}"
+                )
         return Library(blocks=blocks)
 
     def transform_block(
