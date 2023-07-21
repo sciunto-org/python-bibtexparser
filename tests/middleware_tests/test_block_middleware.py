@@ -48,26 +48,16 @@ class LambdaBlockMiddleware(BlockMiddleware):
     def metadata_key():
         return "LambdaBlockMiddleware"
 
-def test_returning_none_removes_block():
+@pytest.mark.parametrize(("middleware", "expected"), [
+    (ConstantBlockMiddleware(None), []),
+    (ConstantBlockMiddleware([]), []),
+    (LambdaBlockMiddleware(lambda b: [b]), BLOCKS),
+])
+def test_successful_transform(middleware, expected):
     library = Library(blocks=BLOCKS)
-    library = ConstantBlockMiddleware(None).transform(library)
+    library = middleware.transform(library)
 
-    assert library.blocks == []
-
-
-def test_returning_empty_removes_block():
-    library = Library(blocks=BLOCKS)
-    library = ConstantBlockMiddleware([]).transform(library)
-
-    assert library.blocks == []
-
-
-def test_returning_singleton_keeps_block():
-    library = Library(blocks=BLOCKS)
-    library = LambdaBlockMiddleware(lambda b: [b]).transform(library)
-
-    assert library.blocks == BLOCKS
-
+    assert library.blocks == expected
 
 def test_returning_list_adds_all():
     library = Library(blocks=BLOCKS)
@@ -102,20 +92,12 @@ def test_returning_list_adds_all():
 
     assert library.blocks == expected
 
-
-def test_returning_bool_raises_error():
+@pytest.mark.parametrize("middleware", [
+    ConstantBlockMiddleware(True),
+    ConstantBlockMiddleware([True]),
+    LambdaBlockMiddleware(lambda block: (b for b in [block])), # generators are not collections
+])
+def test_returning_invalid_raises_error(middleware):
     library = Library(blocks=BLOCKS)
     with pytest.raises(TypeError):
-        library = ConstantBlockMiddleware(True).transform(library)
-
-
-def test_returning_bool_list_raises_error():
-    library = Library(blocks=BLOCKS)
-    with pytest.raises(TypeError):
-        library = ConstantBlockMiddleware([True]).transform(library)
-
-
-def test_returning_generator_raises_error():
-    library = Library(blocks=BLOCKS)
-    with pytest.raises(TypeError):
-        library = LambdaBlockMiddleware(lambda block: (b for b in [block])).transform(library)
+        middleware.transform(library)
