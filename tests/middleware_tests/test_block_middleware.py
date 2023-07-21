@@ -1,3 +1,5 @@
+import pytest
+
 from bibtexparser import Library
 from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import Entry, ExplicitComment, ImplicitComment, Preamble, String
@@ -127,3 +129,46 @@ def test_returning_list_adds_all():
     ]
 
     assert library.blocks == expected
+
+def test_returning_bool_raises_error():
+    class AlwaysTrueBlockMiddleware(BlockMiddleware):
+        """A middleware that returns True for every block."""
+        def __init__(self):
+            super().__init__(allow_parallel_execution = True, allow_inplace_modification = True)
+        def transform_block(self, block, library):
+            return True
+        def metadata_key():
+            return "AlwaysTrueBlockMiddleware"
+    
+    library = Library(blocks=BLOCKS)
+    with pytest.raises(TypeError):
+        library = AlwaysTrueBlockMiddleware().transform(library)
+
+def test_returning_bool_list_raises_error():
+    class AlwaysTrueListBlockMiddleware(BlockMiddleware):
+        """A middleware that returns [True] for every block."""
+        def __init__(self):
+            super().__init__(allow_parallel_execution = True, allow_inplace_modification = True)
+        def transform_block(self, block, library):
+            return [True]
+        def metadata_key():
+            return "AlwaysTrueListBlockMiddleware"
+    
+    library = Library(blocks=BLOCKS)
+    with pytest.raises(TypeError):
+        library = AlwaysTrueListBlockMiddleware().transform(library)
+
+def test_returning_generator_raises_error():
+    class SingletonGeneratorBlockMiddleware(BlockMiddleware):
+        """A middleware that returns a generator for every block."""
+        def __init__(self):
+            super().__init__(allow_parallel_execution = True, allow_inplace_modification = True)
+        def transform_block(self, block, library):
+            return (b for b in [block])
+        def metadata_key():
+            return "SingletonGeneratorBlockMiddleware"
+    
+    library = Library(blocks=BLOCKS)
+    with pytest.raises(TypeError):
+        library = SingletonGeneratorBlockMiddleware().transform(library)
+

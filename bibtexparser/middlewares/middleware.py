@@ -83,9 +83,16 @@ class BlockMiddleware(Middleware, abc.ABC):
             # Case 2: A single block. Add it to the list.
             elif isinstance(transformed, Block):
                 blocks.append(transformed)
-            # Case 3: Something else. Assume it's a collection and append them all.
-            else:
+            # Case 3: A collection. Append all the elements.
+            elif isinstance(transformed, Collection):
+                # check that all the items are indeed blocks
+                for item in transformed:
+                    if not isinstance(item, Block):
+                        raise TypeError(f"Non-Block type found in transformed collection: {type(item)}")
                 blocks.extend(transformed)
+            # Case 4: Something else. Error.
+            else:
+                raise TypeError(f"Illegal output type from transform_block: {type(transformed)}")
         return Library(blocks=blocks)
 
     def transform_block(
