@@ -19,14 +19,13 @@ BLOCKS = [
     ImplicitComment("% implicit_comment_c"),
 ]
 
+
 class ConstantBlockMiddleware(BlockMiddleware):
     """A middleware that always returns the same result for every block."""
 
     def __init__(self, const):
         self._const = const
-        super().__init__(
-            allow_parallel_execution=True, allow_inplace_modification=True
-        )
+        super().__init__(allow_parallel_execution=True, allow_inplace_modification=True)
 
     def transform_block(self, block, library):
         return self._const
@@ -34,13 +33,13 @@ class ConstantBlockMiddleware(BlockMiddleware):
     def metadata_key():
         return "ConstantBlockMiddleware"
 
+
 class LambdaBlockMiddleware(BlockMiddleware):
     """A middleware that applies a lambda to the input block"""
+
     def __init__(self, f):
         self._f = f
-        super().__init__(
-            allow_parallel_execution=True, allow_inplace_modification=True
-        )
+        super().__init__(allow_parallel_execution=True, allow_inplace_modification=True)
 
     def transform_block(self, block, library):
         return self._f(block)
@@ -48,20 +47,27 @@ class LambdaBlockMiddleware(BlockMiddleware):
     def metadata_key():
         return "LambdaBlockMiddleware"
 
-@pytest.mark.parametrize(("middleware", "expected"), [
-    (ConstantBlockMiddleware(None), []),
-    (ConstantBlockMiddleware([]), []),
-    (LambdaBlockMiddleware(lambda b: [b]), BLOCKS),
-])
+
+@pytest.mark.parametrize(
+    ("middleware", "expected"),
+    [
+        (ConstantBlockMiddleware(None), []),
+        (ConstantBlockMiddleware([]), []),
+        (LambdaBlockMiddleware(lambda b: [b]), BLOCKS),
+    ],
+)
 def test_successful_transform(middleware, expected):
     library = Library(blocks=BLOCKS)
     library = middleware.transform(library)
 
     assert library.blocks == expected
 
+
 def test_returning_list_adds_all():
     library = Library(blocks=BLOCKS)
-    library = LambdaBlockMiddleware(lambda b: [ImplicitComment("% Block"), b]).transform(library)
+    library = LambdaBlockMiddleware(
+        lambda b: [ImplicitComment("% Block"), b]
+    ).transform(library)
 
     expected = [
         ImplicitComment("% Block"),
@@ -92,11 +98,17 @@ def test_returning_list_adds_all():
 
     assert library.blocks == expected
 
-@pytest.mark.parametrize("middleware", [
-    ConstantBlockMiddleware(True),
-    ConstantBlockMiddleware([True]),
-    LambdaBlockMiddleware(lambda block: (b for b in [block])), # generators are not collections
-])
+
+@pytest.mark.parametrize(
+    "middleware",
+    [
+        ConstantBlockMiddleware(True),
+        ConstantBlockMiddleware([True]),
+        LambdaBlockMiddleware(
+            lambda block: (b for b in [block])
+        ),  # generators are not collections
+    ],
+)
 def test_returning_invalid_raises_error(middleware):
     library = Library(blocks=BLOCKS)
     with pytest.raises(TypeError):
