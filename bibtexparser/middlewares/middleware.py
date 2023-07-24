@@ -74,7 +74,29 @@ class BlockMiddleware(Middleware, abc.ABC):
     # docstr-coverage: inherited
     def transform(self, library: "Library") -> "Library":
         # TODO Multiprocessing (only for large library and if allow_multi..)
-        blocks = [self.transform_block(b, library) for b in library.blocks]
+        blocks = []
+        for b in library.blocks:
+            transformed = self.transform_block(b, library)
+            # Case 1: None. Skip it.
+            if transformed is None:
+                pass
+            # Case 2: A single block. Add it to the list.
+            elif isinstance(transformed, Block):
+                blocks.append(transformed)
+            # Case 3: A collection. Append all the elements.
+            elif isinstance(transformed, Collection):
+                # check that all the items are indeed blocks
+                for item in transformed:
+                    if not isinstance(item, Block):
+                        raise TypeError(
+                            f"Non-Block type found in transformed collection: {type(item)}"
+                        )
+                blocks.extend(transformed)
+            # Case 4: Something else. Error.
+            else:
+                raise TypeError(
+                    f"Illegal output type from transform_block: {type(transformed)}"
+                )
         return Library(blocks=blocks)
 
     def transform_block(
