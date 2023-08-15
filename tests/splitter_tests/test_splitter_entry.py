@@ -219,7 +219,8 @@ def test_entry_with_space_before_bracket(entry: str):
     assert len(library.failed_blocks) == 0
 
     assert library.entries[0].key == "normal_entry"
-    assert len(library.entries[0].fields) == 1
+    assert len(library.entries[0].fields) == 2
 
+    assert library.entries[1].entry_type == "article"
     assert library.entries[1].key == "articleTestKey"
     assert len(library.entries[1].fields) == 1

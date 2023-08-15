@@ -231,7 +231,7 @@ class Splitter:
             The library with the added blocks.
         """
         self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*(?={)", self.bibstr, re.MULTILINE
+            r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
         )
 
         if library is None:
@@ -337,7 +337,7 @@ class Splitter:
     def _handle_entry(self, m, m_val) -> Union[Entry, ParsingFailedBlock]:
         """Handle entry block. Return end index"""
         start_line = self._current_line
-        entry_type = m_val[1:]
+        entry_type = m_val[1:].strip()
         start_bracket_mark = self._next_mark(accept_eof=False)
         if start_bracket_mark.group(0) != "{":
             self._unaccepted_mark = start_bracket_mark
