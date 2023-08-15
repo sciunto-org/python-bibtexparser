@@ -124,8 +124,8 @@ def test_trailing_comma(enclosing: str):
     assert len(library.entries[0].fields) == 2
     assert library.entries[0].fields_dict["firstfield"].value == "{some value}"
     assert (
-        library.entries[0].fields_dict["fieldBeforeTrailingComma"].value
-        == value_before_trailing_comma
+            library.entries[0].fields_dict["fieldBeforeTrailingComma"].value
+            == value_before_trailing_comma
     )
 
     # Make sure that subsequent blocks are still parsed correctly
@@ -195,4 +195,31 @@ def test_entry_without_fields(entry_without_fields: str):
     assert len(library.entries[0].fields) == 0
 
     assert library.entries[1].key == "subsequentArticle"
+    assert len(library.entries[1].fields) == 1
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        # common in revtex, see issue #384
+        pytest.param("@Article {articleTestKey, title = {Some title}}", id="single whitespace"),
+        pytest.param("@Article  {articleTestKey, title = {Some title}}", id="double whitespace"),
+        pytest.param("@Article\t{articleTestKey, title = {Some title}}", id="tab"),
+        pytest.param("@Article \t {articleTestKey, title = {Some title}}", id="tab and whitespaces"),
+    ],
+)
+def test_entry_with_space_before_bracket(entry: str):
+    """For motivation why we need this, please see issue #391"""
+    some_previous_entry = "@article{normal_entry, title = {The first title}, author = {The first author} }"
+
+    full_bibtex = f"{some_previous_entry}\n\n{entry}\n\n"
+    library: Library = Splitter(full_bibtex).split()
+    assert len(library.blocks) == 2
+    assert len(library.entries) == 2
+    assert len(library.failed_blocks) == 0
+
+    assert library.entries[0].key == "normal_entry"
+    assert len(library.entries[0].fields) == 1
+
+    assert library.entries[1].key == "articleTestKey"
     assert len(library.entries[1].fields) == 1
