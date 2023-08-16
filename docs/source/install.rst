@@ -24,9 +24,6 @@ To install the latest version on the main branch (without manually cloning it), 
 Installation from PyPI
 --------------------------
 
-.. warning::
-    Installation of v2 via PyPI is not yet supported. We will start releasing v2 pre-versions soon, then you'll be able to use the installation method below.
-    Until then, please use the "installation of current development version" as described above.
 
 To install the latest release candidate (currently required to use v2) using pip:
 
