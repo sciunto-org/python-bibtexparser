@@ -1,5 +1,6 @@
-How to release
-==============
+Tagged version are automatically released to pypi using github actions. 
+
+Oder/Manual release instructions:
 
 * Update CHANGELOG
 * Update version in __init__.py
