@@ -88,4 +88,9 @@ Middleware layers transform a library and its blocks, for example by decoding la
 #### Writer
 Writes the content of a bibtex library to a `.bib` file. Optional formatting parameters can be passed using a corresponding dedicated data structure.
 
+## About
 
+Since 2022, `bibtexparser` primarily written and maintained by Michael Weiss [@MiWeiss](https://github.com/MiWeiss/)). 
+
+Credits and thanks to the many contributors who helped creating this library, including
+François Boulogne ([@sciunto](https://github.com/sciunto/), creator of the first version) and Olivier Mangin ([@omangin](https://github.com/omangin/), long-term contributor).
