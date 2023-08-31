@@ -99,6 +99,7 @@ def parse_file(
     path: str,
     parse_stack: Optional[Iterable[Middleware]] = None,
     append_middleware: Optional[Iterable[Middleware]] = None,
+    encoding: str = "UTF-8",
 ) -> Library:
     """Parse a BibTeX file
 
@@ -106,11 +107,12 @@ def parse_file(
         path (str): Path to BibTeX file
         parse_stack (Optional[Iterable[Middleware]], optional): List of middleware to apply to the database after splitting. If None (default), a default stack will be used providing simple standard functionality will be used.
         append_middleware (Optional[Iterable[Middleware]], optional): List of middleware to append to the default stack (ignored if a not-None parse_stack is passed).
+        encoding: Encoding of the .bib file. Default encoding is "UTF-8".
 
     Returns:
         Library: Parsed BibTeX library
     """
-    with open(path) as f:
+    with open(path,encoding=encoding) as f:
         bibtex_str = f.read()
         return parse_string(
             bibtex_str, parse_stack=parse_stack, append_middleware=append_middleware
