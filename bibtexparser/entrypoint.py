@@ -112,7 +112,7 @@ def parse_file(
     Returns:
         Library: Parsed BibTeX library
     """
-    with open(path,encoding=encoding) as f:
+    with open(path, encoding=encoding) as f:
         bibtex_str = f.read()
         return parse_string(
             bibtex_str, parse_stack=parse_stack, append_middleware=append_middleware
