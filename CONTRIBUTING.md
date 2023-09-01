@@ -28,5 +28,5 @@ Issues are labelled `v1` and `v2`, correspondingly.
 To install the dev dependencies, run `pip install -e .[test,lint,docs]` from within the cloned repository. Then:
 
 - To test your code, run `pytest .`
-- To lint your code (required for CI/CD to pass), run: `black bibtexparser tests docs && isort bibtexparser tests docs --profile black
+- To lint your code (required for CI/CD to pass), run: `black bibtexparser tests docs && isort bibtexparser tests docs --profile black`
 - To build and preview the docs, navigate into `docs` and run `make html`. Then open the `index.html` file in the `docs/build/html` folder.
