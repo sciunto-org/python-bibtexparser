@@ -1,6 +1,7 @@
 import logging
 import re
 from typing import List, Optional, Set, Tuple, Union
+import uuid
 
 from .exceptions import (
     BlockAbortedException,
@@ -367,10 +368,12 @@ class Splitter:
                 comma_mark.end()
             )
 
+        unique_key = f'{key}-{uuid.uuid4()}'
+
         entry = Entry(
             start_line=start_line,
             entry_type=entry_type,
-            key=key,
+            key=unique_key,
             fields=fields,
             raw=self.bibstr[m.start() : end_index + 1],
         )
