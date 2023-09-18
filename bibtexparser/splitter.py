@@ -128,19 +128,64 @@ class Splitter:
                     end_index=m.start() - 1,
                 )
 
-    def _move_to_end_of_double_quoted_string(self) -> int:
-        """Index of the closing double quote."""
-        while True:
-            m = self._next_mark(accept_eof=False)
+    def _move_to_comma_or_closing_curly_bracket(
+        self, currently_quote_escaped=False, num_open_curls=0
+    ) -> int:
+        """Index of the end of the field, taking quote-escape into account."""
 
-            if m.group(0) == '"':
-                return m.start()
-            elif m.group(0).startswith("@"):
-                self._unaccepted_mark = m
+        if num_open_curls > 0 and currently_quote_escaped:
+            raise ParserStateException(
+                message="Internal error in parser. "
+                "Found a field-value that is both quote-escaped and curly-escaped. "
+                "Please report this bug."
+            )
+
+        def _is_escaped():
+            return currently_quote_escaped or num_open_curls > 0
+
+        # iterate over marks until we find end of field
+        while True:
+            next_mark = self._next_mark(accept_eof=False)
+
+            # Handle "escape" characters
+            if next_mark.group(0) == '"' and not num_open_curls > 0:
+                currently_quote_escaped = not currently_quote_escaped
+                continue
+            elif next_mark.group(0) == "{" and not currently_quote_escaped:
+                num_open_curls += 1
+                continue
+            elif (
+                next_mark.group(0) == "}"
+                and not currently_quote_escaped
+                and num_open_curls > 0
+            ):
+                num_open_curls -= 1
+                continue
+
+            # Check for end of field
+            elif next_mark.group(0) == "," and not _is_escaped():
+                self._unaccepted_mark = next_mark
+                return next_mark.start()
+            # Check for end of entry:
+            elif next_mark.group(0) == "}" and not _is_escaped():
+                self._unaccepted_mark = next_mark
+                return next_mark.start()
+
+            # Sanity-check: If new block is starting, we abort
+            elif next_mark.group(0).startswith("@"):
+                self._unaccepted_mark = next_mark
+
+                if currently_quote_escaped:
+                    looking_for = '`"`'
+                elif num_open_curls > 0:
+                    looking_for = "`}`"
+                else:
+                    looking_for = "`,` or `}`"
+
                 raise BlockAbortedException(
-                    abort_reason=f"Unexpected block start: `{m.group(0)}`. "
-                    f'Was still looking for field-value closing `"`',
-                    end_index=m.start() - 1,
+                    abort_reason=f"Unexpected block start: `{next_mark.group(0)}`. "
+                    f"Was still looking for field-value closing {looking_for} ",
+                    end_index=next_mark.start() - 1,
                 )
 
     def _move_to_end_of_entry(
@@ -171,31 +216,9 @@ class Splitter:
             start_line = self._current_line
             key_end = equals_mark.start()
             value_start = equals_mark.end()
-            value_start_mark = self._next_mark(accept_eof=False)
-
-            if value_start_mark.group(0) == "{":
-                value_end = self._move_to_closed_bracket() + 1
-            elif value_start_mark.group(0) == '"':
-                value_end = self._move_to_end_of_double_quoted_string() + 1
-            else:
-                # e.g.  String reference or integer. Ended by the observed mark
-                #       (as there is no start mark).
-                #       Should be either a comma or a "}"
-                value_start = equals_mark.end()
-                value_end = value_start_mark.start()
-                # We expect a comma (after a closed field-value), or at the end of entry, a closing bracket
-                if not value_start_mark.group(0) in [
-                    ",",
-                    "}",
-                ]:
-                    self._unaccepted_mark = value_start_mark
-                    raise BlockAbortedException(
-                        abort_reason=f"Unexpected character `{value_start_mark.group(0)}` "
-                        f"after field-value. Expected a comma or closing bracket.",
-                        end_index=value_start_mark.start(),
-                    )
-                # Put comma back into stream, as still expected.
-                self._unaccepted_mark = value_start_mark
+            value_end = self._move_to_comma_or_closing_curly_bracket(
+                currently_quote_escaped=False, num_open_curls=0
+            )
 
             key = self.bibstr[key_start:key_end].strip()
             value = self.bibstr[value_start:value_end].strip()
