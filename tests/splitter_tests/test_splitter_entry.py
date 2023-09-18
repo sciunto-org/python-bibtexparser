@@ -124,8 +124,8 @@ def test_trailing_comma(enclosing: str):
     assert len(library.entries[0].fields) == 2
     assert library.entries[0].fields_dict["firstfield"].value == "{some value}"
     assert (
-            library.entries[0].fields_dict["fieldBeforeTrailingComma"].value
-            == value_before_trailing_comma
+        library.entries[0].fields_dict["fieldBeforeTrailingComma"].value
+        == value_before_trailing_comma
     )
 
     # Make sure that subsequent blocks are still parsed correctly
@@ -202,23 +202,51 @@ def test_entry_without_fields(entry_without_fields: str):
     "entry, expected",
     [
         # See issue #396
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = 10 # "~" # jan}', r'10 # "~" # jan', id="inner quotes"),
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = 10 # "~" # jan,}', r'10 # "~" # jan',
-                     id="inner quotes + comma"),
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = 10 # "~" # jan, author = "Paul"}', r'10 # "~" # jan',
-                     id="inner quotes + other field"),
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = "~" # jan}', r'"~" # jan',
-                     id=r'starting quotes'),
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = "~" # jan, }', r'"~" # jan',
-                     id=r'starting quotes + comma'),
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = "~" # jan, author = "Paul"}', r'"~" # jan',
-                     id="starting quotes + other field"),
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = jan # "~"}', r'jan # "~"',
-                     id=r'ending quotes'),
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = jan # "~",}', r'jan # "~"',
-                     id=r'ending quotes + comma'),
-        pytest.param(r'@INBOOK{inbook-full, relevant_field = jan # "~", author = "Paul"}', r'jan # "~"',
-                     id="ending quotes + other field"),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = 10 # "~" # jan}',
+            r'10 # "~" # jan',
+            id="inner quotes",
+        ),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = 10 # "~" # jan,}',
+            r'10 # "~" # jan',
+            id="inner quotes + comma",
+        ),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = 10 # "~" # jan, author = "Paul"}',
+            r'10 # "~" # jan',
+            id="inner quotes + other field",
+        ),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = "~" # jan}',
+            r'"~" # jan',
+            id=r"starting quotes",
+        ),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = "~" # jan, }',
+            r'"~" # jan',
+            id=r"starting quotes + comma",
+        ),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = "~" # jan, author = "Paul"}',
+            r'"~" # jan',
+            id="starting quotes + other field",
+        ),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = jan # "~"}',
+            r'jan # "~"',
+            id=r"ending quotes",
+        ),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = jan # "~",}',
+            r'jan # "~"',
+            id=r"ending quotes + comma",
+        ),
+        pytest.param(
+            r'@INBOOK{inbook-full, relevant_field = jan # "~", author = "Paul"}',
+            r'jan # "~"',
+            id="ending quotes + other field",
+        ),
     ],
 )
 def test_entry_with_concatenated_field(entry, expected):
