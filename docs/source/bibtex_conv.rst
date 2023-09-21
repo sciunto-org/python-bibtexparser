@@ -15,6 +15,8 @@ Format & Co.
   | http://tug.ctan.org/tex-archive/info/bibtex/tamethebeast/ttb_en.pdf
 * | "Bibtex Summary" by Xavier Décoret
   | http://maverick.inria.fr/~Xavier.Decoret/resources/xdkbibtex/bibtex_summary.html
+* | "BibTeX ing" by Oren Patashnik
+  | http://newton.ex.ac.uk/tex/pack/bibtex/btxdoc/btxdoc.html
 * | "Common Errors in Bibliographies" by John Owen
   | http://www.ece.ucdavis.edu/~jowens/biberrors.html
 * | Common abbreviations for journals
