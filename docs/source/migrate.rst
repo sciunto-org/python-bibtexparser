@@ -8,7 +8,7 @@ and have a quick look at the tutorial to get a feeling for the new API.
 Status of `v2`
 --------------
 
-The `v2` branch is well tested and reasonably stable, but it is not yet widely adopted - as an early adopter, y
+The `v2` branch is well tested and reasonably stable, but it is not yet widely adopted - as an early adopter,
 you may encounter some bugs. If you do, please report them on the issue tracker.
 Also, note that some interfaces may change sightly before we release v2.0.0 as stable.
 
