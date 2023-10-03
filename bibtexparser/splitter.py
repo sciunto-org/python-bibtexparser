@@ -52,7 +52,7 @@ class Splitter:
         # By default, we assume that an implicit comment is started
         #   at the beginning of the file and after each @{...} block.
         #   We then ignore empty implicit comments.
-        self._implicit_comment_start_line = self._current_line
+        self._implicit_comment_start_line = self._current_line if self.bibstr[current_char_index - 1] != "@" else self._current_line - 1
         self._implicit_comment_start: Optional[int] = current_char_index
 
     def _end_implicit_comment(self, end_char_index) -> Optional[ImplicitComment]:
@@ -254,7 +254,7 @@ class Splitter:
             The library with the added blocks.
         """
         self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
+            r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*( |\t)*(?={)|@[\w]*( |\t)*(?=\{)", self.bibstr, re.MULTILINE
         )
 
         if library is None:
