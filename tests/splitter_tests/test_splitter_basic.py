@@ -319,3 +319,79 @@ def test_handles_duplicate_strings():
     assert isinstance(
         lib.failed_blocks[0].ignore_error_block, bibtexparser.model.String
     )
+
+
+blocks_not_starting_on_new_lines = """\
+@article{KUEH2023S98,
+title = {Myocardial Characterisation Using Delayed Dual-Energy Cardiac Computed Tomography},
+author = {S.-H. Kueh and J. Benatar and R. Stewart}
+}@INPROCEEDINGS{9837531,
+  author={Hassan, Mona Bakri and Saeed, Rashid A. and Khalifa, Othman and Ali, Elmustafa Sayed and Mokhtar, Rania A. and Hashim, Aisha A.},
+  title={Green Machine Learning for Green Cloud Energy Efficiency},
+  doi={10.1109/MI-STA54861.2022.9837531}}@ARTICLE{9372936,
+  author={Hu, Ning and Tian, Zhihong and Du, Xiaojiang and Guizani, Nadra and Zhu, Zhihan},
+  title={Deep-Green: A Dispersed Energy-Efficiency Computing Paradigm for Green Industrial IoT},
+  doi={10.1109/TGCN.2021.3064683}}@ARTICLE{5445167,
+  author={Kumar, Karthik and Lu, Yung-Hsiang},
+  title={Cloud Computing for Mobile Users: Can Offloading Computation Save Energy?},
+  doi={10.1109/MC.2010.98}}
+"""
+
+
+@pytest.mark.parametrize(
+    "expected",
+    [
+        {
+            "key": "KUEH2023S98",
+            "type": "article",
+            "raw": "@article{KUEH2023S98,\n"
+            "title = {Myocardial Characterisation Using Delayed Dual-Energy Cardiac Computed Tomography},\n"
+            "author = {S.-H. Kueh and J. Benatar and R. Stewart}\n}",
+            "start_line": 0,
+        },
+        {
+            "key": "9837531",
+            "type": "inproceedings",
+            "raw": "@INPROCEEDINGS{9837531,\n"
+            "  author={Hassan, Mona Bakri and Saeed, Rashid A. and Khalifa, Othman and Ali, Elmustafa Sayed and Mokhtar, Rania A. and Hashim, Aisha A.},\n"
+            "  title={Green Machine Learning for Green Cloud Energy Efficiency},\n"
+            "  doi={10.1109/MI-STA54861.2022.9837531}}",
+            "start_line": 3,
+        },
+        {
+            "key": "9372936",
+            "type": "article",
+            "raw": "@ARTICLE{9372936,\n"
+            "  author={Hu, Ning and Tian, Zhihong and Du, Xiaojiang and Guizani, Nadra and Zhu, Zhihan},\n"
+            "  title={Deep-Green: A Dispersed Energy-Efficiency Computing Paradigm for Green Industrial IoT},\n"
+            "  doi={10.1109/TGCN.2021.3064683}}",
+            "start_line": 6,
+        },
+        {
+            "key": "5445167",
+            "type": "article",
+            "raw": "@ARTICLE{5445167,\n"
+            "  author={Kumar, Karthik and Lu, Yung-Hsiang},\n"
+            "  title={Cloud Computing for Mobile Users: Can Offloading Computation Save Energy?},\n"
+            "  doi={10.1109/MC.2010.98}}",
+            "start_line": 9,
+        },
+    ],
+)
+def test_blocks_not_starting_on_new_lines(expected: Dict[str, Any]):
+    """Test the new blocks that are not on new lines.
+
+    Discussed at https://github.com/sciunto-org/python-bibtexparser/issues/411.
+    """
+    import bibtexparser
+
+    lib = bibtexparser.parse_string(blocks_not_starting_on_new_lines)
+    assert len(lib.entries) == 4
+    entry_by_key = lib.entries_dict
+    assert len(entry_by_key) == 4
+
+    entry = entry_by_key[expected["key"]]
+    assert entry.key == expected["key"]
+    assert entry.entry_type == expected["type"]
+    assert entry.raw == expected["raw"]
+    assert entry.start_line == expected["start_line"]

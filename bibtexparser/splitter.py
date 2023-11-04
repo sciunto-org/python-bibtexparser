@@ -254,7 +254,7 @@ class Splitter:
             The library with the added blocks.
         """
         self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|(?<=\n)@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
+            r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
         )
 
         if library is None:
@@ -395,7 +395,7 @@ class Splitter:
             entry_type=entry_type,
             key=key,
             fields=fields,
-            raw=self.bibstr[m.start() : end_index + 1],
+            raw=self.bibstr[m.start() : end_index],
         )
 
         # If there were duplicate field keys, we return a DuplicateFieldKeyBlock wrapping
