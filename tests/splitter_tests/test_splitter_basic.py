@@ -319,3 +319,59 @@ def test_handles_duplicate_strings():
     assert isinstance(
         lib.failed_blocks[0].ignore_error_block, bibtexparser.model.String
     )
+
+
+blocks_not_starting_on_new_lines = """
+@article{KUEH2023S98,
+title = {Myocardial Characterisation Using Delayed Dual-Energy Cardiac Computed Tomography},
+journal = {Heart, Lung and Circulation},
+volume = {32},
+pages = {S98},
+year = {2023},
+note = {Abstracts for the Cardiac Society of Australia and New Zealand Annual Scientific Meeting (New Zealand) 2023, 15 - 17 June 2023, Auckland, New Zealand},
+issn = {1443-9506},
+doi = {https://doi.org/10.1016/j.hlc.2023.04.262},
+url = {https://www.sciencedirect.com/science/article/pii/S1443950623004390},
+author = {S.-H. Kueh and J. Benatar and R. Stewart}
+}@INPROCEEDINGS{9837531,
+  author={Hassan, Mona Bakri and Saeed, Rashid A. and Khalifa, Othman and Ali, Elmustafa Sayed and Mokhtar, Rania A. and Hashim, Aisha A.},
+  booktitle={2022 IEEE 2nd International Maghreb Meeting of the Conference on Sciences and Techniques of Automatic Control and Computer Engineering (MI-STA)},
+  title={Green Machine Learning for Green Cloud Energy Efficiency},
+  year={2022},
+  volume={},
+  number={},
+  pages={288-294},
+  doi={10.1109/MI-STA54861.2022.9837531}}@ARTICLE{9372936,
+  author={Hu, Ning and Tian, Zhihong and Du, Xiaojiang and Guizani, Nadra and Zhu, Zhihan},
+  journal={IEEE Transactions on Green Communications and Networking},
+  title={Deep-Green: A Dispersed Energy-Efficiency Computing Paradigm for Green Industrial IoT},
+  year={2021},
+  volume={5},
+  number={2},
+  pages={750-764},
+  doi={10.1109/TGCN.2021.3064683}}@ARTICLE{5445167,
+  author={Kumar, Karthik and Lu, Yung-Hsiang},
+  journal={Computer},
+  title={Cloud Computing for Mobile Users: Can Offloading Computation Save Energy?},
+  year={2010},
+  volume={43},
+  number={4},
+  pages={51-56},
+  doi={10.1109/MC.2010.98}}
+"""
+
+
+def test_blocks_not_starting_on_new_lines():
+    """Test the new blocks that are not on new lines.
+
+    Discussed at https://github.com/sciunto-org/python-bibtexparser/issues/411.
+    """
+    import bibtexparser
+
+    lib = bibtexparser.parse_string(blocks_not_starting_on_new_lines)
+    assert len(lib.blocks) == 4
+    assert len(lib.entries) == 4
+    assert lib.entries[0].entry_type == "article"
+    assert lib.entries[1].entry_type == "inproceedings"
+    assert lib.entries[2].entry_type == "article"
+    assert lib.entries[3].entry_type == "article"
