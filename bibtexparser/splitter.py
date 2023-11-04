@@ -395,7 +395,7 @@ class Splitter:
             entry_type=entry_type,
             key=key,
             fields=fields,
-            raw=self.bibstr[m.start() : end_index + 1],
+            raw=self.bibstr[m.start() : end_index],
         )
 
         # If there were duplicate field keys, we return a DuplicateFieldKeyBlock wrapping
