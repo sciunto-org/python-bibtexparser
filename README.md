@@ -5,7 +5,7 @@ Welcome to python-bibtexparser, a parser for `.bib` files with a long history an
 Bibtexparser is available in two versions: V1 and V2. For new projects, we recommend using v2 which, in the long run, will provide an overall more robust and faster experience. **For now, however, note that v2 is an early beta, and does not contain all features of v1**. Install v2 using pip:
 
 ```bash
-pip install python-bibtexparser --pre
+pip install bibtexparser --pre
 ```
 
 Or you can install the latest development version directly from the main branch:
