@@ -838,6 +838,21 @@ def test_split_name_into_parts(name, expected_as_dict, strict):
     expected = _dict_to_nameparts(expected_as_dict)
     assert result == expected
 
+@pytest.mark.parametrize(
+    "name, expected_as_dict", REGULAR_NAME_PARTS_PARSING_TEST_CASES
+)
+@pytest.mark.parametrize("strict", [True, False], ids=["strict", "non-strict"])
+def test_merge_last_name_first_inverse(name, expected_as_dict, strict):
+    """Tests that merging name parts using the last-name-first method
+    maintains the "semantics" of the name.
+    
+    In other words, last-name-first merging is the (right) inverse of splitting.
+    """
+    nameparts = _dict_to_nameparts(expected_as_dict)
+    merged = nameparts.merge_last_name_first
+    resplit = parse_single_name_into_parts(merged, strict=strict)
+    assert resplit == nameparts
+
 
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "copy"])
 def test_separate_co_names_middleware(inplace):
