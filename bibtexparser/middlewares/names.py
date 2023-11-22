@@ -113,6 +113,21 @@ class NameParts:
                 if part is not None
             ]
         )
+    
+    @property
+    def merge_last_name_first(self) -> str:
+        """Merging the name parts into a single string, last-name-first (with commas) format.
+
+        The structure of the output is: `von Last, Jr, First`
+        """
+
+        first = " ".join(self.first) if self.first else None
+        von = " ".join(self.von) if self.von else None
+        last = " ".join(self.last) if self.last else None
+        jr = " ".join(self.jr) if self.jr else None
+
+        von_last = " ".join(name for name in [von, last] if name)
+        return ", ".join(name for name in [von_last, jr, first] if name)
 
 
 class SplitNameParts(_NameTransformerMiddleware):
