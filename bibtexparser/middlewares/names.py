@@ -158,6 +158,9 @@ class MergeNameParts(_NameTransformerMiddleware):
 
     Name fields (e.g. author, editor, translator) are expected to be lists of NameParts.
     """
+    def __init__(self, last_name_first: bool = True, allow_inplace_modification: bool = True, name_fields: Tuple[str] = ("author", "editor", "translator")):
+        self._last_name_first = last_name_first
+        super().__init__(allow_inplace_modification, name_fields)
 
     # docstr-coverage: inherited
     @staticmethod
@@ -168,7 +171,10 @@ class MergeNameParts(_NameTransformerMiddleware):
         if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):
             raise ValueError("Expected a list of NameParts, got {}. ".format(name))
 
-        return [n.merge_first_name_first for n in name]
+        if self._last_name_first:
+            return [n.merge_last_name_first for n in name]
+        else:
+            return [n.merge_first_name_first for n in name]
 
 
 def parse_single_name_into_parts(name, strict=True):

@@ -965,7 +965,7 @@ def test_merge_name_parts(inplace: bool):
     )
     original_copy = deepcopy(input_entry)
 
-    middleware = MergeNameParts(allow_inplace_modification=inplace)
+    middleware = MergeNameParts(last_name_first=False, allow_inplace_modification=inplace)
     transformed_library = middleware.transform(Library([input_entry]))
 
     assert len(transformed_library.entries) == 1
