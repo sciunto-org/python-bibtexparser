@@ -73,19 +73,19 @@ class Library:
         except ValueError:
             raise ValueError("Block to replace is not in library.")
 
-        self._blocks.insert(index, new_block)
         block_after_add = self._add_to_dicts(new_block)
+        self._blocks.insert(index, block_after_add)
 
         if (
             new_block is not block_after_add
-            and isinstance(new_block, DuplicateBlockKeyBlock)
+            and isinstance(block_after_add, DuplicateBlockKeyBlock)
             and fail_on_duplicate_key
         ):
             # Revert changes to old_block
             #   Don't fail on duplicate key, as this would lead to an infinite recursion
             #   (should never happen for a clean library, but could happen if the user
             #   tampered with the internals of the library).
-            self.replace(new_block, old_block, fail_on_duplicate_key=False)
+            self.replace(block_after_add, old_block, fail_on_duplicate_key=False)
             raise ValueError("Duplicate key found.")
 
     @staticmethod
@@ -160,7 +160,9 @@ class Library:
     @property
     def entries(self) -> List[Entry]:
         """All entry (@article, ...) blocks in the library, preserving order of insertion."""
-        return list(self._entries_by_key.values())
+        # Note: Taking this from the entries dict would be faster, but does not preserve order
+        #   e.g. in cases where `replace` has been called.
+        return [b for b in self._blocks if isinstance(b, Entry)]
 
     @property
     def entries_dict(self) -> Dict[str, Entry]:
