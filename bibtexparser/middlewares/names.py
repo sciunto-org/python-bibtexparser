@@ -445,11 +445,17 @@ def parse_single_name_into_parts(name, strict=True):
         else:
             lcases = cases[0]
 
-            #
+            def rindex(l, x, default):
+                """Returns the index of the rightmost occurence of x in l."""
+                for i in range(len(l) - 1, -1, -1):
+                    if l[i] == x:
+                        return i
+                return default
+
+            # Check if at least one of the words is lowercase
             if 0 in lcases:
-                split = len(lcases) - lcases[::-1].index(0)
-                if split == len(lcases):
-                    split = 0  # Last cannot be empty.
+                # Excluding the last word, find the index of the last lower word
+                split = rindex(lcases[:-1], 0, -1) + 1
                 parts.von = sections[0][:split]
                 parts.last = sections[0][split:]
 

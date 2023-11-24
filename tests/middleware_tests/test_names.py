@@ -825,6 +825,27 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
         r"Brand\~{a}o, F",
         {"first": ["F"], "von": [], "last": ["Brand\\", "{a}o"], "jr": []},
     ),
+    ###############################################################################
+    #
+    # Group 2 examples from Tame the BeaST
+    #
+    ###############################################################################
+    (
+        r"de la fontaine, Jean",
+        {"first": ["Jean"], "von": ["de", "la"], "last": ["fontaine"], "jr": []},
+    ),
+    (
+        r"De La Fontaine, Jean",
+        {"first": ["Jean"], "von": [], "last": ["De", "La", "Fontaine"], "jr": []},
+    ),
+    (
+        r"De la Fontaine, Jean",
+        {"first": ["Jean"], "von": ["De", "la"], "last": ["Fontaine"], "jr": []},
+    ),
+    (
+        r"de La Fontaine, Jean",
+        {"first": ["Jean"], "von": ["de"], "last": ["La", "Fontaine"], "jr": []},
+    ),
 )
 
 
