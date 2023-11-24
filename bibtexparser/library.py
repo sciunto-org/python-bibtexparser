@@ -24,7 +24,9 @@ class Library:
         if blocks is not None:
             self.add(blocks)
 
-    def add(self, blocks: Union[List[Block], Block]):
+    def add(
+        self, blocks: Union[List[Block], Block], fail_on_duplicate_key: bool = False
+    ):
         """Add blocks to library.
 
         The adding is key-safe, i.e., it is made sure that no duplicate keys are added.
@@ -32,14 +34,30 @@ class Library:
         a DuplicateKeyBlock.
 
         :param blocks: Block or list of blocks to add.
+        :param fail_on_duplicate_key: If True, raises ValueError if a block was replaced with a DuplicateKeyBlock.
         """
         if isinstance(blocks, Block):
             blocks = [blocks]
 
+        _added_blocks = []
         for block in blocks:
             # This may replace block with a DuplicateEntryKeyBlock
             block = self._add_to_dicts(block)
             self._blocks.append(block)
+            _added_blocks.append(block)
+
+        if fail_on_duplicate_key:
+            duplicate_keys = []
+            for original, added in zip(blocks, _added_blocks):
+                if not original is added and isinstance(added, DuplicateBlockKeyBlock):
+                    duplicate_keys.append(added.key)
+
+            if len(duplicate_keys) > 0:
+                raise ValueError(
+                    f"Duplicate keys found: {duplicate_keys}. "
+                    f"Duplicate entries have been added to the library as DuplicateBlockKeyBlock."
+                    f"Use `library.failed_blocks` to access them. "
+                )
 
     def remove(self, blocks: Union[List[Block], Block]):
         """Remove blocks from library.
