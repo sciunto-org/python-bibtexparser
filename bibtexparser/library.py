@@ -11,7 +11,6 @@ from .model import (
     String,
 )
 
-
 # TODO Use functools.lru_cache for library properties (which create lists when called)
 
 
@@ -58,7 +57,7 @@ class Library:
                 del self._strings_by_key[block.key]
 
     def replace(
-            self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True
+        self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True
     ):
         """Replace a block with another block, at the same position.
 
@@ -78,9 +77,9 @@ class Library:
         self._blocks.insert(index, block_after_add)
 
         if (
-                new_block is not block_after_add
-                and isinstance(block_after_add, DuplicateBlockKeyBlock)
-                and fail_on_duplicate_key
+            new_block is not block_after_add
+            and isinstance(block_after_add, DuplicateBlockKeyBlock)
+            and fail_on_duplicate_key
         ):
             # Revert changes to old_block
             #   Don't fail on duplicate key, as this would lead to an infinite recursion
@@ -91,7 +90,7 @@ class Library:
 
     @staticmethod
     def _cast_to_duplicate(
-            prev_block_with_same_key: Union[Entry, String], duplicate: Union[Entry, String]
+        prev_block_with_same_key: Union[Entry, String], duplicate: Union[Entry, String]
     ):
         assert isinstance(prev_block_with_same_key, type(duplicate)) or isinstance(
             duplicate, type(prev_block_with_same_key)
@@ -103,7 +102,7 @@ class Library:
         )
 
         assert (
-                prev_block_with_same_key.key == duplicate.key
+            prev_block_with_same_key.key == duplicate.key
         ), "Internal BibtexParser Error. Duplicate blocks have different keys."
 
         return DuplicateBlockKeyBlock(
