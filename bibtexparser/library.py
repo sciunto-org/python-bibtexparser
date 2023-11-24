@@ -11,6 +11,7 @@ from .model import (
     String,
 )
 
+
 # TODO Use functools.lru_cache for library properties (which create lists when called)
 
 
@@ -57,7 +58,7 @@ class Library:
                 del self._strings_by_key[block.key]
 
     def replace(
-        self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True
+            self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True
     ):
         """Replace a block with another block, at the same position.
 
@@ -73,24 +74,24 @@ class Library:
         except ValueError:
             raise ValueError("Block to replace is not in library.")
 
-        self._blocks.insert(index, new_block)
         block_after_add = self._add_to_dicts(new_block)
+        self._blocks.insert(index, block_after_add)
 
         if (
-            new_block is not block_after_add
-            and isinstance(new_block, DuplicateBlockKeyBlock)
-            and fail_on_duplicate_key
+                new_block is not block_after_add
+                and isinstance(block_after_add, DuplicateBlockKeyBlock)
+                and fail_on_duplicate_key
         ):
             # Revert changes to old_block
             #   Don't fail on duplicate key, as this would lead to an infinite recursion
             #   (should never happen for a clean library, but could happen if the user
             #   tampered with the internals of the library).
-            self.replace(new_block, old_block, fail_on_duplicate_key=False)
+            self.replace(block_after_add, old_block, fail_on_duplicate_key=False)
             raise ValueError("Duplicate key found.")
 
     @staticmethod
     def _cast_to_duplicate(
-        prev_block_with_same_key: Union[Entry, String], duplicate: Union[Entry, String]
+            prev_block_with_same_key: Union[Entry, String], duplicate: Union[Entry, String]
     ):
         assert isinstance(prev_block_with_same_key, type(duplicate)) or isinstance(
             duplicate, type(prev_block_with_same_key)
@@ -102,7 +103,7 @@ class Library:
         )
 
         assert (
-            prev_block_with_same_key.key == duplicate.key
+                prev_block_with_same_key.key == duplicate.key
         ), "Internal BibtexParser Error. Duplicate blocks have different keys."
 
         return DuplicateBlockKeyBlock(
@@ -160,7 +161,9 @@ class Library:
     @property
     def entries(self) -> List[Entry]:
         """All entry (@article, ...) blocks in the library, preserving order of insertion."""
-        return list(self._entries_by_key.values())
+        # Note: Taking this from the entries dict would be faster, but does not preserve order
+        #   e.g. in cases where `replace` has been called.
+        return [b for b in self._blocks if isinstance(b, Entry)]
 
     @property
     def entries_dict(self) -> Dict[str, Entry]:
