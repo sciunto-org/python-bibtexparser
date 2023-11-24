@@ -121,13 +121,25 @@ class NameParts:
         The structure of the output is: `von Last, Jr, First`
         """
 
+        def escape_last_slash(string: str) -> str:
+            """Escape the last slash in a string if it is not escaped."""
+            # Find the number of trailing slashes
+            stripped = string.rstrip("\\")
+            num_slashes = len(string) - len(stripped)
+            if num_slashes % 2 == 0:
+                # Even number: everything is escaped
+                return string
+            else:
+                # Odd number: need to escape one.
+                return string + "\\"
+
         first = " ".join(self.first) if self.first else None
         von = " ".join(self.von) if self.von else None
         last = " ".join(self.last) if self.last else None
         jr = " ".join(self.jr) if self.jr else None
 
         von_last = " ".join(name for name in [von, last] if name)
-        return ", ".join(name for name in [von_last, jr, first] if name)
+        return ", ".join(escape_last_slash(name) for name in [von_last, jr, first] if name)
 
 
 class SplitNameParts(_NameTransformerMiddleware):
@@ -250,33 +262,38 @@ def parse_single_name_into_parts(name, strict=True):
     for char in nameiter:
         # An escape.
         if char == "\\":
-            escaped = next(nameiter)
+            try:
+                escaped = next(nameiter)
 
-            # BibTeX doesn't allow whitespace escaping. Copy the slash and fall
-            # through to the normal case to handle the whitespace.
-            if escaped in whitespace:
+                # BibTeX doesn't allow whitespace escaping. Copy the slash and fall
+                # through to the normal case to handle the whitespace.
+                if escaped in whitespace:
+                    word.append(char)
+                    char = escaped
+
+                else:
+                    # Is this the first character in a brace?
+                    if bracestart:
+                        bracestart = False
+                        controlseq = escaped.isalpha()
+                        specialchar = True
+
+                    # Can we use it to determine the case?
+                    elif (case == -1) and escaped.isalpha():
+                        if escaped.isupper():
+                            case = 1
+                        else:
+                            case = 0
+
+                    # Copy the escape to the current word and go to the next
+                    # character in the input.
+                    word.append(char)
+                    word.append(escaped)
+                    continue
+
+            # If we're at the end of the string, then the \ is just a \.
+            except StopIteration:
                 word.append(char)
-                char = escaped
-
-            else:
-                # Is this the first character in a brace?
-                if bracestart:
-                    bracestart = False
-                    controlseq = escaped.isalpha()
-                    specialchar = True
-
-                # Can we use it to determine the case?
-                elif (case == -1) and escaped.isalpha():
-                    if escaped.isupper():
-                        case = 1
-                    else:
-                        case = 0
-
-                # Copy the escape to the current word and go to the next
-                # character in the input.
-                word.append(char)
-                word.append(escaped)
-                continue
 
         # Start of a braced expression.
         if char == "{":
@@ -531,7 +548,11 @@ def split_multiple_persons_names(names):
 
         # Escaped character.
         if char == "\\":
-            next(namesiter)
+            try:
+                next(namesiter)
+            # If we're at the end of the string, then the \ is just a \.
+            except StopIteration:
+                pass
             pos += 1
             continue
 
