@@ -64,3 +64,12 @@ def test_replace_fail_on_duplicate():
     assert len(library.failed_blocks) == 0
     assert library.entries[0].key == "Just a regular entry, to be replaced"
     assert library.entries[1].key == "duplicateKey"
+
+
+def test_fail_on_duplicate_add():
+    library = Library()
+    library.add(get_dummy_entry())
+    with pytest.raises(ValueError):
+        library.add(get_dummy_entry(), fail_on_duplicate_key=True)
+    assert len(library.blocks) == 2
+    assert len(library.failed_blocks) == 1
