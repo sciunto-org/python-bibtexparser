@@ -113,7 +113,7 @@ class NameParts:
                 if part is not None
             ]
         )
-    
+
     @property
     def merge_last_name_first(self) -> str:
         """Merging the name parts into a single string, last-name-first (with commas) format.
@@ -139,7 +139,9 @@ class NameParts:
         jr = " ".join(self.jr) if self.jr else None
 
         von_last = " ".join(name for name in [von, last] if name)
-        return ", ".join(escape_last_slash(name) for name in [von_last, jr, first] if name)
+        return ", ".join(
+            escape_last_slash(name) for name in [von_last, jr, first] if name
+        )
 
 
 class SplitNameParts(_NameTransformerMiddleware):
@@ -170,7 +172,13 @@ class MergeNameParts(_NameTransformerMiddleware):
 
     Name fields (e.g. author, editor, translator) are expected to be lists of NameParts.
     """
-    def __init__(self, last_name_first: bool = True, allow_inplace_modification: bool = True, name_fields: Tuple[str] = ("author", "editor", "translator")):
+
+    def __init__(
+        self,
+        last_name_first: bool = True,
+        allow_inplace_modification: bool = True,
+        name_fields: Tuple[str] = ("author", "editor", "translator"),
+    ):
         self._last_name_first = last_name_first
         super().__init__(allow_inplace_modification, name_fields)
 

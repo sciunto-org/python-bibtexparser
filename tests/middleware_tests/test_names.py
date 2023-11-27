@@ -859,6 +859,7 @@ def test_split_name_into_parts(name, expected_as_dict, strict):
     expected = _dict_to_nameparts(expected_as_dict)
     assert result == expected
 
+
 @pytest.mark.parametrize(
     "name, expected_as_dict", REGULAR_NAME_PARTS_PARSING_TEST_CASES
 )
@@ -869,7 +870,7 @@ def test_merge_last_name_first_inverse(name, expected_as_dict, strict):
 
     This property does not hold for certain values that contain '\\'.
     """
-    
+
     # skip cases with \
     if any("\\" in "".join(name) for name in expected_as_dict.values()):
         pytest.skip("Inverse property does not hold for names with '\\'")
@@ -986,7 +987,9 @@ def test_split_name_parts(inplace: bool):
 
 
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "copy"])
-@pytest.mark.parametrize("last_name_first", [True, False], ids=["last name first", "first name first"])
+@pytest.mark.parametrize(
+    "last_name_first", [True, False], ids=["last name first", "first name first"]
+)
 def test_merge_name_parts(inplace: bool, last_name_first: bool):
     input_entry = Entry(
         start_line=0,
@@ -1007,7 +1010,9 @@ def test_merge_name_parts(inplace: bool, last_name_first: bool):
     )
     original_copy = deepcopy(input_entry)
 
-    middleware = MergeNameParts(last_name_first=last_name_first, allow_inplace_modification=inplace)
+    middleware = MergeNameParts(
+        last_name_first=last_name_first, allow_inplace_modification=inplace
+    )
     transformed_library = middleware.transform(Library([input_entry]))
 
     assert len(transformed_library.entries) == 1
