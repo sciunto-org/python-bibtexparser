@@ -5,8 +5,7 @@ Much of the code is taken from Blair Bonnetts never merged v0 pull request
 """
 import abc
 import dataclasses
-from typing import List, Tuple
-from typing_extensions import Literal
+from typing import List, Literal, Tuple
 
 from bibtexparser.model import Block, Entry, Field, MiddlewareErrorBlock
 
