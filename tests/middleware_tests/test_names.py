@@ -1005,7 +1005,7 @@ def test_split_name_parts(inplace: bool):
         ),
     ],
 )
-def test_merge_name_parts(inplace: bool, style: str, names: list[str]):
+def test_merge_name_parts(inplace: bool, style: str, names: List[str]):
     input_entry = Entry(
         start_line=0,
         raw="irrelevant-for-this-test",
