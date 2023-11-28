@@ -174,7 +174,7 @@ class MergeNameParts(_NameTransformerMiddleware):
 
     The merging style indicates whether:
     - the merging is done without commas in first-name-first order ("first"), or
-    - the merging is done with commas in last-name-first order.
+    - the merging is done with commas in last-name-first order ("last").
     """
 
     def __init__(
