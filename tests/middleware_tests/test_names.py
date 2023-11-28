@@ -987,10 +987,8 @@ def test_split_name_parts(inplace: bool):
 
 
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "copy"])
-@pytest.mark.parametrize(
-    "last_name_first", [True, False], ids=["last name first", "first name first"]
-)
-def test_merge_name_parts(inplace: bool, last_name_first: bool):
+@pytest.mark.parametrize("style", ["first", "last"])
+def test_merge_name_parts(inplace: bool, style: str):
     input_entry = Entry(
         start_line=0,
         raw="irrelevant-for-this-test",
@@ -1011,7 +1009,7 @@ def test_merge_name_parts(inplace: bool, last_name_first: bool):
     original_copy = deepcopy(input_entry)
 
     middleware = MergeNameParts(
-        last_name_first=last_name_first, allow_inplace_modification=inplace
+        style=style, allow_inplace_modification=inplace
     )
     transformed_library = middleware.transform(Library([input_entry]))
 
@@ -1020,7 +1018,7 @@ def test_merge_name_parts(inplace: bool, last_name_first: bool):
 
     transformed_entry = transformed_library.entries[0]
     assert transformed_entry.fields_dict["title"] == original_copy.fields_dict["title"]
-    if last_name_first:
+    if style == "last":
         assert transformed_entry.fields_dict["author"].value == [
             "Author, Amy",
             "Bystander, Ben",

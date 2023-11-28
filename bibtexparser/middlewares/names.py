@@ -5,7 +5,7 @@ Much of the code is taken from Blair Bonnetts never merged v0 pull request
 """
 import abc
 import dataclasses
-from typing import List, Tuple
+from typing import List, Literal, Tuple
 
 from bibtexparser.model import Block, Entry, Field, MiddlewareErrorBlock
 
@@ -171,15 +171,19 @@ class MergeNameParts(_NameTransformerMiddleware):
     """Middleware to merge a persons name parts (first, von, last, jr) into a single string.
 
     Name fields (e.g. author, editor, translator) are expected to be lists of NameParts.
+
+    The merging style indicates whether:
+    - the merging is done without commas in first-name-first order ("first"), or
+    - the merging is done with commas in last-name-first order.
     """
 
     def __init__(
         self,
-        last_name_first: bool = True,
+        style: Literal["last"] | Literal["first"] = "last",
         allow_inplace_modification: bool = True,
         name_fields: Tuple[str] = ("author", "editor", "translator"),
     ):
-        self._last_name_first = last_name_first
+        self.style = style
         super().__init__(allow_inplace_modification, name_fields)
 
     # docstr-coverage: inherited
@@ -191,10 +195,12 @@ class MergeNameParts(_NameTransformerMiddleware):
         if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):
             raise ValueError("Expected a list of NameParts, got {}. ".format(name))
 
-        if self._last_name_first:
+        if self.style == "last":
             return [n.merge_last_name_first for n in name]
-        else:
+        elif self.style == "first":
             return [n.merge_first_name_first for n in name]
+        else:
+            raise ValueError("""Expected "first" or "last" style, got {}. """.format(self.style))
 
 
 def parse_single_name_into_parts(name, strict=True):
