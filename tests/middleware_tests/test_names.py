@@ -987,8 +987,11 @@ def test_split_name_parts(inplace: bool):
 
 
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "copy"])
-@pytest.mark.parametrize("style", ["first", "last"])
-def test_merge_name_parts(inplace: bool, style: str):
+@pytest.mark.parametrize(("style", "names"), [
+    ("first", ["Amy Author", "Ben Bystander", "Carl Carpooler\\", "Donald Doctor\\\\"]),
+    ("last", ["Author, Amy", "Bystander, Ben", "Carpooler\\\\, Carl", "Doctor\\\\, Donald"])
+])
+def test_merge_name_parts(inplace: bool, style: str, names: list[str]):
     input_entry = Entry(
         start_line=0,
         raw="irrelevant-for-this-test",
@@ -1002,6 +1005,8 @@ def test_merge_name_parts(inplace: bool, style: str):
                 value=[
                     NameParts(first=["Amy"], last=["Author"], von=[], jr=[]),
                     NameParts(first=["Ben"], last=["Bystander"], von=[], jr=[]),
+                    NameParts(first=["Carl"], last=["Carpooler\\"], von=[], jr=[]),
+                    NameParts(first=["Donald"], last=["Doctor\\\\"], von=[], jr=[]),
                 ],
             ),
         ],
@@ -1018,16 +1023,7 @@ def test_merge_name_parts(inplace: bool, style: str):
 
     transformed_entry = transformed_library.entries[0]
     assert transformed_entry.fields_dict["title"] == original_copy.fields_dict["title"]
-    if style == "last":
-        assert transformed_entry.fields_dict["author"].value == [
-            "Author, Amy",
-            "Bystander, Ben",
-        ]
-    else:
-        assert transformed_entry.fields_dict["author"].value == [
-            "Amy Author",
-            "Ben Bystander",
-        ]
+    assert transformed_entry.fields_dict["author"].value == names
 
     # Make sure other attributes are not changed
     assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
