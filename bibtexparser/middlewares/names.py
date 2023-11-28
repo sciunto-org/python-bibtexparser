@@ -10,6 +10,7 @@ from typing import List, Tuple
 # Literal is only available in Python 3.8+
 try:
     from typing import Literal
+
     FirstOrLastType = Literal["first", "last"]
 except ImportError:
     FirstOrLastType = str
