@@ -200,7 +200,9 @@ class MergeNameParts(_NameTransformerMiddleware):
         elif self.style == "first":
             return [n.merge_first_name_first for n in name]
         else:
-            raise ValueError("""Expected "first" or "last" style, got {}. """.format(self.style))
+            raise ValueError(
+                """Expected "first" or "last" style, got {}. """.format(self.style)
+            )
 
 
 def parse_single_name_into_parts(name, strict=True):
