@@ -5,15 +5,7 @@ Much of the code is taken from Blair Bonnetts never merged v0 pull request
 """
 import abc
 import dataclasses
-from typing import List, Tuple
-
-# Literal is only available in Python 3.8+
-try:
-    from typing import Literal
-
-    FirstOrLastType = Literal["first", "last"]
-except ImportError:
-    FirstOrLastType = str
+from typing import List, Literal, Tuple
 
 from bibtexparser.model import Block, Entry, Field, MiddlewareErrorBlock
 
@@ -187,7 +179,7 @@ class MergeNameParts(_NameTransformerMiddleware):
 
     def __init__(
         self,
-        style: FirstOrLastType = "last",
+        style: Literal["last"] | Literal["first"] = "last",
         allow_inplace_modification: bool = True,
         name_fields: Tuple[str] = ("author", "editor", "translator"),
     ):
