@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 import setuptools
 
-version = "2.0.0b4"
+version = None
 
 with open("bibtexparser/__init__.py") as fh:
     for line in fh:
         if line.startswith("__version__"):
             version = line.strip().split()[-1][1:-1]
             break
+    if not version:
+        raise RuntimeError("Could not determine version")
 
 
 def load_readme():
