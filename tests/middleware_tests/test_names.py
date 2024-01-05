@@ -873,7 +873,7 @@ def test_merge_last_name_first_inverse(name, expected_as_dict, strict):
 
     # cases where either the last name or "von" part ends with an odd number of `\` cannot be handled,
     # since in those cases the `,` is escaped when the name parts are put back together
-    def ends_with_odd_slash(names: list[str]) -> bool:
+    def ends_with_odd_slash(names: List[str]) -> bool:
         if len(names) == 0:
             return False
         name = names[-1]
