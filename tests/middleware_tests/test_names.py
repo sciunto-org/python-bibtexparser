@@ -871,9 +871,21 @@ def test_merge_last_name_first_inverse(name, expected_as_dict, strict):
     This property does not hold for certain values that contain '\\'.
     """
 
-    # skip cases with \
-    if any("\\" in "".join(name) for name in expected_as_dict.values()):
-        pytest.skip("Inverse property does not hold for names with '\\'")
+    # cases where either the last name or "von" part ends with an odd number of `\` cannot be handled, 
+    # since in those cases the `,` is escaped when the name parts are put back together
+    def ends_with_odd_slash(names: list[str]) -> bool:
+        if len(names) == 0:
+            return False
+        name = names[-1]
+        count = 0
+        i = len(name) - 1
+        while i >= 0 and name[i] == "\\":
+            count += 1
+            i -= 1
+        return count % 2 == 1
+    
+    if any(ends_with_odd_slash(name) for name in expected_as_dict.values()):
+        pytest.skip("Inverse property does not hold for names ending with '\\'")
 
     nameparts = _dict_to_nameparts(expected_as_dict)
     merged = nameparts.merge_last_name_first
