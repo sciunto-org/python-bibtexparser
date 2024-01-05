@@ -179,7 +179,7 @@ class MergeNameParts(_NameTransformerMiddleware):
 
     def __init__(
         self,
-        style: Literal["last"] | Literal["first"] = "last",
+        style: Literal["last", "first"] = "last",
         allow_inplace_modification: bool = True,
         name_fields: Tuple[str] = ("author", "editor", "translator"),
     ):
