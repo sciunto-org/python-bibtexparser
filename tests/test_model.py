@@ -311,4 +311,3 @@ def test_entry_fields_shorthand():
     assert entry.fields_dict["myNewField"].key == "myNewField"
     assert entry.fields_dict["myNewField"].value == "new_value"
     assert entry.fields_dict["myNewField"].start_line is None
-
