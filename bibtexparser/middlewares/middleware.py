@@ -62,15 +62,6 @@ class BlockMiddleware(Middleware, abc.ABC):
     except if `allow_inplace_modification` is true.
     """
 
-    @staticmethod
-    @abc.abstractmethod
-    def metadata_key() -> str:
-        """Identifier of the middleware.
-
-        This key is used to identify the middleware in a blocks metadata.
-        """
-        pass
-
     # docstr-coverage: inherited
     def transform(self, library: "Library") -> "Library":
         # TODO Multiprocessing (only for large library and if allow_multi..)
