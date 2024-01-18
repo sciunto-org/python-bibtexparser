@@ -35,8 +35,8 @@ from tests.middleware_tests.middleware_test_util import (
         ("{Simon and Schuster}", ["{Simon and Schuster}"]),
         ("Something \\and Other", ["Something \\and Other"]),
         (
-                "Name One and Two, Name and Name Three",
-                ["Name One", "Two, Name", "Name Three"],
+            "Name One and Two, Name and Name Three",
+            ["Name One", "Two, Name", "Name Three"],
         ),
         ("P. M. Sutherland and Smith, J.", ["P. M. Sutherland", "Smith, J."]),
         ("P. M. Sutherland and\tSmith, J.", ["P. M. Sutherland", "Smith, J."]),
@@ -48,8 +48,8 @@ from tests.middleware_tests.middleware_test_util import (
         ("P. M. Sutherland aNd\tSmith, J.", ["P. M. Sutherland", "Smith, J."]),
         ("P. M. Sutherland aNd\nSmith, J.", ["P. M. Sutherland", "Smith, J."]),
         (
-                "Fake Name an{d brace in an}d and Somebody Else",
-                ["Fake Name an{d brace in an}d", "Somebody Else"],
+            "Fake Name an{d brace in an}d and Somebody Else",
+            ["Fake Name an{d brace in an}d", "Somebody Else"],
         ),
         ("and John Smith", ["and John Smith"]),
         (" and John Smith", ["and John Smith"]),
@@ -62,12 +62,12 @@ from tests.middleware_tests.middleware_test_util import (
         ("John Smith and Phil Holden and\n", ["John Smith", "Phil Holden and"]),
         ("John Smith and Phil Holden and\t", ["John Smith", "Phil Holden and"]),
         (
-                r"{Ben Arous}, {G{\'{e}}rard} and {de Geus}, Tom",
-                ["{Ben Arous}", r"{G{\'{e}}rard}", "{de Geus}, Tom"],
+            r"{Ben Arous}, {G{\'{e}}rard} and {de Geus}, Tom",
+            ["{Ben Arous}", r"{G{\'{e}}rard}", "{de Geus}, Tom"],
         ),
         (
-                r"{Delgado de Molina}, A. and Vign{\'e}, M. and {de Geus}, Tom",
-                ["{Delgado de Molina}, A.", r"Vign{\'e}, M.", "{de Geus}, Tom"]
+            r"{Delgado de Molina}, A. and Vign{\'e}, M. and {de Geus}, Tom",
+            ["{Delgado de Molina}, A.", r"Vign{\'e}, M.", "{de Geus}, Tom"],
         ),
         ("Harry Fellowes and D. Drumpf", ["Harry Fellowes", "D. Drumpf"]),
         ("Harry Fellowes~and D. Drumpf", ["Harry Fellowes~and D. Drumpf"]),
@@ -142,61 +142,61 @@ def _dict_to_nameparts(as_dict):
 @pytest.mark.parametrize(
     "name, expected",
     (
-            pytest.param(
-                "BB,",
-                {"first": [], "von": [], "last": ["BB"], "jr": []},
-                id="trailing comma",
-            ),
-            pytest.param(
-                "BB, ",
-                {"first": [], "von": [], "last": ["BB"], "jr": []},
-                id="trailing comma and space",
-            ),
-            pytest.param(
-                "BB, ~\t",
-                {"first": [], "von": [], "last": ["BB"], "jr": []},
-                id="trailing comma and tab",
-            ),
-            pytest.param(
-                ", ~\t",
-                {"first": [], "von": [], "last": [], "jr": []},
-                id="empty with trailing comma and tab",
-            ),
-            pytest.param(
-                "AA, BB, CC, DD",
-                {"first": ["CC", "DD"], "von": [], "last": ["AA"], "jr": ["BB"]},
-                id="too many commas",
-            ),
-            pytest.param(
-                "AA {BB CC",
-                {"first": ["AA"], "von": [], "last": ["{BB CC}"], "jr": []},
-                id="unterminated opening brace 1",
-            ),
-            pytest.param(
-                "AA {{{BB CC",
-                {"first": ["AA"], "von": [], "last": ["{{{BB CC}}}"], "jr": []},
-                id="unterminated opening brace 2",
-            ),
-            pytest.param(
-                "AA {{{BB} CC}",
-                {"first": ["AA"], "von": [], "last": ["{{{BB} CC}}"], "jr": []},
-                id="unterminated opening brace 3",
-            ),
-            pytest.param(
-                "AA BB CC}",
-                {"first": ["AA", "BB"], "von": [], "last": ["{CC}"], "jr": []},
-                id="unmatched closing brace 1",
-            ),
-            pytest.param(
-                "AA BB CC}}}",
-                {"first": ["AA", "BB"], "von": [], "last": ["{{{CC}}}"], "jr": []},
-                id="unmatched closing brace 2",
-            ),
-            pytest.param(
-                "{AA {BB CC}}}",
-                {"first": [], "von": [], "last": ["{{AA {BB CC}}}"], "jr": []},
-                id="unmatched closing brace 3",
-            ),
+        pytest.param(
+            "BB,",
+            {"first": [], "von": [], "last": ["BB"], "jr": []},
+            id="trailing comma",
+        ),
+        pytest.param(
+            "BB, ",
+            {"first": [], "von": [], "last": ["BB"], "jr": []},
+            id="trailing comma and space",
+        ),
+        pytest.param(
+            "BB, ~\t",
+            {"first": [], "von": [], "last": ["BB"], "jr": []},
+            id="trailing comma and tab",
+        ),
+        pytest.param(
+            ", ~\t",
+            {"first": [], "von": [], "last": [], "jr": []},
+            id="empty with trailing comma and tab",
+        ),
+        pytest.param(
+            "AA, BB, CC, DD",
+            {"first": ["CC", "DD"], "von": [], "last": ["AA"], "jr": ["BB"]},
+            id="too many commas",
+        ),
+        pytest.param(
+            "AA {BB CC",
+            {"first": ["AA"], "von": [], "last": ["{BB CC}"], "jr": []},
+            id="unterminated opening brace 1",
+        ),
+        pytest.param(
+            "AA {{{BB CC",
+            {"first": ["AA"], "von": [], "last": ["{{{BB CC}}}"], "jr": []},
+            id="unterminated opening brace 2",
+        ),
+        pytest.param(
+            "AA {{{BB} CC}",
+            {"first": ["AA"], "von": [], "last": ["{{{BB} CC}}"], "jr": []},
+            id="unterminated opening brace 3",
+        ),
+        pytest.param(
+            "AA BB CC}",
+            {"first": ["AA", "BB"], "von": [], "last": ["{CC}"], "jr": []},
+            id="unmatched closing brace 1",
+        ),
+        pytest.param(
+            "AA BB CC}}}",
+            {"first": ["AA", "BB"], "von": [], "last": ["{{{CC}}}"], "jr": []},
+            id="unmatched closing brace 2",
+        ),
+        pytest.param(
+            "{AA {BB CC}}}",
+            {"first": [], "von": [], "last": ["{{AA {BB CC}}}"], "jr": []},
+            id="unmatched closing brace 3",
+        ),
     ),
 )
 def test_name_splitting_no_strict_mode(name: str, expected: Dict[str, List[str]]):
@@ -1011,17 +1011,17 @@ def test_split_name_parts(inplace: bool):
     ("style", "names"),
     [
         (
-                "first",
-                ["Amy Author", "Ben Bystander", "Carl Carpooler\\", "Donald Doctor\\\\"],
+            "first",
+            ["Amy Author", "Ben Bystander", "Carl Carpooler\\", "Donald Doctor\\\\"],
         ),
         (
-                "last",
-                [
-                    "Author, Amy",
-                    "Bystander, Ben",
-                    "Carpooler\\\\, Carl",
-                    "Doctor\\\\, Donald",
-                ],
+            "last",
+            [
+                "Author, Amy",
+                "Bystander, Ben",
+                "Carpooler\\\\, Carl",
+                "Doctor\\\\, Donald",
+            ],
         ),
     ],
 )
