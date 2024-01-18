@@ -7,6 +7,7 @@ from bibtexparser.middlewares.latex_encoding import (
     LatexDecodingMiddleware,
     LatexEncodingMiddleware,
 )
+from bibtexparser.middlewares.middleware import BlockMiddleware, LibraryMiddleware
 from bibtexparser.middlewares.month import (
     MonthAbbreviationMiddleware,
     MonthIntMiddleware,
@@ -24,6 +25,5 @@ from bibtexparser.middlewares.sorting_entry_fields import (
     SortFieldsAlphabeticallyMiddleware,
     SortFieldsCustomMiddleware,
 )
-from bibtexparser.middlewares.middleware import BlockMiddleware, LibraryMiddleware
 
 from .parsestack import default_parse_stack, default_unparse_stack
