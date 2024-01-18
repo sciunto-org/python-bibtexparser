@@ -30,9 +30,6 @@ class ConstantBlockMiddleware(BlockMiddleware):
     def transform_block(self, block, library):
         return self._const
 
-    def metadata_key():
-        return "ConstantBlockMiddleware"
-
 
 class LambdaBlockMiddleware(BlockMiddleware):
     """A middleware that applies a lambda to the input block"""
@@ -43,9 +40,6 @@ class LambdaBlockMiddleware(BlockMiddleware):
 
     def transform_block(self, block, library):
         return self._f(block)
-
-    def metadata_key():
-        return "LambdaBlockMiddleware"
 
 
 @pytest.mark.parametrize(
