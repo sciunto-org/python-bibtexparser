@@ -1,6 +1,8 @@
 from copy import copy, deepcopy
 from textwrap import dedent
 
+import pytest
+
 from bibtexparser.model import (
     Entry,
     ExplicitComment,
@@ -311,3 +313,9 @@ def test_entry_fields_shorthand():
     assert entry.fields_dict["myNewField"].key == "myNewField"
     assert entry.fields_dict["myNewField"].value == "new_value"
     assert entry.fields_dict["myNewField"].start_line is None
+
+    del entry["myNewField"]
+    assert "myNewField" not in entry.fields_dict
+    assert len([f for f in entry.fields if f.key == "myNewField"]) == 0
+    with pytest.raises(KeyError):
+        entry["myNewField"]

@@ -304,6 +304,16 @@ class Entry(Block):
         else:
             self._fields.append(field)
 
+    def pop_field(self, key: str) -> Optional[Field]:
+        """Removes and returns the field with the given key, if present."""
+        try:
+            field = self.fields_dict.pop(key)
+        except KeyError:
+            return None
+
+        self._fields = [f for f in self._fields if f.key != key]
+        return field
+
     def __getitem__(self, key: str) -> Any:
         """Dict-mimicking index.
 
@@ -325,6 +335,14 @@ class Entry(Block):
         as well as for a shorthand for `set_field`.
         """
         self.set_field(Field(key, value))
+
+    def __delitem__(self, key):
+        """Dict-mimicking index.
+
+        This serves for partial v1.x backwards compatibility,
+        as well as for a shorthand for `pop_field`.
+        """
+        self.pop_field(key)
 
     def items(self):
         """Dict-mimicking, for partial v1.x backwards compatibility.
