@@ -1,3 +1,5 @@
+"""Smoke test for custom middleware, based on the #440 by @tdegeus"""
+
 import bibtexparser
 from bibtexparser.middlewares.middleware import BlockMiddleware
 
@@ -17,7 +19,6 @@ abbreviations = {"Nice Journal": "NJ", "Another Nice Journal": "ANJ"}
 
 
 class JournalAbbreviate(BlockMiddleware):
-
     def transform_entry(self, entry, *args, **kwargs):
         if entry["journal"] in abbreviations:
             entry["journal"] = abbreviations[entry["journal"]]
@@ -25,6 +26,7 @@ class JournalAbbreviate(BlockMiddleware):
 
 
 def test_custom_middleware_smoke():
+    """Test that the very simple custom middleware above works."""
     library = bibtexparser.parse_string(
         bibtex_str, append_middleware=[JournalAbbreviate(True)]
     )
