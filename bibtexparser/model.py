@@ -318,6 +318,14 @@ class Entry(Block):
             return self.key
         return self.fields_dict[key].value
 
+    def __setitem__(self, key: str, value: Any):
+        """Dict-mimicking index.
+
+        This serves for partial v1.x backwards compatibility,
+        as well as for a shorthand for `set_field`.
+        """
+        self.set_field(Field(key, value))
+
     def items(self):
         """Dict-mimicking, for partial v1.x backwards compatibility.
 

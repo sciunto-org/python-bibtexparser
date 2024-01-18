@@ -290,3 +290,24 @@ def test_entry_str():
     )
 
     assert str(entry) == expected
+
+
+def test_entry_fields_shorthand():
+    entry = Entry(
+        entry_type="article",
+        key="myEntry",
+        fields=[
+            Field("myFirstField", "firstValue"),
+            Field("mySecondField", "secondValue"),
+        ],
+    )
+
+    entry["myFirstField"] = "changed_value"
+    assert entry["myFirstField"] == "changed_value"
+    assert entry.fields_dict["myFirstField"].value == "changed_value"
+
+    entry["myNewField"] = "new_value"
+    assert entry["myNewField"] == "new_value"
+    assert entry.fields_dict["myNewField"].key == "myNewField"
+    assert entry.fields_dict["myNewField"].value == "new_value"
+    assert entry.fields_dict["myNewField"].start_line is None
