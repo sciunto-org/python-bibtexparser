@@ -113,7 +113,7 @@ and share them with the community.
 We will be happy to provide a list of community-provided middleware layers here, so please let us know if you have written one!
 
 .. note::
-    To write your own middleware, simply extend the :class:`bibtexparser.middlewares.Blockmiddleware`
+    To write your own middleware, simply extend the :class:`bibtexparser.middlewares.BlockMiddleware`
     (for functions working on blocks individually, such as encoding) or :class:`bibtexparser.middlewares.LibraryMiddleware`
     (for library-wide transformations, such as sorting blocks) and implement the superclass methods
     according to the python docstrings. Make sure to check out some core middleware layers for examples.
