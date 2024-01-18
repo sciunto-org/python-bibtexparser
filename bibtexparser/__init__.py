@@ -5,4 +5,4 @@ from bibtexparser.entrypoint import parse_file, parse_string, write_file, write_
 from bibtexparser.library import Library
 from bibtexparser.writer import BibtexFormat
 
-__version__ = "2.0.0b5"
+__version__ = "2.0.0b6"
