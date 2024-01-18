@@ -28,8 +28,8 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
         super().__init__(allow_inplace_modification)
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "ResolveStringReferences"
 
     # docstr-coverage: inherited

@@ -37,8 +37,8 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         )
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return REMOVED_ENCLOSING_KEY
 
     @staticmethod
@@ -109,8 +109,8 @@ class AddEnclosingMiddleware(BlockMiddleware):
         self._enclose_integers = enclose_integers
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "remove_enclosing"
 
     def _enclose(

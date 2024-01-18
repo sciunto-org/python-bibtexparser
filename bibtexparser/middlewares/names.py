@@ -62,8 +62,8 @@ class SeparateCoAuthors(_NameTransformerMiddleware):
     """Middleware to separate multi-person fields (e.g. co-authors, co-editors)."""
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "separate_coauthors"
 
     # docstr-coverage: inherited
@@ -75,8 +75,8 @@ class MergeCoAuthors(_NameTransformerMiddleware):
     """Middleware to merge multi-person-list fields (e.g. co-authors, co-editors)."""
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "merge_coauthors"
 
     # docstr-coverage: inherited
@@ -123,8 +123,8 @@ class SplitNameParts(_NameTransformerMiddleware):
     """
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "split_name_parts"
 
     def _transform_field_value(self, name) -> List[NameParts]:
@@ -145,8 +145,8 @@ class MergeNameParts(_NameTransformerMiddleware):
     """
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "merge_name_parts"
 
     def _transform_field_value(self, name) -> List[str]:

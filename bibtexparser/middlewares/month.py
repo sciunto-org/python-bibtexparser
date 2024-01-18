@@ -80,8 +80,8 @@ class MonthLongStringMiddleware(_MonthInterpolator):
     and unenclosed."""
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "MonthLongStringMiddleware"
 
     # docstr-coverage: inherited
@@ -124,8 +124,8 @@ class MonthAbbreviationMiddleware(_MonthInterpolator):
     The created abbreviations are always lowercase and unenclosed."""
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "MonthAbbreviationMiddleware"
 
     # docstr-coverage: inherited
@@ -159,8 +159,8 @@ class MonthIntMiddleware(_MonthInterpolator):
     The created int-months are always integers and unenclosed."""
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "MonthIntMiddleware"
 
     # docstr-coverage: inherited

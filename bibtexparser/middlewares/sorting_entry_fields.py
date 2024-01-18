@@ -22,8 +22,8 @@ class SortFieldsAlphabeticallyMiddleware(BlockMiddleware):
         return entry
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "sorted_fields_alphabetically"
 
 
@@ -71,6 +71,6 @@ class SortFieldsCustomMiddleware(BlockMiddleware):
         return entry
 
     # docstr-coverage: inherited
-    @staticmethod
-    def metadata_key() -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "sorted_fields_custom"
