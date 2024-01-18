@@ -22,5 +22,5 @@ A clear and concise description of any alternative solutions or features you've 
 **Remaining Questions (Optional)**
 Please tick all that apply:
 
-- [ ] I would be willing to to contribute a PR to fix this issue.
-- [ ] This issue is a blocker, I'd be greatful for an early fix.
+- [ ] I would be willing to contribute a PR to fix this issue.
+- [ ] This issue is a blocker, I'd be grateful for an early fix.
