@@ -5,7 +5,7 @@ Much of the code is taken from Blair Bonnetts never merged v0 pull request
 """
 import abc
 import dataclasses
-from typing import List, Tuple
+from typing import List, Literal, Tuple
 
 from bibtexparser.model import Block, Entry, Field, MiddlewareErrorBlock
 
@@ -114,6 +114,35 @@ class NameParts:
             ]
         )
 
+    @property
+    def merge_last_name_first(self) -> str:
+        """Merging the name parts into a single string, last-name-first (with commas) format.
+
+        The structure of the output is: `von Last, Jr, First`
+        """
+
+        def escape_last_slash(string: str) -> str:
+            """Escape the last slash in a string if it is not escaped."""
+            # Find the number of trailing slashes
+            stripped = string.rstrip("\\")
+            num_slashes = len(string) - len(stripped)
+            if num_slashes % 2 == 0:
+                # Even number: everything is escaped
+                return string
+            else:
+                # Odd number: need to escape one.
+                return string + "\\"
+
+        first = " ".join(self.first) if self.first else None
+        von = " ".join(self.von) if self.von else None
+        last = " ".join(self.last) if self.last else None
+        jr = " ".join(self.jr) if self.jr else None
+
+        von_last = " ".join(name for name in [von, last] if name)
+        return ", ".join(
+            escape_last_slash(name) for name in [von_last, jr, first] if name
+        )
+
 
 class SplitNameParts(_NameTransformerMiddleware):
     """Middleware to split a persons name into its parts (first, von, last, jr).
@@ -142,7 +171,20 @@ class MergeNameParts(_NameTransformerMiddleware):
     """Middleware to merge a persons name parts (first, von, last, jr) into a single string.
 
     Name fields (e.g. author, editor, translator) are expected to be lists of NameParts.
+
+    The merging style indicates whether:
+    - the merging is done without commas in first-name-first order ("first"), or
+    - the merging is done with commas in last-name-first order ("last").
     """
+
+    def __init__(
+        self,
+        style: Literal["last", "first"] = "last",
+        allow_inplace_modification: bool = True,
+        name_fields: Tuple[str] = ("author", "editor", "translator"),
+    ):
+        self.style = style
+        super().__init__(allow_inplace_modification, name_fields)
 
     # docstr-coverage: inherited
     @classmethod
@@ -153,7 +195,14 @@ class MergeNameParts(_NameTransformerMiddleware):
         if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):
             raise ValueError("Expected a list of NameParts, got {}. ".format(name))
 
-        return [n.merge_first_name_first for n in name]
+        if self.style == "last":
+            return [n.merge_last_name_first for n in name]
+        elif self.style == "first":
+            return [n.merge_first_name_first for n in name]
+        else:
+            raise ValueError(
+                """Expected "first" or "last" style, got {}. """.format(self.style)
+            )
 
 
 def parse_single_name_into_parts(name, strict=True):
@@ -229,33 +278,38 @@ def parse_single_name_into_parts(name, strict=True):
     for char in nameiter:
         # An escape.
         if char == "\\":
-            escaped = next(nameiter)
+            try:
+                escaped = next(nameiter)
 
-            # BibTeX doesn't allow whitespace escaping. Copy the slash and fall
-            # through to the normal case to handle the whitespace.
-            if escaped in whitespace:
+                # BibTeX doesn't allow whitespace escaping. Copy the slash and fall
+                # through to the normal case to handle the whitespace.
+                if escaped in whitespace:
+                    word.append(char)
+                    char = escaped
+
+                else:
+                    # Is this the first character in a brace?
+                    if bracestart:
+                        bracestart = False
+                        controlseq = escaped.isalpha()
+                        specialchar = True
+
+                    # Can we use it to determine the case?
+                    elif (case == -1) and escaped.isalpha():
+                        if escaped.isupper():
+                            case = 1
+                        else:
+                            case = 0
+
+                    # Copy the escape to the current word and go to the next
+                    # character in the input.
+                    word.append(char)
+                    word.append(escaped)
+                    continue
+
+            # If we're at the end of the string, then the \ is just a \.
+            except StopIteration:
                 word.append(char)
-                char = escaped
-
-            else:
-                # Is this the first character in a brace?
-                if bracestart:
-                    bracestart = False
-                    controlseq = escaped.isalpha()
-                    specialchar = True
-
-                # Can we use it to determine the case?
-                elif (case == -1) and escaped.isalpha():
-                    if escaped.isupper():
-                        case = 1
-                    else:
-                        case = 0
-
-                # Copy the escape to the current word and go to the next
-                # character in the input.
-                word.append(char)
-                word.append(escaped)
-                continue
 
         # Start of a braced expression.
         if char == "{":
@@ -510,7 +564,11 @@ def split_multiple_persons_names(names):
 
         # Escaped character.
         if char == "\\":
-            next(namesiter)
+            try:
+                next(namesiter)
+            # If we're at the end of the string, then the \ is just a \.
+            except StopIteration:
+                pass
             pos += 1
             continue
 

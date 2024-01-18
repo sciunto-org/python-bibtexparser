@@ -860,6 +860,39 @@ def test_split_name_into_parts(name, expected_as_dict, strict):
     assert result == expected
 
 
+@pytest.mark.parametrize(
+    "name, expected_as_dict", REGULAR_NAME_PARTS_PARSING_TEST_CASES
+)
+@pytest.mark.parametrize("strict", [True, False], ids=["strict", "non-strict"])
+def test_merge_last_name_first_inverse(name, expected_as_dict, strict):
+    """Tests that merging name parts using the last-name-first method
+    maintains the "semantics" of the name.
+
+    This property does not hold for certain values that contain '\\'.
+    """
+
+    # cases where either the last name or "von" part ends with an odd number of `\` cannot be handled,
+    # since in those cases the `,` is escaped when the name parts are put back together
+    def ends_with_odd_slash(names: List[str]) -> bool:
+        if len(names) == 0:
+            return False
+        name = names[-1]
+        count = 0
+        i = len(name) - 1
+        while i >= 0 and name[i] == "\\":
+            count += 1
+            i -= 1
+        return count % 2 == 1
+
+    if any(ends_with_odd_slash(name) for name in expected_as_dict.values()):
+        pytest.skip("Inverse property does not hold for names ending with '\\'")
+
+    nameparts = _dict_to_nameparts(expected_as_dict)
+    merged = nameparts.merge_last_name_first
+    resplit = parse_single_name_into_parts(merged, strict=strict)
+    assert resplit == nameparts
+
+
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "copy"])
 def test_separate_co_names_middleware(inplace):
     """Test coauthor, co-editor, splitting middleware.
@@ -966,7 +999,25 @@ def test_split_name_parts(inplace: bool):
 
 
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "copy"])
-def test_merge_name_parts(inplace: bool):
+@pytest.mark.parametrize(
+    ("style", "names"),
+    [
+        (
+            "first",
+            ["Amy Author", "Ben Bystander", "Carl Carpooler\\", "Donald Doctor\\\\"],
+        ),
+        (
+            "last",
+            [
+                "Author, Amy",
+                "Bystander, Ben",
+                "Carpooler\\\\, Carl",
+                "Doctor\\\\, Donald",
+            ],
+        ),
+    ],
+)
+def test_merge_name_parts(inplace: bool, style: str, names: List[str]):
     input_entry = Entry(
         start_line=0,
         raw="irrelevant-for-this-test",
@@ -980,13 +1031,15 @@ def test_merge_name_parts(inplace: bool):
                 value=[
                     NameParts(first=["Amy"], last=["Author"], von=[], jr=[]),
                     NameParts(first=["Ben"], last=["Bystander"], von=[], jr=[]),
+                    NameParts(first=["Carl"], last=["Carpooler\\"], von=[], jr=[]),
+                    NameParts(first=["Donald"], last=["Doctor\\\\"], von=[], jr=[]),
                 ],
             ),
         ],
     )
     original_copy = deepcopy(input_entry)
 
-    middleware = MergeNameParts(allow_inplace_modification=inplace)
+    middleware = MergeNameParts(style=style, allow_inplace_modification=inplace)
     transformed_library = middleware.transform(Library([input_entry]))
 
     assert len(transformed_library.entries) == 1
@@ -994,10 +1047,7 @@ def test_merge_name_parts(inplace: bool):
 
     transformed_entry = transformed_library.entries[0]
     assert transformed_entry.fields_dict["title"] == original_copy.fields_dict["title"]
-    assert transformed_entry.fields_dict["author"].value == [
-        "Amy Author",
-        "Ben Bystander",
-    ]
+    assert transformed_entry.fields_dict["author"].value == names
 
     # Make sure other attributes are not changed
     assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
