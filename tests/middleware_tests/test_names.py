@@ -888,7 +888,7 @@ def test_merge_last_name_first_inverse(name, expected_as_dict, strict):
         pytest.skip("Inverse property does not hold for names ending with '\\'")
 
     nameparts = _dict_to_nameparts(expected_as_dict)
-    merged = nameparts.merge_last_name_first
+    merged = nameparts.merge_last_name_first(sep_first=" ")
     resplit = parse_single_name_into_parts(merged, strict=strict)
     assert resplit == nameparts
 

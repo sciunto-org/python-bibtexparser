@@ -98,14 +98,16 @@ class NameParts:
     last: List[str] = dataclasses.field(default_factory=list)
     jr: List[str] = dataclasses.field(default_factory=list)
 
-    @property
-    def merge_first_name_first(self) -> str:
-        """Merging the name parts into a single string, first-name-first (no comma) format."""
+    def merge_first_name_first(self, sep_first: str) -> str:
+        """Merging the name parts into a single string, first-name-first (no comma) format.
+
+        :param sep_first: Separator between first name parts.
+        """
         return " ".join(
             [
                 part
                 for part in (
-                    " ".join(self.first) if self.first else None,
+                    sep_first.join(self.first) if self.first else None,
                     " ".join(self.von) if self.von else None,
                     " ".join(self.last) if self.last else None,
                     " ".join(self.jr) if self.jr else None,
@@ -114,11 +116,12 @@ class NameParts:
             ]
         )
 
-    @property
-    def merge_last_name_first(self) -> str:
+    def merge_last_name_first(self, sep_first: str) -> str:
         """Merging the name parts into a single string, last-name-first (with commas) format.
 
         The structure of the output is: `von Last, Jr, First`
+
+        :param sep_first: Separator between first name parts.
         """
 
         def escape_last_slash(string: str) -> str:
@@ -133,7 +136,7 @@ class NameParts:
                 # Odd number: need to escape one.
                 return string + "\\"
 
-        first = " ".join(self.first) if self.first else None
+        first = sep_first.join(self.first) if self.first else None
         von = " ".join(self.von) if self.von else None
         last = " ".join(self.last) if self.last else None
         jr = " ".join(self.jr) if self.jr else None
@@ -175,15 +178,22 @@ class MergeNameParts(_NameTransformerMiddleware):
     The merging style indicates whether:
     - the merging is done without commas in first-name-first order ("first"), or
     - the merging is done with commas in last-name-first order ("last").
+
+    :param style: Merge style (see above).
+    :sep_first: Separator between first name parts.
+    :param allow_inplace_modification: See corresponding property parent class.
+    :param name_fields: The fields that contain names.
     """
 
     def __init__(
         self,
         style: Literal["last", "first"] = "last",
+        sep_first: str = " ",
         allow_inplace_modification: bool = True,
         name_fields: Tuple[str] = ("author", "editor", "translator"),
     ):
         self.style = style
+        self.sep_first = sep_first
         super().__init__(allow_inplace_modification, name_fields)
 
     # docstr-coverage: inherited
@@ -196,9 +206,9 @@ class MergeNameParts(_NameTransformerMiddleware):
             raise ValueError("Expected a list of NameParts, got {}. ".format(name))
 
         if self.style == "last":
-            return [n.merge_last_name_first for n in name]
+            return [n.merge_last_name_first(self.sep_first) for n in name]
         elif self.style == "first":
-            return [n.merge_first_name_first for n in name]
+            return [n.merge_first_name_first(self.sep_first) for n in name]
         else:
             raise ValueError(
                 """Expected "first" or "last" style, got {}. """.format(self.style)
