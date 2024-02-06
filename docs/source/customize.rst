@@ -28,9 +28,9 @@ Middleware Layers
 
     # We want to add three new middleware layers to our parse stack:
     layers = [
-        m.MonthIntMiddleware(True), # Months should be represented as int (0-12)
-        m.SeparateCoAuthors(True), # Co-authors should be separated as list of strings
-        m.SplitNameParts(True) # Individual Names should be split into first, von, last, jr parts
+        m.MonthIntMiddleware(), # Months should be represented as int (0-12)
+        m.SeparateCoAuthors(), # Co-authors should be separated as list of strings
+        m.SplitNameParts() # Individual Names should be split into first, von, last, jr parts
     ]
     library = bibtexparser.parse_file('bibtex.bib', append_middleware=layers)
 
