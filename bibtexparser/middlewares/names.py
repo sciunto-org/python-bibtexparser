@@ -574,6 +574,9 @@ def split_multiple_persons_names(names):
 
         # Change in brace level.
         if char == "{":
+            if step == NEXT_WORD:
+                spans[-1].append(possible_end)
+                spans.append([pos - 1])
             bracelevel += 1
             step = START_WHITESPACE
             continue
