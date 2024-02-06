@@ -21,7 +21,9 @@ class Middleware(abc.ABC):
     or LibraryMiddleware"""
 
     def __init__(
-        self, allow_parallel_execution: bool, allow_inplace_modification: bool = True
+        self,
+        allow_parallel_execution: bool = True,
+        allow_inplace_modification: bool = True,
     ):
         """
 
