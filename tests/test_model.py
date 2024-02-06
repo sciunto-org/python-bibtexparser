@@ -77,6 +77,12 @@ def test_entry_deepcopy():
     assert entry_1.fields_dict["field"] == entry_2.fields_dict["field"]
 
 
+def test_entry_contain():
+    entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    assert "field" in entry
+    assert "other" not in entry
+
+
 def test_string_equality():
     # Equal to itself
     string_1 = String(
