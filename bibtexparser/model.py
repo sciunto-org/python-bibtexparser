@@ -315,6 +315,10 @@ class Entry(Block):
         self._fields = [f for f in self._fields if f.key != key]
         return field
 
+    def __contains__(self, key: str) -> bool:
+        """Dict-mimicking ``in`` operator."""
+        return key in self.fields_dict
+
     def __getitem__(self, key: str) -> Any:
         """Dict-mimicking index.
 
