@@ -90,7 +90,7 @@ Writes the content of a bibtex library to a `.bib` file. Optional formatting par
 
 ## About
 
-Since 2022, `bibtexparser` is primarily written and maintained by Michael Weiss ([@MiWeiss](https://github.com/MiWeiss/)). 
+Since 2022, `bibtexparser` is primarily written and maintained by Michael Weiss ([@MiWeiss](https://github.com/MiWeiss/)). In 2024, Tom de Geus ([@tdegeus](https://github.com/tdegeus)) joined as co-maintainer. 
 
 Credits and thanks to the many contributors who helped creating this library, including
 François Boulogne ([@sciunto](https://github.com/sciunto/), creator of the first version) and Olivier Mangin ([@omangin](https://github.com/omangin/), long-term contributor).
