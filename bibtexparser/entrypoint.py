@@ -76,14 +76,19 @@ def parse_string(
 ):
     """Parse a BibTeX string.
 
-    Args:
-        bibtex_str (str): BibTeX string to parse
-        parse_stack (Optional[Iterable[Middleware]], optional): List of middleware to apply to the database after splitting. If None (default), a default stack will be used providing simple standard functionality will be used.
-        append_middleware (Optional[Iterable[Middleware]], optional): List of middleware to append to the default stack (ignored if a not-None parse_stack is passed).
-        library (Optional[Library], optional): Library to add entries to. If None (default), a new library will be created.
+    :param bibtex_str: BibTeX string to parse
+    :param parse_stack:
+        List of middleware to apply to the database after splitting.
+        If ``None`` (default), a default stack will be used providing simple standard functionality.
 
-    Returns:
-        Library: Parsed BibTeX database
+    :param append_middleware:
+        List of middleware to append to the default stack
+        (ignored if a not-``None`` parse_stack is passed).
+
+    :param library:
+        Library to add entries to. If ``None`` (default), a new library will be created.
+
+    :return: Library: Parsed BibTeX database
     """
     splitter = Splitter(bibstr=bibtex_str)
     library = splitter.split(library=library)
@@ -103,14 +108,17 @@ def parse_file(
 ) -> Library:
     """Parse a BibTeX file
 
-    Args:
-        path (str): Path to BibTeX file
-        parse_stack (Optional[Iterable[Middleware]], optional): List of middleware to apply to the database after splitting. If None (default), a default stack will be used providing simple standard functionality will be used.
-        append_middleware (Optional[Iterable[Middleware]], optional): List of middleware to append to the default stack (ignored if a not-None parse_stack is passed).
-        encoding: Encoding of the .bib file. Default encoding is "UTF-8".
+    :param path: Path to BibTeX file
+    :param parse_stack:
+        List of middleware to apply to the database after splitting.
+        If ``None`` (default), a default stack will be used providing simple standard functionality.
 
-    Returns:
-        Library: Parsed BibTeX library
+    :param append_middleware:
+        List of middleware to append to the default stack
+        (ignored if a not-``None`` parse_stack is passed).
+
+    :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``.
+    :return: Library: Parsed BibTeX library
     """
     with open(path, encoding=encoding) as f:
         bibtex_str = f.read()
