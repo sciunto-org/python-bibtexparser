@@ -48,6 +48,18 @@ from tests.middleware_tests.middleware_test_util import (
         ("P. M. Sutherland aNd\tSmith, J.", ["P. M. Sutherland", "Smith, J."]),
         ("P. M. Sutherland aNd\nSmith, J.", ["P. M. Sutherland", "Smith, J."]),
         (
+            r"{Delgado de Molina}, A. and Vign{\'e}, M. and {de Geus}, Tom",
+            ["{Delgado de Molina}, A.", r"Vign{\'e}, M.", "{de Geus}, Tom"],
+        ),
+        (
+            r"{Delgado de Molina}, A. and {de Geus}, Tom and Vign{\'e}, M.",
+            ["{Delgado de Molina}, A.", "{de Geus}, Tom", r"Vign{\'e}, M."],
+        ),
+        (
+            r"{Delgado de Molina}, A. and {de Geus}, Tom and {Vign{\'e}, M.}",
+            ["{Delgado de Molina}, A.", "{de Geus}, Tom", r"{Vign{\'e}, M.}"],
+        ),
+        (
             "Fake Name an{d brace in an}d and Somebody Else",
             ["Fake Name an{d brace in an}d", "Somebody Else"],
         ),
@@ -238,6 +250,10 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
         {"first": ["A."], "von": [], "last": ["{Delgado de Molina}"], "jr": []},
     ),
     (r"M. Vign{\'e}", {"first": ["M."], "von": [], "last": [r"Vign{\'e}"], "jr": []}),
+    (
+        r"Tom {de Geus}",
+        {"first": ["Tom"], "von": [], "last": ["{de Geus}"], "jr": []},
+    ),
     ###############################################################################
     #
     # Test cases from
