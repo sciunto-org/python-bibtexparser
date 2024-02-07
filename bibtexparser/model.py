@@ -5,7 +5,8 @@ from typing import Any, Dict, List, Optional, Set
 class Block(abc.ABC):
     """A abstract superclass of all top-level building blocks of a bibtex file.
 
-    E.g. a `@string` block, a `@preamble` block, an `@entry` block, a comment, etc."""
+    E.g. a ``@string`` block, a ``@preamble`` block, an ``@entry`` block, a comment, etc.
+    """
 
     def __init__(
         self,
@@ -51,15 +52,15 @@ class Block(abc.ABC):
         return self._parser_metadata
 
     def get_parser_metadata(self, key: str) -> Optional[Any]:
-        """EXPERIMENTAL: get auxiliary information stored in `parser_metadata`.
+        """EXPERIMENTAL: get auxiliary information stored in ``parser_metadata``.
 
-        See attribute `parser_metadata` for more information."""
+        See attribute ``parser_metadata`` for more information."""
         return self._parser_metadata.get(key, None)
 
     def set_parser_metadata(self, key: str, value: Any):
-        """EXPERIMENTAL: set auxiliary information stored in `parser_metadata`.
+        """EXPERIMENTAL: set auxiliary information stored in ``parser_metadata``.
 
-        See attribute `parser_metadata` for more information."""
+        See attribute ``parser_metadata`` for more information."""
         self._parser_metadata[key] = value
 
     def __eq__(self, other):
@@ -72,7 +73,7 @@ class Block(abc.ABC):
 
 
 class String(Block):
-    """Bibtex Blocks of the `@string` type, e.g. @string{me = "My Name"}."""
+    """Bibtex Blocks of the ``@string`` type, e.g. ``@string{me = "My Name"}``."""
 
     def __init__(
         self,
@@ -87,7 +88,7 @@ class String(Block):
 
     @property
     def key(self) -> str:
-        """The key of the string, e.g. `me` in `@string{me = "My Name"}`."""
+        """The key of the string, e.g. ``me`` in ``@string{me = "My Name"}``."""
         return self._key
 
     @key.setter
@@ -96,7 +97,7 @@ class String(Block):
 
     @property
     def value(self) -> str:
-        """The value of the string, e.g. `"My Name"` in `@string{me = "My Name"}`."""
+        """The value of the string, e.g. ``"My Name"`` in ``@string{me = "My Name"}``."""
         return self._value
 
     @value.setter
@@ -114,7 +115,7 @@ class String(Block):
 
 
 class Preamble(Block):
-    """Bibtex Blocks of the `@preamble` type, e.g. @preamble{This is a preamble}."""
+    """Bibtex Blocks of the ``@preamble`` type, e.g. ``@preamble{This is a preamble}``."""
 
     def __init__(
         self, value: str, start_line: Optional[int] = None, raw: Optional[str] = None
@@ -124,7 +125,7 @@ class Preamble(Block):
 
     @property
     def value(self) -> str:
-        """The value of the preamble, e.g. `blabla` in `@preamble{blabla}`."""
+        """The value of the preamble, e.g. ``blabla`` in ``@preamble{blabla}``."""
         return self._value
 
     @value.setter
@@ -142,7 +143,7 @@ class Preamble(Block):
 
 
 class ExplicitComment(Block):
-    """Bibtex Blocks of the `@comment` type, e.g. @comment{This is a comment}."""
+    """Bibtex Blocks of the ``@comment`` type, e.g. ``@comment{This is a comment}``."""
 
     def __init__(
         self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
@@ -152,7 +153,7 @@ class ExplicitComment(Block):
 
     @property
     def comment(self) -> str:
-        """The value of the comment, e.g. `blabla` in `@comment{blabla}`."""
+        """The value of the comment, e.g. ``blabla`` in ``@comment{blabla}``."""
         return self._comment
 
     @comment.setter
@@ -170,7 +171,7 @@ class ExplicitComment(Block):
 
 
 class ImplicitComment(Block):
-    """Bibtex outside of an @{...} block, which is treated as a comment."""
+    """Bibtex outside of an ``@{...}`` block, which is treated as a comment."""
 
     def __init__(
         self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
@@ -198,7 +199,7 @@ class ImplicitComment(Block):
 
 
 class Field:
-    """A field of a Bibtex entry, e.g. `author = {John Doe}`."""
+    """A field of a Bibtex entry, e.g. ``author = {John Doe}``."""
 
     def __init__(self, key: str, value: Any, start_line: Optional[int] = None):
         self._start_line = start_line
@@ -207,7 +208,7 @@ class Field:
 
     @property
     def key(self) -> str:
-        """The key of the field, e.g. `author` in `author = {John Doe}`."""
+        """The key of the field, e.g. ``author`` in ``author = {John Doe}``."""
         return self._key
 
     @key.setter
@@ -216,7 +217,7 @@ class Field:
 
     @property
     def value(self) -> Any:
-        """The value of the field, e.g. `{John Doe}` in `author = {John Doe}`."""
+        """The value of the field, e.g. ``{John Doe}`` in ``author = {John Doe}``."""
         return self._value
 
     @value.setter
@@ -247,7 +248,7 @@ class Field:
 
 
 class Entry(Block):
-    """Bibtex Blocks of the `@entry` type, e.g. @article{Cesar2013, ...}."""
+    """Bibtex Blocks of the ``@entry`` type, e.g. ``@article{Cesar2013, ...}``."""
 
     def __init__(
         self,
@@ -264,7 +265,7 @@ class Entry(Block):
 
     @property
     def entry_type(self):
-        """The type of the entry, e.g. `article` in `@article{Cesar2013, ...}`."""
+        """The type of the entry, e.g. ``article`` in ``@article{Cesar2013, ...}``."""
         return self._entry_type
 
     @entry_type.setter
@@ -273,7 +274,7 @@ class Entry(Block):
 
     @property
     def key(self):
-        """The key of the entry, e.g. `Cesar2013` in `@article{Cesar2013, ...}`."""
+        """The key of the entry, e.g. ``Cesar2013`` in ``@article{Cesar2013, ...}``."""
         return self._key
 
     @key.setter
@@ -282,7 +283,7 @@ class Entry(Block):
 
     @property
     def fields(self) -> List[Field]:
-        """The key-value attributes of an entry, as `Field` instances."""
+        """The key-value attributes of an entry, as ``Field`` instances."""
         return self._fields
 
     @fields.setter
@@ -436,7 +437,7 @@ class DuplicateBlockKeyBlock(ParsingFailedBlock):
 
     @property
     def key(self) -> str:
-        """The key of the entry, e.g. `Cesar2013` in `@article{Cesar2013, ...}`."""
+        """The key of the entry, e.g. ``Cesar2013`` in ``@article{Cesar2013, ...}``."""
         return self._key
 
     @key.setter

@@ -40,8 +40,8 @@ class ParserStateException(ParsingException):
 class RegexMismatchException(ParserStateException):
     """Raised when regex matches are inconsistent, implying a bug in the parser.
 
-    For example, raised when first match `@string{`
-    is not followed by an overlapping match `}`.
+    For example, raised when first match ``@string{``
+    is not followed by an overlapping match ``}``.
     """
 
     def __init__(self, first_match, expected_match, second_match):
