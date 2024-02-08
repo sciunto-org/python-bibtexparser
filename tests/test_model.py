@@ -77,7 +77,17 @@ def test_entry_deepcopy():
     assert entry_1.fields_dict["field"] == entry_2.fields_dict["field"]
 
 
-def test_entry_contain():
+def test_entry_pop():
+    entry1 = Entry(
+        "article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw"
+    )
+    entry2 = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    assert entry1.pop("other", "default") == "default"
+    assert entry1.pop("foo") == Field("foo", "bar", 2)
+    assert entry1 == entry2
+
+
+def test_entry_contains():
     entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
     assert "field" in entry
     assert "other" not in entry
