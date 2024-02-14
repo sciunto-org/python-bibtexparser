@@ -77,6 +77,18 @@ def test_entry_deepcopy():
     assert entry_1.fields_dict["field"] == entry_2.fields_dict["field"]
 
 
+def test_entry_get():
+    entry1 = Entry(
+        "article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw"
+    )
+    entry2 = Entry(
+        "article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw"
+    )
+    assert entry1.get("other", "default") == "default"
+    assert entry1.get("foo") == Field("foo", "bar", 2)
+    assert entry1 == entry2
+
+
 def test_entry_pop():
     entry1 = Entry(
         "article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw"
