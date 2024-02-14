@@ -318,6 +318,13 @@ class Entry(Block):
         self._fields = [f for f in self._fields if f.key != key]
         return field
 
+    def get(self, key: str, default=None) -> Optional[Field]:
+        """Returns the field with the given key, or the default value if it does not exist.
+
+        :param key: The key of the field.
+        :param default: The value to return if the field does not exist."""
+        return self.fields_dict.get(key, default)
+
     def __contains__(self, key: str) -> bool:
         """Dict-mimicking ``in`` operator."""
         return key in self.fields_dict
