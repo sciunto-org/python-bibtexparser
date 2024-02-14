@@ -16,7 +16,7 @@ The core functionality of bibtexparser is deliberately kept simple:
 * Upon writing, the splitting is reversed and the blocks are joined together again, with few formatting options.
 
 Advanced transformations of blocks, such as sorting, encoding, cross-referencing, etc. are not part of the core functionality,
-but can be optionally added to the parse stack by using the corresponging middleware layers:
+but can be optionally added to the parse stack by using the corresponding middleware layers:
 Middleware layers helper classes providing the functionality take a library object and return a new, transformed version of said library.
 
 Middleware Layers
@@ -28,9 +28,9 @@ Middleware Layers
 
     # We want to add three new middleware layers to our parse stack:
     layers = [
-        m.MonthIntMiddleware(True), # Months should be represented as int (0-12)
-        m.SeparateCoAuthors(True), # Co-authors should be separated as list of strings
-        m.SplitNameParts(True) # Individual Names should be split into first, von, last, jr parts
+        m.MonthIntMiddleware(), # Months should be represented as int (0-12)
+        m.SeparateCoAuthors(), # Co-authors should be separated as list of strings
+        m.SplitNameParts() # Individual Names should be split into first, von, last, jr parts
     ]
     library = bibtexparser.parse_file('bibtex.bib', append_middleware=layers)
 
