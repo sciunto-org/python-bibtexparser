@@ -68,32 +68,43 @@ by selecting the corresponding argument when calling :code:`bibtexparser.parse` 
 
 Core Middleware
 ^^^^^^^^^^^^^^^
-The following middleware layers are part of the core functionality of bibtexparser and maintained as part of the main repository.
-The functionality is straightforward from the class names, so we will not go into detail here and refer to the
-docstrings of the classes instead.
 
-Middleware Layers Regarding Encoding and Enclosing of Values
+bibtexparser comes with a number of middleware options:
+
+.. _middleware_encoding:
+
+Encoding and Enclosing of Values
+::::::::::::::::::::::::::::::::
 
 * :mod:`bibtexparser.middlewares.AddEnclosingMiddleware`
 * :mod:`bibtexparser.middlewares.RemoveEnclosingMiddleware`
 * :mod:`bibtexparser.middlewares.LatexEncodingMiddleware`
 * :mod:`bibtexparser.middlewares.LatexDecodingMiddleware`
 
-Middleware Layers Regarding Value References and Representation
+.. _middleware_references:
+
+Value References and Representation
+:::::::::::::::::::::::::::::::::::
 
 * :mod:`bibtexparser.middlewares.ResolveStringReferencesMiddleware`
 * :mod:`bibtexparser.middlewares.MonthIntMiddleware`
 * :mod:`bibtexparser.middlewares.MonthAbbreviationMiddleware`
 * :mod:`bibtexparser.middlewares.MonthLongStringMiddleware`
 
-Middleware Layers Regarding Names
+.. _middleware_names:
+
+Names
+:::::
 
 * :mod:`bibtexparser.middlewares.SeparateCoAuthors`
 * :mod:`bibtexparser.middlewares.MergeCoAuthors`
 * :mod:`bibtexparser.middlewares.SplitNameParts` (requires SeperateCoAuthors to be applied first)
 * :mod:`bibtexparser.middlewares.MergeNameParts`
 
-Sorting Middleware Layers
+.. _middleware_sorting:
+
+Sorting
+:::::::
 
 * :mod:`bibtexparser.middlewares.SortBlocksByTypeAndKeyMiddleware`
 * :mod:`bibtexparser.middlewares.SortFieldsAlphabeticallyMiddleware`
@@ -106,17 +117,86 @@ Sorting Middleware Layers
     even if it comes at the cost of slightly reduced functionality and performance.
     See the migration docs, if you are migrating from bibtexparser v1.
 
+Write your own Middleware
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Functions working on blocks individually
+::::::::::::::::::::::::::::::::::::::::
+
+Should extend the :class:`bibtexparser.middlewares.BlockMiddleware` class.
+This includes functionalities similar to
+:ref:`middleware_encoding`, :ref:`middleware_references`, and :ref:`middleware_names`.
+
+*   Basic example:
+
+    .. code-block:: python
+
+        from bibtexparser.middlewares import BlockMiddleware
+
+        class MyMiddleware(BlockMiddleware):
+            def transform_entry(self, entry, *args, **kwargs):
+                # Do something with the entry, e.g.
+                entry["title"] = entry["title"].lower()
+                # Return the transformed entry
+                return entry
+
+*   Initialize the middleware with some parameters:
+
+    .. code-block:: python
+
+        from bibtexparser.middlewares import BlockMiddleware
+
+        class MyMiddleware(BlockMiddleware):
+            def __init__(self, my_param):
+                self.my_param = my_param
+                super().__init__()
+
+            def transform_entry(self, entry, *args, **kwargs):
+                # Do something with the entry, e.g.
+                entry["title"] = entry["title"].lower()
+                # Return the transformed entry
+                return entry
+
+Library-wide transformations
+::::::::::::::::::::::::::::
+
+Should extend the :class:`bibtexparser.middlewares.LibraryMiddleware` class.
+This includes functionalities similar to sorting blocks
+(e.g. :mod:`bibtexparser.middlewares.SortBlocksByTypeAndKeyMiddleware`).
+
+Warning
+:::::::
+
+:class:`bibtexparser.middlewares.BlockMiddleware` and :class:`bibtexparser.middlewares.LibraryMiddleware`
+have two default arguments:
+
+*   ``allow_parallel_execution=True``, see :py:meth:`bibtexparser.middlewares.Middleware.allow_inplace_modification`.
+*   ``allow_inplace_modification=True``, see :py:meth:`bibtexparser.middlewares.Middleware.allow_parallel_execution`.
+
+If you want to change these defaults, specify them in the call to the super constructor. E.g.:
+
+.. code-block:: python
+
+    from bibtexparser.middlewares import BlockMiddleware
+
+    class MyMiddleware(BlockMiddleware):
+        def __init__(self, my_param):
+            self.my_param = my_param
+            super().__init__(
+                allow_parallel_execution = False,
+                allow_inplace_modification = False,
+            )
+
+        def transform_entry(self, entry, *args, **kwargs):
+            # Do something with the entry, e.g.
+            entry["title"] = entry["title"].lower()
+            # Return the transformed entry
+            return entry
+
 Community-Provided Middleware
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Aiming to keep the core functionality of bibtexparser simple, we encourage users to provide their own middleware layers
-and share them with the community.
-We will be happy to provide a list of community-provided middleware layers here, so please let us know if you have written one!
-
-.. note::
-    To write your own middleware, simply extend the :class:`bibtexparser.middlewares.BlockMiddleware`
-    (for functions working on blocks individually, such as encoding) or :class:`bibtexparser.middlewares.LibraryMiddleware`
-    (for library-wide transformations, such as sorting blocks) and implement the superclass methods
-    according to the python docstrings. Make sure to check out some core middleware layers for examples.
+We encourage users to provide their own middleware layers and share them with the community.
+We are happy to provide a list of community-provided middleware layers here, so please let us know if you have written one!
 
 Metadata Fields
 ^^^^^^^^^^^^^^^
