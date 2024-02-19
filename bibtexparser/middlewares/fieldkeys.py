@@ -25,8 +25,7 @@ class NormalizeFieldKeys(BlockMiddleware):
         for field in entry.fields:
             normalized_key: str = field.key.lower()
             if normalized_key in seen_normalized_keys:
-                # TODO: Log the full entry, too, to help the user find where the failure occurred?
-                logging.warning(f"NormalizeFieldKeys: duplicate normalized key '{normalized_key}' (original '{field.key}'); overriding previous value")
+                logging.warning(f"NormalizeFieldKeys: in entry '{entry.key}': duplicate normalized key '{normalized_key}' (original '{field.key}'); overriding previous value")
             seen_normalized_keys.add(normalized_key)
             field.key = normalized_key
             new_fields_dict[normalized_key] = field  # This implements "last one wins", but otherwise preserves insertion order.
