@@ -2,6 +2,7 @@ from bibtexparser.middlewares.enclosing import (
     AddEnclosingMiddleware,
     RemoveEnclosingMiddleware,
 )
+from bibtexparser.middlewares.fieldkeys import NormalizeFieldKeys
 from bibtexparser.middlewares.interpolate import ResolveStringReferencesMiddleware
 from bibtexparser.middlewares.latex_encoding import (
     LatexDecodingMiddleware,

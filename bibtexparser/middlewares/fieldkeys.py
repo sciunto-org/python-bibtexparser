@@ -1,0 +1,37 @@
+import logging
+from typing import Collection, Dict, List, Set, Union
+
+from bibtexparser.library import Library
+from bibtexparser.model import Block, Entry, Field
+
+from .middleware import BlockMiddleware
+
+class NormalizeFieldKeys(BlockMiddleware):
+    """Normalize field keys to lowercase.
+
+    In case of conflicts (e.g. both 'author' and 'Author' exist in the same entry),
+    a warning is emitted, and the last value wins.
+
+    Some other middlewares, such as `SeparateCoAuthors`, assume lowercase key names.
+    """
+
+    def __init__(self, allow_inplace_modification: bool = True):
+        super().__init__(allow_inplace_modification=allow_inplace_modification,
+                         allow_parallel_execution=True)
+
+    def transform_entry(self, entry: Entry, library: "Library") -> Union[Block, Collection[Block], None]:
+        seen_normalized_keys: Set[str] = set()
+        new_fields_dict: Dict[str, Field] = {}
+        for field in entry.fields:
+            normalized_key: str = field.key.lower()
+            if normalized_key in seen_normalized_keys:
+                # TODO: Log the full entry, too, to help the user find where the failure occurred?
+                logging.warning(f"NormalizeFieldKeys: duplicate normalized key '{normalized_key}' (original '{field.key}'); overriding previous value")
+            seen_normalized_keys.add(normalized_key)
+            field.key = normalized_key
+            new_fields_dict[normalized_key] = field  # This implements "last one wins", but otherwise preserves insertion order.
+
+        new_fields: List[Field] = list(new_fields_dict.values())
+        entry.fields = new_fields
+
+        return entry
