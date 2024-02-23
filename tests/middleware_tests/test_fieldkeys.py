@@ -2,137 +2,69 @@ from bibtexparser import Library
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
 from bibtexparser.middlewares.fieldkeys import NormalizeFieldKeys
 from bibtexparser.model import Entry, Field
+import re
+import pytest
 
-test_entry_1a = Entry(
-    entry_type="article",
-    key="smith2022",
-    fields=[
-        Field(key="author", value='"Smith, J."'),
-        Field(key="title", value='"A Test Article"'),
-        Field(key="journal", value='"J. of Testing"'),
-        Field(key="month", value='"jan"'),
-        Field(key="year", value='"2022"'),
-    ],
-)
-test_entry_2a = Entry(
-    entry_type="book",
-    key="doe2021",
-    fields=[
-        Field(key="author", value='"Doe, J."'),
-        Field(key="title", value='"A Test Book"'),
-        Field(key="publisher", value='"Test Pub."'),
-        Field(key="year", value='"2021"'),
-        Field(key="month", value="apr"),
-    ],
-)
-test_entry_3a = Entry(
-    entry_type="inproceedings",
-    key="jones2023",
-    fields=[
-        Field(key="author", value='"Jones, R."'),
-        Field(key="title", value='"A Test Conf. Paper"'),
-        Field(key="booktitle", value='"Proc. of the Intl. Test Conf."'),
-        Field(key="year", value='"2023"'),
-        Field(key="month", value="8"),
-    ],
-)
-test_library_lowercasekeys = Library()
-test_library_lowercasekeys.add(test_entry_1a)
-test_library_lowercasekeys.add(test_entry_2a)
-test_library_lowercasekeys.add(test_entry_3a)
+entries = {
+    "article": {
+        "author": '"Smith, J."',
+        "title": '"A Test Article"',
+        "journal": '"J. of Testing"',
+        "month": '"jan"',
+        "year": '"2022"',
+    },
+    "book": {
+        "author": '"Doe, J."',
+        "title": '"A Test Book"',
+        "publisher": '"Test Pub."',
+        "year": '"2021"',
+        "month": "apr",
+    },
+    "inproceedings": {
+        "author": '"Jones, R."',
+        "title": '"A Test Conf. Paper"',
+        "booktitle": '"Proc. of the Intl. Test Conf."',
+        "year": '"2023"',
+        "month": "8",
+    },
+}
 
-test_entry_1b = Entry(
-    entry_type="article",
-    key="smith2022",
-    fields=[
-        Field(key="author", value='"Smith, J."'),
-        Field(key="title", value='"A Test Article"'),
-        Field(key="journal", value='"J. of Testing"'),
-        Field(key="month", value='"jan"'),
-        Field(key="year", value='"2022"'),
-    ],
-)
-test_entry_2b = Entry(
-    entry_type="book",
-    key="doe2021",
-    fields=[
-        Field(key="author", value='"Doe, J."'),
-        Field(key="title", value='"A Test Book"'),
-        Field(key="publisher", value='"Test Pub."'),
-        Field(key="year", value='"2021"'),
-        Field(key="month", value="apr"),
-    ],
-)
-test_entry_3b = Entry(
-    entry_type="inproceedings",
-    key="jones2023",
-    fields=[
-        Field(key="author", value='"Jones, R."'),
-        Field(key="title", value='"A Test Conf. Paper"'),
-        Field(key="booktitle", value='"Proc. of the Intl. Test Conf."'),
-        Field(key="year", value='"2023"'),
-        Field(key="month", value="8"),
-    ],
-)
-test_library_capitalizedkeys = Library()
-test_library_capitalizedkeys.add(test_entry_1b)
-test_library_capitalizedkeys.add(test_entry_2b)
-test_library_capitalizedkeys.add(test_entry_3b)
+ref = Library()
+for i, (entry_type, fields) in enumerate(entries.items()):
+    f = [Field(key=k, value=v) for k, v in fields.items()]
+    ref.add(Entry(entry_type=entry_type, key=f"foo{i}", fields=f))
 
 
-def test_normalize_lowercase():
-    original_library = test_library_lowercasekeys
-    new_library = NormalizeFieldKeys(allow_inplace_modification=False).transform(
-        original_library
+def test_normalize_fieldkeys():
+    """
+    Check library with uppercase field keys.
+    """
+
+    lib = Library()
+    for i, (entry_type, fields) in enumerate(entries.items()):
+        f = [Field(key=k, value=v) for k, v in fields.items()]
+        lib.add(Entry(entry_type=entry_type, key=f"foo{i}", fields=f))
+
+    lib = NormalizeFieldKeys().transform(lib)
+
+    for key in lib.entries_dict:
+        assert lib.entries_dict[key] == ref.entries_dict[key]
+
+
+def test_normalize_fieldkeys_force_last(caplog):
+    """
+    Check library with uppercase field keys and duplicate normalized keys.
+    """
+    lib = Library()
+    for i, (entry_type, fields) in enumerate(entries.items()):
+        f = [Field(key=k.lower(), value="foo") for k in fields]
+        f += [Field(key=k.upper(), value=v) for k, v in fields.items()]
+        lib.add(Entry(entry_type=entry_type, key=f"foo{i}", fields=f))
+
+    lib = NormalizeFieldKeys().transform(lib)
+    assert re.match(
+        r"(WARNING\s*)(\w*\:\w*\.py\:[0-9]*\s*)(NormalizeFieldKeys)(.*)", caplog.text
     )
 
-    assert "author" in new_library.entries_dict["smith2022"]
-    assert new_library.entries_dict["smith2022"]["author"] == '"Smith, J."'
-    assert "author" in new_library.entries_dict["doe2021"]
-    assert new_library.entries_dict["doe2021"]["author"] == '"Doe, J."'
-    assert "author" in new_library.entries_dict["jones2023"]
-    assert new_library.entries_dict["jones2023"]["author"] == '"Jones, R."'
-
-    # Test the same after enclosing is removed
-    no_enclosing_library = RemoveEnclosingMiddleware(
-        allow_inplace_modification=False
-    ).transform(original_library)
-    new_library = NormalizeFieldKeys(allow_inplace_modification=False).transform(
-        no_enclosing_library
-    )
-
-    assert "author" in new_library.entries_dict["smith2022"]
-    assert new_library.entries_dict["smith2022"]["author"] == "Smith, J."
-    assert "author" in new_library.entries_dict["doe2021"]
-    assert new_library.entries_dict["doe2021"]["author"] == "Doe, J."
-    assert "author" in new_library.entries_dict["jones2023"]
-    assert new_library.entries_dict["jones2023"]["author"] == "Jones, R."
-
-
-def test_normalize_capitalized():
-    original_library = test_library_capitalizedkeys
-    new_library = NormalizeFieldKeys(allow_inplace_modification=False).transform(
-        original_library
-    )
-
-    assert "author" in new_library.entries_dict["smith2022"]
-    assert new_library.entries_dict["smith2022"]["author"] == '"Smith, J."'
-    assert "author" in new_library.entries_dict["doe2021"]
-    assert new_library.entries_dict["doe2021"]["author"] == '"Doe, J."'
-    assert "author" in new_library.entries_dict["jones2023"]
-    assert new_library.entries_dict["jones2023"]["author"] == '"Jones, R."'
-
-    # Test the same after enclosing is removed
-    no_enclosing_library = RemoveEnclosingMiddleware(
-        allow_inplace_modification=False
-    ).transform(original_library)
-    new_library = NormalizeFieldKeys(allow_inplace_modification=False).transform(
-        no_enclosing_library
-    )
-
-    assert "author" in new_library.entries_dict["smith2022"]
-    assert new_library.entries_dict["smith2022"]["author"] == "Smith, J."
-    assert "author" in new_library.entries_dict["doe2021"]
-    assert new_library.entries_dict["doe2021"]["author"] == "Doe, J."
-    assert "author" in new_library.entries_dict["jones2023"]
-    assert new_library.entries_dict["jones2023"]["author"] == "Jones, R."
+    for key in lib.entries_dict:
+        assert lib.entries_dict[key] == ref.entries_dict[key]

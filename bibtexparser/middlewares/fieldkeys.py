@@ -47,13 +47,14 @@ class NormalizeFieldKeys(BlockMiddleware):
             # longer than the BibTeX import. For such applications, the better warning message is more important.
             if normalized_key in seen_normalized_keys:
                 logging.warning(
-                    f"NormalizeFieldKeys: in entry '{entry.key}': duplicate normalized key '{normalized_key}' (original '{field.key}'); overriding previous value"
+                    f"NormalizeFieldKeys: in entry '{entry.key}': "
+                    + f"duplicate normalized key '{normalized_key}' "
+                    + f"(original '{field.key}'); overriding previous value"
                 )
             seen_normalized_keys.add(normalized_key)
             field.key = normalized_key
-            new_fields_dict[normalized_key] = (
-                field  # This implements "last one wins", but otherwise preserves insertion order.
-            )
+            # "last one wins", but otherwise preserve insertion order
+            new_fields_dict[normalized_key] = field
 
         new_fields: List[Field] = list(new_fields_dict.values())
         entry.fields = new_fields
