@@ -22,9 +22,8 @@ class NormalizeFieldKeys(BlockMiddleware):
             allow_parallel_execution=True,
         )
 
-    def transform_entry(
-        self, entry: Entry, library: "Library"
-    ) -> Union[Block, Collection[Block], None]:
+    # docstr-coverage: inherited
+    def transform_entry(self, entry: Entry, library: "Library") -> Entry:
         seen_normalized_keys: Set[str] = set()
         new_fields_dict: Dict[str, Field] = {}
         for field in entry.fields:
