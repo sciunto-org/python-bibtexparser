@@ -6,6 +6,7 @@ from bibtexparser.model import Block, Entry, Field
 
 from .middleware import BlockMiddleware
 
+
 class NormalizeFieldKeys(BlockMiddleware):
     """Normalize field keys to lowercase.
 
@@ -16,19 +17,27 @@ class NormalizeFieldKeys(BlockMiddleware):
     """
 
     def __init__(self, allow_inplace_modification: bool = True):
-        super().__init__(allow_inplace_modification=allow_inplace_modification,
-                         allow_parallel_execution=True)
+        super().__init__(
+            allow_inplace_modification=allow_inplace_modification,
+            allow_parallel_execution=True,
+        )
 
-    def transform_entry(self, entry: Entry, library: "Library") -> Union[Block, Collection[Block], None]:
+    def transform_entry(
+        self, entry: Entry, library: "Library"
+    ) -> Union[Block, Collection[Block], None]:
         seen_normalized_keys: Set[str] = set()
         new_fields_dict: Dict[str, Field] = {}
         for field in entry.fields:
             normalized_key: str = field.key.lower()
             if normalized_key in seen_normalized_keys:
-                logging.warning(f"NormalizeFieldKeys: in entry '{entry.key}': duplicate normalized key '{normalized_key}' (original '{field.key}'); overriding previous value")
+                logging.warning(
+                    f"NormalizeFieldKeys: in entry '{entry.key}': duplicate normalized key '{normalized_key}' (original '{field.key}'); overriding previous value"
+                )
             seen_normalized_keys.add(normalized_key)
             field.key = normalized_key
-            new_fields_dict[normalized_key] = field  # This implements "last one wins", but otherwise preserves insertion order.
+            new_fields_dict[normalized_key] = (
+                field  # This implements "last one wins", but otherwise preserves insertion order.
+            )
 
         new_fields: List[Field] = list(new_fields_dict.values())
         entry.fields = new_fields
