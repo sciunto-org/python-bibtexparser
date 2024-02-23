@@ -2,13 +2,16 @@
 
 These tests are not exhaustive, but they should cover the most common cases.
 More exhaustive and atomic tests are provided in separate modules."""
-from typing import Any, Dict
+
+from typing import Any
+from typing import Dict
 
 import pytest as pytest
 
 from bibtexparser.library import Library
 from bibtexparser.splitter import Splitter
 
+# flake8: noqa
 example_bibstr = """
 
 @string{goossens = "Goossens, Michel"}
@@ -259,10 +262,7 @@ def test_failed_block():
     expected_raw = "\n".join(example_bibstr.splitlines()[27:40])
     assert failed_block.raw.strip() == expected_raw.strip()
     assert failed_block.start_line == 27
-    assert (
-        'Was still looking for field-value closing `"`'
-        in failed_block.error.abort_reason
-    )
+    assert 'Was still looking for field-value closing `"`' in failed_block.error.abort_reason
 
 
 duplicate_bibtex_entry_keys = """
@@ -316,9 +316,7 @@ def test_handles_duplicate_strings():
     assert isinstance(lib.failed_blocks[0], bibtexparser.model.DuplicateBlockKeyBlock)
     assert lib.failed_blocks[0].previous_block.value == "Duplicate string 1"
     assert lib.failed_blocks[0].ignore_error_block.value == '"Duplicate string 2"'
-    assert isinstance(
-        lib.failed_blocks[0].ignore_error_block, bibtexparser.model.String
-    )
+    assert isinstance(lib.failed_blocks[0].ignore_error_block, bibtexparser.model.String)
 
 
 blocks_not_starting_on_new_lines = """\

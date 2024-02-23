@@ -2,7 +2,8 @@ import pytest
 
 from bibtexparser.library import Library
 from bibtexparser.splitter import Splitter
-from tests.resources import EDGE_CASE_VALUES, ENCLOSINGS
+from tests.resources import EDGE_CASE_VALUES
+from tests.resources import ENCLOSINGS
 
 
 @pytest.mark.parametrize(

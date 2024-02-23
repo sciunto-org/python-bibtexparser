@@ -1,5 +1,9 @@
 import abc
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Set
 
 
 class Block(abc.ABC):
@@ -117,9 +121,7 @@ class String(Block):
 class Preamble(Block):
     """Bibtex Blocks of the ``@preamble`` type, e.g. ``@preamble{This is a preamble}``."""
 
-    def __init__(
-        self, value: str, start_line: Optional[int] = None, raw: Optional[str] = None
-    ):
+    def __init__(self, value: str, start_line: Optional[int] = None, raw: Optional[str] = None):
         super().__init__(start_line, raw)
         self._value = value
 
@@ -136,18 +138,13 @@ class Preamble(Block):
         return f"Preamble (line: {self.start_line}): `{self.value}`"
 
     def __repr__(self):
-        return (
-            f"Preamble(value=`{self.value}`, "
-            f"start_line={self.start_line}, raw=`{self.raw}`)"
-        )
+        return f"Preamble(value=`{self.value}`, " f"start_line={self.start_line}, raw=`{self.raw}`)"
 
 
 class ExplicitComment(Block):
     """Bibtex Blocks of the ``@comment`` type, e.g. ``@comment{This is a comment}``."""
 
-    def __init__(
-        self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
-    ):
+    def __init__(self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None):
         super().__init__(start_line, raw)
         self._comment = comment
 
@@ -173,9 +170,7 @@ class ExplicitComment(Block):
 class ImplicitComment(Block):
     """Bibtex outside of an ``@{...}`` block, which is treated as a comment."""
 
-    def __init__(
-        self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None
-    ):
+    def __init__(self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None):
         super().__init__(start_line, raw)
         self._comment = comment
 
@@ -241,10 +236,7 @@ class Field:
         return f"Field (line: {self.start_line}, key: `{self.key}`): `{self.value}`"
 
     def __repr__(self):
-        return (
-            f"Field(key=`{self.key}`, value=`{self.value}`, "
-            f"start_line={self.start_line})"
-        )
+        return f"Field(key=`{self.key}`, value=`{self.value}`, " f"start_line={self.start_line})"
 
 
 class Entry(Block):
@@ -370,9 +362,7 @@ class Entry(Block):
         ] + [(f.key, f.value) for f in self.fields]
 
     def __str__(self):
-        lines = [
-            f"Entry (line: {self.start_line}, type: `{self.entry_type}`, key: `{self.key}`):"
-        ]
+        lines = [f"Entry (line: {self.start_line}, type: `{self.entry_type}`, key: `{self.key}`):"]
         lines.extend([f"\t`{f.key}` = `{f.value}`" for f in self.fields])
         return "\n".join(lines)
 

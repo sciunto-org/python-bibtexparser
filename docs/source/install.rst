@@ -31,7 +31,7 @@ To install the latest release candidate (currently required to use v2) using pip
 
     pip install --pre bibtexparser
 
-without the ``--pre`` option, you will get the latest `v1` version.
+without the ``--pre`` option, you will get the latest v1 version.
 It has a different API and is not directly compatible with v2.
 
 
@@ -50,5 +50,3 @@ Or, if you want to install dev dependencies:
 .. code-block:: sh
 
     pip install .[test,lint,docs]
-
-

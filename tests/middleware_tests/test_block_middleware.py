@@ -2,7 +2,11 @@ import pytest
 
 from bibtexparser import Library
 from bibtexparser.middlewares.middleware import BlockMiddleware
-from bibtexparser.model import Entry, ExplicitComment, ImplicitComment, Preamble, String
+from bibtexparser.model import Entry
+from bibtexparser.model import ExplicitComment
+from bibtexparser.model import ImplicitComment
+from bibtexparser.model import Preamble
+from bibtexparser.model import String
 
 BLOCKS = [
     ExplicitComment("explicit_comment_a"),
@@ -59,9 +63,7 @@ def test_successful_transform(middleware, expected):
 
 def test_returning_list_adds_all():
     library = Library(blocks=BLOCKS)
-    library = LambdaBlockMiddleware(
-        lambda b: [ImplicitComment("% Block"), b]
-    ).transform(library)
+    library = LambdaBlockMiddleware(lambda b: [ImplicitComment("% Block"), b]).transform(library)
 
     expected = [
         ImplicitComment("% Block"),
@@ -98,9 +100,7 @@ def test_returning_list_adds_all():
     [
         ConstantBlockMiddleware(True),
         ConstantBlockMiddleware([True]),
-        LambdaBlockMiddleware(
-            lambda block: (b for b in [block])
-        ),  # generators are not collections
+        LambdaBlockMiddleware(lambda block: (b for b in [block])),  # generators are not collections
     ],
 )
 def test_returning_invalid_raises_error(middleware):

@@ -1,29 +1,21 @@
-from bibtexparser.middlewares.enclosing import (
-    AddEnclosingMiddleware,
-    RemoveEnclosingMiddleware,
-)
+from bibtexparser.middlewares.enclosing import AddEnclosingMiddleware
+from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
 from bibtexparser.middlewares.interpolate import ResolveStringReferencesMiddleware
-from bibtexparser.middlewares.latex_encoding import (
-    LatexDecodingMiddleware,
-    LatexEncodingMiddleware,
-)
-from bibtexparser.middlewares.middleware import BlockMiddleware, LibraryMiddleware
-from bibtexparser.middlewares.month import (
-    MonthAbbreviationMiddleware,
-    MonthIntMiddleware,
-    MonthLongStringMiddleware,
-)
-from bibtexparser.middlewares.names import (
-    MergeCoAuthors,
-    MergeNameParts,
-    NameParts,
-    SeparateCoAuthors,
-    SplitNameParts,
-)
+from bibtexparser.middlewares.latex_encoding import LatexDecodingMiddleware
+from bibtexparser.middlewares.latex_encoding import LatexEncodingMiddleware
+from bibtexparser.middlewares.middleware import BlockMiddleware
+from bibtexparser.middlewares.middleware import LibraryMiddleware
+from bibtexparser.middlewares.month import MonthAbbreviationMiddleware
+from bibtexparser.middlewares.month import MonthIntMiddleware
+from bibtexparser.middlewares.month import MonthLongStringMiddleware
+from bibtexparser.middlewares.names import MergeCoAuthors
+from bibtexparser.middlewares.names import MergeNameParts
+from bibtexparser.middlewares.names import NameParts
+from bibtexparser.middlewares.names import SeparateCoAuthors
+from bibtexparser.middlewares.names import SplitNameParts
 from bibtexparser.middlewares.sorting_blocks import SortBlocksByTypeAndKeyMiddleware
-from bibtexparser.middlewares.sorting_entry_fields import (
-    SortFieldsAlphabeticallyMiddleware,
-    SortFieldsCustomMiddleware,
-)
+from bibtexparser.middlewares.sorting_entry_fields import SortFieldsAlphabeticallyMiddleware
+from bibtexparser.middlewares.sorting_entry_fields import SortFieldsCustomMiddleware
 
-from .parsestack import default_parse_stack, default_unparse_stack
+from .parsestack import default_parse_stack
+from .parsestack import default_unparse_stack

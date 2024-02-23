@@ -1,4 +1,4 @@
-## Contributing 
+## Contributing
 
 Thanks heaps for being interested in contributing to python-bibtexparser.
 
@@ -11,12 +11,12 @@ We are always looking for people to improve the library. Contributions include, 
 ### Some guidelines:
 
 1. Be nice! Were all doing this in our free time; no one is obligated to do anything.
-2. Add sufficient tests to your PRs 
+2. Add sufficient tests to your PRs
 3. Document your code.
 4. Don't hesitate to ask questions.
 
 ### Version 1 vs version 2
-Also note that there are currently two independent "default" branches: 
+Also note that there are currently two independent "default" branches:
 First, `main`, where we maintain the `v2` of bibtexparser, which is a complete re-write and currently still in beta and not feature complete.
 Second, `v1` where we maintain the stable `v1` version of bibtexparser. Note that on `v1` we accept only small, non-breaking changes and are planning to stop support as soon as `v2` reaches reasonable stability.
 The two branches are never going to be merged anymore, thus if you want to change something for both versions, you will have to open two PRs.

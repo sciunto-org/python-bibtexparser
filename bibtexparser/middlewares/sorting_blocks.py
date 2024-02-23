@@ -1,16 +1,17 @@
 from copy import deepcopy
-from dataclasses import dataclass, field
-from typing import List, Tuple, Type
+from dataclasses import dataclass
+from dataclasses import field
+from typing import List
+from typing import Tuple
+from typing import Type
 
 from bibtexparser.library import Library
-from bibtexparser.model import (
-    Block,
-    Entry,
-    ExplicitComment,
-    ImplicitComment,
-    Preamble,
-    String,
-)
+from bibtexparser.model import Block
+from bibtexparser.model import Entry
+from bibtexparser.model import ExplicitComment
+from bibtexparser.model import ImplicitComment
+from bibtexparser.model import Preamble
+from bibtexparser.model import String
 
 from .middleware import LibraryMiddleware
 
@@ -57,8 +58,7 @@ class SortBlocksByTypeAndKeyMiddleware(LibraryMiddleware):
         for t in sort_order:
             if not issubclass(t, Block):
                 raise ValueError(
-                    "Sort order must only contain Block subclasses, "
-                    f"but got {str(t)}"
+                    "Sort order must only contain Block subclasses, " f"but got {str(t)}"
                 )
 
     @staticmethod
@@ -74,9 +74,7 @@ class SortBlocksByTypeAndKeyMiddleware(LibraryMiddleware):
                 #   (this happens for comments, preambles and parsing-failed blocks, for example)
                 pass
 
-            if not (
-                isinstance(block, ExplicitComment) or isinstance(block, ImplicitComment)
-            ):
+            if not (isinstance(block, ExplicitComment) or isinstance(block, ImplicitComment)):
                 # We added a non-comment block, hence we finish the junk and
                 # start a new one
                 block_junks.append(current_junk)
@@ -107,9 +105,7 @@ class SortBlocksByTypeAndKeyMiddleware(LibraryMiddleware):
 
             block_junks.sort(key=_sort_key)
             return Library(
-                blocks=[
-                    block for block_junk in block_junks for block in block_junk.blocks
-                ]
+                blocks=[block for block_junk in block_junks for block in block_junk.blocks]
             )
         else:
 

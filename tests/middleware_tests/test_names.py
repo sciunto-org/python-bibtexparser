@@ -1,24 +1,22 @@
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict
+from typing import List
 
 import pytest as pytest
 
 from bibtexparser.library import Library
-from bibtexparser.middlewares.names import (
-    InvalidNameError,
-    MergeCoAuthors,
-    MergeNameParts,
-    NameParts,
-    SeparateCoAuthors,
-    SplitNameParts,
-    parse_single_name_into_parts,
-    split_multiple_persons_names,
-)
-from bibtexparser.model import Entry, Field
-from tests.middleware_tests.middleware_test_util import (
-    assert_inplace_is_respected,
-    assert_nonfield_entry_attributes_unchanged,
-)
+from bibtexparser.middlewares.names import InvalidNameError
+from bibtexparser.middlewares.names import MergeCoAuthors
+from bibtexparser.middlewares.names import MergeNameParts
+from bibtexparser.middlewares.names import NameParts
+from bibtexparser.middlewares.names import SeparateCoAuthors
+from bibtexparser.middlewares.names import SplitNameParts
+from bibtexparser.middlewares.names import parse_single_name_into_parts
+from bibtexparser.middlewares.names import split_multiple_persons_names
+from bibtexparser.model import Entry
+from bibtexparser.model import Field
+from tests.middleware_tests.middleware_test_util import assert_inplace_is_respected
+from tests.middleware_tests.middleware_test_util import assert_nonfield_entry_attributes_unchanged
 
 
 @pytest.mark.parametrize(
@@ -213,9 +211,7 @@ def test_name_splitting_no_strict_mode(name: str, expected: Dict[str, List[str]]
 def test_name_splitting_commas_at_higher_brace_level(strict: bool):
     """Test that commas are only considered at higher brace levels"""
     result = parse_single_name_into_parts("CC, dd, {AA, BB}", strict=strict)
-    expected = _dict_to_nameparts(
-        {"first": ["{AA, BB}"], "von": [], "last": ["CC"], "jr": ["dd"]}
-    )
+    expected = _dict_to_nameparts({"first": ["{AA, BB}"], "von": [], "last": ["CC"], "jr": ["dd"]})
     assert result == expected
 
 
@@ -865,9 +861,7 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
 )
 
 
-@pytest.mark.parametrize(
-    "name, expected_as_dict", REGULAR_NAME_PARTS_PARSING_TEST_CASES
-)
+@pytest.mark.parametrize("name, expected_as_dict", REGULAR_NAME_PARTS_PARSING_TEST_CASES)
 @pytest.mark.parametrize("strict", [True, False], ids=["strict", "non-strict"])
 def test_split_name_into_parts(name, expected_as_dict, strict):
     # As all inputs are valid, strict/no-strict should have no influence
@@ -876,9 +870,7 @@ def test_split_name_into_parts(name, expected_as_dict, strict):
     assert result == expected
 
 
-@pytest.mark.parametrize(
-    "name, expected_as_dict", REGULAR_NAME_PARTS_PARSING_TEST_CASES
-)
+@pytest.mark.parametrize("name, expected_as_dict", REGULAR_NAME_PARTS_PARSING_TEST_CASES)
 @pytest.mark.parametrize("strict", [True, False], ids=["strict", "non-strict"])
 def test_merge_last_name_first_inverse(name, expected_as_dict, strict):
     """Tests that merging name parts using the last-name-first method

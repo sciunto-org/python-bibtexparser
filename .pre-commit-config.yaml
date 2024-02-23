@@ -1,0 +1,56 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: check-yaml
+  - id: check-toml
+  - id: debug-statements
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: v2.12.0
+  hooks:
+  - id: pretty-format-yaml
+    args: [--preserve-quotes, --autofix, --indent, '2']
+  - id: pretty-format-toml
+    args: [--autofix, --indent, '4', --trailing-commas]
+- repo: https://github.com/pre-commit/pygrep-hooks
+  rev: v1.10.0
+  hooks:
+  - id: python-check-blanket-noqa
+  - id: python-check-blanket-type-ignore
+  - id: python-no-log-warn
+  - id: python-use-type-annotations
+  - id: rst-backticks
+  - id: rst-directive-colons
+  - id: rst-inline-touching-normal
+- repo: https://github.com/psf/black
+  rev: 24.2.0
+  hooks:
+  - id: black
+    args: [--safe, --quiet, --line-length=100]
+- repo: https://github.com/PyCQA/autoflake
+  rev: v2.3.0
+  hooks:
+  - id: autoflake
+    args: [--in-place, --remove-unused-variable]
+- repo: https://github.com/pycqa/isort
+  rev: 5.13.2
+  hooks:
+  - id: isort
+    name: isort
+    args: ["--force-single-line", "--line-length=100", "--profile=black"]
+- repo: https://github.com/asottile/pyupgrade
+  rev: v3.15.1
+  hooks:
+  - id: pyupgrade
+    args: [--py36-plus]
+- repo: https://github.com/PyCQA/flake8
+  rev: 7.0.0
+  hooks:
+  - id: flake8
+    args: ["--ignore=E722,W503,E203", --max-line-length=110, "--per-file-ignores=*/__init__.py:F401"]
+- repo: https://github.com/asottile/setup-cfg-fmt
+  rev: v2.5.0
+  hooks:
+  - id: setup-cfg-fmt

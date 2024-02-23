@@ -1,7 +1,8 @@
 from typing import Tuple
 
 from bibtexparser.library import Library
-from bibtexparser.model import Block, Entry
+from bibtexparser.model import Block
+from bibtexparser.model import Entry
 
 from .middleware import BlockMiddleware
 
@@ -49,7 +50,7 @@ class SortFieldsCustomMiddleware(BlockMiddleware):
             self._order = order
 
         if len(self._order) != len(set(self._order)):
-            duplicate_keys = set([x for x in self._order if self._order.count(x) > 1])
+            duplicate_keys = {x for x in self._order if self._order.count(x) > 1}
             raise ValueError(
                 "Order list must not contain duplicates. "
                 "The following keys are duplicated: "

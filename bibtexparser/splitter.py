@@ -1,23 +1,23 @@
 import logging
 import re
-from typing import List, Optional, Set, Tuple, Union
+from typing import List
+from typing import Optional
+from typing import Set
+from typing import Tuple
+from typing import Union
 
-from .exceptions import (
-    BlockAbortedException,
-    ParserStateException,
-    RegexMismatchException,
-)
+from .exceptions import BlockAbortedException
+from .exceptions import ParserStateException
+from .exceptions import RegexMismatchException
 from .library import Library
-from .model import (
-    DuplicateFieldKeyBlock,
-    Entry,
-    ExplicitComment,
-    Field,
-    ImplicitComment,
-    ParsingFailedBlock,
-    Preamble,
-    String,
-)
+from .model import DuplicateFieldKeyBlock
+from .model import Entry
+from .model import ExplicitComment
+from .model import Field
+from .model import ImplicitComment
+from .model import ParsingFailedBlock
+from .model import Preamble
+from .model import String
 
 
 class Splitter:
@@ -154,11 +154,7 @@ class Splitter:
             elif next_mark.group(0) == "{" and not currently_quote_escaped:
                 num_open_curls += 1
                 continue
-            elif (
-                next_mark.group(0) == "}"
-                and not currently_quote_escaped
-                and num_open_curls > 0
-            ):
+            elif next_mark.group(0) == "}" and not currently_quote_escaped and num_open_curls > 0:
                 num_open_curls -= 1
                 continue
 
@@ -188,9 +184,7 @@ class Splitter:
                     end_index=next_mark.start() - 1,
                 )
 
-    def _move_to_end_of_entry(
-        self, first_key_start: int
-    ) -> Tuple[List[Field], int, Set[str]]:
+    def _move_to_end_of_entry(self, first_key_start: int) -> Tuple[List[Field], int, Set[str]]:
         """Move to the end of the entry and return the fields and the end index."""
         result = []
         keys = set()
@@ -290,7 +284,8 @@ class Splitter:
 
                 except BlockAbortedException as e:
                     logging.warning(
-                        f"Parsing of `{m_val}` block (line {start_line}) aborted on line {self._current_line}  "
+                        f"Parsing of `{m_val}` block (line {start_line}) "
+                        f"aborted on line {self._current_line} "
                         f"due to syntactical error in bibtex:\n {e.abort_reason}"
                     )
                     logging.info(
@@ -308,8 +303,7 @@ class Splitter:
                 except ParserStateException as e:
                     # This is a bug in the parser, not in the bibtex. We should not continue.
                     logging.error(
-                        "python-bibtexparser detected an invalid state. "
-                        "Please report this bug."
+                        "python-bibtexparser detected an invalid state. Please report this bug."
                     )
                     logging.error(e.message)
                     raise e
@@ -321,9 +315,7 @@ class Splitter:
                     )
                     raise e
 
-                self._reset_block_status(
-                    current_char_index=self._current_char_index + 1
-                )
+                self._reset_block_status(current_char_index=self._current_char_index + 1)
             else:
                 # Part of implicit comment
                 continue
@@ -379,16 +371,13 @@ class Splitter:
         elif comma_mark.group(0) != ",":
             self._unaccepted_mark = comma_mark
             raise BlockAbortedException(
-                abort_reason="Expected comma after entry key,"
-                f" but found {comma_mark.group(0)}",
+                abort_reason=f"Expected comma after entry key, but found {comma_mark.group(0)}",
                 end_index=comma_mark.end(),
             )
         else:
             self._open_brackets += 1
             key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
-            fields, end_index, duplicate_keys = self._move_to_end_of_entry(
-                comma_mark.end()
-            )
+            fields, end_index, duplicate_keys = self._move_to_end_of_entry(comma_mark.end())
 
         entry = Entry(
             start_line=start_line,

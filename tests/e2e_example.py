@@ -1,12 +1,10 @@
 from textwrap import dedent
 
 import bibtexparser
-from bibtexparser.middlewares.names import (
-    MergeCoAuthors,
-    MergeNameParts,
-    SeparateCoAuthors,
-    SplitNameParts,
-)
+from bibtexparser.middlewares.names import MergeCoAuthors
+from bibtexparser.middlewares.names import MergeNameParts
+from bibtexparser.middlewares.names import SeparateCoAuthors
+from bibtexparser.middlewares.names import SplitNameParts
 
 bibtex_string = dedent(
     """\
@@ -54,11 +52,11 @@ def test_example():
     \tjournal = {Nature Reviews Materials},
     \tyear = {2019}
     }
-    
-    
+
+
     @comment{This is a comment.}
-    
-    
+
+
     @preamble{e = mc^2}"""
         ).strip()
     )

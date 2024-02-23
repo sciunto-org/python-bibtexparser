@@ -1,11 +1,17 @@
 import warnings
-from typing import Iterable, List, Optional, TextIO, Union
+from typing import Iterable
+from typing import List
+from typing import Optional
+from typing import TextIO
+from typing import Union
 
 from .library import Library
 from .middlewares.middleware import Middleware
-from .middlewares.parsestack import default_parse_stack, default_unparse_stack
+from .middlewares.parsestack import default_parse_stack
+from .middlewares.parsestack import default_unparse_stack
 from .splitter import Splitter
-from .writer import BibtexFormat, write
+from .writer import BibtexFormat
+from .writer import write
 
 
 def _build_parse_stack(
@@ -27,7 +33,7 @@ def _build_parse_stack(
         return list(parse_stack)
 
     parse_stack_types = [type(m) for m in parse_stack]
-    append_stack_types = set([type(m) for m in append_middleware])
+    append_stack_types = {type(m) for m in append_middleware}
     stack_types_intersect = set(parse_stack_types).intersection(append_stack_types)
     if len(stack_types_intersect) > 0:
         warnings.warn(
@@ -57,7 +63,7 @@ def _build_unparse_stack(
         return list(unparse_stack)
 
     parse_stack_types = [type(m) for m in unparse_stack]
-    append_stack_types = set([type(m) for m in prepend_middleware])
+    append_stack_types = {type(m) for m in prepend_middleware}
     stack_types_intersect = set(parse_stack_types).intersection(append_stack_types)
     if len(stack_types_intersect) > 0:
         warnings.warn(

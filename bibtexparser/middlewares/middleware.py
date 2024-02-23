@@ -1,17 +1,16 @@
 import abc
 import logging
 from copy import deepcopy
-from typing import Collection, Union
+from typing import Collection
+from typing import Union
 
 from bibtexparser.library import Library
-from bibtexparser.model import (
-    Block,
-    Entry,
-    ExplicitComment,
-    ImplicitComment,
-    Preamble,
-    String,
-)
+from bibtexparser.model import Block
+from bibtexparser.model import Entry
+from bibtexparser.model import ExplicitComment
+from bibtexparser.model import ImplicitComment
+from bibtexparser.model import Preamble
+from bibtexparser.model import String
 
 
 class Middleware(abc.ABC):
@@ -94,9 +93,7 @@ class BlockMiddleware(Middleware, abc.ABC):
                 blocks.extend(transformed)
             # Case 4: Something else. Error.
             else:
-                raise TypeError(
-                    f"Illegal output type from transform_block: {type(transformed)}"
-                )
+                raise TypeError(f"Illegal output type from transform_block: {type(transformed)}")
         return Library(blocks=blocks)
 
     def transform_block(
