@@ -54,3 +54,8 @@ repos:
   rev: v2.5.0
   hooks:
   - id: setup-cfg-fmt
+- repo: https://github.com/HunterMcGushion/docstr_coverage
+  rev: v2.3.0
+  hooks:
+  - id: docstr-coverage
+    args: ["bibtexparser"]

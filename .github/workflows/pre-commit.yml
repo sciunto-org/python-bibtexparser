@@ -13,5 +13,5 @@ jobs:
     - uses: actions/checkout@main
     - uses: actions/setup-python@main
       with:
-        python-version: '>=3.11'
+        python-version: '<3.12' # https://github.com/HunterMcGushion/docstr_coverage/issues/137
     - uses: pre-commit/action@main
