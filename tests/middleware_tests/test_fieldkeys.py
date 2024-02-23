@@ -1,62 +1,63 @@
+from bibtexparser import Library
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
 from bibtexparser.middlewares.fieldkeys import NormalizeFieldKeys
-from bibtexparser.splitter import Splitter
+from bibtexparser.model import Entry, Field
 
-test_bibtex_string_lowercasekeys = """
-@article{smith2022,
-  author  = "Smith, J.",
-  title   = "A Test Article",
-  journal = "J. of Testing",
-  month   = "jan",
-  year    = "2022"
-}
+test_entry_1a = Entry(entry_type="article",
+                      key="smith2022",
+                      fields=[Field(key="author", value='"Smith, J."'),
+                              Field(key="title", value='"A Test Article"'),
+                              Field(key="journal", value='"J. of Testing"'),
+                              Field(key="month", value='"jan"'),
+                              Field(key="year", value='"2022"')])
+test_entry_2a = Entry(entry_type="book",
+                      key="doe2021",
+                      fields=[Field(key="author", value='"Doe, J."'),
+                              Field(key="title", value='"A Test Book"'),
+                              Field(key="publisher", value='"Test Pub."'),
+                              Field(key="year", value='"2021"'),
+                              Field(key="month", value='apr')])
+test_entry_3a = Entry(entry_type="inproceedings",
+                      key="jones2023",
+                      fields=[Field(key="author", value='"Jones, R."'),
+                              Field(key="title", value='"A Test Conf. Paper"'),
+                              Field(key="booktitle", value='"Proc. of the Intl. Test Conf."'),
+                              Field(key="year", value='"2023"'),
+                              Field(key="month", value='8')])
+test_library_lowercasekeys = Library()
+test_library_lowercasekeys.add(test_entry_1a)
+test_library_lowercasekeys.add(test_entry_2a)
+test_library_lowercasekeys.add(test_entry_3a)
 
-@book{doe2021,
-  author    = "Doe, J.",
-  title     = "A Test Book",
-  publisher = "Test Pub.",
-  year      = "2021",
-  month     = apr
-}
+test_entry_1b = Entry(entry_type="article",
+                      key="smith2022",
+                      fields=[Field(key="author", value='"Smith, J."'),
+                              Field(key="title", value='"A Test Article"'),
+                              Field(key="journal", value='"J. of Testing"'),
+                              Field(key="month", value='"jan"'),
+                              Field(key="year", value='"2022"')])
+test_entry_2b = Entry(entry_type="book",
+                      key="doe2021",
+                      fields=[Field(key="author", value='"Doe, J."'),
+                              Field(key="title", value='"A Test Book"'),
+                              Field(key="publisher", value='"Test Pub."'),
+                              Field(key="year", value='"2021"'),
+                              Field(key="month", value='apr')])
+test_entry_3b = Entry(entry_type="inproceedings",
+                      key="jones2023",
+                      fields=[Field(key="author", value='"Jones, R."'),
+                              Field(key="title", value='"A Test Conf. Paper"'),
+                              Field(key="booktitle", value='"Proc. of the Intl. Test Conf."'),
+                              Field(key="year", value='"2023"'),
+                              Field(key="month", value='8')])
+test_library_capitalizedkeys = Library()
+test_library_capitalizedkeys.add(test_entry_1b)
+test_library_capitalizedkeys.add(test_entry_2b)
+test_library_capitalizedkeys.add(test_entry_3b)
 
-@inproceedings{jones2023,
-  author    = "Jones, R.",
-  title     = "A Test Conf. Paper",
-  booktitle = "Proc. of the Intl. Test Conf.",
-  year      = "2023",
-  month     = 8
-}
-"""
-
-test_bibtex_string_capitalizedkeys = """
-@article{smith2022,
-  Author  = "Smith, J.",
-  Title   = "A Test Article",
-  Journal = "J. of Testing",
-  Month   = "jan",
-  Year    = "2022"
-}
-
-@book{doe2021,
-  Author    = "Doe, J.",
-  Title     = "A Test Book",
-  Publisher = "Test Pub.",
-  Year      = "2021",
-  Month     = apr
-}
-
-@inproceedings{jones2023,
-  Author    = "Jones, R.",
-  Title     = "A Test Conf. Paper",
-  Booktitle = "Proc. of the Intl. Test Conf.",
-  Year      = "2023",
-  Month     = 8
-}
-"""
 
 def test_normalize_lowercase():
-    original_library = Splitter(test_bibtex_string_lowercasekeys).split()
-
+    original_library = test_library_lowercasekeys
     new_library = NormalizeFieldKeys(allow_inplace_modification=False).transform(
         original_library
     )
@@ -84,8 +85,7 @@ def test_normalize_lowercase():
     assert new_library.entries_dict["jones2023"]["author"] == "Jones, R."
 
 def test_normalize_capitalized():
-    original_library = Splitter(test_bibtex_string_capitalizedkeys).split()
-
+    original_library = test_library_capitalizedkeys
     new_library = NormalizeFieldKeys(allow_inplace_modification=False).transform(
         original_library
     )
