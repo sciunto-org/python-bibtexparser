@@ -1,4 +1,4 @@
-name: "Linting and unittests"
+name: "unittests"
 
 on:
   push:
