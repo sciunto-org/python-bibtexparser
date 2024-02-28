@@ -2,7 +2,6 @@
 Installation
 ============
 
-
 Requirements
 ------------
 

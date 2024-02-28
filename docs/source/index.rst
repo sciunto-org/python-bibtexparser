@@ -25,6 +25,7 @@ Contents:
     install.rst
     quickstart.rst
     customize.rst
+    contribute.rst
     migrate.rst
     biber.rst
     bibtexparser.rst
