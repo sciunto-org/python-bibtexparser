@@ -1,8 +1,8 @@
 import logging
-from typing import Collection, Dict, List, Set, Union
+from typing import Dict, List, Set
 
 from bibtexparser.library import Library
-from bibtexparser.model import Block, Entry, Field
+from bibtexparser.model import Entry, Field
 
 from .middleware import BlockMiddleware
 

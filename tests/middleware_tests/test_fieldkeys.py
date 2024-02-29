@@ -3,7 +3,6 @@ import re
 import pytest
 
 from bibtexparser import Library
-from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
 from bibtexparser.middlewares.fieldkeys import NormalizeFieldKeys
 from bibtexparser.model import Entry, Field
 
