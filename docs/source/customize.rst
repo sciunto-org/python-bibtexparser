@@ -198,6 +198,7 @@ Community-Provided Middleware
 
 We encourage users to provide their own middleware layers and share them with the community.
 We are happy to provide a list of community-provided middleware layers here, so please let us know if you have written one!
+See ``CONTRIBUTING.md`` for suggestions how to contribute.
 
 Metadata Fields
 ^^^^^^^^^^^^^^^
