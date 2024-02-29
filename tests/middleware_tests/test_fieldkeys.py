@@ -1,10 +1,9 @@
 import re
 
-import pytest
-
 from bibtexparser import Library
 from bibtexparser.middlewares.fieldkeys import NormalizeFieldKeys
-from bibtexparser.model import Entry, Field
+from bibtexparser.model import Entry
+from bibtexparser.model import Field
 
 entries = {
     "article": {
@@ -63,9 +62,7 @@ def test_normalize_fieldkeys_force_last(caplog):
         lib.add(Entry(entry_type=entry_type, key=f"entry{i}", fields=f))
 
     lib = NormalizeFieldKeys().transform(lib)
-    assert re.match(
-        r"(WARNING\s*)(\w*\:\w*\.py\:[0-9]*\s*)(NormalizeFieldKeys)(.*)", caplog.text
-    )
+    assert re.match(r"(WARNING\s*)(\w*\:\w*\.py\:[0-9]*\s*)(NormalizeFieldKeys)(.*)", caplog.text)
 
     for key in lib.entries_dict:
         assert lib.entries_dict[key] == ref.entries_dict[key]

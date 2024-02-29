@@ -1,8 +1,11 @@
 import logging
-from typing import Dict, List, Set
+from typing import Dict
+from typing import List
+from typing import Set
 
 from bibtexparser.library import Library
-from bibtexparser.model import Entry, Field
+from bibtexparser.model import Entry
+from bibtexparser.model import Field
 
 from .middleware import BlockMiddleware
 
@@ -35,9 +38,9 @@ class NormalizeFieldKeys(BlockMiddleware):
             # to remove "seen_normalized_keys" and this if statement
             if normalized_key in seen_normalized_keys:
                 logging.warning(
-                    f"NormalizeFieldKeys: in entry '{entry.key}': " +
-                    f"duplicate normalized key '{normalized_key}' " +
-                    f"(original '{field.key}'); overriding previous value"
+                    f"NormalizeFieldKeys: in entry '{entry.key}': "
+                    + f"duplicate normalized key '{normalized_key}' "
+                    + f"(original '{field.key}'); overriding previous value"
                 )
             seen_normalized_keys.add(normalized_key)
             field.key = normalized_key
