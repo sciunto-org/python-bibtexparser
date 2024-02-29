@@ -34,7 +34,7 @@ entries = {
 ref = Library()
 for i, (entry_type, fields) in enumerate(entries.items()):
     f = [Field(key=k, value=v) for k, v in fields.items()]
-    ref.add(Entry(entry_type=entry_type, key=f"foo{i}", fields=f))
+    ref.add(Entry(entry_type=entry_type, key=f"entry{i}", fields=f))
 
 
 def test_normalize_fieldkeys():
@@ -45,7 +45,7 @@ def test_normalize_fieldkeys():
     lib = Library()
     for i, (entry_type, fields) in enumerate(entries.items()):
         f = [Field(key=k, value=v) for k, v in fields.items()]
-        lib.add(Entry(entry_type=entry_type, key=f"foo{i}", fields=f))
+        lib.add(Entry(entry_type=entry_type, key=f"entry{i}", fields=f))
 
     lib = NormalizeFieldKeys().transform(lib)
 
@@ -59,9 +59,9 @@ def test_normalize_fieldkeys_force_last(caplog):
     """
     lib = Library()
     for i, (entry_type, fields) in enumerate(entries.items()):
-        f = [Field(key=k.lower(), value="foo") for k in fields]
+        f = [Field(key=k.lower(), value="dummyvalue") for k in fields]
         f += [Field(key=k.upper(), value=v) for k, v in fields.items()]
-        lib.add(Entry(entry_type=entry_type, key=f"foo{i}", fields=f))
+        lib.add(Entry(entry_type=entry_type, key=f"entry{i}", fields=f))
 
     lib = NormalizeFieldKeys().transform(lib)
     assert re.match(
