@@ -27,7 +27,5 @@ class JournalAbbreviate(BlockMiddleware):
 
 def test_custom_middleware_smoke():
     """Test that the very simple custom middleware above works."""
-    library = bibtexparser.parse_string(
-        bibtex_str, append_middleware=[JournalAbbreviate()]
-    )
+    library = bibtexparser.parse_string(bibtex_str, append_middleware=[JournalAbbreviate()])
     assert library.entries[0]["journal"] == "NJ"

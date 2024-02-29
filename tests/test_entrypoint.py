@@ -1,8 +1,6 @@
 """Testing the parse_file function."""
 
-import pytest
-
-from bibtexparser import parse_file, writer
+from bibtexparser import parse_file
 
 
 def test_gbk():

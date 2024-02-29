@@ -1,9 +1,12 @@
 import abc
 from collections import OrderedDict
-from typing import Tuple, Union
+from typing import Tuple
+from typing import Union
 
 from bibtexparser.library import Library
-from bibtexparser.model import Block, Entry, Field
+from bibtexparser.model import Block
+from bibtexparser.model import Entry
+from bibtexparser.model import Field
 
 from .middleware import BlockMiddleware
 
@@ -31,9 +34,7 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
         return entry
 
     @abc.abstractmethod
-    def resolve_month_field_val(
-        self, month_field: Field
-    ) -> Tuple[Union[str, int], str]:
+    def resolve_month_field_val(self, month_field: Field) -> Tuple[Union[str, int], str]:
         """Transform the month field.
 
         Args:

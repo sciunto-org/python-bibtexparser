@@ -1,4 +1,4 @@
-Tagged version are automatically released to pypi using github actions. 
+Tagged version are automatically released to pypi using github actions.
 
 Oder/Manual release instructions:
 
@@ -17,4 +17,3 @@ Oder/Manual release instructions:
     twine upload dist/*
 * Create release on Github
 * Verify docs are automatically updated
-

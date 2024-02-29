@@ -1,6 +1,6 @@
-skip_magic: True
-skip_file_doc: True
-skip_init: True
-skip_private: True
-ignore_setter: True
+skip_magic: true
+skip_file_doc: true
+skip_init: true
+skip_private: true
+ignore_setter: true
 fail-under: 100

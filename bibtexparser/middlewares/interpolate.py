@@ -3,7 +3,8 @@ from copy import deepcopy
 from typing import Any
 
 from bibtexparser.library import Library
-from bibtexparser.model import Entry, Field
+from bibtexparser.model import Entry
+from bibtexparser.model import Field
 
 from .enclosing import REMOVED_ENCLOSING_KEY
 from .middleware import LibraryMiddleware
@@ -41,10 +42,7 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
         raised_enclosing_warning = False
         for entry in library.entries:
             resolved_fields = list()
-            if (
-                not raised_enclosing_warning
-                and REMOVED_ENCLOSING_KEY in entry.parser_metadata
-            ):
+            if not raised_enclosing_warning and REMOVED_ENCLOSING_KEY in entry.parser_metadata:
                 raised_enclosing_warning = True
                 warnings.warn(
                     (

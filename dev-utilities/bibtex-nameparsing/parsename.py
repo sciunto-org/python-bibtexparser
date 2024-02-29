@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os.path
 import shutil
@@ -13,7 +12,7 @@ try:
 except ImportError:
     from tempfile import mkdtemp
 
-    class TemporaryDirectory(object):
+    class TemporaryDirectory:
         def __init__(self):
             self.name = mkdtemp()
 
@@ -45,7 +44,7 @@ def evaluate_bibtex_parsename(tempdir, names):
     # Write entries for each string in the list.
     with open(os.path.join(tempdir, "parsename.bib"), "w") as bibfile:
         for i, name in enumerate(names):
-            bibfile.write("@parsename{{case{0:d}, author={{{1:s}}}}}\n".format(i, name))
+            bibfile.write(f"@parsename{{case{i:d}, author={{{name:s}}}}}\n")
 
     # Run BibTeX.
     proc = subprocess.Popen(
@@ -64,7 +63,7 @@ def evaluate_bibtex_parsename(tempdir, names):
         return False
 
     # No error.
-    with open(os.path.join(tempdir, "parsename.bbl"), "r") as bblfile:
+    with open(os.path.join(tempdir, "parsename.bbl")) as bblfile:
         print(bblfile.read())
     return True
 

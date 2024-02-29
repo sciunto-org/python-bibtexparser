@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # BibtexParser documentation build configuration file, created by
 # sphinx-quickstart on Thu Aug  1 13:30:23 2013.
@@ -176,14 +175,7 @@ htmlhelp_basename = "BibtexParserdoc"
 
 # -- Options for LaTeX output --------------------------------------------------
 
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #'papersize': 'letterpaper',
-    # The font size ('10pt', '11pt' or '12pt').
-    #'pointsize': '10pt',
-    # Additional stuff for the LaTeX preamble.
-    #'preamble': '',
-}
+latex_elements = {}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
@@ -222,9 +214,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    ("index", "bibtexparser", "BibtexParser Documentation", ["F. Boulogne"], 1)
-]
+man_pages = [("index", "bibtexparser", "BibtexParser Documentation", ["F. Boulogne"], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False

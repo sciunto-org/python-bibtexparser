@@ -1,15 +1,15 @@
-from typing import Dict, List, Union
+from typing import Dict
+from typing import List
+from typing import Union
 
-from .model import (
-    Block,
-    DuplicateBlockKeyBlock,
-    Entry,
-    ExplicitComment,
-    ImplicitComment,
-    ParsingFailedBlock,
-    Preamble,
-    String,
-)
+from .model import Block
+from .model import DuplicateBlockKeyBlock
+from .model import Entry
+from .model import ExplicitComment
+from .model import ImplicitComment
+from .model import ParsingFailedBlock
+from .model import Preamble
+from .model import String
 
 # TODO Use functools.lru_cache for library properties (which create lists when called)
 
@@ -24,9 +24,7 @@ class Library:
         if blocks is not None:
             self.add(blocks)
 
-    def add(
-        self, blocks: Union[List[Block], Block], fail_on_duplicate_key: bool = False
-    ):
+    def add(self, blocks: Union[List[Block], Block], fail_on_duplicate_key: bool = False):
         """Add blocks to library.
 
         The adding is key-safe, i.e., it is made sure that no duplicate keys are added.
@@ -34,7 +32,8 @@ class Library:
         a DuplicateKeyBlock.
 
         :param blocks: Block or list of blocks to add.
-        :param fail_on_duplicate_key: If True, raises ValueError if a block was replaced with a DuplicateKeyBlock.
+        :param fail_on_duplicate_key:
+            If True, raises ValueError if a block was replaced with a DuplicateKeyBlock.
         """
         if isinstance(blocks, Block):
             blocks = [blocks]
@@ -49,7 +48,7 @@ class Library:
         if fail_on_duplicate_key:
             duplicate_keys = []
             for original, added in zip(blocks, _added_blocks):
-                if not original is added and isinstance(added, DuplicateBlockKeyBlock):
+                if original is not added and isinstance(added, DuplicateBlockKeyBlock):
                     duplicate_keys.append(added.key)
 
             if len(duplicate_keys) > 0:
@@ -74,9 +73,7 @@ class Library:
             elif isinstance(block, String):
                 del self._strings_by_key[block.key]
 
-    def replace(
-        self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True
-    ):
+    def replace(self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True):
         """Replace a block with another block, at the same position.
 
         :param old_block: Block to replace.
@@ -196,7 +193,5 @@ class Library:
     def comments(self) -> List[Union[ExplicitComment, ImplicitComment]]:
         """All comment blocks in the library, preserving order of insertion."""
         return [
-            block
-            for block in self._blocks
-            if isinstance(block, (ExplicitComment, ImplicitComment))
+            block for block in self._blocks if isinstance(block, (ExplicitComment, ImplicitComment))
         ]

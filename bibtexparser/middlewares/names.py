@@ -3,11 +3,17 @@
 Much of the code is taken from Blair Bonnetts never merged v0 pull request
 (https://github.com/sciunto-org/python-bibtexparser/pull/140).
 """
+
 import abc
 import dataclasses
-from typing import List, Literal, Tuple
+from typing import List
+from typing import Literal
+from typing import Tuple
 
-from bibtexparser.model import Block, Entry, Field, MiddlewareErrorBlock
+from bibtexparser.model import Block
+from bibtexparser.model import Entry
+from bibtexparser.model import Field
+from bibtexparser.model import MiddlewareErrorBlock
 
 from .middleware import BlockMiddleware
 
@@ -139,9 +145,7 @@ class NameParts:
         jr = " ".join(self.jr) if self.jr else None
 
         von_last = " ".join(name for name in [von, last] if name)
-        return ", ".join(
-            escape_last_slash(name) for name in [von_last, jr, first] if name
-        )
+        return ", ".join(escape_last_slash(name) for name in [von_last, jr, first] if name)
 
 
 class SplitNameParts(_NameTransformerMiddleware):
@@ -193,16 +197,14 @@ class MergeNameParts(_NameTransformerMiddleware):
 
     def _transform_field_value(self, name) -> List[str]:
         if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):
-            raise ValueError("Expected a list of NameParts, got {}. ".format(name))
+            raise ValueError(f"Expected a list of NameParts, got {name}. ")
 
         if self.style == "last":
             return [n.merge_last_name_first for n in name]
         elif self.style == "first":
             return [n.merge_first_name_first for n in name]
         else:
-            raise ValueError(
-                """Expected "first" or "last" style, got {}. """.format(self.style)
-            )
+            raise ValueError(f"""Expected "first" or "last" style, got {self.style}. """)
 
 
 def parse_single_name_into_parts(name, strict=True):
@@ -478,10 +480,10 @@ def parse_single_name_into_parts(name, strict=True):
         else:
             lcases = cases[0]
 
-            def rindex(l, x, default):
-                """Returns the index of the rightmost occurence of x in l."""
-                for i in range(len(l) - 1, -1, -1):
-                    if l[i] == x:
+            def rindex(k, x, default):
+                """Returns the index of the rightmost occurrence of x in k."""
+                for i in range(len(k) - 1, -1, -1):
+                    if k[i] == x:
                         return i
                 return default
 

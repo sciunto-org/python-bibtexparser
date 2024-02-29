@@ -1,6 +1,10 @@
 from bibtexparser import Library
 from bibtexparser.middlewares.sorting_blocks import SortBlocksByTypeAndKeyMiddleware
-from bibtexparser.model import Entry, ExplicitComment, ImplicitComment, Preamble, String
+from bibtexparser.model import Entry
+from bibtexparser.model import ExplicitComment
+from bibtexparser.model import ImplicitComment
+from bibtexparser.model import Preamble
+from bibtexparser.model import String
 
 BLOCKS = [
     ExplicitComment("explicit_comment_a"),
@@ -47,9 +51,7 @@ def test_sorting_blocks_preserving_comments_default_type_order():
 def test_sorting_blocks_preserving_comments_custom_type_order():
     type_order = (Preamble, String, Entry)
     library = Library(blocks=BLOCKS)
-    library = SortBlocksByTypeAndKeyMiddleware(block_type_order=type_order).transform(
-        library
-    )
+    library = SortBlocksByTypeAndKeyMiddleware(block_type_order=type_order).transform(library)
     ordered_blocks = library.blocks
 
     assert ordered_blocks[0] == Preamble("preamble_a")
