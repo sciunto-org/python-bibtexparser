@@ -39,7 +39,7 @@ for i, (entry_type, fields) in enumerate(entries.items()):
 
 def test_normalize_fieldkeys():
     """
-    Check library with uppercase field keys.
+    Check library with lowercase field keys.
     """
 
     lib = Library()
