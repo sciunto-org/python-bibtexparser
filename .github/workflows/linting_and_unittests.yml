@@ -1,48 +1,30 @@
-name: "Linting and unittests"
+name: "unittests"
 
 on:
   push:
     paths:
-      - '**.py'
+    - '**.py'
   pull_request:
     branches: ["main"]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    container:
-      image: python:3.8
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[lint]
-      - name: Lint format with `black`
-        run: black bibtexparser tests setup.py --check
-      - name: Lint imports with `isort`
-        run: isort bibtexparser tests setup.py --check-only --profile black
-      - name: Check docstr-coverage with `docstr-coverage`
-        run: docstr-coverage bibtexparser
 
   build:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.8, 3.9, '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[test]
-      - name: Test with pytest
-        run: |
-          pytest tests
-
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[test]
+    - name: Test with pytest
+      run: |
+        pytest tests

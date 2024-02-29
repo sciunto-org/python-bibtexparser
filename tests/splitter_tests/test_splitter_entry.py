@@ -1,12 +1,15 @@
 """Tests the parsing of entries, e.g. `@article{...}` blocks."""
+
 from textwrap import dedent
 
 import pytest as pytest
 
 from bibtexparser.library import Library
-from bibtexparser.model import DuplicateFieldKeyBlock, Field
+from bibtexparser.model import DuplicateFieldKeyBlock
+from bibtexparser.model import Field
 from bibtexparser.splitter import Splitter
-from tests.resources import EDGE_CASE_VALUES, ENCLOSINGS
+from tests.resources import EDGE_CASE_VALUES
+from tests.resources import ENCLOSINGS
 
 
 @pytest.mark.parametrize(
@@ -115,7 +118,7 @@ def test_trailing_comma(enclosing: str):
         firstfield = {{some value}},
         fieldBeforeTrailingComma = {value_before_trailing_comma},
     }}
-    
+
     @string{{someString = "some value"}}"""
     )
     library: Library = Splitter(bibtex_str).split()
@@ -261,12 +264,8 @@ def test_entry_with_concatenated_field(entry, expected):
     "entry",
     [
         # common in revtex, see issue #384
-        pytest.param(
-            "@Article {articleTestKey, title = {Some title}}", id="single whitespace"
-        ),
-        pytest.param(
-            "@Article  {articleTestKey, title = {Some title}}", id="double whitespace"
-        ),
+        pytest.param("@Article {articleTestKey, title = {Some title}}", id="single whitespace"),
+        pytest.param("@Article  {articleTestKey, title = {Some title}}", id="double whitespace"),
         pytest.param("@Article\t{articleTestKey, title = {Some title}}", id="tab"),
         pytest.param(
             "@Article \t {articleTestKey, title = {Some title}}",
@@ -276,7 +275,9 @@ def test_entry_with_concatenated_field(entry, expected):
 )
 def test_entry_with_space_before_bracket(entry: str):
     """For motivation why we need this, please see issue #391"""
-    some_previous_entry = "@article{normal_entry, title = {The first title}, author = {The first author} }"
+    some_previous_entry = (
+        "@article{normal_entry, title = {The first title}, author = {The first author} }"
+    )
 
     full_bibtex = f"{some_previous_entry}\n\n{entry}\n\n"
     library: Library = Splitter(full_bibtex).split()

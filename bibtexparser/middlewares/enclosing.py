@@ -1,6 +1,10 @@
-from typing import Tuple, Union
+from typing import Tuple
+from typing import Union
 
-from bibtexparser.model import Entry, Field, String
+from bibtexparser.library import Library
+from bibtexparser.model import Entry
+from bibtexparser.model import Field
+from bibtexparser.model import String
 
 from .middleware import BlockMiddleware
 
@@ -51,7 +55,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         return value, "no-enclosing"
 
     # docstr-coverage: inherited
-    def transform_entry(self, entry: Entry, library: "Library") -> Entry:
+    def transform_entry(self, entry: Entry, library: Library) -> Entry:
         field: Field
         metadata = dict()
         for field in entry.fields:
@@ -62,7 +66,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         return entry
 
     # docstr-coverage: inherited
-    def transform_string(self, string: String, library: "Library") -> String:
+    def transform_string(self, string: String, library: Library) -> String:
         stripped, enclosing = self._strip_enclosing(string.value)
         string.value = stripped
         string.parser_metadata[self.metadata_key()] = enclosing
@@ -101,8 +105,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
 
         if default_enclosing not in ("{", '"'):
             raise ValueError(
-                "default_enclosing must be either '{' or '\"'"
-                f"not '{default_enclosing}'"
+                "default_enclosing must be either '{' or '\"'" f"not '{default_enclosing}'"
             )
         self._default_enclosing = default_enclosing
         self._reuse_previous_enclosing = reuse_previous_enclosing
@@ -113,9 +116,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
     def metadata_key(cls) -> str:
         return "remove_enclosing"
 
-    def _enclose(
-        self, value: str, metadata_enclosing: str, apply_int_rule: bool
-    ) -> str:
+    def _enclose(self, value: str, metadata_enclosing: str, apply_int_rule: bool) -> str:
         enclosing = self._default_enclosing
         if self._reuse_previous_enclosing and metadata_enclosing is not None:
             enclosing = metadata_enclosing
@@ -129,8 +130,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
         if enclosing == "no-enclosing":
             return value
         raise ValueError(
-            f"enclosing must be either '{{' or '\"' or 'no-enclosing', "
-            f"not '{enclosing}'"
+            f"enclosing must be either '{{' or '\"' or 'no-enclosing', " f"not '{enclosing}'"
         )
 
     # docstr-coverage: inherited
@@ -142,13 +142,9 @@ class AddEnclosingMiddleware(BlockMiddleware):
         for field in entry.fields:
             apply_int_rule = field.key in ENTRY_POTENTIALLY_INT_FIELDS
             prev_encoding = (
-                metadata_enclosing.get(field.key, None)
-                if metadata_enclosing is not None
-                else None
+                metadata_enclosing.get(field.key, None) if metadata_enclosing is not None else None
             )
-            field.value = self._enclose(
-                field.value, prev_encoding, apply_int_rule=apply_int_rule
-            )
+            field.value = self._enclose(field.value, prev_encoding, apply_int_rule=apply_int_rule)
         return entry
 
     # docstr-coverage: inherited

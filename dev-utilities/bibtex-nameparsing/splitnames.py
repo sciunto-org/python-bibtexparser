@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os.path
 import shutil
@@ -13,7 +12,7 @@ try:
 except ImportError:
     from tempfile import mkdtemp
 
-    class TemporaryDirectory(object):
+    class TemporaryDirectory:
         def __init__(self):
             self.name = mkdtemp()
 
@@ -45,9 +44,7 @@ def evaluate_bibtex_splitnames(tempdir, names):
     # Write entries for each string in the list.
     with open(os.path.join(tempdir, "splitnames.bib"), "w") as bibfile:
         for i, name in enumerate(names):
-            bibfile.write(
-                "@splitnames{{case{0:d}, author={{{1:s}}}}}\n".format(i, name)
-            )
+            bibfile.write(f"@splitnames{{case{i:d}, author={{{name:s}}}}}\n")
 
     # Run BibTeX.
     proc = subprocess.Popen(
@@ -66,7 +63,7 @@ def evaluate_bibtex_splitnames(tempdir, names):
         return False
 
     # No error.
-    with open(os.path.join(tempdir, "splitnames.bbl"), "r") as bblfile:
+    with open(os.path.join(tempdir, "splitnames.bbl")) as bblfile:
         print(bblfile.read())
     return True
 

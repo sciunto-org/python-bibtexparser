@@ -24,23 +24,23 @@ ENCLOSINGS: List[pytest.param] = [
 VALID_BIBTEX_SNIPPETS: List[str] = [
     # A small, regular article
     dedent(
-        f"""\
-    @article{{test,
+        """\
+    @article{test,
         author = "John Doe",
         title = "Some title",
-    }}"""
+    }"""
     ),
     # A string definition
-    dedent(f"""@string{{someString = "some value"}}"""),
+    dedent("""@string{someString = "some value"}"""),
     # A string definition with a comment
     dedent(
-        f"""\
-    @string{{someString = "some value"}}
-    
+        """\
+    @string{someString = "some value"}
+
     % This is a comment"""
     ),
     # A preamble
-    dedent(f"""@preamble{{some preamble}}"""),
+    dedent("""@preamble{some preamble}"""),
     # A an empty line
     "\n",
     # A comment

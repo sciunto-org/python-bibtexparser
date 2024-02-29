@@ -1,16 +1,15 @@
-from copy import copy, deepcopy
+from copy import copy
+from copy import deepcopy
 from textwrap import dedent
 
 import pytest
 
-from bibtexparser.model import (
-    Entry,
-    ExplicitComment,
-    Field,
-    ImplicitComment,
-    Preamble,
-    String,
-)
+from bibtexparser.model import Entry
+from bibtexparser.model import ExplicitComment
+from bibtexparser.model import Field
+from bibtexparser.model import ImplicitComment
+from bibtexparser.model import Preamble
+from bibtexparser.model import String
 
 
 def test_entry_equality():
@@ -78,21 +77,15 @@ def test_entry_deepcopy():
 
 
 def test_entry_get():
-    entry1 = Entry(
-        "article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw"
-    )
-    entry2 = Entry(
-        "article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw"
-    )
+    entry1 = Entry("article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw")
+    entry2 = Entry("article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw")
     assert entry1.get("other", "default") == "default"
     assert entry1.get("foo") == Field("foo", "bar", 2)
     assert entry1 == entry2
 
 
 def test_entry_pop():
-    entry1 = Entry(
-        "article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw"
-    )
+    entry1 = Entry("article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw")
     entry2 = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
     assert entry1.pop("other", "default") == "default"
     assert entry1.pop("foo") == Field("foo", "bar", 2)

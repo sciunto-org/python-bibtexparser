@@ -10,18 +10,18 @@ For more detailed information, please refer to the corresponding sections of the
 Prerequisite: Vocabulary
 ========================
 
-* An **entry** refers to a citable item, e.g. `@book{...}`, `@article{...}`, etc.
-* A **preamble** is a `@preamble{...}` block.
-* A **string** is `@string{...}`.
-* An **explicit comment** is written as `@comment{...}`.
-* An **implicit comment** is any text not within any `@...{...}` block.
+* An **entry** refers to a citable item, e.g. ``@book{...}``, ``@article{...}``, etc.
+* A **preamble** is a ``@preamble{...}`` block.
+* A **string** is ``@string{...}``.
+* An **explicit comment** is written as ``@comment{...}``.
+* An **implicit comment** is any text not within any ``@...{...}`` block.
 * Each of the above is called a **block**, i.e., any .bib file is a collection of blocks of the above types.
 
 In an entry, you can find
 
-* an **entry type** like `article`, `book`, etc.
-* and **entry key**, e.g. `Cesar2013` in `@article{Cesar2013, ...}`.
-* and **fields**, which are the key-value pairs in the entry, e.g. `author = {Jean César}`.
+* an **entry type** like ``article``, ``book``, etc.
+* and **entry key**, e.g. ``Cesar2013`` in ``@article{Cesar2013, ...}``.
+* and **fields**, which are the key-value pairs in the entry, e.g. ``author = {Jean César}``.
 * each field has a **field key** and a **field value**.
 
 
@@ -59,7 +59,7 @@ Let's attempt to parse this string using the default bibtexparser configuration:
     library = bibtexparser.parse_string(bibtex_str) # or bibtexparser.parse_file("my_file.bib")
 
 
-The returned `library` object provides access to the parsed blocks, i.e., parsed high-level segments of the bibtex such as entries, comments, strings and preambles.
+The returned ``library`` object provides access to the parsed blocks, i.e., parsed high-level segments of the bibtex such as entries, comments, strings and preambles.
 You can access them by type, or iterate over all blocks, as shown below:
 
 .. code-block:: python
@@ -102,7 +102,7 @@ Example of exposed attributes:
     first_field.key # The field key, e.g. "author"
     first_field.value # The field value, e.g. "Albert Einstein and Boris Johnson"
 
-For a list of all available attributes, see the documentation of the `bibtexparser.model` module.
+For a list of all available attributes, see the documentation of the ``bibtexparser.model`` module.
 
 
 Step 2: Error Checking
@@ -123,7 +123,7 @@ and you should check for their presence to make sure mistakes are not going unde
 
 Obviously, in your code, you may want to go beyond simply printing a statement
 when faced with failed_blocks.
-Here, the actual failed blocks provided in `library.failed_blocks`
+Here, the actual failed blocks provided in ``library.failed_blocks``
 will provide you some more information
 (exceeding this tutorial, see the corresponding section of the docs for more detail).
 

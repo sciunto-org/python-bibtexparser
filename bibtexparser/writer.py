@@ -1,16 +1,16 @@
 from copy import deepcopy
-from typing import List, Optional, Union
+from typing import List
+from typing import Optional
+from typing import Union
 
 from .library import Library
-from .model import (
-    Entry,
-    ExplicitComment,
-    Field,
-    ImplicitComment,
-    ParsingFailedBlock,
-    Preamble,
-    String,
-)
+from .model import Entry
+from .model import ExplicitComment
+from .model import Field
+from .model import ImplicitComment
+from .model import ParsingFailedBlock
+from .model import Preamble
+from .model import String
 
 VAL_SEP = " = "
 PARSING_FAILED_COMMENT = "% WARNING Parsing failed for the following {n} lines."
@@ -52,22 +52,16 @@ def _treat_preamble(block: Preamble, bibtex_format: "BibtexFormat") -> List[str]
     return [f"@preamble{{{block.value}}}\n"]
 
 
-def _treat_impl_comment(
-    block: ImplicitComment, bibtex_format: "BibtexFormat"
-) -> List[str]:
+def _treat_impl_comment(block: ImplicitComment, bibtex_format: "BibtexFormat") -> List[str]:
     # Note: No explicit escaping is done here - that should be done in middleware
     return [block.comment, "\n"]
 
 
-def _treat_expl_comment(
-    block: ExplicitComment, bibtex_format: "BibtexFormat"
-) -> List[str]:
+def _treat_expl_comment(block: ExplicitComment, bibtex_format: "BibtexFormat") -> List[str]:
     return ["@comment{", block.comment, "}\n"]
 
 
-def _treat_failed_block(
-    block: ParsingFailedBlock, bibtex_format: "BibtexFormat"
-) -> List[str]:
+def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat") -> List[str]:
     lines = len(block.raw.splitlines())
     parsing_failed_comment = PARSING_FAILED_COMMENT.format(n=lines)
     return [parsing_failed_comment, "\n", block.raw, "\n"]

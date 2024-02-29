@@ -33,4 +33,3 @@ Here are some interesting projects using .bib-based libraries (but not necessari
   | https://github.com/FlamingTempura/bibtex-tidy (github repo)
 * | Display your bibliography in html pages:
   | http://www.monperrus.net/martin/bibtexbrowser/
-

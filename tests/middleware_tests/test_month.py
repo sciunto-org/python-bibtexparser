@@ -1,9 +1,7 @@
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
-from bibtexparser.middlewares.month import (
-    MonthAbbreviationMiddleware,
-    MonthIntMiddleware,
-    MonthLongStringMiddleware,
-)
+from bibtexparser.middlewares.month import MonthAbbreviationMiddleware
+from bibtexparser.middlewares.month import MonthIntMiddleware
+from bibtexparser.middlewares.month import MonthLongStringMiddleware
 from bibtexparser.splitter import Splitter
 
 test_bibtex_string = """
@@ -58,12 +56,10 @@ def test_long_string_months():
     ), "enclosed values should not be not changed"
 
     # Test the same after enclosing is removed
-    no_enclosing_library = RemoveEnclosingMiddleware(
-        allow_inplace_modification=False
-    ).transform(original_library)
-    new_library = MonthLongStringMiddleware(allow_inplace_modification=False).transform(
-        no_enclosing_library
-    )
+    m = RemoveEnclosingMiddleware(allow_inplace_modification=False)
+    no_enclosing_library = m.transform(original_library)
+    m = MonthLongStringMiddleware(allow_inplace_modification=False)
+    new_library = m.transform(no_enclosing_library)
 
     assert new_library.entries_dict["smith2022"]["month"] == "January"
     assert new_library.entries_dict["doe2021"]["month"] == "April"
@@ -74,9 +70,8 @@ def test_long_string_months():
 def test_short_string_months():
     original_library = Splitter(test_bibtex_string).split()
 
-    new_library = MonthAbbreviationMiddleware(
-        allow_inplace_modification=False
-    ).transform(original_library)
+    m = MonthAbbreviationMiddleware(allow_inplace_modification=False)
+    new_library = m.transform(original_library)
 
     assert (
         new_library.entries_dict["smith2022"]["month"] == '"jan"'
@@ -88,12 +83,10 @@ def test_short_string_months():
     ), "enclosed values should not be not changed"
 
     # Test the same after enclosing is removed
-    no_enclosing_library = RemoveEnclosingMiddleware(
-        allow_inplace_modification=False
-    ).transform(original_library)
-    new_library = MonthAbbreviationMiddleware(
-        allow_inplace_modification=False
-    ).transform(no_enclosing_library)
+    m = RemoveEnclosingMiddleware(allow_inplace_modification=False)
+    no_enclosing_library = m.transform(original_library)
+    m = MonthAbbreviationMiddleware(allow_inplace_modification=False)
+    new_library = m.transform(no_enclosing_library)
 
     assert new_library.entries_dict["smith2022"]["month"] == "jan"
     assert new_library.entries_dict["doe2021"]["month"] == "apr"
@@ -104,9 +97,8 @@ def test_short_string_months():
 def test_int_months():
     original_library = Splitter(test_bibtex_string).split()
 
-    new_library = MonthIntMiddleware(allow_inplace_modification=False).transform(
-        original_library
-    )
+    m = MonthIntMiddleware(allow_inplace_modification=False)
+    new_library = m.transform(original_library)
 
     assert (
         new_library.entries_dict["smith2022"]["month"] == '"jan"'
@@ -118,12 +110,10 @@ def test_int_months():
     ), "enclosed values should not be not changed"
 
     # Test the same after enclosing is removed
-    no_enclosing_library = RemoveEnclosingMiddleware(
-        allow_inplace_modification=False
-    ).transform(original_library)
-    new_library = MonthIntMiddleware(allow_inplace_modification=False).transform(
-        no_enclosing_library
-    )
+    m = RemoveEnclosingMiddleware(allow_inplace_modification=False)
+    no_enclosing_library = m.transform(original_library)
+    m = MonthIntMiddleware(allow_inplace_modification=False)
+    new_library = m.transform(no_enclosing_library)
 
     assert new_library.entries_dict["smith2022"]["month"] == 1
     assert new_library.entries_dict["doe2021"]["month"] == 4

@@ -2,16 +2,16 @@
 
 import pytest
 
-from bibtexparser import BibtexFormat, Library, writer
-from bibtexparser.model import (
-    Entry,
-    ExplicitComment,
-    Field,
-    ImplicitComment,
-    ParsingFailedBlock,
-    Preamble,
-    String,
-)
+from bibtexparser import BibtexFormat
+from bibtexparser import Library
+from bibtexparser import writer
+from bibtexparser.model import Entry
+from bibtexparser.model import ExplicitComment
+from bibtexparser.model import Field
+from bibtexparser.model import ImplicitComment
+from bibtexparser.model import ParsingFailedBlock
+from bibtexparser.model import Preamble
+from bibtexparser.model import String
 
 _DUMMY_STRING = String(key="myKey", value='"myValue"')
 _DUMMY_PREAMBLE = Preamble(value='"myValue"')
@@ -132,9 +132,7 @@ def test_block_separator(block_separator):
 
 def test_write_failed_block():
     raw = "@article{irrelevant-for-this-test,\nexcept = {that-there-need-to-be},\nother = {multiple-lines}\n}"
-    block = ParsingFailedBlock(
-        error=ValueError("Some error"), raw=raw, ignore_error_block=None
-    )
+    block = ParsingFailedBlock(error=ValueError("Some error"), raw=raw, ignore_error_block=None)
     library = Library(blocks=[block])
     string = writer.write(library)
     lines = string.splitlines()

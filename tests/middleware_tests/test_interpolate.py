@@ -19,20 +19,16 @@ bibtex_string = """
 
 
 def test_string_interpolation_middleware_interpolates_string():
-    original_library = Splitter(bibtex_string).split()
+    original_lib = Splitter(bibtex_string).split()
 
     # Prerequisite
-    assert (
-        original_library.entries_dict["test_article"].fields_dict["note"].value
-        == "test_note"
-    )
+    assert original_lib.entries_dict["test_article"].fields_dict["note"].value == "test_note"
 
     # Apply middleware
-    changed_library = ResolveStringReferencesMiddleware(
-        allow_inplace_modification=False
-    ).transform(original_library)
+    m = ResolveStringReferencesMiddleware(allow_inplace_modification=False)
+    changed_library = m.transform(original_lib)
 
-    assert original_library is not changed_library
+    assert original_lib is not changed_library
     assert (
         changed_library.entries_dict["test_article"].fields_dict["note"].value
         == '"This is a test note."'
@@ -40,15 +36,13 @@ def test_string_interpolation_middleware_interpolates_string():
 
 
 def test_warning_is_raised_if_enclosings_are_removed():
-    original_library = Splitter(bibtex_string).split()
-    no_enclosing_library = RemoveEnclosingMiddleware(
-        allow_inplace_modification=False
-    ).transform(original_library)
+    original_lib = Splitter(bibtex_string).split()
+    m = RemoveEnclosingMiddleware(allow_inplace_modification=False)
+    no_enclosing_library = m.transform(original_lib)
 
     with pytest.warns(UserWarning) as record:
-        ResolveStringReferencesMiddleware(allow_inplace_modification=False).transform(
-            no_enclosing_library
-        )
+        m = ResolveStringReferencesMiddleware(allow_inplace_modification=False)
+        m.transform(no_enclosing_library)
 
     assert len(record) == 1
     assert "RemoveEnclosing" in record[0].message.args[0]
