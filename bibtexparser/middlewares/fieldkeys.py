@@ -35,9 +35,9 @@ class NormalizeFieldKeys(BlockMiddleware):
             # to remove "seen_normalized_keys" and this if statement
             if normalized_key in seen_normalized_keys:
                 logging.warning(
-                    f"NormalizeFieldKeys: in entry '{entry.key}': "
-                    + f"duplicate normalized key '{normalized_key}' "
-                    + f"(original '{field.key}'); overriding previous value"
+                    f"NormalizeFieldKeys: in entry '{entry.key}': " +
+                    f"duplicate normalized key '{normalized_key}' " +
+                    f"(original '{field.key}'); overriding previous value"
                 )
             seen_normalized_keys.add(normalized_key)
             field.key = normalized_key
