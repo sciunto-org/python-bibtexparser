@@ -600,8 +600,8 @@ def split_multiple_persons_names(names):
                 step = FIND_A
                 possible_end = pos - 1
 
-        # Looking for the letter a. NB., we can have multiple whitespace
-        # characters so we need to handle that here.
+        # Looking for the letter "a".
+        # NB, we can have multiple whitespace characters so we need to handle that here.
         elif step == FIND_A:
             if char in ("a", "A"):
                 step = FIND_N
@@ -612,6 +612,9 @@ def split_multiple_persons_names(names):
         elif step == FIND_N:
             if char in ("n", "N"):
                 step = FIND_D
+            elif char in whitespace:
+                step = FIND_A
+                possible_end = pos - 1
             else:
                 step = START_WHITESPACE
 
@@ -619,6 +622,9 @@ def split_multiple_persons_names(names):
         elif step == FIND_D:
             if char in ("d", "D"):
                 step = END_WHITESPACE
+            elif char in whitespace:
+                step = FIND_A
+                possible_end = pos - 1
             else:
                 step = START_WHITESPACE
 
