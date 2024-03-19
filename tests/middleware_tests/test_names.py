@@ -75,6 +75,8 @@ from tests.middleware_tests.middleware_test_util import assert_nonfield_entry_at
         ("Harry Fellowes~and D. Drumpf", ["Harry Fellowes~and D. Drumpf"]),
         ("Harry Fellowes~and~D. Drumpf", ["Harry Fellowes~and~D. Drumpf"]),
         ("Harry Fellowes and~D. Drumpf", ["Harry Fellowes and~D. Drumpf"]),
+        ("Doe, John A and Doe, Jane", ["Doe, John A", "Doe, Jane"]),
+        ("Doe, John AN and Doe, Jane", ["Doe, John AN", "Doe, Jane"]),
         ("      ", []),
         ("\t\n \t", []),
         ("~", ["~"]),
