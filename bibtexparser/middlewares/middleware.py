@@ -12,6 +12,8 @@ from bibtexparser.model import ImplicitComment
 from bibtexparser.model import Preamble
 from bibtexparser.model import String
 
+logger = logging.getLogger(__name__)
+
 
 class Middleware(abc.ABC):
     """Implements a function to transform a block or library.
@@ -128,7 +130,7 @@ class BlockMiddleware(Middleware, abc.ABC):
         elif isinstance(block, ImplicitComment):
             return self.transform_implicit_comment(block, library)
 
-        logging.warning(f"Unknown block type {type(block)}")
+        logger.warning(f"Unknown block type {type(block)}")
         return block
 
     def transform_entry(

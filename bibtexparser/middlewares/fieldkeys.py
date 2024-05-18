@@ -9,6 +9,8 @@ from bibtexparser.model import Field
 
 from .middleware import BlockMiddleware
 
+logger = logging.getLogger(__name__)
+
 
 class NormalizeFieldKeys(BlockMiddleware):
     """Normalize field keys to lowercase.
@@ -37,7 +39,7 @@ class NormalizeFieldKeys(BlockMiddleware):
             # if performance is a concern, we could emit a warning with only {entry.key}
             # to remove "seen_normalized_keys" and this if statement
             if normalized_key in seen_normalized_keys:
-                logging.warning(
+                logger.warning(
                     f"NormalizeFieldKeys: in entry '{entry.key}': "
                     + f"duplicate normalized key '{normalized_key}' "
                     + f"(original '{field.key}'); overriding previous value"

@@ -62,7 +62,9 @@ def test_normalize_fieldkeys_force_last(caplog):
         lib.add(Entry(entry_type=entry_type, key=f"entry{i}", fields=f))
 
     lib = NormalizeFieldKeys().transform(lib)
-    assert re.match(r"(WARNING\s*)(\w*\:\w*\.py\:[0-9]*\s*)(NormalizeFieldKeys)(.*)", caplog.text)
+    assert re.match(
+        r"(WARNING\s*)([\w\.]*\:\w*\.py\:[0-9]*\s*)(NormalizeFieldKeys)(.*)", caplog.text
+    )
 
     for key in lib.entries_dict:
         assert lib.entries_dict[key] == ref.entries_dict[key]

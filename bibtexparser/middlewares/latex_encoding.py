@@ -22,6 +22,8 @@ from bibtexparser.model import String
 from .middleware import BlockMiddleware
 from .names import NameParts
 
+logger = logging.getLogger(__name__)
+
 
 class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
     """Abstract utility class allowing to modify python-strings"""
@@ -59,7 +61,7 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
                 field.value.von = self._transform_all_strings(field.value.von, errors)
                 field.value.jr = self._transform_all_strings(field.value.jr, errors)
             else:
-                logging.info(
+                logger.info(
                     f" [{self.metadata_key()}] Cannot python-str transform field {field.key}"
                     f" with value type {type(field.value)}"
                 )
@@ -76,7 +78,7 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
         if isinstance(string.value, str):
             string.value = self._transform_python_value_string(string.value)
         else:
-            logging.info(
+            logger.info(
                 f" [{self.metadata_key()}] Cannot python-str transform string {string.key}"
                 f" with value type {type(string.value)}"
             )
