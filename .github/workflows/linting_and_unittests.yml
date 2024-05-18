@@ -1,4 +1,4 @@
-name: "unittests-reproduce"
+name: "unittests"
 
 on:
   push:
@@ -12,8 +12,21 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        exclude:
+          # run python < 3.10 on macos-13 instead of latest (https://github.com/actions/setup-python/issues/855)
+          - os: macos-latest
+            node: 3.9         
+          - os: macos-latest
+            node: 3.8          
+          - os: macos-13
+            node: 3.10          
+          - os: macos-13
+            node: 3.11          
+          - os: macos-13
+            node: 3.12
+            
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
