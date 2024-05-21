@@ -19,6 +19,8 @@ from .model import ParsingFailedBlock
 from .model import Preamble
 from .model import String
 
+logger = logging.getLogger(__name__)
+
 
 class Splitter:
     """Object responsible for splitting a BibTeX string into blocks.
@@ -254,7 +256,7 @@ class Splitter:
         if library is None:
             library = Library()
         else:
-            logging.info("Adding blocks to existing library.")
+            logger.info("Adding blocks to existing library.")
 
         while True:
             m = self._next_mark(accept_eof=True)
@@ -283,12 +285,12 @@ class Splitter:
                         library.add(self._handle_entry(m, m_val))
 
                 except BlockAbortedException as e:
-                    logging.warning(
+                    logger.warning(
                         f"Parsing of `{m_val}` block (line {start_line}) "
                         f"aborted on line {self._current_line} "
                         f"due to syntactical error in bibtex:\n {e.abort_reason}"
                     )
-                    logging.info(
+                    logger.info(
                         "We will try to continue parsing, but this might lead to unexpected results."
                         "The failed block will be stored in the `failed_blocks`of the library."
                     )
@@ -302,14 +304,14 @@ class Splitter:
 
                 except ParserStateException as e:
                     # This is a bug in the parser, not in the bibtex. We should not continue.
-                    logging.error(
+                    logger.error(
                         "python-bibtexparser detected an invalid state. Please report this bug."
                     )
-                    logging.error(e.message)
+                    logger.error(e.message)
                     raise e
                 except Exception as e:
                     # For unknown exeptions, we want to fail hard and get the info in our issue tracker.
-                    logging.error(
+                    logger.error(
                         f"Unexpected exception while parsing `{m_val}` block (line {start_line})"
                         "Please report this bug."
                     )
