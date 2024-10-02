@@ -13,7 +13,7 @@ How to release
 * Upload to pypi-test
     twine upload --repository testpypi dist/*
 * Upload to pypi
-    twine check dist/*
+    twine upload dist/*
 * Create release on Github
 * Verify docs are automatically updated
 
