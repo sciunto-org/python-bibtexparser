@@ -4,6 +4,7 @@ from bibtexparser.middlewares.fieldkeys import NormalizeFieldKeys
 from bibtexparser.middlewares.interpolate import ResolveStringReferencesMiddleware
 from bibtexparser.middlewares.latex_encoding import LatexDecodingMiddleware
 from bibtexparser.middlewares.latex_encoding import LatexEncodingMiddleware
+from bibtexparser.middlewares.lists import SeparateCSVLists
 from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.middlewares.middleware import LibraryMiddleware
 from bibtexparser.middlewares.month import MonthAbbreviationMiddleware
