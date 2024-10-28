@@ -120,3 +120,96 @@ class SortBlocksByTypeAndKeyMiddleware(LibraryMiddleware):
 
             blocks.sort(key=_sort_key)
             return Library(blocks=blocks)
+
+
+class SortBlocksByYearMonthDayMiddleware(LibraryMiddleware):
+    """Sorts the blocks of a library by year, month and day. 
+
+    :param descending: uses descending ordering (ascending by default)
+    :param preserve_comments_on_top: comments remain above same block (default True)
+    """
+
+    def __init__(
+        self,
+        preserve_comments_on_top: bool = True,
+        descending = False
+    ):
+        self._preserve_comments_on_top = preserve_comments_on_top
+        self._descending = descending
+
+        # In-place modification is not yet supported, we make this explicit here,
+        super().__init__(allow_inplace_modification=False)
+
+    @staticmethod
+    # Sort blocks by year and month (default 0 in case entry has no year or month)
+    # Month should be an integer (recommended to use MonthIntMiddleware beforehand)
+    def _sort_key(block: Block):
+        month = 0
+        year = 0
+        day = 0
+        try:
+            try:
+                v = block.fields_dict["day"].value
+                if isinstance(v, str) and v.isdigit():
+                    v = int(v)
+                if isinstance(v, int):
+                    if v >= 1 or v <= 31:
+                        day = v
+            except KeyError:
+                # No year field
+                pass
+            try:
+                v = block.fields_dict["month"].value
+                if isinstance(v, str) and v.isdigit():
+                    v = int(v)
+                if isinstance(v, int):
+                    if v >= 1 or v <= 12:
+                        month = v
+            except KeyError:
+                # No month field
+                pass
+            try:
+                year = int(block.fields_dict["year"].value)
+            except KeyError:
+                # No year field
+                pass
+        except AttributeError:
+            # No fiedlds_dict (e.g. Comments)
+            pass
+        return year, month, day
+
+    # docstr-coverage: inherited
+    def transform(self, library: Library) -> Library:
+        blocks = deepcopy(library.blocks)
+
+        if self._preserve_comments_on_top:
+            # We start creating a new list of block_junks (made of comments and entries)
+            block_junks = []
+            current_junk = _BlockJunk()
+            for block in blocks:
+                current_junk.blocks.append(block)
+                current_junk.sort_key = self._sort_key(block)
+
+                if not (
+                    isinstance(block, ExplicitComment) or isinstance(block, ImplicitComment)
+                ):
+                    # We added a non-comment block, hence we finish the junk and
+                    # start a new one
+                    block_junks.append(current_junk)
+                    current_junk = _BlockJunk()
+
+            if current_junk.blocks:
+                # That would be a junk with only comments, but we add it at the end for completeness
+                block_junks.append(current_junk)
+
+            def _sort_key(block_junk):
+                return block_junk.sort_key
+
+            block_junks.sort(key=_sort_key, reverse=self._descending)
+            return Library(
+                blocks=[block for block_junk in block_junks for block in block_junk.blocks]
+            )
+        
+        else:
+            blocks.sort(key=self._sort_key)
+            return Library(blocks=blocks)
