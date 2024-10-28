@@ -152,7 +152,7 @@ def parse_url(
     :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``.
     :return: Library: Parsed BibTeX library
     """
-    import urllib
+    import urllib.request
 
     with urllib.request.urlopen(url) as f:
         bibtex_str = f.read().decode(encoding)
@@ -160,7 +160,6 @@ def parse_url(
             bibtex_str, parse_stack=parse_stack, append_middleware=append_middleware
         )
     
-
 def write_file(
     file: Union[str, TextIO],
     library: Library,
