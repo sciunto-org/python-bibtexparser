@@ -174,7 +174,7 @@ class SortBlocksByYearMonthDayMiddleware(LibraryMiddleware):
                 # No year field
                 pass
         except AttributeError:
-            # No fiedlds_dict (e.g. Comments)
+            # No fields_dict (e.g. Comments)
             pass
         return year, month, day
 
