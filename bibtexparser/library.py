@@ -165,6 +165,11 @@ class Library:
         return [b for b in self._blocks if isinstance(b, ParsingFailedBlock)]
 
     @property
+    def duplicate_blocks(self) -> List[DuplicateBlockKeyBlock]:
+        """All blocks that could not be parsed, preserving order of insertion."""
+        return [b for b in self._blocks if isinstance(b, DuplicateBlockKeyBlock)]
+
+    @property
     def strings(self) -> List[String]:
         """All @string blocks in the library, preserving order of insertion."""
         return list(self._strings_by_key.values())
