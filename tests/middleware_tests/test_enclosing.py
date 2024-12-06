@@ -197,6 +197,100 @@ def _figure_out_added_enclosing(changed_value, value):
     return used_enclosing
 
 
+@pytest.mark.parametrize("metadata_resolving", ["", "journal"])
+@pytest.mark.parametrize("metadata_enclosing", ["{", '"', "no-enclosing", None])
+@pytest.mark.parametrize("default_enclosing", ["{", '"'])
+@pytest.mark.parametrize("enclose_ints", [True, False], ids=["enclose_ints", "no_enclose_ints"])
+@pytest.mark.parametrize(
+    "keep_abbr_string", [True, False], ids=["keep_abbr_string", "no_keep_abbr_string"]
+)
+@pytest.mark.parametrize("reuse_previous_enclosing", [True, False], ids=["reuse", "no_reuse"])
+@pytest.mark.parametrize(
+    "value",
+    [
+        # value, is a abbreviation?
+        ("IEEE_T_PAMI", True),
+        ('IEEE_T_PAMI # "ieee tpami"', True),
+        ('IEEE_T_PAMI" # ieee tpami', False),
+        ('IEEE_T-PAMI # "ieee tpami"', False),
+        ('IEEE_T-PAMI # "ieee # tpami"', False),
+        ('IEEE T-PAMI # "ieee tpami"', False),
+    ],
+)
+@pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
+def test_addition_of_enclosing_on_entry_with_abbr(
+    value: tuple,
+    metadata_resolving: str,
+    keep_abbr_string: bool,
+    metadata_enclosing: str,
+    default_enclosing: str,
+    enclose_ints: bool,
+    reuse_previous_enclosing: bool,
+    inplace: bool,
+):
+    """Extensive Matrix-Testing of the AddEnclosingMiddleware on Entries.
+
+    Also covers the internals for other block types (i.e., String),
+    which thus can be tested more light-weight."""
+    # These values not matter for this unit test,
+    #   but must not change during transformation
+    #   (hence, they are created as variables, not directly in Entry constructor)
+    value, is_abbr = value
+    input_entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[Field(value=value, start_line=6, key="journal")],
+    )
+
+    if metadata_resolving:
+        input_entry.parser_metadata["ResolveStringReferences"] = [metadata_resolving]
+    if metadata_enclosing is not None:
+        input_entry.parser_metadata["removed_enclosing"] = {"journal": metadata_enclosing}
+
+    middleware = AddEnclosingMiddleware(
+        allow_inplace_modification=inplace,
+        default_enclosing=default_enclosing,
+        reuse_previous_enclosing=reuse_previous_enclosing,
+        enclose_integers=enclose_ints,
+        keep_abbr_string=keep_abbr_string,
+    )
+
+    transformed_library = middleware.transform(library=Library([input_entry]))
+
+    # Assert correct library state
+    assert len(transformed_library.blocks) == 1
+    assert len(transformed_library.entries) == 1
+    # Assert correct addition of enclosing
+    transformed = transformed_library.entries[0]
+    changed_value = transformed["journal"]
+
+    # Assert correct enclosing was added
+    if reuse_previous_enclosing and metadata_enclosing is not None:
+        expected_enclosing = metadata_enclosing
+    elif (isinstance(value, int) or value.isdigit()) and not enclose_ints:
+        expected_enclosing = "no-enclosing"
+    elif not metadata_resolving and keep_abbr_string:
+        if is_abbr:
+            expected_enclosing = "no-enclosing"
+        else:
+            expected_enclosing = default_enclosing
+    else:
+        expected_enclosing = default_enclosing
+
+    if expected_enclosing == "no-enclosing":
+        _skip_pseudo_enclosing_value(value)
+
+    assert changed_value == middleware._enclose_value(value, expected_enclosing)
+
+    # Assert remaining fields are unchanged
+    assert_nonfield_entry_attributes_unchanged(input_entry, transformed)
+
+    # Assert `allow_inplace_modification` is respected
+    assert_inplace_is_respected(inplace, input_entry, transformed)
+
+
 @pytest.mark.parametrize("metadata_enclosing", ["{", '"', None])
 @pytest.mark.parametrize("default_enclosing", ["{", '"'])
 @pytest.mark.parametrize("enclose_ints", [True, False], ids=["enclose_ints", "no_enclose_ints"])
