@@ -139,6 +139,7 @@ def write_file(
     parse_stack: Optional[Iterable[Middleware]] = None,
     append_middleware: Optional[Iterable[Middleware]] = None,
     bibtex_format: Optional[BibtexFormat] = None,
+    encoding: str = "UTF-8",
 ) -> None:
     """Write a BibTeX database to a file.
 
@@ -156,7 +157,7 @@ def write_file(
         bibtex_format=bibtex_format,
     )
     if isinstance(file, str):
-        with open(file, "w") as f:
+        with open(file, "w", encoding=encoding) as f:
             f.write(bibtex_str)
     else:
         file.write(bibtex_str)
