@@ -12,8 +12,7 @@ jobs:
   build:
     strategy:
       matrix:
-        # macos-latest currently has issues (https://github.com/actions/setup-python/issues/855)
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.10', '3.11', '3.12']
     runs-on: ${{ matrix.os }}
     steps:
