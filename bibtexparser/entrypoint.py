@@ -1,3 +1,4 @@
+import codecs
 import warnings
 from typing import Iterable
 from typing import List
@@ -20,9 +21,9 @@ def _build_parse_stack(
 ) -> List[Middleware]:
     if parse_stack is not None and append_middleware is not None:
         raise ValueError(
-            "Provided both parse_stack and append_middleware."
-            "Only one should be provided."
-            "(append_middleware should only be used with the default parse_stack,"
+            "Provided both parse_stack and append_middleware. "
+            "Only one should be provided. "
+            "(append_middleware should only be used with the default parse_stack, "
             "i.e., when the passed parse_stack is None.)"
         )
 
@@ -50,10 +51,10 @@ def _build_unparse_stack(
 ) -> List[Middleware]:
     if unparse_stack is not None and prepend_middleware is not None:
         raise ValueError(
-            "Provided both parse_stack and append_middleware."
-            "Only one should be provided."
-            "(prepend_middleware should only be used with the default parse_stack,"
-            "i.e., when the passed parse_stack is None.)"
+            "Provided both unparse_stack and prepend_middleware. "
+            "Only one should be provided. "
+            "(prepend_middleware should only be used with the default unparse_stack, "
+            "i.e., when the passed unparse_stack is None.)"
         )
 
     if unparse_stack is None:
@@ -125,7 +126,13 @@ def parse_file(
 
     :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``.
     :return: Library: Parsed BibTeX library
+    :raises LookupError: If the specified encoding is not recognized.
     """
+    try:
+        codecs.lookup(encoding)
+    except LookupError:
+        raise LookupError(f"Unknown encoding: {encoding!r}")
+
     with open(path, encoding=encoding) as f:
         bibtex_str = f.read()
         return parse_string(
