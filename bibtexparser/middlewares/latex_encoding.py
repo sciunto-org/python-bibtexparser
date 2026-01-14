@@ -102,8 +102,13 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
 
         if encoder is not None and (keep_math is not None or enclose_urls is not None):
             raise ValueError(
-                "Cannot specify both encoder and keep_math or enclose_urls."
+                "Cannot specify both encoder and keep_math or enclose_urls. "
                 "If you want to use a custom encoder, you have to specify it completely."
+            )
+
+        if encoder is not None and not isinstance(encoder, UnicodeToLatexEncoder):
+            raise TypeError(
+                f"encoder must be a UnicodeToLatexEncoder instance, got {type(encoder).__name__}"
             )
 
         # Defaults (not specified as defaults in args,
@@ -167,9 +172,14 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
         if decoder is not None and (keep_braced_groups is not None or keep_math_mode is not None):
             raise ValueError(
                 "Cannot specify both decoder and one of "
-                "`keep_braced_groups` or `keep_math_mode`."
+                "`keep_braced_groups` or `keep_math_mode`. "
                 "If you want to use a custom decoder, "
                 "you have to specify it completely."
+            )
+
+        if decoder is not None and not isinstance(decoder, LatexNodes2Text):
+            raise TypeError(
+                f"decoder must be a LatexNodes2Text instance, got {type(decoder).__name__}"
             )
 
         # Defaults (not specified as defaults in args,
