@@ -291,8 +291,8 @@ class Splitter:
                         f"due to syntactical error in bibtex:\n {e.abort_reason}"
                     )
                     logger.info(
-                        "We will try to continue parsing, but this might lead to unexpected results."
-                        "The failed block will be stored in the `failed_blocks`of the library."
+                        "We will try to continue parsing, but this might lead to unexpected results. "
+                        "The failed block will be stored in the `failed_blocks` of the library."
                     )
                     library.add(
                         ParsingFailedBlock(
@@ -308,14 +308,14 @@ class Splitter:
                         "python-bibtexparser detected an invalid state. Please report this bug."
                     )
                     logger.error(e.message)
-                    raise e
-                except Exception as e:
+                    raise
+                except Exception:
                     # For unknown exceptions, we want to fail hard and get the info in our issue tracker.
                     logger.error(
-                        f"Unexpected exception while parsing `{m_val}` block (line {start_line})"
+                        f"Unexpected exception while parsing `{m_val}` block (line {start_line}). "
                         "Please report this bug."
                     )
-                    raise e
+                    raise
 
                 self._reset_block_status(current_char_index=self._current_char_index + 1)
             else:
