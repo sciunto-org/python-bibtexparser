@@ -10,7 +10,7 @@ Status of v2
 
 The v2 branch is well tested and reasonably stable, but it is not yet widely adopted - as an early adopter,
 you may encounter some bugs. If you do, please report them on the issue tracker.
-Also, note that some interfaces may change sightly before we release v2.0.0 as stable.
+Also, note that some interfaces may change slightly before we release v2.0.0 as stable.
 
 Some customizations from v1 are not implemented in v2, as we doubt they are widely used. If you need one of
 these features, please let us know on the issue tracker.
@@ -51,7 +51,7 @@ As such, it makes reduced use of the new features of v2 and makes use of backwar
 Changing the entrypoint with default settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To make sure that users dont "migrate by accident" to bibtex v2, we changed the entrypoint of the package:
+To make sure that users don't "migrate by accident" to bibtex v2, we changed the entrypoint of the package:
 
 .. code-block:: python
 
@@ -102,5 +102,5 @@ but for them, the migration is straight forward and we will not go into detail h
 Writing a bibtex file (possibly with customizations)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The way to write a bibtex file has changed fundamentally in v2, and is now handeled in a fashion very similar to the parsing.
+The way to write a bibtex file has changed fundamentally in v2, and is now handled in a fashion very similar to the parsing.
 See the :ref:`writing quickstart <writing_quickstart>` and :ref:`writing formatting <writing_formatting>` for more information.

@@ -20,7 +20,7 @@ Prerequisite: Vocabulary
 In an entry, you can find
 
 * an **entry type** like ``article``, ``book``, etc.
-* and **entry key**, e.g. ``Cesar2013`` in ``@article{Cesar2013, ...}``.
+* an **entry key**, e.g. ``Cesar2013`` in ``@article{Cesar2013, ...}``.
 * and **fields**, which are the key-value pairs in the entry, e.g. ``author = {Jean César}``.
 * each field has a **field key** and a **field value**.
 

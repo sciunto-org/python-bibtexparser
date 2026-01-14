@@ -166,9 +166,9 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
 
         if decoder is not None and (keep_braced_groups is not None or keep_math_mode is not None):
             raise ValueError(
-                "Cannot specify both encoder and one of "
-                "`keep_braced_groups` or `keep_braced_groups`."
-                "If you want to use a custom encoder, "
+                "Cannot specify both decoder and one of "
+                "`keep_braced_groups` or `keep_math_mode`."
+                "If you want to use a custom decoder, "
                 "you have to specify it completely."
             )
 

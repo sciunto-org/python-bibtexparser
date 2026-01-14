@@ -196,7 +196,7 @@ class MergeNameParts(_NameTransformerMiddleware):
         return "merge_name_parts"
 
     def _transform_field_value(self, name) -> List[str]:
-        if not isinstance(name, list) and all(isinstance(n, NameParts) for n in name):
+        if not (isinstance(name, list) and all(isinstance(n, NameParts) for n in name)):
             raise ValueError(f"Expected a list of NameParts, got {name}. ")
 
         if self.style == "last":
