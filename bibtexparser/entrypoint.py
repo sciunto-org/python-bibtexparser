@@ -21,9 +21,9 @@ def _build_parse_stack(
 ) -> List[Middleware]:
     if parse_stack is not None and append_middleware is not None:
         raise ValueError(
-            "Provided both parse_stack and append_middleware."
-            "Only one should be provided."
-            "(append_middleware should only be used with the default parse_stack,"
+            "Provided both parse_stack and append_middleware. "
+            "Only one should be provided. "
+            "(append_middleware should only be used with the default parse_stack, "
             "i.e., when the passed parse_stack is None.)"
         )
 
@@ -51,10 +51,10 @@ def _build_unparse_stack(
 ) -> List[Middleware]:
     if unparse_stack is not None and prepend_middleware is not None:
         raise ValueError(
-            "Provided both parse_stack and append_middleware."
-            "Only one should be provided."
-            "(prepend_middleware should only be used with the default parse_stack,"
-            "i.e., when the passed parse_stack is None.)"
+            "Provided both unparse_stack and prepend_middleware. "
+            "Only one should be provided. "
+            "(prepend_middleware should only be used with the default unparse_stack, "
+            "i.e., when the passed unparse_stack is None.)"
         )
 
     if unparse_stack is None:

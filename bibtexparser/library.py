@@ -107,18 +107,22 @@ class Library:
     def _cast_to_duplicate(
         prev_block_with_same_key: Union[Entry, String], duplicate: Union[Entry, String]
     ):
-        assert isinstance(prev_block_with_same_key, type(duplicate)) or isinstance(
-            duplicate, type(prev_block_with_same_key)
-        ), (
-            "Internal BibtexParser Error. Duplicate blocks share no common type."
-            f"Found {type(prev_block_with_same_key)} and {type(duplicate)}, but both should be"
-            f"either instance of String or instance of Entry."
-            f"Please report this issue at the bibtexparser issue tracker.",
-        )
+        if not (
+            isinstance(prev_block_with_same_key, type(duplicate))
+            or isinstance(duplicate, type(prev_block_with_same_key))
+        ):
+            raise ValueError(
+                "Internal BibtexParser Error. Duplicate blocks share no common type. "
+                f"Found {type(prev_block_with_same_key)} and {type(duplicate)}, but both should be "
+                "either instance of String or instance of Entry. "
+                "Please report this issue at the bibtexparser issue tracker."
+            )
 
-        assert (
-            prev_block_with_same_key.key == duplicate.key
-        ), "Internal BibtexParser Error. Duplicate blocks have different keys."
+        if prev_block_with_same_key.key != duplicate.key:
+            raise ValueError(
+                "Internal BibtexParser Error. Duplicate blocks have different keys. "
+                "Please report this issue at the bibtexparser issue tracker."
+            )
 
         return DuplicateBlockKeyBlock(
             start_line=duplicate.start_line,
