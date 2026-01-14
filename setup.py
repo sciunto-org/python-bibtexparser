@@ -29,7 +29,7 @@ setuptools.setup(
     description="Bibtex parser for python 3",
     long_description_content_type="text/markdown",
     long_description=load_readme(),
-    python_requires='>=3.9',
+    python_requires=">=3.9",
     packages=setuptools.find_packages(include=["bibtexparser", "bibtexparser.*"]),
     classifiers=[
         "Development Status :: 4 - Beta",
