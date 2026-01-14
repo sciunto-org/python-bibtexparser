@@ -1,3 +1,4 @@
+import codecs
 import warnings
 from typing import Iterable
 from typing import List
@@ -125,7 +126,13 @@ def parse_file(
 
     :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``.
     :return: Library: Parsed BibTeX library
+    :raises LookupError: If the specified encoding is not recognized.
     """
+    try:
+        codecs.lookup(encoding)
+    except LookupError:
+        raise LookupError(f"Unknown encoding: {encoding!r}")
+
     with open(path, encoding=encoding) as f:
         bibtex_str = f.read()
         return parse_string(
