@@ -14,7 +14,7 @@ jobs:
       matrix:
         # macos-latest currently has issues (https://github.com/actions/setup-python/issues/855)
         os: [ubuntu-latest, windows-latest, macos-13]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
