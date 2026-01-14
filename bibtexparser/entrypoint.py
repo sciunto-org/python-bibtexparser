@@ -151,8 +151,8 @@ def write_file(
     :param bibtex_format: Customized BibTeX format to use (optional)."""
     bibtex_str = write_string(
         library=library,
-        unparse_stack=parse_stack,
-        prepend_middleware=append_middleware,
+        unparse_stack=unparse_stack,
+        prepend_middleware=prepend_middleware,
         bibtex_format=bibtex_format,
     )
     if isinstance(file, str):
