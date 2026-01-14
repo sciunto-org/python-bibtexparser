@@ -136,18 +136,18 @@ def parse_file(
 def write_file(
     file: Union[str, TextIO],
     library: Library,
-    parse_stack: Optional[Iterable[Middleware]] = None,
-    append_middleware: Optional[Iterable[Middleware]] = None,
+    unparse_stack: Optional[Iterable[Middleware]] = None,
+    prepend_middleware: Optional[Iterable[Middleware]] = None,
     bibtex_format: Optional[BibtexFormat] = None,
 ) -> None:
     """Write a BibTeX database to a file.
 
     :param file: File to write to. Can be a file name or a file object.
     :param library: BibTeX database to serialize.
-    :param parse_stack: List of middleware to apply to the database before writing.
+    :param unparse_stack: List of middleware to apply to the database before writing.
                         If None, a default stack will be used.
-    :param append_middleware: List of middleware to append to the default stack.
-                        Only applicable if `parse_stack` is None.
+    :param prepend_middleware: List of middleware to prepend to the default stack.
+                        Only applicable if `unparse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional)."""
     bibtex_str = write_string(
         library=library,
