@@ -164,8 +164,8 @@ class SplitNameParts(_NameTransformerMiddleware):
         if not isinstance(name, list):
             raise ValueError(
                 "Expected a list of strings, got {}. "
-                "Make sure to use `SeparateCoAuthors` middleware"
-                "before using `SplitNameParts` middleware".format(name)
+                "Make sure to use `SeparateCoAuthors` middleware "
+                "before using `SplitNameParts` middleware.".format(name)
             )
 
         return [parse_single_name_into_parts(n) for n in name]
