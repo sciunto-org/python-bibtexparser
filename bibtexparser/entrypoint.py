@@ -139,6 +139,7 @@ def write_file(
     unparse_stack: Optional[Iterable[Middleware]] = None,
     prepend_middleware: Optional[Iterable[Middleware]] = None,
     bibtex_format: Optional[BibtexFormat] = None,
+    encoding: str = "UTF-8",
 ) -> None:
     """Write a BibTeX database to a file.
 
@@ -148,7 +149,8 @@ def write_file(
                         If None, a default stack will be used.
     :param prepend_middleware: List of middleware to prepend to the default stack.
                         Only applicable if `unparse_stack` is None.
-    :param bibtex_format: Customized BibTeX format to use (optional)."""
+    :param bibtex_format: Customized BibTeX format to use (optional).
+    :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``."""
     bibtex_str = write_string(
         library=library,
         unparse_stack=unparse_stack,
@@ -156,7 +158,7 @@ def write_file(
         bibtex_format=bibtex_format,
     )
     if isinstance(file, str):
-        with open(file, "w") as f:
+        with open(file, "w", encoding=encoding) as f:
             f.write(bibtex_str)
     else:
         file.write(bibtex_str)
