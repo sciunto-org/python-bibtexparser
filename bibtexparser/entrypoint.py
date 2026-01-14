@@ -174,7 +174,7 @@ def write_string(
     :param unparse_stack: List of middleware to apply to the database before writing.
                         If None, a default stack will be used.
     :param prepend_middleware: List of middleware to prepend to the default stack.
-                        Only applicable if `parse_stack` is None.
+                        Only applicable if `unparse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional).
     """
     middleware: Middleware

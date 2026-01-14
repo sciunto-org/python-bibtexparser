@@ -1,6 +1,6 @@
 # python-bibtexparser v2
 
-Welcome to python-bibtexparser, a parser for `.bib` files with a long history and wide adaption.
+Welcome to python-bibtexparser, a parser for `.bib` files with a long history and wide adoption.
 
 Bibtexparser is available in two versions: V1 and V2. For new projects, we recommend using v2 which, in the long run, will provide an overall more robust and faster experience. **For now, however, note that v2 is an early beta, and does not contain all features of v1**. Install v2 using pip:
 
@@ -61,7 +61,7 @@ bib_database = bibtexparser.parse_string(bibtex_string,
 
 # Let's transform it back to a bibtex_string.
 new_bibtex_string = bibtexparser.write_string(bib_database,
-    # Revert aboves transfomration
+    # Revert above transformation
     prepend_middleware=[MergeNameParts(), MergeCoAuthors()]
 )
 ```
@@ -76,14 +76,14 @@ Consult the documentation for a list of available middleware, parsing options an
 The architecture consists of the following components:
 
 #### Library
-Reflects the contents of a parsed bibtex files, including all comments, entries, strings, preamples and their metadata (e.g. order).
+Reflects the contents of a parsed bibtex files, including all comments, entries, strings, preambles and their metadata (e.g. order).
 
 #### A Splitter
 Splits a bibtex string into basic blocks (Entry, String, Preamble, ...), with correspondingly split content (e.g. fields on Entry, key-value on String, ...).
 The splitter aims to be forgiving when facing invalid bibtex: A line starting with a block definition (``@....``) ends the previous block, even if not yet every bracket is closed, failing the parsing of the previous block. Correspondingly, one block type is "ParsingFailedBlock".
 
 #### Middleware
-Middleware layers transform a library and its blocks, for example by decoding latex special characters, interpolating string references, resoling crossreferences or re-ordering blocks. Thus, the choice of middleware allows to customize parsing and writing to ones specific usecase. Note: Middlewares, by default, no not mutate their input, but return a modified copy.
+Middleware layers transform a library and its blocks, for example by decoding latex special characters, interpolating string references, resolving crossreferences or re-ordering blocks. Thus, the choice of middleware allows to customize parsing and writing to ones specific usecase. Note: Middlewares, by default, do not mutate their input, but return a modified copy.
 
 #### Writer
 Writes the content of a bibtex library to a ``.bib`` file. Optional formatting parameters can be passed using a corresponding dedicated data structure.

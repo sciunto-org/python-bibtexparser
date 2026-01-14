@@ -98,7 +98,7 @@ Names
 
 * :mod:`bibtexparser.middlewares.SeparateCoAuthors`
 * :mod:`bibtexparser.middlewares.MergeCoAuthors`
-* :mod:`bibtexparser.middlewares.SplitNameParts` (requires SeperateCoAuthors to be applied first)
+* :mod:`bibtexparser.middlewares.SplitNameParts` (requires SeparateCoAuthors to be applied first)
 * :mod:`bibtexparser.middlewares.MergeNameParts`
 
 .. _middleware_sorting:

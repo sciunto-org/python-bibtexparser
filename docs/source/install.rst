@@ -5,6 +5,7 @@ Installation
 Requirements
 ------------
 
+
 Bibtexparser's only requirement is a python interpreter which is not yet EOL (currently >= 3.9).
 
 As of version 2.0.0, bibtexparser is a pure-python project (no direct bindings to C libraries).

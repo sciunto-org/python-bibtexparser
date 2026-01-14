@@ -310,7 +310,7 @@ class Splitter:
                     logger.error(e.message)
                     raise e
                 except Exception as e:
-                    # For unknown exeptions, we want to fail hard and get the info in our issue tracker.
+                    # For unknown exceptions, we want to fail hard and get the info in our issue tracker.
                     logger.error(
                         f"Unexpected exception while parsing `{m_val}` block (line {start_line})"
                         "Please report this bug."

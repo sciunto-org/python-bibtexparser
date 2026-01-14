@@ -10,7 +10,7 @@ We are always looking for people to improve the library. Contributions include, 
 
 ### Some guidelines
 
-1. Be nice! Were all doing this in our free time; no one is obligated to do anything.
+1. Be nice! We're all doing this in our free time; no one is obligated to do anything.
 2. Add sufficient tests to your PRs.
 3. Document your code.
 4. Don't hesitate to ask questions.

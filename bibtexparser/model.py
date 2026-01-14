@@ -7,7 +7,7 @@ from typing import Set
 
 
 class Block(abc.ABC):
-    """A abstract superclass of all top-level building blocks of a bibtex file.
+    """An abstract superclass of all top-level building blocks of a bibtex file.
 
     E.g. a ``@string`` block, a ``@preamble`` block, an ``@entry`` block, a comment, etc.
     """
