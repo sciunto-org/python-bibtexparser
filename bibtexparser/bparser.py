@@ -159,7 +159,7 @@ class BibTexParser(object):
 
         bibtex_file_obj = self._bibtex_file_obj(bibtex_str)
         try:
-            self._expr.parseFile(bibtex_file_obj)
+            self._expr.parse_file(bibtex_file_obj)
         except self._expr.ParseException as exc:
             logger.error("Could not parse properly, starting at %s", exc.line)
             if not partial:
@@ -198,20 +198,20 @@ class BibTexParser(object):
         self._expr.add_log_function(logger.debug)
 
         # Set actions
-        self._expr.entry.addParseAction(
+        self._expr.entry.add_parse_action(
             lambda s, l, t: self._add_entry(
                 t.get('EntryType'), t.get('Key'), t.get('Fields'))
             )
-        self._expr.implicit_comment.addParseAction(
+        self._expr.implicit_comment.add_parse_action(
             lambda s, l, t: self._add_comment(t[0])
             )
-        self._expr.explicit_comment.addParseAction(
+        self._expr.explicit_comment.add_parse_action(
             lambda s, l, t: self._add_comment(t[0])
             )
-        self._expr.preamble_decl.addParseAction(
+        self._expr.preamble_decl.add_parse_action(
             lambda s, l, t: self._add_preamble(t[0])
             )
-        self._expr.string_def.addParseAction(
+        self._expr.string_def.add_parse_action(
             lambda s, l, t: self._add_string(t['StringName'].name,
                                              t['StringValue'])
             )

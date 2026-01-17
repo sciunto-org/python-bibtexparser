@@ -29,7 +29,7 @@ def add_logger_parse_action(expr, log_func):
     """Register a callback on expression parsing with the adequate message."""
     def action(s, l, t):
         log_func("Found {}: {}".format(expr.resultsName, t))
-    expr.addParseAction(action)
+    expr.add_parse_action(action)
 
 
 # Parse action helpers
@@ -111,7 +111,7 @@ class BibtexExpression(object):
         # String names
         string_name = pp.Word(pp.alphanums + '_-:')('StringName')
         self.set_string_name_parse_action(lambda s, l, t: None)
-        string_name.addParseAction(self._string_name_parse_action)
+        string_name.add_parse_action(self._string_name_parse_action)
 
         # Values inside bibtex fields
         # Values can be integer or string expressions. The latter may use
@@ -123,27 +123,27 @@ class BibtexExpression(object):
         # Braced values: braced values can contain nested (but balanced) braces
         braced_value_content = pp.CharsNotIn('{}')
         braced_value = pp.Forward()  # Recursive definition for nested braces
-        braced_value <<= pp.originalTextFor(
+        braced_value <<= pp.original_text_for(
             '{' + pp.ZeroOrMore(braced_value | braced_value_content) + '}'
             )('BracedValue')
-        braced_value.setParseAction(remove_braces)
+        braced_value.set_parse_action(remove_braces)
         # TODO add ignore for "\}" and "\{" ?
         # TODO @ are not parsed by bibtex in braces
 
         # Quoted values: may contain braced content with balanced braces
-        brace_in_quoted = pp.nestedExpr('{', '}', ignoreExpr=None)
+        brace_in_quoted = pp.nested_expr('{', '}', ignore_expr=None)
         text_in_quoted = pp.CharsNotIn('"{}')
         # (quotes should be escaped by braces in quoted value)
-        quoted_value = pp.originalTextFor(
+        quoted_value = pp.original_text_for(
             '"' + pp.ZeroOrMore(text_in_quoted | brace_in_quoted) + '"'
             )('QuotedValue')
-        quoted_value.addParseAction(pp.removeQuotes)
+        quoted_value.add_parse_action(pp.remove_quotes)
 
         # String expressions
-        string_expr = pp.delimitedList(
+        string_expr = pp.DelimitedList(
             (quoted_value | braced_value | string_name), delim='#'
             )('StringExpression')
-        string_expr.addParseAction(self._string_expr_parse_action)
+        string_expr.add_parse_action(self._string_expr_parse_action)
 
         value = (integer | string_expr)('Value')
 
@@ -151,7 +151,7 @@ class BibtexExpression(object):
 
         # @EntryType { ...
         entry_type = (pp.Suppress('@') + pp.Word(pp.alphas))('EntryType')
-        entry_type.setParseAction(first_token)
+        entry_type.set_parse_action(first_token)
 
         # Entry key: any character up to a ',' without leading and trailing
         # spaces. Also exclude spaces and prevent it from being empty.
@@ -175,20 +175,20 @@ class BibtexExpression(object):
                         msg="Whitespace not allowed in citekeys.")
             return key
 
-        key.setParseAction(citekeyParseAction)
+        key.set_parse_action(citekeyParseAction)
 
         # Field name: word of letters, digits, dashes and underscores
         field_name = pp.Word(pp.alphanums + '_-().+')('FieldName')
-        field_name.setParseAction(first_token)
+        field_name.set_parse_action(first_token)
 
         # Field: field_name = value
         field = pp.Group(field_name + pp.Suppress('=') + value)('Field')
-        field.setParseAction(field_to_pair)
+        field.set_parse_action(field_to_pair)
 
         # List of fields: comma separeted fields
-        field_list = (pp.delimitedList(field) + pp.Suppress(pp.Optional(','))
+        field_list = (pp.DelimitedList(field) + pp.Suppress(pp.Optional(','))
                       )('Fields')
-        field_list.setParseAction(
+        field_list.set_parse_action(
             lambda s, l, t: {k: v for (k, v) in reversed(t.get('Fields'))})
 
         # Entry: type, key, and fields
@@ -204,10 +204,10 @@ class BibtexExpression(object):
                                    ) | pp.StringEnd()
         self.explicit_comment = (
             pp.Suppress(comment_line_start) +
-            pp.originalTextFor(pp.SkipTo(not_an_implicit_comment),
-                               asString=True))('ExplicitComment')
-        self.explicit_comment.addParseAction(remove_trailing_newlines)
-        self.explicit_comment.addParseAction(remove_braces)
+            pp.original_text_for(pp.SkipTo(not_an_implicit_comment),
+                               as_string=True))('ExplicitComment')
+        self.explicit_comment.add_parse_action(remove_trailing_newlines)
+        self.explicit_comment.add_parse_action(remove_braces)
         # Previous implementation included comment until next '}'.
         # This is however not inline with bibtex behavior that is to only
         # ignore until EOL. Brace stipping is arbitrary here but avoids
@@ -219,10 +219,10 @@ class BibtexExpression(object):
                 raise pp.ParseException("Match must not be empty.")
 
         # Implicit comments: not anything else
-        self.implicit_comment = pp.originalTextFor(
-            pp.SkipTo(not_an_implicit_comment).setParseAction(mustNotBeEmpty),
-            asString=True)('ImplicitComment')
-        self.implicit_comment.addParseAction(remove_trailing_newlines)
+        self.implicit_comment = pp.original_text_for(
+            pp.SkipTo(not_an_implicit_comment).set_parse_action(mustNotBeEmpty),
+            as_string=True)('ImplicitComment')
+        self.implicit_comment.add_parse_action(remove_trailing_newlines)
 
         # String definition
         self.string_def = (pp.Suppress(string_def_start) + in_braces_or_pars(
@@ -274,5 +274,13 @@ class BibtexExpression(object):
     def _string_expr_parse_action(self, s, l, t):
         return BibDataStringExpression.expression_if_needed(t)
 
+    def parse_file(self, file_obj):
+        """Execute parse expression on a file object"""
+        return self.main_expression.parse_file(file_obj, parse_all=True)
+
     def parseFile(self, file_obj):
-        return self.main_expression.parseFile(file_obj, parseAll=True)
+        """Execute parse expression on a file object
+
+        Alias for parse_file()
+        """
+        return self.parse_file(file_obj)
