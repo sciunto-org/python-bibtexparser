@@ -57,6 +57,24 @@ class Splitter:
         self._implicit_comment_start_line = self._current_line
         self._implicit_comment_start: Optional[int] = current_char_index
 
+    def _is_at_line_start(self, pos: int) -> bool:
+        """Check if position is at the start of a line (after optional whitespace).
+
+        This is used to determine whether an @ sign should be treated as a new
+        block start (for error recovery) or as content within a field value.
+        We only want to abort parsing and start a new block if the @ is at the
+        beginning of a line, to avoid false positives with @ signs in content.
+        """
+        # Scan backwards from pos to find either newline or non-whitespace
+        for i in range(pos - 1, -1, -1):
+            char = self.bibstr[i]
+            if char == "\n":
+                return True
+            elif not char.isspace():
+                return False
+        # Start of string counts as line start
+        return True
+
     def _end_implicit_comment(self, end_char_index) -> Optional[ImplicitComment]:
         if self._implicit_comment_start is None:
             return  # No implicit comment started
@@ -122,7 +140,11 @@ class Splitter:
                     return m.start()
                 else:
                     num_additional_brackets -= 1
-            elif m.group(0).startswith("@"):
+            elif m.group(0).startswith("@") and self._is_at_line_start(m.start()):
+                # Only abort if the @ is at the start of a line.
+                # This allows @ signs in field values (e.g., "LeQua @ {CLEF}")
+                # while still providing error recovery when a new block starts
+                # on a new line within an unclosed block.
                 self._unaccepted_mark = m
                 raise BlockAbortedException(
                     abort_reason=f"Unexpected block start: `{m.group(0)}`. "
@@ -169,8 +191,13 @@ class Splitter:
                 self._unaccepted_mark = next_mark
                 return next_mark.start()
 
-            # Sanity-check: If new block is starting, we abort
-            elif next_mark.group(0).startswith("@"):
+            # Sanity-check: If new block is starting at line start, we abort.
+            # We only abort if the @ is at the start of a line to allow @ signs
+            # in field values (e.g., "LeQua @ {CLEF}") while still providing
+            # error recovery when a new block starts on a new line.
+            elif next_mark.group(0).startswith("@") and self._is_at_line_start(
+                next_mark.start()
+            ):
                 self._unaccepted_mark = next_mark
 
                 if currently_quote_escaped:
