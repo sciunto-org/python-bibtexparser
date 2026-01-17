@@ -43,7 +43,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "pylatexenc>=2.10",
+        "pylatexenc~=2.10",
     ],
     extras_require={
         "test": [
