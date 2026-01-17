@@ -46,7 +46,7 @@ class Splitter:
 
         self._reset_block_status(current_char_index=0)
 
-    def _reset_block_status(self, current_char_index):
+    def _reset_block_status(self, current_char_index: int) -> None:
         self._open_brackets = 0
         self._is_quote_open = False
         self._expected_next: Optional[List[str]] = None
@@ -131,7 +131,7 @@ class Splitter:
                 )
 
     def _move_to_comma_or_closing_curly_bracket(
-        self, currently_quote_escaped=False, num_open_curls=0
+        self, currently_quote_escaped: bool = False, num_open_curls: int = 0
     ) -> int:
         """Index of the end of the field, taking quote-escape into account."""
 

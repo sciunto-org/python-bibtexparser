@@ -31,6 +31,7 @@ setuptools.setup(
     long_description=load_readme(),
     python_requires=">=3.9",
     packages=setuptools.find_packages(include=["bibtexparser", "bibtexparser.*"]),
+    package_data={"bibtexparser": ["py.typed"]},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3",
