@@ -4,6 +4,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Set
+from typing import Tuple
 
 
 class Block(abc.ABC):
@@ -67,7 +68,7 @@ class Block(abc.ABC):
         See attribute ``parser_metadata`` for more information."""
         self._parser_metadata[key] = value
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         # make sure they have the same type and same content
         return (
             isinstance(other, self.__class__)
@@ -108,10 +109,10 @@ class String(Block):
     def value(self, value: str):
         self._value = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"String (line: {self.start_line}, key: `{self.key}`): `{self.value}`"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"String(key=`{self.key}`, value=`{self.value}`, "
             f"start_line={self.start_line}, raw=`{self.raw}`)"
@@ -134,10 +135,10 @@ class Preamble(Block):
     def value(self, value: str):
         self._value = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Preamble (line: {self.start_line}): `{self.value}`"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Preamble(value=`{self.value}`, " f"start_line={self.start_line}, raw=`{self.raw}`)"
 
 
@@ -157,10 +158,10 @@ class ExplicitComment(Block):
     def comment(self, value: str):
         self._comment = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"ExplicitComment (line: {self.start_line}): `{self.comment}`"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"ExplicitComment(comment=`{self.comment}`, "
             f"start_line={self.start_line}, raw=`{self.raw}`)"
@@ -183,10 +184,10 @@ class ImplicitComment(Block):
     def comment(self, value: str):
         self._comment = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"ImplicitComment (line: {self.start_line}): `{self.comment}`"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"ImplicitComment(comment=`{self.comment}`, "
             f"start_line={self.start_line}, raw=`{self.raw}`)"
@@ -224,7 +225,7 @@ class Field:
         """The line number of the first line of this field in the originally parsed string."""
         return self._start_line
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         # make sure they have the same type and same content
         return (
             isinstance(other, self.__class__)
@@ -232,10 +233,10 @@ class Field:
             and self.__dict__ == other.__dict__
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Field (line: {self.start_line}, key: `{self.key}`): `{self.value}`"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Field(key=`{self.key}`, value=`{self.value}`, " f"start_line={self.start_line})"
 
 
@@ -256,7 +257,7 @@ class Entry(Block):
         self._fields = fields
 
     @property
-    def entry_type(self):
+    def entry_type(self) -> str:
         """The type of the entry, e.g. ``article`` in ``@article{Cesar2013, ...}``."""
         return self._entry_type
 
@@ -265,7 +266,7 @@ class Entry(Block):
         self._entry_type = value
 
     @property
-    def key(self):
+    def key(self) -> str:
         """The key of the entry, e.g. ``Cesar2013`` in ``@article{Cesar2013, ...}``."""
         return self._key
 
@@ -343,7 +344,7 @@ class Entry(Block):
         """
         self.set_field(Field(key, value))
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         """Dict-mimicking index.
 
         This serves for partial v1.x backwards compatibility,
@@ -351,7 +352,7 @@ class Entry(Block):
         """
         self.pop(key)
 
-    def items(self):
+    def items(self) -> List[Tuple[str, Any]]:
         """Dict-mimicking, for partial v1.x backwards compatibility.
 
         For newly written code, it's recommended to use `entry.entry_type`,
@@ -361,12 +362,12 @@ class Entry(Block):
             ("ID", self.key),
         ] + [(f.key, f.value) for f in self.fields]
 
-    def __str__(self):
+    def __str__(self) -> str:
         lines = [f"Entry (line: {self.start_line}, type: `{self.entry_type}`, key: `{self.key}`):"]
         lines.extend([f"\t`{f.key}` = `{f.value}`" for f in self.fields])
         return "\n".join(lines)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"Entry(entry_type=`{self.entry_type}`, key=`{self.key}`, "
             f"fields=`{self.fields.__repr__()}`, start_line={self.start_line})"

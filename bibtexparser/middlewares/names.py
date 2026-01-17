@@ -9,6 +9,7 @@ import dataclasses
 from typing import List
 from typing import Literal
 from typing import Tuple
+from typing import Union
 
 from bibtexparser.model import Block
 from bibtexparser.model import Entry
@@ -73,7 +74,7 @@ class SeparateCoAuthors(_NameTransformerMiddleware):
         return "separate_coauthors"
 
     # docstr-coverage: inherited
-    def _transform_field_value(self, name) -> List[str]:
+    def _transform_field_value(self, name: str) -> List[str]:
         return split_multiple_persons_names(name)
 
 
@@ -86,7 +87,7 @@ class MergeCoAuthors(_NameTransformerMiddleware):
         return "merge_coauthors"
 
     # docstr-coverage: inherited
-    def _transform_field_value(self, name):
+    def _transform_field_value(self, name: Union[List[str], str]) -> str:
         if isinstance(name, list):
             return " and ".join(name)
         return name
@@ -160,7 +161,7 @@ class SplitNameParts(_NameTransformerMiddleware):
     def metadata_key(cls) -> str:
         return "split_name_parts"
 
-    def _transform_field_value(self, name) -> List[NameParts]:
+    def _transform_field_value(self, name: List[str]) -> List[NameParts]:
         if not isinstance(name, list):
             raise ValueError(
                 "Expected a list of strings, got {}. "
@@ -195,7 +196,7 @@ class MergeNameParts(_NameTransformerMiddleware):
     def metadata_key(cls) -> str:
         return "merge_name_parts"
 
-    def _transform_field_value(self, name) -> List[str]:
+    def _transform_field_value(self, name: List[NameParts]) -> List[str]:
         if not (isinstance(name, list) and all(isinstance(n, NameParts) for n in name)):
             raise ValueError(f"Expected a list of NameParts, got {name}. ")
 
@@ -207,7 +208,7 @@ class MergeNameParts(_NameTransformerMiddleware):
             raise ValueError(f"""Expected "first" or "last" style, got {self.style}. """)
 
 
-def parse_single_name_into_parts(name, strict=True):
+def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
     """
     Parse a name into its constituent parts: First, von, Last, and Jr.
 
@@ -502,7 +503,7 @@ def parse_single_name_into_parts(name, strict=True):
     return parts
 
 
-def split_multiple_persons_names(names):
+def split_multiple_persons_names(names: str) -> List[str]:
     """
     Splits a string of multiple names.
 
