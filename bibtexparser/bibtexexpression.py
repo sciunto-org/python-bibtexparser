@@ -275,4 +275,12 @@ class BibtexExpression(object):
         return BibDataStringExpression.expression_if_needed(t)
 
     def parse_file(self, file_obj):
+        """Execute parse expression on a file object"""
         return self.main_expression.parse_file(file_obj, parse_all=True)
+
+    def parseFile(self, file_obj):
+        """Execute parse expression on a file object
+
+        Alias for parse_file()
+        """
+        return self.parse_file(file_obj)
