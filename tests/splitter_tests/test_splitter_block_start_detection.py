@@ -12,7 +12,6 @@ import pytest
 
 from bibtexparser.splitter import Splitter
 
-
 # =============================================================================
 # Test: @ signs in field values (issue #488)
 # =============================================================================
@@ -36,7 +35,7 @@ from bibtexparser.splitter import Splitter
             id="at_sign_space_brace_in_title",
         ),
         pytest.param(
-            '@article{test, email = {john.doe@example.com}}',
+            "@article{test, email = {john.doe@example.com}}",
             "test",
             "email",
             "john.doe@example.com",

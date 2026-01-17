@@ -195,9 +195,7 @@ class Splitter:
             # We only abort if the @ is at the start of a line to allow @ signs
             # in field values (e.g., "LeQua @ {CLEF}") while still providing
             # error recovery when a new block starts on a new line.
-            elif next_mark.group(0).startswith("@") and self._is_at_line_start(
-                next_mark.start()
-            ):
+            elif next_mark.group(0).startswith("@") and self._is_at_line_start(next_mark.start()):
                 self._unaccepted_mark = next_mark
 
                 if currently_quote_escaped:
