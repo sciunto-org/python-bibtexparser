@@ -3,6 +3,7 @@ import bibtexparser.middlewares
 import bibtexparser.model
 from bibtexparser.entrypoint import parse_file
 from bibtexparser.entrypoint import parse_string
+from bibtexparser.entrypoint import parse_url
 from bibtexparser.entrypoint import write_file
 from bibtexparser.entrypoint import write_string
 from bibtexparser.library import Library

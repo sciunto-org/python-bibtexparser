@@ -6,10 +6,12 @@ from .model import Block
 from .model import DuplicateBlockKeyBlock
 from .model import Entry
 from .model import ExplicitComment
+from .model import Field
 from .model import ImplicitComment
 from .model import ParsingFailedBlock
 from .model import Preamble
 from .model import String
+
 
 # TODO Use functools.lru_cache for library properties (which create lists when called)
 
@@ -167,6 +169,11 @@ class Library:
         return [b for b in self._blocks if isinstance(b, ParsingFailedBlock)]
 
     @property
+    def duplicate_blocks(self) -> List[DuplicateBlockKeyBlock]:
+        """All blocks that could not be parsed, preserving order of insertion."""
+        return [b for b in self._blocks if isinstance(b, DuplicateBlockKeyBlock)]
+
+    @property
     def strings(self) -> List[String]:
         """All @string blocks in the library, preserving order of insertion."""
         return list(self._strings_by_key.values())
@@ -199,3 +206,44 @@ class Library:
         return [
             block for block in self._blocks if isinstance(block, (ExplicitComment, ImplicitComment))
         ]
+    
+    def filter(self,
+               filter: Dict,
+               case_sensitive = False
+            ) -> List[Entry]:
+        """ Return filtered list of entries. Filter is a dict."""
+        entries = []
+
+
+        # Transform List in set
+        for k in filter.keys():
+            if not isinstance(filter[k], set):
+                if isinstance(filter[k], List):
+                    filter[k] = set([x.lower() if not case_sensitive and isinstance(x, str) else x for x in filter[k]])
+                else:
+                    x = filter[k].lower() if not case_sensitive and isinstance(filter[k], str) else filter[k]
+                    filter[k] = set([x])
+
+        for block in self._blocks:
+            if isinstance(block, Entry):
+                found = True
+                for key in filter.keys():
+                    if key in block.fields_dict.keys():
+                        if isinstance(block.fields_dict[key], Field):
+                            if isinstance(block.fields_dict[key].value, List):
+                                bset = set([x.lower() if not case_sensitive and isinstance(x, str) else x for x in block.fields_dict[key].value])
+                            else:
+                                x = block.fields_dict[key].value.lower() if not case_sensitive and isinstance(block.fields_dict[key].value, str) else block.fields_dict[key].value
+                                bset = set([x])
+                            
+                            if not set(bset).intersection(filter[key]):
+                                found = False
+                                break
+                        else:
+                            found = False
+                    else:
+                        found = False
+                if found:
+                    entries.append(block)
+
+        return entries
