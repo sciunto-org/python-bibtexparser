@@ -173,6 +173,23 @@ class Splitter:
 
             # Handle "escape" characters
             if next_mark.group(0) == '"' and not num_open_curls > 0:
+                # Check for {"} escape sequence when inside quotes (issue #487).
+                # Per BibTeX spec, {"} represents a literal quote in a quoted field.
+                # We verify this is a true escape by checking:
+                # 1. We're inside quotes
+                # 2. The " is surrounded by { and }
+                # 3. There's more content after the } (i.e., pos+2 is in bounds)
+                #    This distinguishes {"} escapes from cases like @article{"}
+                #    where " closes the field and } closes the entry.
+                if currently_quote_escaped:
+                    pos = next_mark.start()
+                    if (
+                        pos > 0
+                        and pos + 2 < len(self.bibstr)
+                        and self.bibstr[pos - 1] == "{"
+                        and self.bibstr[pos + 1] == "}"
+                    ):
+                        continue
                 currently_quote_escaped = not currently_quote_escaped
                 continue
             elif next_mark.group(0) == "{" and not currently_quote_escaped:

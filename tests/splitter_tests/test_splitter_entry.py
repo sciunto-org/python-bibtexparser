@@ -291,3 +291,50 @@ def test_entry_with_space_before_bracket(entry: str):
     assert library.entries[1].entry_type == "article"
     assert library.entries[1].key == "articleTestKey"
     assert len(library.entries[1].fields) == 1
+
+
+@pytest.mark.parametrize(
+    "bibtex_str, expected_title",
+    [
+        # Issue #487: {"} escape sequence for quotes in double-quoted fields
+        pytest.param(
+            '@inproceedings{test, title = "Comments on {"}Filenames and Fonts{"}"}',
+            '"Comments on {"}Filenames and Fonts{"}"',
+            id="escaped quotes in title",
+        ),
+        pytest.param(
+            '@article{test, title = "The {"}LaTeX{"} Project"}',
+            '"The {"}LaTeX{"} Project"',
+            id="escaped quotes around word",
+        ),
+        pytest.param(
+            '@article{test, title = "Single {"} quote"}',
+            '"Single {"} quote"',
+            id="single escaped quote",
+        ),
+        # Ensure brace-delimited fields still work correctly
+        pytest.param(
+            '@article{test, title = {Contains "quotes" inside}}',
+            '{Contains "quotes" inside}',
+            id="quotes in brace-delimited field",
+        ),
+        # Ensure {"} as complete field value works (brace-delimited)
+        pytest.param(
+            '@article{test, title = {"}}',
+            '{"}',
+            id="just a quote in braces",
+        ),
+    ],
+)
+def test_escaped_quotes_in_field_value(bibtex_str: str, expected_title: str):
+    """Test parsing of {"} escape sequence in double-quoted fields.
+
+    Per ttb_en.pdf page 20, {"} is used to include a literal
+    double quote character within a double-quoted field value.
+
+    See: https://github.com/sciunto-org/python-bibtexparser/issues/487
+    """
+    library: Library = Splitter(bibtex_str).split()
+    assert len(library.failed_blocks) == 0
+    assert len(library.entries) == 1
+    assert library.entries[0].fields_dict["title"].value == expected_title
