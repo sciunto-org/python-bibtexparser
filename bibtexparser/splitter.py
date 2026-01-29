@@ -174,8 +174,9 @@ class Splitter:
             # Handle "escape" characters
             if next_mark.group(0) == '"' and not num_open_curls > 0:
                 # Check for {"} escape sequence when inside quotes (issue #487).
-                # Per BibTeX spec, {"} represents a literal quote in a quoted field.
-                # We verify this is a true escape by checking:
+                # Per https://tug.ctan.org/info/bibtex/tamethebeast/ttb_en.pdf,
+                # {"} represents a literal quote in a quoted field.
+                # We verify this by checking:
                 # 1. We're inside quotes
                 # 2. The " is surrounded by { and }
                 # 3. There's more content after the } (i.e., pos+2 is in bounds)
