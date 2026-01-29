@@ -116,9 +116,7 @@ def _handle_deprecated_write_params(
         prepend_middleware = kwargs.pop("append_middleware")
 
     if kwargs:
-        raise TypeError(
-            f"{function_name}() got unexpected keyword arguments: {', '.join(kwargs)}"
-        )
+        raise TypeError(f"{function_name}() got unexpected keyword arguments: {', '.join(kwargs)}")
 
     return unparse_stack, prepend_middleware
 
