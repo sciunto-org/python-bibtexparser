@@ -75,6 +75,54 @@ def _build_unparse_stack(
     return list(prepend_middleware) + list(unparse_stack)
 
 
+def _handle_deprecated_write_params(
+    unparse_stack: Optional[Iterable[Middleware]],
+    prepend_middleware: Optional[Iterable[Middleware]],
+    kwargs: dict,
+    function_name: str,
+) -> tuple[Optional[Iterable[Middleware]], Optional[Iterable[Middleware]]]:
+    """Handle deprecated parameter names for write functions.
+
+    :param unparse_stack: Current unparse_stack value
+    :param prepend_middleware: Current prepend_middleware value
+    :param kwargs: Dictionary of keyword arguments to check for deprecated params
+    :param function_name: Name of the calling function (for error messages)
+    :return: Tuple of (unparse_stack, prepend_middleware) with deprecated values migrated
+    """
+    if "parse_stack" in kwargs:
+        warnings.warn(
+            "Parameter 'parse_stack' is deprecated. Use 'unparse_stack' instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        if unparse_stack is not None:
+            raise ValueError(
+                "Cannot provide both 'parse_stack' (deprecated) and 'unparse_stack'. "
+                "Use 'unparse_stack' instead."
+            )
+        unparse_stack = kwargs.pop("parse_stack")
+
+    if "append_middleware" in kwargs:
+        warnings.warn(
+            "Parameter 'append_middleware' is deprecated. Use 'prepend_middleware' instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+        if prepend_middleware is not None:
+            raise ValueError(
+                "Cannot provide both 'append_middleware' (deprecated) and 'prepend_middleware'. "
+                "Use 'prepend_middleware' instead."
+            )
+        prepend_middleware = kwargs.pop("append_middleware")
+
+    if kwargs:
+        raise TypeError(
+            f"{function_name}() got unexpected keyword arguments: {', '.join(kwargs)}"
+        )
+
+    return unparse_stack, prepend_middleware
+
+
 def parse_string(
     bibtex_str: str,
     parse_stack: Optional[Iterable[Middleware]] = None,
@@ -147,6 +195,7 @@ def write_file(
     prepend_middleware: Optional[Iterable[Middleware]] = None,
     bibtex_format: Optional[BibtexFormat] = None,
     encoding: str = "UTF-8",
+    **kwargs,
 ) -> None:
     """Write a BibTeX database to a file.
 
@@ -157,7 +206,16 @@ def write_file(
     :param prepend_middleware: List of middleware to prepend to the default stack.
                         Only applicable if `unparse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional).
-    :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``."""
+    :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``.
+
+    .. deprecated:: (next version)
+        Parameters 'parse_stack' and 'append_middleware' are deprecated, will be deleted soon.
+        Use 'unparse_stack' and 'prepend_middleware' instead.
+    """
+    unparse_stack, prepend_middleware = _handle_deprecated_write_params(
+        unparse_stack, prepend_middleware, kwargs, "write_file"
+    )
+
     bibtex_str = write_string(
         library=library,
         unparse_stack=unparse_stack,
@@ -176,6 +234,7 @@ def write_string(
     unparse_stack: Optional[Iterable[Middleware]] = None,
     prepend_middleware: Optional[Iterable[Middleware]] = None,
     bibtex_format: Optional["BibtexFormat"] = None,
+    **kwargs,
 ) -> str:
     """Serialize a BibTeX database to a string.
 
@@ -185,7 +244,15 @@ def write_string(
     :param prepend_middleware: List of middleware to prepend to the default stack.
                         Only applicable if `unparse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional).
+
+    .. deprecated:: (next version)
+        Parameters 'parse_stack' and 'append_middleware' are deprecated.
+        Use 'unparse_stack' and 'prepend_middleware' instead.
     """
+    unparse_stack, prepend_middleware = _handle_deprecated_write_params(
+        unparse_stack, prepend_middleware, kwargs, "write_string"
+    )
+
     middleware: Middleware
     for middleware in _build_unparse_stack(unparse_stack, prepend_middleware):
         library = middleware.transform(library=library)
