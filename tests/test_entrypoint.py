@@ -2,9 +2,13 @@
 
 import os
 import tempfile
+import warnings
+
+import pytest
 
 from bibtexparser import parse_file
 from bibtexparser import write_file
+from bibtexparser import write_string
 from bibtexparser.library import Library
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
@@ -90,3 +94,150 @@ def test_write_file_roundtrip_gbk():
         assert library2.entries[0]["journal"] == original_journal
     finally:
         os.unlink(temp_path)
+
+
+# Deprecation warning tests for write_file and write_string
+def test_write_file_deprecated_parse_stack_parameter():
+    """Test that using deprecated 'parse_stack' parameter issues a warning."""
+    library = Library([])
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".bib", delete=False) as f:
+        temp_path = f.name
+
+    try:
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            write_file(temp_path, library, parse_stack=[])
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "parse_stack" in str(w[0].message)
+            assert "unparse_stack" in str(w[0].message)
+    finally:
+        os.unlink(temp_path)
+
+
+def test_write_file_deprecated_append_middleware_parameter():
+    """Test that using deprecated 'append_middleware' parameter issues a warning."""
+    library = Library([])
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".bib", delete=False) as f:
+        temp_path = f.name
+
+    try:
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            write_file(temp_path, library, append_middleware=[])
+            assert len(w) == 1
+            assert issubclass(w[0].category, DeprecationWarning)
+            assert "append_middleware" in str(w[0].message)
+            assert "prepend_middleware" in str(w[0].message)
+    finally:
+        os.unlink(temp_path)
+
+
+def test_write_file_both_parse_stack_and_unparse_stack_raises_error():
+    """Test that providing both parse_stack and unparse_stack raises ValueError."""
+    library = Library([])
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".bib", delete=False) as f:
+        temp_path = f.name
+
+    try:
+        with pytest.raises(ValueError) as excinfo:
+            write_file(temp_path, library, parse_stack=[], unparse_stack=[])
+        assert "parse_stack" in str(excinfo.value)
+        assert "unparse_stack" in str(excinfo.value)
+        assert "Use 'unparse_stack' instead" in str(excinfo.value)
+    finally:
+        os.unlink(temp_path)
+
+
+def test_write_file_both_append_and_prepend_middleware_raises_error():
+    """Test that providing both append_middleware and prepend_middleware raises ValueError."""
+    library = Library([])
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".bib", delete=False) as f:
+        temp_path = f.name
+
+    try:
+        with pytest.raises(ValueError) as excinfo:
+            write_file(temp_path, library, append_middleware=[], prepend_middleware=[])
+        assert "append_middleware" in str(excinfo.value)
+        assert "prepend_middleware" in str(excinfo.value)
+        assert "Use 'prepend_middleware' instead" in str(excinfo.value)
+    finally:
+        os.unlink(temp_path)
+
+
+def test_write_file_unexpected_keyword_argument_raises_error():
+    """Test that unexpected keyword arguments raise TypeError."""
+    library = Library([])
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".bib", delete=False) as f:
+        temp_path = f.name
+
+    try:
+        with pytest.raises(TypeError) as excinfo:
+            write_file(temp_path, library, unknown_param="value")
+        assert "unexpected keyword arguments" in str(excinfo.value)
+        assert "unknown_param" in str(excinfo.value)
+    finally:
+        os.unlink(temp_path)
+
+
+def test_write_string_deprecated_parse_stack_parameter():
+    """Test that using deprecated 'parse_stack' parameter issues a warning."""
+    library = Library([])
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        write_string(library, parse_stack=[])
+        assert len(w) == 1
+        assert issubclass(w[0].category, DeprecationWarning)
+        assert "parse_stack" in str(w[0].message)
+        assert "unparse_stack" in str(w[0].message)
+
+
+def test_write_string_deprecated_append_middleware_parameter():
+    """Test that using deprecated 'append_middleware' parameter issues a warning."""
+    library = Library([])
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        write_string(library, append_middleware=[])
+        assert len(w) == 1
+        assert issubclass(w[0].category, DeprecationWarning)
+        assert "append_middleware" in str(w[0].message)
+        assert "prepend_middleware" in str(w[0].message)
+
+
+def test_write_string_both_parse_stack_and_unparse_stack_raises_error():
+    """Test that providing both parse_stack and unparse_stack raises ValueError."""
+    library = Library([])
+
+    with pytest.raises(ValueError) as excinfo:
+        write_string(library, parse_stack=[], unparse_stack=[])
+    assert "parse_stack" in str(excinfo.value)
+    assert "unparse_stack" in str(excinfo.value)
+    assert "Use 'unparse_stack' instead" in str(excinfo.value)
+
+
+def test_write_string_both_append_and_prepend_middleware_raises_error():
+    """Test that providing both append_middleware and prepend_middleware raises ValueError."""
+    library = Library([])
+
+    with pytest.raises(ValueError) as excinfo:
+        write_string(library, append_middleware=[], prepend_middleware=[])
+    assert "append_middleware" in str(excinfo.value)
+    assert "prepend_middleware" in str(excinfo.value)
+    assert "Use 'prepend_middleware' instead" in str(excinfo.value)
+
+
+def test_write_string_unexpected_keyword_argument_raises_error():
+    """Test that unexpected keyword arguments raise TypeError."""
+    library = Library([])
+
+    with pytest.raises(TypeError) as excinfo:
+        write_string(library, unknown_param="value")
+    assert "unexpected keyword arguments" in str(excinfo.value)
+    assert "unknown_param" in str(excinfo.value)
