@@ -8,4 +8,4 @@ from bibtexparser.entrypoint import write_string
 from bibtexparser.library import Library
 from bibtexparser.writer import BibtexFormat
 
-__version__ = "2.0.0b8"
+__version__ = "2.0.0b9"
