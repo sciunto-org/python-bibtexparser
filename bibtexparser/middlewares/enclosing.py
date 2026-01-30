@@ -1,3 +1,4 @@
+import re
 from typing import Tuple
 from typing import Union
 
@@ -85,6 +86,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
         reuse_previous_enclosing: bool,
         enclose_integers: bool,
         default_enclosing: str,
+        keep_abbr_string: bool = False,
         allow_inplace_modification: bool = True,
     ):
         """
@@ -95,6 +97,8 @@ class AddEnclosingMiddleware(BlockMiddleware):
             (only of no previous enclosing was applied)
         :param default_enclosing: The default enclosing character to use ('{', '"', or 'no-enclosing')
             (only of no previous enclosing was applied, and - for ints - enclose_integers is False)
+        :keep_abbr_string: Whether to keep the abbreviation (e.g., 'IEEE_J_PAMI').
+            (only of no previous enclosing was applied)
         :param allow_inplace_modification: Whether to allow inplace modification
             (see BlockMiddleware docs).
         """
@@ -110,19 +114,31 @@ class AddEnclosingMiddleware(BlockMiddleware):
         self._default_enclosing = default_enclosing
         self._reuse_previous_enclosing = reuse_previous_enclosing
         self._enclose_integers = enclose_integers
+        self._keep_abbr_string = keep_abbr_string
 
     # docstr-coverage: inherited
     @classmethod
     def metadata_key(cls) -> str:
         return "remove_enclosing"
 
-    def _enclose(self, value: str, metadata_enclosing: str, apply_int_rule: bool) -> str:
+    def _enclose(
+        self,
+        value: str,
+        metadata_enclosing: str,
+        apply_int_rule: bool,
+        replaced_abbr: bool,
+    ) -> str:
         enclosing = self._default_enclosing
         if self._reuse_previous_enclosing and metadata_enclosing is not None:
             enclosing = metadata_enclosing
         elif apply_int_rule and not self._enclose_integers and value.isdigit():
-            return value
+            enclosing = "no-enclosing"
+        elif not replaced_abbr and self._keep_abbr_string:
+            if self._is_value_containing_abbr(value):
+                enclosing = "no-enclosing"
+        return self._enclose_value(value, enclosing)
 
+    def _enclose_value(self, value: str, enclosing: str) -> str:
         if enclosing == "{":
             return f"{{{value}}}"
         if enclosing == '"':
@@ -133,18 +149,32 @@ class AddEnclosingMiddleware(BlockMiddleware):
             f"enclosing must be either '{{' or '\"' or 'no-enclosing', " f"not '{enclosing}'"
         )
 
+    def _is_value_containing_abbr(self, value: str) -> bool:
+        is_invalid_abbr = False
+        for _s in value.split("#"):
+            _s = _s.strip()
+            # is not a valid string is enclosed in quotes,
+            if not (_s.startswith('"') and _s.endswith('"')):
+                # and is a invalid abbreviation starts with a letter and contains only letters, digits and underscores
+                if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", _s) is None:
+                    is_invalid_abbr = True
+                    break
+        return not is_invalid_abbr
+
     # docstr-coverage: inherited
     def transform_entry(self, entry: Entry, *args, **kwargs) -> Entry:
-        field: Field
-        metadata_enclosing = entry.parser_metadata.pop(
-            RemoveEnclosingMiddleware.metadata_key(), None
-        )
+        metadata_enclosing = entry.parser_metadata.pop(RemoveEnclosingMiddleware.metadata_key(), {})
+        # NOTE: this is a ugly hack to check if the string was resolved by the ResolveStringReferencesMiddleware
+        # we can't import the class directly because of circular imports
+        # maybe we should add a shared module containing all metadata keys
+        metadata_resolving: list = entry.parser_metadata.get("ResolveStringReferences", [])
         for field in entry.fields:
-            apply_int_rule = field.key in ENTRY_POTENTIALLY_INT_FIELDS
-            prev_encoding = (
-                metadata_enclosing.get(field.key, None) if metadata_enclosing is not None else None
+            field.value = self._enclose(
+                field.value,
+                metadata_enclosing=metadata_enclosing.get(field.key, None),
+                apply_int_rule=field.key in ENTRY_POTENTIALLY_INT_FIELDS,
+                replaced_abbr=field.key in metadata_resolving,
             )
-            field.value = self._enclose(field.value, prev_encoding, apply_int_rule=apply_int_rule)
         return entry
 
     # docstr-coverage: inherited
@@ -154,5 +184,6 @@ class AddEnclosingMiddleware(BlockMiddleware):
             string.value,
             string.parser_metadata.get(metadata_key),
             apply_int_rule=STRINGS_CAN_BE_UNESCAPED_INTS,
+            replaced_abbr=False,
         )
         return string
