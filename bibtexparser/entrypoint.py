@@ -185,7 +185,34 @@ def parse_file(
             bibtex_str, parse_stack=parse_stack, append_middleware=append_middleware
         )
 
+def parse_url(
+    url: str,
+    parse_stack: Optional[Iterable[Middleware]] = None,
+    append_middleware: Optional[Iterable[Middleware]] = None,
+    encoding: str = "UTF-8",
+) -> Library:
+    """Parse a BibTeX file from an URL
 
+    :param url: Url to BibTeX file
+    :param parse_stack:
+        List of middleware to apply to the database after splitting.
+        If ``None`` (default), a default stack will be used providing simple standard functionality.
+
+    :param append_middleware:
+        List of middleware to append to the default stack
+        (ignored if a not-``None`` parse_stack is passed).
+
+    :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``.
+    :return: Library: Parsed BibTeX library
+    """
+    import urllib.request
+
+    with urllib.request.urlopen(url) as f:
+        bibtex_str = f.read().decode(encoding)
+        return parse_string(
+            bibtex_str, parse_stack=parse_stack, append_middleware=append_middleware
+        )
+    
 def write_file(
     file: Union[str, TextIO],
     library: Library,
