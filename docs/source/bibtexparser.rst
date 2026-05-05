@@ -38,3 +38,8 @@ Full API
 
 .. autoclass:: bibtexparser.BibtexFormat
     :members:
+
+:mod:`bibtexparser.middlewares.parsestack` --- Default parse/unparse stacks
+-----------------------------------------------------------------------------
+.. automodule:: bibtexparser.middlewares.parsestack
+    :members:

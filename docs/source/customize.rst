@@ -40,18 +40,19 @@ This example adds three new middleware layers to the parse stack:
 2. The second layer splits the author field into a list of authors (and similarly for editors, translators, etc.).
 3. The third layer splits the author names into a object representing the first, von, last and jr parts of the name.
 
-Default Parse-Stack
-^^^^^^^^^^^^^^^^^^^
+Default Parse and Write Stacks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-BibtexParser foresees a default parse stack; i.e., some middleware is automatically applied as we assume it to be
-part of the expected functionality for most users.
+BibtexParser applies a default middleware stack when parsing and writing.
+These stacks are built by :func:`~bibtexparser.middlewares.parsestack.default_parse_stack`
+and :func:`~bibtexparser.middlewares.parsestack.default_unparse_stack`, respectively.
 
-Currently, the default parse stack consists of the following layers:
+**Parse stack:**
 
 * :class:`bibtexparser.middlewares.ResolveStringReferencesMiddleware`: De-Reference reference to @string definitions.
 * :class:`bibtexparser.middlewares.RemoveEnclosingMiddleware`: Removes enclosing (e.g. curly braces or "") from values.
 
-The default write stack consists of the following layers:
+**Write stack:**
 
 * :class:`bibtexparser.middlewares.AddEnclosingMiddleware`: Encloses values in curly braces where needed.
 
