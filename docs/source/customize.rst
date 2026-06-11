@@ -106,9 +106,39 @@ Names
 Sorting
 :::::::
 
+* :mod:`bibtexparser.middlewares.SortBlocksMiddleware`
 * :mod:`bibtexparser.middlewares.SortBlocksByTypeAndKeyMiddleware`
 * :mod:`bibtexparser.middlewares.SortFieldsAlphabeticallyMiddleware`
 * :mod:`bibtexparser.middlewares.SortFieldsCustomMiddleware`
+
+:class:`bibtexparser.middlewares.SortBlocksMiddleware` allows sorting blocks by any custom criterion:
+It takes a sort-key function which - as the ``key`` argument of Python's built-in :func:`sorted` -
+maps each block to a value to sort by. For example, to write a library with its entries sorted by year:
+
+.. code-block:: python
+
+    import bibtexparser
+    import bibtexparser.middlewares as m
+    from bibtexparser.model import Entry
+
+    def by_year(block):
+        # Tuple sort keys allow sorting libraries with mixed block types:
+        # Non-entries (e.g. @string) and entries without a year are put on top,
+        # remaining entries are sorted by year, ties broken by citation key.
+        if isinstance(block, Entry) and "year" in block:
+            return (1, int(block["year"]), block.key)
+        return (0, 0, "")
+
+    library = bibtexparser.parse_file("bibtex.bib")
+    bibtexparser.write_file(
+        "sorted.bib", library, prepend_middleware=[m.SortBlocksMiddleware(key=by_year)]
+    )
+
+Descending order is available via ``reverse=True``. By default, comments remain attached
+to the (entry or other) block they precede; pass ``preserve_comments_on_top=False`` to sort
+them like any other block. The sort is stable, i.e., blocks with equal sort keys remain
+in their previous order. See the class docstring for further details, e.g., on how to use
+comparator functions instead of sort-key functions.
 
 .. note::
     As opposed to bibtexparser v1, the en- and decoding of latex characters is now handled by a third-party library.
@@ -163,6 +193,11 @@ Library-wide transformations
 Should extend the :class:`bibtexparser.middlewares.LibraryMiddleware` class.
 This includes functionalities similar to sorting blocks
 (e.g. :mod:`bibtexparser.middlewares.SortBlocksByTypeAndKeyMiddleware`).
+
+.. note::
+    For custom sorting, you usually don't have to write your own middleware:
+    Pass a sort-key function to :class:`bibtexparser.middlewares.SortBlocksMiddleware`
+    instead (see :ref:`middleware_sorting`).
 
 Warning
 :::::::
