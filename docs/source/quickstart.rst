@@ -136,8 +136,7 @@ All failed blocks are instances of ``bibtexparser.model.ParsingFailedBlock``
 Depending on the type of failure, a more specific subtype with additional attributes is used:
 
 * ``DuplicateFieldKeyBlock``: The entry contained the same field key more than once
-  (e.g. two ``title`` fields). The parsed entry — with all duplicate fields preserved —
-  is available as ``failed_block.entry``, and the offending keys as ``failed_block.duplicate_keys``.
+  (e.g. two ``title`` fields). The offending keys are available as ``failed_block.duplicate_keys``.
 * ``DuplicateBlockKeyBlock``: The library already contained a block with the same entry key.
   The previously parsed block is available as ``failed_block.previous_block``.
 * ``MiddlewareErrorBlock``: A middleware raised an exception while transforming the block.

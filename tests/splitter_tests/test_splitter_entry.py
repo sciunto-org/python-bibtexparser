@@ -159,12 +159,11 @@ def test_multiple_identical_field_keys():
     assert isinstance(block, DuplicateFieldKeyBlock)
 
     assert "author, title" in str(block.error)
+    assert "ignore_error_block" in str(block.error)
 
     assert block.duplicate_keys == {"author", "title"}
 
     assert block.ignore_error_block is not None
-    # The entry (with all duplicate fields) is also exposed as `block.entry`
-    assert block.entry is block.ignore_error_block
 
     title_fields = [f for f in block.ignore_error_block.fields if f.key == "title"]
     assert len(title_fields) == 3
