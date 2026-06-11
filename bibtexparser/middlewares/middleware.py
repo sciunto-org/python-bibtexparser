@@ -9,6 +9,7 @@ from bibtexparser.model import Block
 from bibtexparser.model import Entry
 from bibtexparser.model import ExplicitComment
 from bibtexparser.model import ImplicitComment
+from bibtexparser.model import ParsingFailedBlock
 from bibtexparser.model import Preamble
 from bibtexparser.model import String
 
@@ -129,6 +130,8 @@ class BlockMiddleware(Middleware, abc.ABC):
             return self.transform_explicit_comment(block, library)
         elif isinstance(block, ImplicitComment):
             return self.transform_implicit_comment(block, library)
+        elif isinstance(block, ParsingFailedBlock):
+            return self.transform_failed_block(block, library)
 
         logger.warning(f"Unknown block type {type(block)}")
         return block
@@ -187,6 +190,17 @@ class BlockMiddleware(Middleware, abc.ABC):
         you should use `transform` or `transform_block` instead.
         """
         return implicit_comment
+
+    def transform_failed_block(
+        self, failed_block: ParsingFailedBlock, library: "Library"
+    ) -> Union[Block, Collection[Block], None]:
+        """Transform a block whose parsing failed (e.g. a ``DuplicateFieldKeyBlock``).
+        Called by `transform_block` if the block is a ``ParsingFailedBlock``.
+
+        By default, failed blocks are kept in the library unchanged,
+        i.e., the middleware is not applied to them.
+        """
+        return failed_block
 
 
 class LibraryMiddleware(Middleware, abc.ABC):

@@ -456,14 +456,18 @@ class DuplicateBlockKeyBlock(ParsingFailedBlock):
 
 
 class DuplicateFieldKeyBlock(ParsingFailedBlock):
-    """An error-indicating block indicating a duplicate field key in an entry."""
+    """An error-indicating block indicating a duplicate field key in an entry.
+
+    The entry containing the duplicate field keys is available as
+    `block.ignore_error_block`, the duplicate keys as `block.duplicate_keys`."""
 
     def __init__(self, duplicate_keys: Set[str], entry: Entry):
         sorted_duplicate_keys = sorted(list(duplicate_keys))
         super().__init__(
             error=Exception(
-                f"Duplicate field keys on entry: '{', '.join(sorted_duplicate_keys)}'."
-                f"Note: The entry (containing duplicate) is available as `failed_block.entry`"
+                f"Duplicate field keys on entry: '{', '.join(sorted_duplicate_keys)}'. "
+                f"Note: The entry (containing duplicates) is available as "
+                f"`failed_block.ignore_error_block`"
             ),
             start_line=entry.start_line,
             raw=entry.raw,

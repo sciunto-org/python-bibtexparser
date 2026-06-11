@@ -159,6 +159,9 @@ def test_multiple_identical_field_keys():
     assert isinstance(block, DuplicateFieldKeyBlock)
 
     assert "author, title" in str(block.error)
+    assert "ignore_error_block" in str(block.error)
+
+    assert block.duplicate_keys == {"author", "title"}
 
     assert block.ignore_error_block is not None
 
