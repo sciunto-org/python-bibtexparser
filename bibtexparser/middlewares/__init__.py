@@ -15,6 +15,7 @@ from bibtexparser.middlewares.names import NameParts
 from bibtexparser.middlewares.names import SeparateCoAuthors
 from bibtexparser.middlewares.names import SplitNameParts
 from bibtexparser.middlewares.sorting_blocks import SortBlocksByTypeAndKeyMiddleware
+from bibtexparser.middlewares.sorting_blocks import SortBlocksMiddleware
 from bibtexparser.middlewares.sorting_entry_fields import SortFieldsAlphabeticallyMiddleware
 from bibtexparser.middlewares.sorting_entry_fields import SortFieldsCustomMiddleware
 
