@@ -123,9 +123,28 @@ and you should check for their presence to make sure mistakes are not going unde
 
 Obviously, in your code, you may want to go beyond simply printing a statement
 when faced with failed_blocks.
-Here, the actual failed blocks provided in ``library.failed_blocks``
-will provide you some more information
-(exceeding this tutorial, see the corresponding section of the docs for more detail).
+All failed blocks are instances of ``bibtexparser.model.ParsingFailedBlock``
+(or one of its subtypes) and expose at least the following attributes to investigate the problem:
+
+.. code-block:: python
+
+    failed_block = library.failed_blocks[0]
+    failed_block.error       # The exception describing why parsing failed
+    failed_block.start_line  # The line in the file where the block started
+    failed_block.raw         # The raw, unparsed bibtex of the block
+
+Depending on the type of failure, a more specific subtype with additional attributes is used:
+
+* ``DuplicateFieldKeyBlock``: The entry contained the same field key more than once
+  (e.g. two ``title`` fields). The parsed entry — with all duplicate fields preserved —
+  is available as ``failed_block.entry``, and the offending keys as ``failed_block.duplicate_keys``.
+* ``DuplicateBlockKeyBlock``: The library already contained a block with the same entry key.
+  The previously parsed block is available as ``failed_block.previous_block``.
+* ``MiddlewareErrorBlock``: A middleware raised an exception while transforming the block.
+
+For these types, the block as parsed before the error was detected is available
+as ``failed_block.ignore_error_block``, which you may use to recover from the error
+manually (e.g. by fixing and re-adding it to the library) if you choose to do so.
 
 .. _writing_quickstart:
 

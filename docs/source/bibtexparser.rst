@@ -17,13 +17,14 @@ Full API
 -----------------------------------------------------------------------
 
 .. autoclass:: bibtexparser.Library
-    :members: entries, entries_dict, comments, strings, preambles, blocks
+    :members: entries, entries_dict, comments, strings, preambles, blocks, failed_blocks
 
 
 :mod:`bibtexparser.model` --- The classes used in the library
 -------------------------------------------------------------
 .. automodule:: bibtexparser.model
-    :members: Entry, String, Preamble, Block, ExplicitComment, ImplicitComment, Field
+    :members: Entry, String, Preamble, Block, ExplicitComment, ImplicitComment, Field,
+        ParsingFailedBlock, MiddlewareErrorBlock, DuplicateBlockKeyBlock, DuplicateFieldKeyBlock
 
 
 :mod:`bibtexparser.middlewares` --- Customizers to transform parsed library
