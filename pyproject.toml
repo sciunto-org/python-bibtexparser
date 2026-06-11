@@ -1,16 +1,9 @@
 [build-system]
-requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools>=77"]
 
 [project]
-name = "bibtexparser"
-description = "Bibtex parser for python 3"
-readme = "README.md"
-requires-python = ">=3.9"
-license = "MIT"
-license-files = ["LICENSE"]
-authors = [{ name = "Michael Weiss and other contributors", email = "code@mweiss.ch" }]
-maintainers = [{ name = "Michael Weiss", email = "code@mweiss.ch" }]
+authors = [{name = "Michael Weiss and other contributors", email = "code@mweiss.ch"}]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
@@ -22,26 +15,33 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = ["pylatexenc~=2.10"]
+description = "Bibtex parser for python 3"
 dynamic = ["version"]
+license = "MIT"
+license-files = ["LICENSE"]
+maintainers = [{name = "Michael Weiss", email = "code@mweiss.ch"}]
+name = "bibtexparser"
+readme = "README.md"
+requires-python = ">=3.9"
 
 [project.optional-dependencies]
-test = [
-    "pytest",        # Test runner
-    "pytest-xdist",  # Parallel tests: `pytest -n <num-workers>`
-    "pytest-cov",    # Code coverage
-    "jupyter",       # For runnable examples
-]
 docs = ["sphinx"]
+test = [
+    "pytest",  # Test runner
+    "pytest-xdist",  # Parallel tests: `pytest -n <num-workers>`
+    "pytest-cov",  # Code coverage
+    "jupyter",  # For runnable examples
+]
 
 [project.urls]
 Homepage = "https://github.com/sciunto-org/python-bibtexparser"
 Repository = "https://github.com/sciunto-org/python-bibtexparser"
 
-[tool.setuptools.packages.find]
-include = ["bibtexparser", "bibtexparser.*"]
+[tool.setuptools.dynamic]
+version = {attr = "bibtexparser.__version__"}
 
 [tool.setuptools.package-data]
 bibtexparser = ["py.typed"]
 
-[tool.setuptools.dynamic]
-version = { attr = "bibtexparser.__version__" }
+[tool.setuptools.packages.find]
+include = ["bibtexparser", "bibtexparser.*"]
