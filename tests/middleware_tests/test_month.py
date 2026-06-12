@@ -169,9 +169,7 @@ def test_issue_447_month_macro_not_enclosed_when_writing():
     See https://github.com/sciunto-org/python-bibtexparser/issues/447
     """
     library = bibtexparser.parse_string("@article{test447,\n month = {1},\n year = {2019}\n}")
-    written = bibtexparser.write_string(
-        library, prepend_middleware=[MonthAbbreviationMiddleware()]
-    )
+    written = bibtexparser.write_string(library, prepend_middleware=[MonthAbbreviationMiddleware()])
     assert "month = jan" in written
     # Other values are still enclosed with the default enclosing
     assert "year = {2019}" in written

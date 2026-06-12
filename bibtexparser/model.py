@@ -6,7 +6,6 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 
-
 _ALLOWED_ENCLOSINGS = (None, "{", '"', "no-enclosing")
 
 
