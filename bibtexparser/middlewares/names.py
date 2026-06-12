@@ -37,7 +37,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
     def __init__(
         self,
         allow_inplace_modification: bool = True,
-        name_fields: Tuple[str] = ("author", "editor", "translator"),
+        name_fields: Tuple[str, ...] = ("author", "editor", "translator"),
     ):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
@@ -46,7 +46,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
         self._name_fields = name_fields
 
     @property
-    def name_fields(self) -> Tuple[str]:
+    def name_fields(self) -> Tuple[str, ...]:
         """The fields that contain names, considered by this middleware."""
         return self._name_fields
 
@@ -187,7 +187,7 @@ class MergeNameParts(_NameTransformerMiddleware):
         self,
         style: Literal["last", "first"] = "last",
         allow_inplace_modification: bool = True,
-        name_fields: Tuple[str] = ("author", "editor", "translator"),
+        name_fields: Tuple[str, ...] = ("author", "editor", "translator"),
     ):
         self.style = style
         super().__init__(allow_inplace_modification, name_fields)
