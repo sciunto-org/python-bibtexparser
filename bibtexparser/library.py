@@ -17,46 +17,68 @@ from .model import String
 class Library:
     """A collection of parsed bibtex blocks."""
 
-    def __init__(self, blocks: Union[List[Block], None] = None):
+    def __init__(
+        self,
+        blocks: Union[List[Block], None] = None,
+        fail_on_duplicate_key: bool = True,
+    ):
         self._blocks = []
         self._entries_by_key = dict()
         self._strings_by_key = dict()
         if blocks is not None:
-            self.add(blocks)
+            self.add(blocks, fail_on_duplicate_key=fail_on_duplicate_key)
 
-    def add(self, blocks: Union[List[Block], Block], fail_on_duplicate_key: bool = False):
+    def add(self, blocks: Union[List[Block], Block], fail_on_duplicate_key: bool = True):
         """Add blocks to library.
 
-        The adding is key-safe, i.e., it is made sure that no duplicate keys are added.
-        for the same type (i.e., String or Entry). Duplicates are silently replaced with
-        a DuplicateKeyBlock.
+        The adding is key-safe, i.e., it is made sure that no duplicate keys are added
+        for the same type (i.e., String or Entry). Depending on `fail_on_duplicate_key`,
+        duplicates either cause a ValueError (default) or are replaced with
+        a DuplicateBlockKeyBlock.
 
         :param blocks: Block or list of blocks to add.
         :param fail_on_duplicate_key:
-            If True, raises ValueError if a block was replaced with a DuplicateKeyBlock.
+            If True (default), raises ValueError on duplicate keys, leaving the
+            library unchanged. If False, duplicates are silently replaced with
+            DuplicateBlockKeyBlock instances, which can be inspected via
+            `library.failed_blocks`. This is e.g. used when parsing, where a
+            bibtex file with duplicate keys should not raise.
+        :raises ValueError: If fail_on_duplicate_key is True and a duplicate key
+            is found. In this case, no blocks are added to the library.
         """
         if isinstance(blocks, Block):
             blocks = [blocks]
 
-        _added_blocks = []
+        if fail_on_duplicate_key:
+            duplicate_keys = self._find_duplicate_keys(blocks)
+            if len(duplicate_keys) > 0:
+                raise ValueError(
+                    f"Duplicate keys found: {duplicate_keys}. "
+                    f"No blocks were added to the library. "
+                    f"To add duplicates as DuplicateBlockKeyBlock instances instead, "
+                    f"use `library.add(blocks, fail_on_duplicate_key=False)`."
+                )
+
         for block in blocks:
             # This may replace block with a DuplicateEntryKeyBlock
             block = self._add_to_dicts(block)
             self._blocks.append(block)
-            _added_blocks.append(block)
 
-        if fail_on_duplicate_key:
-            duplicate_keys = []
-            for original, added in zip(blocks, _added_blocks):
-                if original is not added and isinstance(added, DuplicateBlockKeyBlock):
-                    duplicate_keys.append(added.key)
-
-            if len(duplicate_keys) > 0:
-                raise ValueError(
-                    f"Duplicate keys found: {duplicate_keys}. "
-                    f"Duplicate entries have been added to the library as DuplicateBlockKeyBlock."
-                    f"Use `library.failed_blocks` to access them. "
-                )
+    def _find_duplicate_keys(self, blocks: List[Block]) -> List[str]:
+        """Keys of blocks that would become duplicates when added to the library."""
+        duplicate_keys = []
+        seen_entry_keys = set(self._entries_by_key)
+        seen_string_keys = set(self._strings_by_key)
+        for block in blocks:
+            if isinstance(block, Entry):
+                if block.key in seen_entry_keys:
+                    duplicate_keys.append(block.key)
+                seen_entry_keys.add(block.key)
+            elif isinstance(block, String):
+                if block.key in seen_string_keys:
+                    duplicate_keys.append(block.key)
+                seen_string_keys.add(block.key)
+        return duplicate_keys
 
     def remove(self, blocks: Union[List[Block], Block]):
         """Remove blocks from library.

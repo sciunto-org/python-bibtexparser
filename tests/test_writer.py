@@ -157,7 +157,8 @@ def test_write_manually_created_duplicate_entries_raises():
     """Reproduces issue #400: duplicate keys on programmatically created entries."""
     library = Library()
     library.add(_dummy_entry())
-    library.add(_dummy_entry())
+    # Silently-added duplicates (no raw bibtex) must still be caught at write time.
+    library.add(_dummy_entry(), fail_on_duplicate_key=False)
     with pytest.raises(ValueError, match="failed_blocks"):
         writer.write(library)
 

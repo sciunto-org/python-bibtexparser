@@ -97,7 +97,9 @@ class BlockMiddleware(Middleware, abc.ABC):
             # Case 4: Something else. Error.
             else:
                 raise TypeError(f"Illegal output type from transform_block: {type(transformed)}")
-        return Library(blocks=blocks)
+        # Duplicate keys (e.g. introduced by a block transformation) must not raise
+        # mid-pipeline; they are exposed as `library.failed_blocks`.
+        return Library(blocks=blocks, fail_on_duplicate_key=False)
 
     def transform_block(
         self, block: Block, library: "Library"

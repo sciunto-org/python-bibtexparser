@@ -323,9 +323,9 @@ class Splitter:
                     elif m_val.startswith("@preamble"):
                         library.add(self._handle_preamble())
                     elif m_val.startswith("@string"):
-                        library.add(self._handle_string(m))
+                        library.add(self._handle_string(m), fail_on_duplicate_key=False)
                     else:
-                        library.add(self._handle_entry(m, m_val))
+                        library.add(self._handle_entry(m, m_val), fail_on_duplicate_key=False)
 
                 except BlockAbortedException as e:
                     logger.warning(
