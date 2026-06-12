@@ -128,11 +128,12 @@ class SortBlocksMiddleware(LibraryMiddleware):
             block_junks = self._block_junks(blocks)
             block_junks.sort(key=lambda junk: self._key(junk.main_block), reverse=self._reverse)
             return Library(
-                blocks=[block for block_junk in block_junks for block in block_junk.blocks]
+                blocks=[block for block_junk in block_junks for block in block_junk.blocks],
+                fail_on_duplicate_key=False,
             )
         else:
             blocks.sort(key=self._key, reverse=self._reverse)
-            return Library(blocks=blocks)
+            return Library(blocks=blocks, fail_on_duplicate_key=False)
 
 
 class SortBlocksByTypeAndKeyMiddleware(SortBlocksMiddleware):

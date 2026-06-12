@@ -17,23 +17,30 @@ from .model import String
 class Library:
     """A collection of parsed bibtex blocks."""
 
-    def __init__(self, blocks: Union[List[Block], None] = None):
+    def __init__(
+        self,
+        blocks: Union[List[Block], None] = None,
+        fail_on_duplicate_key: bool = True,
+    ):
         self._blocks = []
         self._entries_by_key = dict()
         self._strings_by_key = dict()
         if blocks is not None:
-            self.add(blocks)
+            self.add(blocks, fail_on_duplicate_key=fail_on_duplicate_key)
 
-    def add(self, blocks: Union[List[Block], Block], fail_on_duplicate_key: bool = False):
+    def add(self, blocks: Union[List[Block], Block], fail_on_duplicate_key: bool = True):
         """Add blocks to library.
 
-        The adding is key-safe, i.e., it is made sure that no duplicate keys are added.
-        for the same type (i.e., String or Entry). Duplicates are silently replaced with
-        a DuplicateKeyBlock.
+        The adding is key-safe, i.e., it is made sure that no duplicate keys are added
+        for the same type (i.e., String or Entry). Duplicates are replaced with
+        a DuplicateBlockKeyBlock.
 
         :param blocks: Block or list of blocks to add.
         :param fail_on_duplicate_key:
-            If True, raises ValueError if a block was replaced with a DuplicateKeyBlock.
+            If True (default), raises ValueError if a block was replaced with a
+            DuplicateBlockKeyBlock. If False, duplicates are replaced silently
+            and can be inspected via `library.failed_blocks`. This is e.g. used
+            when parsing, where a bibtex file with duplicate keys should not raise.
         """
         if isinstance(blocks, Block):
             blocks = [blocks]

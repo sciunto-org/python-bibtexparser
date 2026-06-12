@@ -20,7 +20,7 @@ def test_replace_with_duplicates():
     """Test that replace() works when there are duplicate values. See issue 404."""
     library = Library()
     library.add(get_dummy_entry())
-    library.add(get_dummy_entry())
+    library.add(get_dummy_entry(), fail_on_duplicate_key=False)
     # Test precondition
     assert len(library.blocks) == 2
     assert len(library.failed_blocks) == 1
@@ -59,10 +59,31 @@ def test_replace_fail_on_duplicate():
     assert library.entries[1].key == "duplicateKey"
 
 
-def test_fail_on_duplicate_add():
+def test_add_fails_on_duplicate_by_default():
     library = Library()
     library.add(get_dummy_entry())
     with pytest.raises(ValueError):
-        library.add(get_dummy_entry(), fail_on_duplicate_key=True)
+        library.add(get_dummy_entry())
+    # The duplicate is added as failed block nonetheless,
+    # allowing the user to resolve it after catching the exception.
+    assert len(library.blocks) == 2
+    assert len(library.failed_blocks) == 1
+
+
+def test_add_duplicate_does_not_fail_if_disabled():
+    library = Library()
+    library.add(get_dummy_entry())
+    library.add(get_dummy_entry(), fail_on_duplicate_key=False)
+    assert len(library.blocks) == 2
+    assert len(library.failed_blocks) == 1
+
+
+def test_constructor_fails_on_duplicate_by_default():
+    with pytest.raises(ValueError):
+        Library(blocks=[get_dummy_entry(), get_dummy_entry()])
+
+    library = Library(
+        blocks=[get_dummy_entry(), get_dummy_entry()], fail_on_duplicate_key=False
+    )
     assert len(library.blocks) == 2
     assert len(library.failed_blocks) == 1
