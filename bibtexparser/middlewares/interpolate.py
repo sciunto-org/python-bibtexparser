@@ -38,6 +38,9 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
         if not self.allow_inplace_modification:
             library = deepcopy(library)
 
+        # BibTeX string keys are case-insensitive; later definitions win.
+        string_values = {key.lower(): s.value for key, s in library.strings_dict.items()}
+
         entry: Entry
         raised_enclosing_warning = False
         for entry in library.entries:
@@ -58,9 +61,10 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
             for field in entry.fields:
                 if _value_is_nonstring_or_enclosed(field.value):
                     continue
-                if field.value not in library.strings_dict:
+                try:
+                    field.value = string_values[field.value.lower()]
+                except KeyError:
                     continue
-                field.value = library.strings_dict[field.value].value
                 resolved_fields.append(field.key)
 
             if resolved_fields:
