@@ -81,9 +81,7 @@ def _failed_blocks_without_raw_error(blocks: List[ParsingFailedBlock]) -> str:
 
 
 def _raise_on_unwritable_blocks(library: Library) -> None:
-    unwritable = [
-        b for b in library.blocks if isinstance(b, ParsingFailedBlock) and b.raw is None
-    ]
+    unwritable = [b for b in library.blocks if isinstance(b, ParsingFailedBlock) and b.raw is None]
     if unwritable:
         raise ValueError(_failed_blocks_without_raw_error(unwritable))
 
