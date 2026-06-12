@@ -92,8 +92,8 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
 
     def __init__(
         self,
-        keep_math: bool = None,
-        enclose_urls: bool = None,
+        keep_math: Optional[bool] = None,
+        enclose_urls: Optional[bool] = None,
         encoder: Optional[UnicodeToLatexEncoder] = None,
         allow_inplace_modification: bool = True,
     ):
@@ -163,8 +163,8 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
     def __init__(
         self,
         allow_inplace_modification: bool = True,
-        keep_braced_groups: bool = None,
-        keep_math_mode: bool = None,
+        keep_braced_groups: Optional[bool] = None,
+        keep_math_mode: Optional[bool] = None,
         decoder: Optional[LatexNodes2Text] = None,
     ):
         super().__init__(

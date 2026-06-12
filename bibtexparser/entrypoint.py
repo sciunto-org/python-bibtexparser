@@ -4,6 +4,7 @@ from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import TextIO
+from typing import Tuple
 from typing import Union
 
 from .library import Library
@@ -80,7 +81,7 @@ def _handle_deprecated_write_params(
     prepend_middleware: Optional[Iterable[Middleware]],
     kwargs: dict,
     function_name: str,
-) -> tuple[Optional[Iterable[Middleware]], Optional[Iterable[Middleware]]]:
+) -> Tuple[Optional[Iterable[Middleware]], Optional[Iterable[Middleware]]]:
     """Handle deprecated parameter names for write functions.
 
     :param unparse_stack: Current unparse_stack value
@@ -126,7 +127,7 @@ def parse_string(
     parse_stack: Optional[Iterable[Middleware]] = None,
     append_middleware: Optional[Iterable[Middleware]] = None,
     library: Optional[Library] = None,
-):
+) -> Library:
     """Parse a BibTeX string.
 
     :param bibtex_str: BibTeX string to parse
