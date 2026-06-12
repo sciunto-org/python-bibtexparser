@@ -31,9 +31,9 @@ class Block(abc.ABC):
     ):
         self._start_line_in_file = start_line
         self._raw = raw
-        self._parser_metadata: Dict[str, Any] = parser_metadata
         if parser_metadata is None:
-            self._parser_metadata: Dict[str, Any] = {}
+            parser_metadata = {}
+        self._parser_metadata: Dict[str, Any] = parser_metadata
 
     @property
     def start_line(self) -> Optional[int]:

@@ -130,7 +130,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
 
         if default_enclosing not in ("{", '"'):
             raise ValueError(
-                "default_enclosing must be either '{' or '\"'" f"not '{default_enclosing}'"
+                "default_enclosing must be either '{' or '\"', " f"not '{default_enclosing}'"
             )
         self._default_enclosing = default_enclosing
         self._reuse_previous_enclosing = reuse_previous_enclosing

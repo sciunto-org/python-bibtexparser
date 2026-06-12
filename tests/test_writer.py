@@ -105,6 +105,40 @@ def test_entry_value_column(value_column):
         assert f"{bib_format.indent}veryverylongkeyfield = 2020" in string
 
 
+@pytest.mark.parametrize("value_column", [None, 10, "auto"])
+def test_string_value_column(value_column):
+    library = Library(
+        blocks=[
+            String(key="me", value='"myValue"'),
+            String(key="veryverylongkey", value='"otherValue"'),
+        ]
+    )
+    bib_format = BibtexFormat()
+    if value_column is not None:
+        bib_format.value_column = value_column
+    string = writer.write(library, bib_format)
+    if value_column is None:
+        # Make sure there are no unneeded spaces
+        assert '@string{me = "myValue"}' in string
+        assert '@string{veryverylongkey = "otherValue"}' in string
+    elif value_column == 10:
+        assert '@string{me      = "myValue"}' in string
+        assert '@string{veryverylongkey = "otherValue"}' in string
+    if value_column == "auto":
+        assert '@string{me              = "myValue"}' in string
+        assert '@string{veryverylongkey = "otherValue"}' in string
+
+
+def test_auto_value_column_considers_string_keys():
+    library = Library(blocks=[String(key="averyverylongstringkey", value='"v"'), _dummy_entry()])
+    bib_format = BibtexFormat()
+    bib_format.value_column = "auto"
+    string = writer.write(library, bib_format)
+    # The 22-char string key drives the alignment column for entry fields, too
+    pad = " " * (22 - len("title"))
+    assert f'{bib_format.indent}title{pad} = "myTitle"' in string
+
+
 @pytest.mark.parametrize("block_separator", [None, "\n\n", "\n-----\n"])
 def test_block_separator(block_separator):
     library = Library(blocks=[_DUMMY_STRING, _DUMMY_PREAMBLE])
