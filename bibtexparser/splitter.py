@@ -323,8 +323,6 @@ class Splitter:
                     elif m_val.startswith("@preamble"):
                         library.add(self._handle_preamble())
                     elif m_val.startswith("@string"):
-                        # Duplicate keys in parsed bibtex must not raise,
-                        # they are exposed as `library.failed_blocks`.
                         library.add(self._handle_string(m), fail_on_duplicate_key=False)
                     else:
                         library.add(self._handle_entry(m, m_val), fail_on_duplicate_key=False)
