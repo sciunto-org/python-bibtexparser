@@ -32,7 +32,8 @@ class Library:
         """Add blocks to library.
 
         The adding is key-safe, i.e., it is made sure that no duplicate keys are added
-        for the same type (i.e., String or Entry). Duplicates are replaced with
+        for the same type (i.e., String or Entry). Depending on `fail_on_duplicate_key`,
+        duplicates either cause a ValueError (default) or are replaced with
         a DuplicateBlockKeyBlock.
 
         :param blocks: Block or list of blocks to add.
