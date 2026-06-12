@@ -3,6 +3,7 @@ from typing import Union
 
 import pytest
 
+import bibtexparser
 from bibtexparser.library import Library
 from bibtexparser.middlewares.enclosing import AddEnclosingMiddleware
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
@@ -275,6 +276,150 @@ def test_no_addition_block_types(
         ),
         same_instance=inplace,
     )
+
+
+@pytest.mark.parametrize("demanded_enclosing", ["{", '"', "no-enclosing"])
+@pytest.mark.parametrize("metadata_enclosing", ["{", '"', "no-enclosing", None])
+@pytest.mark.parametrize("default_enclosing", ["{", '"'])
+@pytest.mark.parametrize("reuse_previous_enclosing", [True, False], ids=["reuse", "no_reuse"])
+def test_demanded_enclosing_takes_precedence_on_entry(
+    demanded_enclosing: str,
+    metadata_enclosing: str,
+    default_enclosing: str,
+    reuse_previous_enclosing: bool,
+):
+    """A `field.enclosing` demand must win over all other enclosing rules. See issue #447."""
+    field = Field(key="month", value="jan", start_line=6, enclosing=demanded_enclosing)
+    input_entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[field],
+    )
+    if metadata_enclosing is not None:
+        input_entry.parser_metadata["removed_enclosing"] = {"month": metadata_enclosing}
+
+    middleware = AddEnclosingMiddleware(
+        allow_inplace_modification=True,
+        default_enclosing=default_enclosing,
+        reuse_previous_enclosing=reuse_previous_enclosing,
+        enclose_integers=True,
+    )
+
+    transformed = middleware.transform(library=Library([input_entry])).entries[0]
+
+    expected = {"{": "{jan}", '"': '"jan"', "no-enclosing": "jan"}[demanded_enclosing]
+    assert transformed["month"] == expected
+    # The demand is consumed when the new (enclosed) value is assigned
+    assert transformed.fields_dict["month"].enclosing is None
+
+
+@pytest.mark.parametrize("value", [8, "8"], ids=["int", "digit-str"])
+def test_demanded_no_enclosing_on_int_value(value):
+    """Demanding 'no-enclosing' on an int field must yield an unenclosed string value."""
+    field = Field(key="month", value=value, start_line=6, enclosing="no-enclosing")
+    input_entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[field],
+    )
+
+    middleware = AddEnclosingMiddleware(
+        allow_inplace_modification=True,
+        default_enclosing="{",
+        reuse_previous_enclosing=False,
+        enclose_integers=True,
+    )
+
+    transformed = middleware.transform(library=Library([input_entry])).entries[0]
+    assert transformed["month"] == "8"
+
+
+@pytest.mark.parametrize("demanded_enclosing", ["{", '"', "no-enclosing"])
+def test_demanded_enclosing_takes_precedence_on_string(demanded_enclosing: str):
+    input_string = String(
+        start_line=5,
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        value="intro # outro",
+        enclosing=demanded_enclosing,
+    )
+
+    middleware = AddEnclosingMiddleware(
+        allow_inplace_modification=True,
+        default_enclosing="{",
+        reuse_previous_enclosing=False,
+        enclose_integers=True,
+    )
+
+    transformed = middleware.transform(library=Library([input_string])).strings[0]
+    expected = {
+        "{": "{intro # outro}",
+        '"': '"intro # outro"',
+        "no-enclosing": "intro # outro",
+    }[demanded_enclosing]
+    assert transformed.value == expected
+    assert transformed.enclosing is None
+
+
+def test_removal_sets_no_enclosing_demand_for_references():
+    """Unenclosed non-numeric values (i.e., string references and concatenations)
+    must keep their `no-enclosing` when writing. See issue #447."""
+    fields = [
+        Field(value="jan", start_line=6, key="month"),
+        Field(value='jan # "~1st"', start_line=7, key="day"),
+        Field(value="2019", start_line=8, key="year"),
+        Field(value="{Some Title}", start_line=9, key="title"),
+        Field(value='"Some Author"', start_line=10, key="author"),
+    ]
+    input_entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=fields,
+    )
+
+    middleware = RemoveEnclosingMiddleware(allow_inplace_modification=True)
+    transformed = middleware.transform(library=Library([input_entry])).entries[0]
+
+    # References and concatenations demand to remain unenclosed
+    assert transformed.fields_dict["month"].enclosing == "no-enclosing"
+    assert transformed.fields_dict["day"].enclosing == "no-enclosing"
+    # Ints remain subject to the writer's `enclose_integers` option
+    assert transformed.fields_dict["year"].enclosing is None
+    # Previously enclosed values remain subject to the writer's defaults
+    assert transformed.fields_dict["title"].enclosing is None
+    assert transformed.fields_dict["author"].enclosing is None
+
+
+def test_removal_sets_no_enclosing_demand_on_string_block():
+    input_string = String(
+        start_line=5,
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        value="intro # outro",
+    )
+
+    middleware = RemoveEnclosingMiddleware(allow_inplace_modification=True)
+    transformed = middleware.transform(library=Library([input_string])).strings[0]
+    assert transformed.enclosing == "no-enclosing"
+
+
+def test_string_reference_roundtrip():
+    """Default parse -> write must not enclose string references and concatenations,
+    as this would change their semantics. See issue #447."""
+    bibtex = '@article{someKey,\n\tmonth = jan,\n\tpages = intro # "--" # outro,\n\tyear = 2019\n}'
+    library = bibtexparser.parse_string(bibtex)
+    written = bibtexparser.write_string(library)
+
+    assert "month = jan" in written
+    assert 'pages = intro # "--" # outro' in written
+    # Ints are still enclosed by the default unparse stack
+    assert "year = {2019}" in written
 
 
 # TODO round-trip tests (removal -> addition -> removal)

@@ -1,5 +1,6 @@
 import abc
 from collections import OrderedDict
+from typing import Optional
 from typing import Tuple
 from typing import Union
 
@@ -30,6 +31,9 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
 
         new_val, meta = self.resolve_month_field_val(month)
         month.value = new_val
+        demanded_enclosing = self._demanded_enclosing(new_val)
+        if demanded_enclosing is not None:
+            month.enclosing = demanded_enclosing
         entry.parser_metadata[self.metadata_key()] = meta
         return entry
 
@@ -43,6 +47,10 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
         Returns:
             A tuple of the transformed value and the metadata."""
         raise NotImplementedError("Abstract method")
+
+    def _demanded_enclosing(self, new_value: Union[str, int]) -> Optional[str]:
+        """The `Field.enclosing` to demand for the transformed month value, if any."""
+        return None
 
 
 _MONTH_ABBREV_TO_FULL = OrderedDict(
@@ -93,7 +101,7 @@ class MonthLongStringMiddleware(_MonthInterpolator):
         if isinstance(v, int):
             if v < 1 or v > 12:
                 return (
-                    month_field,
+                    month_field.value,
                     f"month-field unchanged - unknown month {v}",
                 )  # Nothing we can do here
             return _MONTH_FULL[v - 1], "transformed int-month to str-month"
@@ -122,12 +130,23 @@ class MonthAbbreviationMiddleware(_MonthInterpolator):
     will not be transformed. If you want to transform these values, you should
     use this middleware after the RemoveEnclosingMiddleware.
 
-    The created abbreviations are always lowercase and unenclosed."""
+    The created abbreviations are always lowercase and unenclosed.
+    As the abbreviations are bibtex string references (macros, e.g. `jan`),
+    a `no-enclosing` demand is set on the month field (see `Field.enclosing`),
+    making sure the `AddEnclosingMiddleware` keeps them unenclosed when writing."""
 
     # docstr-coverage: inherited
     @classmethod
     def metadata_key(cls) -> str:
         return "MonthAbbreviationMiddleware"
+
+    # docstr-coverage: inherited
+    def _demanded_enclosing(self, new_value: Union[str, int]) -> Optional[str]:
+        # Month macros (jan, feb, ...) must not be enclosed when written,
+        # as that would turn them into plain strings instead of references.
+        if isinstance(new_value, str) and new_value in _MONTH_ABBREV:
+            return "no-enclosing"
+        return None
 
     # docstr-coverage: inherited
     def resolve_month_field_val(self, month_field: Field):
@@ -137,7 +156,7 @@ class MonthAbbreviationMiddleware(_MonthInterpolator):
         if isinstance(v, int):
             if v < 1 or v > 12:
                 # Nothing we can do here
-                return month_field, f"month-field unchanged - unknown month {v}"
+                return month_field.value, f"month-field unchanged - unknown month {v}"
             return _MONTH_ABBREV[v - 1], "transformed int-month to abbreviated month"
         elif isinstance(v, str):
             v_lower = v.lower()
@@ -157,12 +176,20 @@ class MonthIntMiddleware(_MonthInterpolator):
     will not be transformed. If you want to transform these values, you should
     use this middleware after the RemoveEnclosingMiddleware.
 
-    The created int-months are always integers and unenclosed."""
+    The created int-months are always integers and unenclosed.
+    A `no-enclosing` demand is set on the month field (see `Field.enclosing`),
+    making sure the `AddEnclosingMiddleware` keeps them unenclosed when writing."""
 
     # docstr-coverage: inherited
     @classmethod
     def metadata_key(cls) -> str:
         return "MonthIntMiddleware"
+
+    # docstr-coverage: inherited
+    def _demanded_enclosing(self, new_value: Union[str, int]) -> Optional[str]:
+        if isinstance(new_value, int):
+            return "no-enclosing"
+        return None
 
     # docstr-coverage: inherited
     def resolve_month_field_val(self, month_field: Field):
