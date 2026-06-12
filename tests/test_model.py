@@ -368,6 +368,37 @@ def test_string_enclosing_validation():
         String("myKey", "myValue", 1, "raw", enclosing="invalid")
 
 
+def test_entry_hash():
+    # Equal entries have equal hashes
+    entry_1 = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    entry_2 = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    assert hash(entry_1) == hash(entry_2)
+    # Entries are usable in sets and dicts
+    assert len({entry_1, deepcopy(entry_1)}) == 1
+    assert {entry_1: "value"}[entry_2] == "value"
+
+
+def test_string_hash():
+    # Equal strings have equal hashes
+    string_1 = String("key", "value", 1, "raw")
+    string_2 = String("key", "value", 1, "raw")
+    assert hash(string_1) == hash(string_2)
+    # Strings are usable in sets and dicts
+    assert len({string_1, deepcopy(string_1)}) == 1
+    assert {string_1: "value"}[string_2] == "value"
+
+
+def test_field_hash():
+    # Equal fields have equal hashes
+    field_1 = Field("field", "value", 1)
+    field_2 = Field("field", "value", 1)
+    assert hash(field_1) == hash(field_2)
+    # Fields are usable in sets and dicts, even with unhashable values
+    field_1.value = ["some", "unhashable", "value"]
+    assert len({field_1, deepcopy(field_1)}) == 1
+    assert {field_1: "value"}[deepcopy(field_1)] == "value"
+
+
 def test_entry_fields_shorthand():
     entry = Entry(
         entry_type="article",
