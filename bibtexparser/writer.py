@@ -22,7 +22,7 @@ def _treat_entry(block: Entry, bibtex_format) -> List[str]:
     for i, field in enumerate(block.fields):
         res.append(bibtex_format.indent)
         res.append(field.key)
-        res.append(_val_intent_string(bibtex_format, field.key))
+        res.append(_val_indent_string(bibtex_format, field.key))
         res.append(VAL_SEP)
         res.append(field.value)
         if bibtex_format.trailing_comma or i < len(block.fields) - 1:
@@ -32,7 +32,7 @@ def _treat_entry(block: Entry, bibtex_format) -> List[str]:
     return res
 
 
-def _val_intent_string(bibtex_format: "BibtexFormat", key: str) -> str:
+def _val_indent_string(bibtex_format: "BibtexFormat", key: str) -> str:
     """The spaces which have to be added after the ` = `."""
     length = bibtex_format.value_column - len(key) - len(VAL_SEP)
     return "" if length <= 0 else " " * length
@@ -163,7 +163,7 @@ class BibtexFormat:
 
     @property
     def indent(self) -> str:
-        """Character(s) for indenting BibTeX field-value pairs. Default: single space."""
+        """Character(s) for indenting BibTeX field-value pairs. Default: single tab."""
         return self._indent
 
     @indent.setter
@@ -174,7 +174,7 @@ class BibtexFormat:
     def value_column(self) -> Union[int, str]:
         """Controls the alignment of field- and string-values. Default: no alignment.
 
-        This impacts String and Entry blocks.
+        This impacts Entry blocks (String blocks are not aligned).
 
         An integer value x specifies that spaces should be added before the " = ",
         such that, if possible, the value is written at column `len(self.indent) + x`.

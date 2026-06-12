@@ -21,7 +21,7 @@ DEFAULT_BLOCK_TYPE_ORDER = (String, Preamble, Entry, ImplicitComment, ExplicitCo
 
 
 @dataclass
-class _BlockJunk:
+class _BlockChunk:
     """Data-Structure reflecting zero or more comments together with a block."""
 
     # The blocks (comments and the main block) are stored in the order they were parsed.
@@ -29,12 +29,12 @@ class _BlockJunk:
 
     @property
     def main_block(self) -> Block:
-        """Returns the main (i.e., last, non-comment) block of this junk."""
+        """Returns the main (i.e., last, non-comment) block of this chunk."""
         try:
             return self.blocks[-1]
         except IndexError:
             raise RuntimeError(
-                "Block junk must contain at least one block. "
+                "Block chunk must contain at least one block. "
                 "This is a bug in bibtexparser, please report it."
             )
 
@@ -104,31 +104,31 @@ class SortBlocksMiddleware(LibraryMiddleware):
         super().__init__(allow_inplace_modification=False)
 
     @staticmethod
-    def _block_junks(blocks: List[Block]) -> List[_BlockJunk]:
-        block_junks = []
-        current_junk = _BlockJunk()
+    def _block_chunks(blocks: List[Block]) -> List[_BlockChunk]:
+        block_chunks = []
+        current_chunk = _BlockChunk()
         for block in blocks:
-            current_junk.blocks.append(block)
+            current_chunk.blocks.append(block)
             if not (isinstance(block, ExplicitComment) or isinstance(block, ImplicitComment)):
-                # We added a non-comment block, hence we finish the junk and
+                # We added a non-comment block, hence we finish the chunk and
                 # start a new one
-                block_junks.append(current_junk)
-                current_junk = _BlockJunk()
+                block_chunks.append(current_chunk)
+                current_chunk = _BlockChunk()
 
-        if current_junk.blocks:
-            # That would be a junk with only comments, but we add it at the end for completeness
-            block_junks.append(current_junk)
+        if current_chunk.blocks:
+            # That would be a chunk with only comments, but we add it at the end for completeness
+            block_chunks.append(current_chunk)
 
-        return block_junks
+        return block_chunks
 
     # docstr-coverage: inherited
     def transform(self, library: Library) -> Library:
         blocks = deepcopy(library.blocks)
         if self._preserve_comments_on_top:
-            block_junks = self._block_junks(blocks)
-            block_junks.sort(key=lambda junk: self._key(junk.main_block), reverse=self._reverse)
+            block_chunks = self._block_chunks(blocks)
+            block_chunks.sort(key=lambda chunk: self._key(chunk.main_block), reverse=self._reverse)
             return Library(
-                blocks=[block for block_junk in block_junks for block in block_junk.blocks],
+                blocks=[block for block_chunk in block_chunks for block in block_chunk.blocks],
                 fail_on_duplicate_key=False,
             )
         else:

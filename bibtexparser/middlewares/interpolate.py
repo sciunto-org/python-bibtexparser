@@ -47,8 +47,8 @@ class ResolveStringReferencesMiddleware(LibraryMiddleware):
                 warnings.warn(
                     (
                         "The RemoveEnclosingMiddleware must not run before "
-                        "the ResolveStringReferencesMiddleware."
-                        "We continue, but string interpolation is likely to fail,"
+                        "the ResolveStringReferencesMiddleware. "
+                        "We continue, but string interpolation is likely to fail, "
                         "or to be too aggressive (i.e., replace too many strings)."
                     ),
                     UserWarning,

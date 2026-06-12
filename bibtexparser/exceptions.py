@@ -19,7 +19,7 @@ class ParsingException(Exception):
 
 
 class BlockAbortedException(ParsingException):
-    """Exception where a invalid bibtex file led to an aborted block."""
+    """Exception where an invalid bibtex file led to an aborted block."""
 
     def __init__(
         self,
@@ -50,9 +50,9 @@ class RegexMismatchException(ParserStateException):
         self.expected_match = expected_match
         self.second_match = second_match
         super().__init__(
-            f"Regex mismatch: {first_match} followed by {second_match},"
+            f"Regex mismatch: {first_match} followed by {second_match}, "
             f"but expected {expected_match}.\n"
-            "This is an python-bibtexparser internal error. "
+            "This is a python-bibtexparser internal error. "
             "Please report this issue at our issue tracker."
         )
 
