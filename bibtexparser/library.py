@@ -76,8 +76,22 @@ class Library:
                 seen_string_keys.add(block.key)
         return duplicate_keys
 
+    def _block_index(self, block: Block) -> int:
+        """Index of a block in the library, preferring identity over equality.
+
+        :param block: Block to look up.
+        :raises ValueError: If block is not in library."""
+        for i, b in enumerate(self._blocks):
+            if b is block:
+                return i
+        # No identity match; fall back to equality (raises ValueError if not found).
+        return self._blocks.index(block)
+
     def remove(self, blocks: list[Block] | Block):
         """Remove blocks from library.
+
+        If equal duplicate blocks exist in the library, the exact (identical)
+        instance is removed, if present; otherwise the first equal block.
 
         :param blocks: Block or list of blocks to remove.
         :raises ValueError: If block is not in library."""
@@ -85,7 +99,7 @@ class Library:
             blocks = [blocks]
 
         for block in blocks:
-            self._blocks.remove(block)
+            del self._blocks[self._block_index(block)]
             if isinstance(block, Entry):
                 del self._entries_by_key[block.key]
             elif isinstance(block, String):
@@ -94,6 +108,9 @@ class Library:
     def replace(self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True):
         """Replace a block with another block, at the same position.
 
+        If equal duplicate blocks exist in the library, the exact (identical)
+        instance is replaced, if present; otherwise the first equal block.
+
         :param old_block: Block to replace.
         :param new_block: Block to replace with.
         :param fail_on_duplicate_key: If False, adds a DuplicateKeyBlock if
@@ -101,7 +118,7 @@ class Library:
         :raises ValueError: If old_block is not in library or if fail_on_duplicate_key is True
                 and a block with new_block.key (other than old_block) already exists."""
         try:
-            index = self._blocks.index(old_block)
+            index = self._block_index(old_block)
             self.remove(old_block)
         except ValueError:
             raise ValueError("Block to replace is not in library.")

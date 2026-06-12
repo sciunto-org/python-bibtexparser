@@ -124,7 +124,7 @@ def parse_string(
     parse_stack: Iterable[Middleware] | None = None,
     append_middleware: Iterable[Middleware] | None = None,
     library: Library | None = None,
-):
+) -> Library:
     """Parse a BibTeX string.
 
     :param bibtex_str: BibTeX string to parse
