@@ -47,10 +47,6 @@ class Splitter:
         self._reset_block_status(current_char_index=0)
 
     def _reset_block_status(self, current_char_index: int) -> None:
-        self._open_brackets = 0
-        self._is_quote_open = False
-        self._expected_next: Optional[List[str]] = None
-
         # By default, we assume that an implicit comment is started
         #   at the beginning of the file and after each @{...} block.
         #   We then ignore empty implicit comments.
@@ -420,7 +416,6 @@ class Splitter:
                 end_index=comma_mark.end(),
             )
         else:
-            self._open_brackets += 1
             key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
             fields, end_index, duplicate_keys = self._move_to_end_of_entry(comma_mark.end())
 
