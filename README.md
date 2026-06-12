@@ -33,8 +33,8 @@ Go check out our documentation on [https://bibtexparser.readthedocs.io/en/main/]
 - :rocket: Order of magnitudes faster
 - :wrench: Easily customizable parsing **and** writing
 - :herb: Access to raw, unparsed bibtex.
-- :hankey: Fault-Tolerant: Able to parse files with syntax errors
-- :mahjong: Massively simplified, robuster handling of de- and encoding (special chars, ...).
+- :shield: Fault-Tolerant: Able to parse files with syntax errors
+- :mahjong: Massively simplified, more robust handling of de- and encoding (special chars, ...).
 - :copyright: Permissive MIT license
 
 ## TLDR Usage Example
