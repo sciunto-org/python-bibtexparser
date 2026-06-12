@@ -6,6 +6,16 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 
+_ALLOWED_ENCLOSINGS = (None, "{", '"', "no-enclosing")
+
+
+def _validated_enclosing(enclosing: Optional[str]) -> Optional[str]:
+    if enclosing not in _ALLOWED_ENCLOSINGS:
+        raise ValueError(
+            "enclosing must be one of None, '{', '\"' or 'no-enclosing', " f"not {enclosing!r}"
+        )
+    return enclosing
+
 
 class Block(abc.ABC):
     """An abstract superclass of all top-level building blocks of a bibtex file.
@@ -86,10 +96,12 @@ class String(Block):
         value: str,
         start_line: Optional[int] = None,
         raw: Optional[str] = None,
+        enclosing: Optional[str] = None,
     ):
         super().__init__(start_line, raw)
         self._key = key
         self._value = value
+        self._enclosing = _validated_enclosing(enclosing)
 
     @property
     def key(self) -> str:
@@ -108,6 +120,22 @@ class String(Block):
     @value.setter
     def value(self, value: str):
         self._value = value
+        self._enclosing = None
+
+    @property
+    def enclosing(self) -> Optional[str]:
+        """The enclosing demanded when writing this string, e.g. ``'{'``.
+
+        Allowed values are ``'{'``, ``'"'`` and ``'no-enclosing'``.
+        ``None`` (the default) leaves the choice to the writing middleware
+        (see ``AddEnclosingMiddleware``), which is the right choice for most use-cases.
+
+        Note: Assigning a new ``value`` to the string resets this attribute to ``None``."""
+        return self._enclosing
+
+    @enclosing.setter
+    def enclosing(self, enclosing: Optional[str]):
+        self._enclosing = _validated_enclosing(enclosing)
 
     def __str__(self) -> str:
         return f"String (line: {self.start_line}, key: `{self.key}`): `{self.value}`"
@@ -197,10 +225,17 @@ class ImplicitComment(Block):
 class Field:
     """A field of a Bibtex entry, e.g. ``author = {John Doe}``."""
 
-    def __init__(self, key: str, value: Any, start_line: Optional[int] = None):
+    def __init__(
+        self,
+        key: str,
+        value: Any,
+        start_line: Optional[int] = None,
+        enclosing: Optional[str] = None,
+    ):
         self._start_line = start_line
         self._key = key
         self._value = value
+        self._enclosing = _validated_enclosing(enclosing)
 
     @property
     def key(self) -> str:
@@ -219,6 +254,27 @@ class Field:
     @value.setter
     def value(self, value: Any):
         self._value = value
+        self._enclosing = None
+
+    @property
+    def enclosing(self) -> Optional[str]:
+        """The enclosing demanded when writing this field, e.g. ``'{'``.
+
+        Allowed values are ``'{'``, ``'"'`` and ``'no-enclosing'``.
+        ``None`` (the default) leaves the choice to the writing middleware
+        (see ``AddEnclosingMiddleware``), which is the right choice for most use-cases.
+
+        A demand of ``'no-enclosing'`` is used for values that must be written verbatim,
+        such as bibtex string references (``month = jan``)
+        or concatenation expressions (``pages = intro # outro``),
+        where adding an enclosing would change the semantics of the value.
+
+        Note: Assigning a new ``value`` to the field resets this attribute to ``None``."""
+        return self._enclosing
+
+    @enclosing.setter
+    def enclosing(self, enclosing: Optional[str]):
+        self._enclosing = _validated_enclosing(enclosing)
 
     @property
     def start_line(self) -> int:
@@ -237,7 +293,10 @@ class Field:
         return f"Field (line: {self.start_line}, key: `{self.key}`): `{self.value}`"
 
     def __repr__(self) -> str:
-        return f"Field(key=`{self.key}`, value=`{self.value}`, " f"start_line={self.start_line})"
+        return (
+            f"Field(key=`{self.key}`, value=`{self.value}`, "
+            f"start_line={self.start_line}, enclosing={self._enclosing!r})"
+        )
 
 
 class Entry(Block):

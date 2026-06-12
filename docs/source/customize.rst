@@ -246,6 +246,37 @@ The metadata attribute and its exact specification is still experimental and sub
 even within minor/path versions. Even when not experimental anymore, it is not intended to be used by users directly,
 and may be changed as needed by the corresponding middleware maintainers.
 
+.. _value_enclosing:
+
+Enclosing of Values when Writing
+--------------------------------
+
+When writing a library, the :class:`bibtexparser.middlewares.AddEnclosingMiddleware`
+(part of the default write stack) decides for each value whether to enclose it
+in curly braces or quotes. By default, values are enclosed in curly braces
+(integers in common int-fields can be left unenclosed, see the middleware's docstring).
+
+Values that must not be enclosed — as enclosing would change their semantics —
+demand this via the ``enclosing`` attribute on the ``Field`` (or ``String``) instance,
+which takes precedence over all other enclosing rules. This applies for example to
+bibtex string references and concatenation expressions, such as month macros:
+
+.. code-block:: python
+
+    library = bibtexparser.parse_string('@article{k, month = {1}, year = {2000}}')
+    bib_str = bibtexparser.write_string(
+        library,
+        prepend_middleware=[bibtexparser.middlewares.MonthAbbreviationMiddleware()],
+    )
+    # The month abbreviation middleware demands `month.enclosing = "no-enclosing"`,
+    # hence the written entry contains `month = jan` (a string reference)
+    # and not `month = {jan}` (a literal).
+
+You may also set the demand manually, e.g. ``entry.fields_dict["title"].enclosing = '"'``
+to enforce quotes for a specific field. Allowed values are ``'{'``, ``'"'`` and
+``'no-enclosing'``; ``None`` (the default) leaves the choice to the middleware.
+Note that assigning a new ``value`` to a field resets its ``enclosing`` to ``None``.
+
 .. _writing_formatting:
 
 Formatting Options for Writing

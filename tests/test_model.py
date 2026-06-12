@@ -315,6 +315,59 @@ def test_entry_str():
     assert str(entry) == expected
 
 
+@pytest.mark.parametrize("enclosing", ["{", '"', "no-enclosing", None])
+def test_field_enclosing_demand(enclosing):
+    # Default is None (writer middleware decides)
+    field = Field("month", "jan")
+    assert field.enclosing is None
+
+    # Settable via attribute and constructor
+    field.enclosing = enclosing
+    assert field.enclosing == enclosing
+    assert Field("month", "jan", enclosing=enclosing).enclosing == enclosing
+
+    # Assigning a new value resets the demanded enclosing
+    field.value = "feb"
+    assert field.enclosing is None
+
+
+def test_field_enclosing_validation():
+    field = Field("month", "jan")
+    with pytest.raises(ValueError):
+        field.enclosing = "invalid"
+    with pytest.raises(ValueError):
+        Field("month", "jan", enclosing="invalid")
+
+
+def test_field_equality_considers_enclosing():
+    assert Field("month", "jan") != Field("month", "jan", enclosing="no-enclosing")
+    assert Field("month", "jan", enclosing="{") == Field("month", "jan", enclosing="{")
+
+
+@pytest.mark.parametrize("enclosing", ["{", '"', "no-enclosing", None])
+def test_string_enclosing_demand(enclosing):
+    # Default is None (writer middleware decides)
+    string = String("myKey", "myValue", 1, "raw")
+    assert string.enclosing is None
+
+    # Settable via attribute and constructor
+    string.enclosing = enclosing
+    assert string.enclosing == enclosing
+    assert String("myKey", "myValue", 1, "raw", enclosing=enclosing).enclosing == enclosing
+
+    # Assigning a new value resets the demanded enclosing
+    string.value = "myNewValue"
+    assert string.enclosing is None
+
+
+def test_string_enclosing_validation():
+    string = String("myKey", "myValue", 1, "raw")
+    with pytest.raises(ValueError):
+        string.enclosing = "invalid"
+    with pytest.raises(ValueError):
+        String("myKey", "myValue", 1, "raw", enclosing="invalid")
+
+
 def test_entry_fields_shorthand():
     entry = Entry(
         entry_type="article",
