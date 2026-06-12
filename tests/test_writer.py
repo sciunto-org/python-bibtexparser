@@ -143,3 +143,28 @@ def test_write_failed_block():
     assert lines[2] == "except = {that-there-need-to-be},"
     assert lines[3] == "other = {multiple-lines}"
     assert lines[4] == "}"
+
+
+def test_write_failed_block_without_raw_raises():
+    """A failed block with no raw bibtex cannot be written (issue #400)."""
+    block = ParsingFailedBlock(error=ValueError("Some error"), raw=None, ignore_error_block=None)
+    library = Library(blocks=[block])
+    with pytest.raises(ValueError, match="failed blocks without raw bibtex"):
+        writer.write(library)
+
+
+def test_write_manually_created_duplicate_entries_raises():
+    """Reproduces issue #400: duplicate keys on programmatically created entries."""
+    library = Library()
+    library.add(_dummy_entry())
+    library.add(_dummy_entry())
+    with pytest.raises(ValueError, match="failed_blocks"):
+        writer.write(library)
+
+
+def test_write_raises_listing_all_unwritable_blocks():
+    first = ParsingFailedBlock(error=ValueError("first error"), raw=None)
+    second = ParsingFailedBlock(error=ValueError("second error"), raw=None)
+    library = Library(blocks=[first, _dummy_entry(), second])
+    with pytest.raises(ValueError, match="(?s)first error.*second error"):
+        writer.write(library)
