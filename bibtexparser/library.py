@@ -196,7 +196,7 @@ class Library:
     @property
     def strings_dict(self) -> Dict[str, String]:
         """Dict representation of all @string blocks in the library."""
-        return self._strings_by_key
+        return self._strings_by_key.copy()
 
     @property
     def entries(self) -> List[Entry]:
