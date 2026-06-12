@@ -31,6 +31,12 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     It is useful when the field value is enclosed in braces or quotes
     (which is the case for the vast majority of values).
 
+    Values that were not enclosed and are not plain integers
+    (i.e., unresolved bibtex string references such as `month = jan`
+    and concatenation expressions such as `pages = intro # outro`)
+    get a `no-enclosing` demand (see `Field.enclosing`),
+    as enclosing them when writing would change their semantics.
+
     Note: If you want to interpolate strings, you should do so
     before removing any enclosing.
     """
@@ -62,6 +68,10 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         for field in entry.fields:
             stripped, enclosing = self._strip_enclosing(field.value)
             field.value = stripped
+            if enclosing == "no-enclosing" and not stripped.isdigit():
+                # String references and concatenations must remain unenclosed,
+                # as enclosing them would change their semantics.
+                field.enclosing = "no-enclosing"
             metadata[field.key] = enclosing
         entry.parser_metadata[self.metadata_key()] = metadata
         return entry
@@ -70,6 +80,9 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     def transform_string(self, string: String, library: Library) -> String:
         stripped, enclosing = self._strip_enclosing(string.value)
         string.value = stripped
+        if enclosing == "no-enclosing" and not stripped.isdigit():
+            # See corresponding comment in `transform_entry`
+            string.enclosing = "no-enclosing"
         string.parser_metadata[self.metadata_key()] = enclosing
         return string
 
