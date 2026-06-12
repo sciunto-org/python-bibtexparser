@@ -2,8 +2,6 @@ name: "unittests"
 
 on:
   push:
-    paths:
-    - '**.py'
   pull_request:
     branches: ["main"]
 
