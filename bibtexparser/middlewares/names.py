@@ -6,10 +6,7 @@ Much of the code is taken from Blair Bonnetts never merged v0 pull request
 
 import abc
 import dataclasses
-from typing import List
 from typing import Literal
-from typing import Tuple
-from typing import Union
 
 from bibtexparser.library import Library
 from bibtexparser.model import Block
@@ -37,7 +34,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
     def __init__(
         self,
         allow_inplace_modification: bool = True,
-        name_fields: Tuple[str] = ("author", "editor", "translator"),
+        name_fields: tuple[str] = ("author", "editor", "translator"),
     ):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
@@ -46,7 +43,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
         self._name_fields = name_fields
 
     @property
-    def name_fields(self) -> Tuple[str]:
+    def name_fields(self) -> tuple[str]:
         """The fields that contain names, considered by this middleware."""
         return self._name_fields
 
@@ -75,7 +72,7 @@ class SeparateCoAuthors(_NameTransformerMiddleware):
         return "separate_coauthors"
 
     # docstr-coverage: inherited
-    def _transform_field_value(self, name: str) -> List[str]:
+    def _transform_field_value(self, name: str) -> list[str]:
         return split_multiple_persons_names(name)
 
 
@@ -88,7 +85,7 @@ class MergeCoAuthors(_NameTransformerMiddleware):
         return "merge_coauthors"
 
     # docstr-coverage: inherited
-    def _transform_field_value(self, name: Union[List[str], str]) -> str:
+    def _transform_field_value(self, name: list[str] | str) -> str:
         if isinstance(name, list):
             return " and ".join(name)
         return name
@@ -101,10 +98,10 @@ class NameParts:
     The different parts are defined according to BibTex's implementation
     of name parts (first, von, last, jr)."""
 
-    first: List[str] = dataclasses.field(default_factory=list)
-    von: List[str] = dataclasses.field(default_factory=list)
-    last: List[str] = dataclasses.field(default_factory=list)
-    jr: List[str] = dataclasses.field(default_factory=list)
+    first: list[str] = dataclasses.field(default_factory=list)
+    von: list[str] = dataclasses.field(default_factory=list)
+    last: list[str] = dataclasses.field(default_factory=list)
+    jr: list[str] = dataclasses.field(default_factory=list)
 
     @property
     def merge_first_name_first(self) -> str:
@@ -162,7 +159,7 @@ class SplitNameParts(_NameTransformerMiddleware):
     def metadata_key(cls) -> str:
         return "split_name_parts"
 
-    def _transform_field_value(self, name: List[str]) -> List[NameParts]:
+    def _transform_field_value(self, name: list[str]) -> list[NameParts]:
         if not isinstance(name, list):
             raise ValueError(
                 "Expected a list of strings, got {}. "
@@ -187,7 +184,7 @@ class MergeNameParts(_NameTransformerMiddleware):
         self,
         style: Literal["last", "first"] = "last",
         allow_inplace_modification: bool = True,
-        name_fields: Tuple[str] = ("author", "editor", "translator"),
+        name_fields: tuple[str] = ("author", "editor", "translator"),
     ):
         self.style = style
         super().__init__(allow_inplace_modification, name_fields)
@@ -197,7 +194,7 @@ class MergeNameParts(_NameTransformerMiddleware):
     def metadata_key(cls) -> str:
         return "merge_name_parts"
 
-    def _transform_field_value(self, name: List[NameParts]) -> List[str]:
+    def _transform_field_value(self, name: list[NameParts]) -> list[str]:
         if not (isinstance(name, list) and all(isinstance(n, NameParts) for n in name)):
             raise ValueError(f"Expected a list of NameParts, got {name}. ")
 
@@ -504,7 +501,7 @@ def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
     return parts
 
 
-def split_multiple_persons_names(names: str) -> List[str]:
+def split_multiple_persons_names(names: str) -> list[str]:
     """
     Splits a string of multiple names.
 

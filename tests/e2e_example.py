@@ -6,8 +6,7 @@ from bibtexparser.middlewares.names import MergeNameParts
 from bibtexparser.middlewares.names import SeparateCoAuthors
 from bibtexparser.middlewares.names import SplitNameParts
 
-bibtex_string = dedent(
-    """\
+bibtex_string = dedent("""\
 @article{Muller2020,
     title = "Some Paper Title",
     author = "John Muller and Jane Doe",
@@ -19,8 +18,7 @@ bibtex_string = dedent(
     This is a comment.
 }
 
-@preamble{e = mc^2}    """
-)
+@preamble{e = mc^2}    """)
 
 
 def test_example():
@@ -42,10 +40,7 @@ def test_example():
     )
 
     # Note: As defaults change, this assertion may need to be updated.
-    assert (
-        new_bibtex_string.strip()
-        == dedent(
-            """
+    assert new_bibtex_string.strip() == dedent("""
     @article{Muller2020,
     \ttitle = {Some Paper Title},
     \tauthor = {John Muller and Jane Doe},
@@ -57,6 +52,4 @@ def test_example():
     @comment{This is a comment.}
 
 
-    @preamble{e = mc^2}"""
-        ).strip()
-    )
+    @preamble{e = mc^2}""").strip()

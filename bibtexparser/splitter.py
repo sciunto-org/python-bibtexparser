@@ -1,10 +1,5 @@
 import logging
 import re
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import Union
 
 from .exceptions import BlockAbortedException
 from .exceptions import ParserStateException
@@ -51,7 +46,7 @@ class Splitter:
         #   at the beginning of the file and after each @{...} block.
         #   We then ignore empty implicit comments.
         self._implicit_comment_start_line = self._current_line
-        self._implicit_comment_start: Optional[int] = current_char_index
+        self._implicit_comment_start: int | None = current_char_index
 
     def _is_at_line_start(self, pos: int) -> bool:
         """Check if position is at the start of a line (after optional whitespace).
@@ -71,7 +66,7 @@ class Splitter:
         # Start of string counts as line start
         return True
 
-    def _end_implicit_comment(self, end_char_index) -> Optional[ImplicitComment]:
+    def _end_implicit_comment(self, end_char_index) -> ImplicitComment | None:
         if self._implicit_comment_start is None:
             return  # No implicit comment started
 
@@ -98,7 +93,7 @@ class Splitter:
         else:
             return None
 
-    def _next_mark(self, accept_eof: bool) -> Optional[re.Match]:
+    def _next_mark(self, accept_eof: bool) -> re.Match | None:
         # Check if there is a mark that was previously not consumed
         #   and return it if so
         if self._unaccepted_mark is not None:
@@ -225,7 +220,7 @@ class Splitter:
                     end_index=next_mark.start() - 1,
                 )
 
-    def _move_to_end_of_entry(self, first_key_start: int) -> Tuple[List[Field], int, Set[str]]:
+    def _move_to_end_of_entry(self, first_key_start: int) -> tuple[list[Field], int, set[str]]:
         """Move to the end of the entry and return the fields and the end index."""
         result = []
         keys = set()
@@ -280,7 +275,7 @@ class Splitter:
                     end_index=after_field_mark.start(),
                 )
 
-    def split(self, library: Optional[Library] = None) -> Library:
+    def split(self, library: Library | None = None) -> Library:
         """Split the bibtex-string into blocks and add them to the library.
 
         Args:
@@ -390,7 +385,7 @@ class Splitter:
             raw=self.bibstr[start_index : end_bracket_index + 1],
         )
 
-    def _handle_entry(self, m, m_val) -> Union[Entry, ParsingFailedBlock]:
+    def _handle_entry(self, m, m_val) -> Entry | ParsingFailedBlock:
         """Handle entry block. Return end index"""
         start_line = self._current_line
         entry_type = m_val[1:].strip()

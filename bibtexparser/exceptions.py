@@ -1,7 +1,3 @@
-from typing import List
-from typing import Optional
-
-
 class ParsingException(Exception):
     """Generic Exception for parsing errors"""
 
@@ -25,7 +21,7 @@ class BlockAbortedException(ParsingException):
         self,
         abort_reason: str,
         # Not provided if end of file is reached
-        end_index: Optional[int] = None,
+        end_index: int | None = None,
     ):
         self.abort_reason = abort_reason
         self.end_index = end_index
@@ -60,6 +56,6 @@ class RegexMismatchException(ParserStateException):
 class PartialMiddlewareException(ParsingException):
     """Exception raised when a middleware could not be fully applied."""
 
-    def __init__(self, reasons: List[str]):
+    def __init__(self, reasons: list[str]):
         reasons_string = "\n\n=====\n\n".join(reasons)
         super().__init__(f"Middleware could not be fully applied: {reasons_string}")

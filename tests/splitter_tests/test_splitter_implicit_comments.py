@@ -11,12 +11,10 @@ from bibtexparser.splitter import Splitter
 def test_implicit_comment_eof():
     """Makes sure implicit comments at end of file are parsed."""
 
-    bibtex_str = dedent(
-        """\
+    bibtex_str = dedent("""\
     @article{article1, title={title1}}
 
-    % This is an implicit comment at the end of the file."""
-    )
+    % This is an implicit comment at the end of the file.""")
 
     library = Splitter(bibtex_str).split()
 
@@ -68,8 +66,7 @@ def test_implicit_comment_on_block_end_line(block):
 def test_multiline_implicit_comment():
     """Makes sure implicit comments spanning multiple lines are parsed."""
 
-    bibtex_str = dedent(
-        """\
+    bibtex_str = dedent("""\
     @article{article1, title={title1}}
 
     % This is an implicit comment
@@ -77,20 +74,17 @@ def test_multiline_implicit_comment():
 
     with an empty line in between.
 
-    @article{article2, title={title2}}"""
-    )
+    @article{article2, title={title2}}""")
 
     library = Splitter(bibtex_str).split()
 
     assert len(library.comments) == 1
 
-    expected_str = dedent(
-        """\
+    expected_str = dedent("""\
     % This is an implicit comment
     %   spanning multiple lines
 
-    with an empty line in between."""
-    )
+    with an empty line in between.""")
     assert library.comments[0].comment == expected_str
     # Before applying the middleware, `comment` and `raw` are the same.
     assert library.comments[0].raw == expected_str

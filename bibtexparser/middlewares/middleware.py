@@ -1,8 +1,7 @@
 import abc
 import logging
+from collections.abc import Collection
 from copy import deepcopy
-from typing import Collection
-from typing import Union
 
 from bibtexparser.library import Library
 from bibtexparser.model import Block
@@ -101,9 +100,7 @@ class BlockMiddleware(Middleware, abc.ABC):
         # mid-pipeline; they are exposed as `library.failed_blocks`.
         return Library(blocks=blocks, fail_on_duplicate_key=False)
 
-    def transform_block(
-        self, block: Block, library: "Library"
-    ) -> Union[Block, Collection[Block], None]:
+    def transform_block(self, block: Block, library: "Library") -> Block | Collection[Block] | None:
         """Transform a block.
 
         :param block: Block to transform.
@@ -138,9 +135,7 @@ class BlockMiddleware(Middleware, abc.ABC):
         logger.warning(f"Unknown block type {type(block)}")
         return block
 
-    def transform_entry(
-        self, entry: Entry, library: "Library"
-    ) -> Union[Block, Collection[Block], None]:
+    def transform_entry(self, entry: Entry, library: "Library") -> Block | Collection[Block] | None:
         """Transform an entry. Called by `transform_block` if the block is an entry.
 
         Note: This method modifies the passed entry. For a method
@@ -151,7 +146,7 @@ class BlockMiddleware(Middleware, abc.ABC):
 
     def transform_string(
         self, string: String, library: "Library"
-    ) -> Union[Block, Collection[Block], None]:
+    ) -> Block | Collection[Block] | None:
         """Transform a string. Called by `transform_block` if the block is a string.
 
         Note: This method modifies the passed string. For a method
@@ -162,7 +157,7 @@ class BlockMiddleware(Middleware, abc.ABC):
 
     def transform_preamble(
         self, preamble: Preamble, library: "Library"
-    ) -> Union[Block, Collection[Block], None]:
+    ) -> Block | Collection[Block] | None:
         """Transform a preamble. Called by `transform_block` if the block is a preamble.
 
         Note: This method modifies the passed preamble. For a method
@@ -173,7 +168,7 @@ class BlockMiddleware(Middleware, abc.ABC):
 
     def transform_explicit_comment(
         self, explicit_comment: ExplicitComment, library: "Library"
-    ) -> Union[Block, Collection[Block], None]:
+    ) -> Block | Collection[Block] | None:
         """Transform an explicit comment. Called by `transform_block` if the block is an explicit comment.
 
         Note: This method modifies the passed explicit comment. For a method
@@ -184,7 +179,7 @@ class BlockMiddleware(Middleware, abc.ABC):
 
     def transform_implicit_comment(
         self, implicit_comment: ImplicitComment, library: "Library"
-    ) -> Union[Block, Collection[Block], None]:
+    ) -> Block | Collection[Block] | None:
         """Transform an implicit comment. Called by `transform_block` if the block is an implicit comment.
 
         Note: This method modifies the passed implicit comment. For a method
@@ -195,7 +190,7 @@ class BlockMiddleware(Middleware, abc.ABC):
 
     def transform_failed_block(
         self, failed_block: ParsingFailedBlock, library: "Library"
-    ) -> Union[Block, Collection[Block], None]:
+    ) -> Block | Collection[Block] | None:
         """Transform a block whose parsing failed (e.g. a ``DuplicateFieldKeyBlock``).
         Called by `transform_block` if the block is a ``ParsingFailedBlock``.
 

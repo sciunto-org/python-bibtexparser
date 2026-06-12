@@ -1,5 +1,4 @@
 from copy import deepcopy
-from typing import Union
 
 import pytest
 
@@ -126,7 +125,7 @@ def test_addition_of_enclosing_on_entry(
     default_enclosing: str,
     enclose_ints: bool,
     reuse_previous_enclosing: bool,
-    value: Union[str, int],
+    value: str | int,
     inplace: bool,
 ):
     """Extensive Matrix-Testing of the AddEnclosingMiddleware on Entries.

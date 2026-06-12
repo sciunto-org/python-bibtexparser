@@ -1,7 +1,5 @@
 from copy import deepcopy
-from typing import List
 from typing import Optional
-from typing import Union
 
 from .library import Library
 from .model import Entry
@@ -16,7 +14,7 @@ VAL_SEP = " = "
 PARSING_FAILED_COMMENT = "% WARNING Parsing failed for the following {n} lines."
 
 
-def _treat_entry(block: Entry, bibtex_format) -> List[str]:
+def _treat_entry(block: Entry, bibtex_format) -> list[str]:
     res = ["@", block.entry_type, "{", block.key, ",\n"]
     field: Field
     for i, field in enumerate(block.fields):
@@ -38,7 +36,7 @@ def _val_indent_string(bibtex_format: "BibtexFormat", key: str) -> str:
     return "" if length <= 0 else " " * length
 
 
-def _treat_string(block: String, bibtex_format) -> List[str]:
+def _treat_string(block: String, bibtex_format) -> list[str]:
     return [
         "@string{",
         block.key,
@@ -49,20 +47,20 @@ def _treat_string(block: String, bibtex_format) -> List[str]:
     ]
 
 
-def _treat_preamble(block: Preamble, bibtex_format: "BibtexFormat") -> List[str]:
+def _treat_preamble(block: Preamble, bibtex_format: "BibtexFormat") -> list[str]:
     return [f"@preamble{{{block.value}}}\n"]
 
 
-def _treat_impl_comment(block: ImplicitComment, bibtex_format: "BibtexFormat") -> List[str]:
+def _treat_impl_comment(block: ImplicitComment, bibtex_format: "BibtexFormat") -> list[str]:
     # Note: No explicit escaping is done here - that should be done in middleware
     return [block.comment, "\n"]
 
 
-def _treat_expl_comment(block: ExplicitComment, bibtex_format: "BibtexFormat") -> List[str]:
+def _treat_expl_comment(block: ExplicitComment, bibtex_format: "BibtexFormat") -> list[str]:
     return ["@comment{", block.comment, "}\n"]
 
 
-def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat") -> List[str]:
+def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat") -> list[str]:
     if block.raw is None:
         raise ValueError(_failed_blocks_without_raw_error([block]))
     lines = len(block.raw.splitlines())
@@ -70,7 +68,7 @@ def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat"
     return [parsing_failed_comment, "\n", block.raw, "\n"]
 
 
-def _failed_blocks_without_raw_error(blocks: List[ParsingFailedBlock]) -> str:
+def _failed_blocks_without_raw_error(blocks: list[ParsingFailedBlock]) -> str:
     descriptions = "\n".join(f"  - {type(b).__name__}: {b.error}" for b in blocks)
     return (
         "Cannot write library: it contains failed blocks without raw bibtex "
@@ -132,7 +130,7 @@ def write(library: Library, bibtex_format: Optional["BibtexFormat"] = None) -> s
     return "".join(string_pieces)
 
 
-def _treat_block(bibtex_format, block) -> List[str]:
+def _treat_block(bibtex_format, block) -> list[str]:
     if isinstance(block, Entry):
         string_block_pieces = _treat_entry(block, bibtex_format)
     elif isinstance(block, String):
@@ -159,7 +157,7 @@ class BibtexFormat:
 
     def __init__(self):
         self._indent: str = "\t"
-        self._align_field_values: Union[int, str] = 0
+        self._align_field_values: int | str = 0
         self._block_separator: str = "\n\n"
         self._trailing_comma: bool = False
         self._parsing_failed_comment: str = PARSING_FAILED_COMMENT
@@ -174,7 +172,7 @@ class BibtexFormat:
         self._indent = indent
 
     @property
-    def value_column(self) -> Union[int, str]:
+    def value_column(self) -> int | str:
         """Controls the alignment of field- and string-values. Default: no alignment.
 
         This impacts String and Entry blocks.
@@ -194,7 +192,7 @@ class BibtexFormat:
         return self._align_field_values
 
     @value_column.setter
-    def value_column(self, align_values: Union[int, str]):
+    def value_column(self, align_values: int | str):
         if isinstance(align_values, int):
             if align_values < 0:
                 raise ValueError("align_field_values must be >= 0")

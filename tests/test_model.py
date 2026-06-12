@@ -305,12 +305,10 @@ def test_entry_str():
         ],
     )
 
-    expected = dedent(
-        """\
+    expected = dedent("""\
     Entry (line: None, type: `article`, key: `myEntry`):
     \t`myFirstField` = `firstValue`
-    \t`mySecondField` = `secondValue`"""
-    )
+    \t`mySecondField` = `secondValue`""")
 
     assert str(entry) == expected
 

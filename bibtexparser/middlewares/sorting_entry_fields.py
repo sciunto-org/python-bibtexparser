@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from bibtexparser.library import Library
 from bibtexparser.model import Block
 from bibtexparser.model import Entry
@@ -35,7 +33,7 @@ class SortFieldsCustomMiddleware(BlockMiddleware):
 
     def __init__(
         self,
-        order: Tuple[str, ...],
+        order: tuple[str, ...],
         case_sensitive: bool = False,
         allow_inplace_modification: bool = True,
     ):

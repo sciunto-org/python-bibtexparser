@@ -1,7 +1,3 @@
-from typing import Optional
-from typing import Tuple
-from typing import Union
-
 from bibtexparser.library import Library
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
@@ -53,7 +49,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         return REMOVED_ENCLOSING_KEY
 
     @staticmethod
-    def _strip_enclosing(value: str) -> Tuple[str, Union[str, None]]:
+    def _strip_enclosing(value: str) -> tuple[str, str | None]:
         value = value.strip()
         if value.startswith("{") and value.endswith("}"):
             return value[1:-1], "{"
@@ -144,9 +140,9 @@ class AddEnclosingMiddleware(BlockMiddleware):
     def _enclose(
         self,
         value: str,
-        metadata_enclosing: Optional[str],
+        metadata_enclosing: str | None,
         apply_int_rule: bool,
-        demanded_enclosing: Optional[str] = None,
+        demanded_enclosing: str | None = None,
     ) -> str:
         enclosing = self._default_enclosing
         if demanded_enclosing is not None:

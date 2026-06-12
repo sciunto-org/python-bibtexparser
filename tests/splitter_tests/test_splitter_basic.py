@@ -4,7 +4,6 @@ These tests are not exhaustive, but they should cover the most common cases.
 More exhaustive and atomic tests are provided in separate modules."""
 
 from typing import Any
-from typing import Dict
 
 import pytest as pytest
 
@@ -135,7 +134,7 @@ def _split() -> Library:
         },
     ],
 )
-def test_entry(expected: Dict[str, Any]):
+def test_entry(expected: dict[str, Any]):
     library = _split()
     assert len(library.entries) == 2
     entry_by_key = library.entries_dict
@@ -177,7 +176,7 @@ def test_entry(expected: Dict[str, Any]):
         },
     ],
 )
-def test_strings(expected: Dict[str, any]) -> None:
+def test_strings(expected: dict[str, any]) -> None:
     library = _split()
     assert len(library.strings) == 2
     # Raise KeyError if not found
@@ -235,7 +234,7 @@ def test_preamble():
         },
     ],
 )
-def test_comments(expected: Dict[str, any]) -> None:
+def test_comments(expected: dict[str, any]) -> None:
     library = _split()
     comments = library.comments
     assert len(comments) == 3
@@ -376,7 +375,7 @@ author = {S.-H. Kueh and J. Benatar and R. Stewart}
         },
     ],
 )
-def test_blocks_not_starting_on_new_lines(expected: Dict[str, Any]):
+def test_blocks_not_starting_on_new_lines(expected: dict[str, Any]):
     """Test the new blocks that are not on new lines.
 
     Discussed at https://github.com/sciunto-org/python-bibtexparser/issues/411.

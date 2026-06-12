@@ -1,8 +1,5 @@
 import abc
 from collections import OrderedDict
-from typing import Optional
-from typing import Tuple
-from typing import Union
 
 from bibtexparser.library import Library
 from bibtexparser.model import Block
@@ -38,7 +35,7 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
         return entry
 
     @abc.abstractmethod
-    def resolve_month_field_val(self, month_field: Field) -> Tuple[Union[str, int], str]:
+    def resolve_month_field_val(self, month_field: Field) -> tuple[str | int, str]:
         """Transform the month field.
 
         Args:
@@ -48,7 +45,7 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
             A tuple of the transformed value and the metadata."""
         raise NotImplementedError("Abstract method")
 
-    def _demanded_enclosing(self, new_value: Union[str, int]) -> Optional[str]:
+    def _demanded_enclosing(self, new_value: str | int) -> str | None:
         """The `Field.enclosing` to demand for the transformed month value, if any."""
         return None
 
@@ -141,7 +138,7 @@ class MonthAbbreviationMiddleware(_MonthInterpolator):
         return "MonthAbbreviationMiddleware"
 
     # docstr-coverage: inherited
-    def _demanded_enclosing(self, new_value: Union[str, int]) -> Optional[str]:
+    def _demanded_enclosing(self, new_value: str | int) -> str | None:
         # Month macros (jan, feb, ...) must not be enclosed when written,
         # as that would turn them into plain strings instead of references.
         if isinstance(new_value, str) and new_value in _MONTH_ABBREV:
@@ -186,7 +183,7 @@ class MonthIntMiddleware(_MonthInterpolator):
         return "MonthIntMiddleware"
 
     # docstr-coverage: inherited
-    def _demanded_enclosing(self, new_value: Union[str, int]) -> Optional[str]:
+    def _demanded_enclosing(self, new_value: str | int) -> str | None:
         if isinstance(new_value, int):
             return "no-enclosing"
         return None
