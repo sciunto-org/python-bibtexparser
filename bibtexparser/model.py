@@ -86,6 +86,12 @@ class Block(abc.ABC):
             and self.__dict__ == other.__dict__
         )
 
+    def __hash__(self) -> int:
+        # Hash on a stable subset of the attributes compared in `__eq__`
+        # (equal blocks thus have equal hashes). Mutable or potentially
+        # unhashable attributes (e.g. fields, parser_metadata) are excluded.
+        return hash((type(self), self._start_line_in_file, self._raw))
+
 
 class String(Block):
     """Bibtex Blocks of the ``@string`` type, e.g. ``@string{me = "My Name"}``."""
@@ -288,6 +294,12 @@ class Field:
             and isinstance(self, other.__class__)
             and self.__dict__ == other.__dict__
         )
+
+    def __hash__(self) -> int:
+        # Hash on a stable subset of the attributes compared in `__eq__`
+        # (equal fields thus have equal hashes). The value is excluded as it
+        # may be mutable or unhashable (e.g. a list after middleware was applied).
+        return hash((type(self), self._start_line, self._key))
 
     def __str__(self) -> str:
         return f"Field (line: {self.start_line}, key: `{self.key}`): `{self.value}`"

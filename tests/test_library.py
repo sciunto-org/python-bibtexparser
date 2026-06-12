@@ -3,6 +3,7 @@ import pytest
 from bibtexparser import Library
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
+from bibtexparser.model import ImplicitComment
 
 
 def get_dummy_entry():
@@ -94,3 +95,33 @@ def test_constructor_fails_on_duplicate_by_default():
     library = Library(blocks=[get_dummy_entry(), get_dummy_entry()], fail_on_duplicate_key=False)
     assert len(library.blocks) == 2
     assert len(library.failed_blocks) == 1
+
+
+def test_remove_prefers_identical_instance_over_equal_block():
+    """With two equal blocks, remove() must remove the passed instance. See issue 537."""
+    first_comment = ImplicitComment("#same")
+    second_comment = ImplicitComment("#same")
+    assert first_comment == second_comment
+
+    library = Library()
+    library.add([first_comment, second_comment])
+
+    library.remove(second_comment)
+    assert len(library.blocks) == 1
+    assert library.blocks[0] is first_comment
+
+
+def test_replace_prefers_identical_instance_over_equal_block():
+    """With two equal blocks, replace() must replace the passed instance. See issue 537."""
+    first_comment = ImplicitComment("#same")
+    second_comment = ImplicitComment("#same")
+    assert first_comment == second_comment
+
+    library = Library()
+    library.add([first_comment, second_comment])
+
+    new_comment = ImplicitComment("#new")
+    library.replace(second_comment, new_comment)
+    assert len(library.blocks) == 2
+    assert library.blocks[0] is first_comment
+    assert library.blocks[1] is new_comment
