@@ -139,7 +139,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
     # docstr-coverage: inherited
     @classmethod
     def metadata_key(cls) -> str:
-        return "remove_enclosing"
+        return "add_enclosing"
 
     def _enclose(
         self,
