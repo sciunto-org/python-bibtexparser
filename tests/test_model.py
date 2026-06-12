@@ -96,6 +96,30 @@ def test_entry_contains():
     entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
     assert "field" in entry
     assert "other" not in entry
+    # ENTRYTYPE and ID are exposed by `__getitem__`, hence always contained
+    assert "ENTRYTYPE" in entry
+    assert "ID" in entry
+
+
+def test_entry_setitem_field():
+    entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    entry["field"] = "new_value"
+    entry["other"] = "other_value"
+    assert entry["field"] == "new_value"
+    assert entry["other"] == "other_value"
+    assert [f.key for f in entry.fields] == ["field", "other"]
+
+
+def test_entry_setitem_entrytype_and_id():
+    entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    entry["ENTRYTYPE"] = "book"
+    entry["ID"] = "new_key"
+    assert entry.entry_type == "book"
+    assert entry.key == "new_key"
+    assert entry["ENTRYTYPE"] == "book"
+    assert entry["ID"] == "new_key"
+    # No literal fields must be created for these keys
+    assert [f.key for f in entry.fields] == ["field"]
 
 
 def test_string_equality():

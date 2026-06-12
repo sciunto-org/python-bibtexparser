@@ -373,7 +373,12 @@ class Entry(Block):
         return self.fields_dict.get(key, default)
 
     def __contains__(self, key: str) -> bool:
-        """Dict-mimicking ``in`` operator."""
+        """Dict-mimicking ``in`` operator.
+
+        As in ``__getitem__``, ``ENTRYTYPE`` and ``ID`` are always contained.
+        """
+        if key in ("ENTRYTYPE", "ID"):
+            return True
         return key in self.fields_dict
 
     def __getitem__(self, key: str) -> Any:
@@ -395,8 +400,16 @@ class Entry(Block):
 
         This serves for partial v1.x backwards compatibility,
         as well as for a shorthand for `set_field`.
+
+        Mirroring ``__getitem__``, the keys ``ENTRYTYPE`` and ``ID``
+        set ``entry_type`` and ``key`` instead of a field.
         """
-        self.set_field(Field(key, value))
+        if key == "ENTRYTYPE":
+            self.entry_type = value
+        elif key == "ID":
+            self.key = value
+        else:
+            self.set_field(Field(key, value))
 
     def __delitem__(self, key: str) -> None:
         """Dict-mimicking index.
