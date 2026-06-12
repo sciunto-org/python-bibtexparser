@@ -62,9 +62,28 @@ def _treat_expl_comment(block: ExplicitComment, bibtex_format: "BibtexFormat") -
 
 
 def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat") -> List[str]:
+    if block.raw is None:
+        raise ValueError(_failed_blocks_without_raw_error([block]))
     lines = len(block.raw.splitlines())
     parsing_failed_comment = PARSING_FAILED_COMMENT.format(n=lines)
     return [parsing_failed_comment, "\n", block.raw, "\n"]
+
+
+def _failed_blocks_without_raw_error(blocks: List[ParsingFailedBlock]) -> str:
+    descriptions = "\n".join(f"  - {type(b).__name__}: {b.error}" for b in blocks)
+    return (
+        "Cannot write library: it contains failed blocks without raw bibtex "
+        "(typically created programmatically, not by parsing):\n"
+        f"{descriptions}\n"
+        "Inspect `library.failed_blocks` to resolve this, e.g. by removing these blocks "
+        "or by fixing and re-adding their `block.ignore_error_block`."
+    )
+
+
+def _raise_on_unwritable_blocks(library: Library) -> None:
+    unwritable = [b for b in library.blocks if isinstance(b, ParsingFailedBlock) and b.raw is None]
+    if unwritable:
+        raise ValueError(_failed_blocks_without_raw_error(unwritable))
 
 
 def _calculate_auto_value_align(library: Library) -> int:
@@ -82,7 +101,11 @@ def write(library: Library, bibtex_format: Optional["BibtexFormat"] = None) -> s
     The exposed entrypoint is `bibtexparser.write_string` (in entrypoint.py).
 
     :param library: BibTeX database to serialize.
-    :param bibtex_format: Customized BibTeX format to use (optional)."""
+    :param bibtex_format: Customized BibTeX format to use (optional).
+    :raises ValueError: If the library contains failed blocks without raw bibtex
+        (e.g. duplicate-key blocks resulting from programmatically created entries)."""
+    _raise_on_unwritable_blocks(library)
+
     if bibtex_format is None:
         bibtex_format = BibtexFormat()
 
