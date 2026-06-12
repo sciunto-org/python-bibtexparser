@@ -1,12 +1,12 @@
 Tagged version are automatically released to pypi using github actions.
 
-Oder/Manual release instructions:
+Alternative manual release instructions:
 
 * Update CHANGELOG
 * Update version in __init__.py
 * Commit and open PR on Github to see that all tests pass,
   and then merge the PR.
-* Check out master locally
+* Check out main locally
 * Build sdist and wheel
     python -m build
 * Check long description

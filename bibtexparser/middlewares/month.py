@@ -199,12 +199,12 @@ class MonthIntMiddleware(_MonthInterpolator):
             if v_lower in _MONTH_ABBREV:
                 return (
                     _MONTH_ABBREV.index(v_lower[:3]) + 1,
-                    "transformed full month to int-month",
+                    "transformed abbreviated month to int-month",
                 )
             elif v_lower in _LOWERCASE_FULL:
                 return (
                     _LOWERCASE_FULL.index(v_lower) + 1,
-                    "transformed abbreviated month to int-month",
+                    "transformed full month to int-month",
                 )
 
         if isinstance(v, str) and v.isdigit():
