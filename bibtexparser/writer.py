@@ -174,7 +174,7 @@ class BibtexFormat:
     def value_column(self) -> Union[int, str]:
         """Controls the alignment of field- and string-values. Default: no alignment.
 
-        This impacts Entry blocks (String blocks are not aligned).
+        This impacts String and Entry blocks.
 
         An integer value x specifies that spaces should be added before the " = ",
         such that, if possible, the value is written at column `len(self.indent) + x`.
