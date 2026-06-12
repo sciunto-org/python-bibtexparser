@@ -76,7 +76,9 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
     # docstr-coverage: inherited
     def transform_string(self, string: String, library: "Library") -> Block:
         if isinstance(string.value, str):
-            string.value = self._transform_python_value_string(string.value)
+            string.value, error = self._transform_python_value_string(string.value)
+            if error != "":
+                return MiddlewareErrorBlock(block=string, error=PartialMiddlewareException([error]))
         else:
             logger.info(
                 f" [{self.metadata_key()}] Cannot python-str transform string {string.key}"
