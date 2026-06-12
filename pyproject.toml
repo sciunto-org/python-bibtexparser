@@ -7,7 +7,6 @@ authors = [{name = "Michael Weiss and other contributors", email = "code@mweiss.
 classifiers = [
     "Development Status :: 4 - Beta",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -22,7 +21,7 @@ license-files = ["LICENSE"]
 maintainers = [{name = "Michael Weiss", email = "code@mweiss.ch"}]
 name = "bibtexparser"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.optional-dependencies]
 docs = ["sphinx"]
