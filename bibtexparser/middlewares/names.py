@@ -11,6 +11,7 @@ from typing import Literal
 from typing import Tuple
 from typing import Union
 
+from bibtexparser.library import Library
 from bibtexparser.model import Block
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
@@ -54,7 +55,7 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
         raise NotImplementedError("called abstract method")
 
     # docstr-coverage: inherited
-    def transform_entry(self, entry: Entry, *args, **kwargs) -> Block:
+    def transform_entry(self, entry: Entry, library: Library) -> Block:
         field: Field
         try:
             for field in entry.fields:

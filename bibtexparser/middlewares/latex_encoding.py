@@ -143,7 +143,8 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
         self._encoder = encoder
 
     # docstr-coverage: inherited
-    def metadata_key(self) -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "latex_encoding"
 
     # docstr-coverage: inherited
@@ -210,7 +211,8 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
         self._decoder = decoder
 
     # docstr-coverage: inherited
-    def metadata_key(self) -> str:
+    @classmethod
+    def metadata_key(cls) -> str:
         return "latex_decoding"
 
     # docstr-coverage: inherited
