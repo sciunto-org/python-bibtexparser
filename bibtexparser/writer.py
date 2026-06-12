@@ -42,6 +42,7 @@ def _treat_string(block: String, bibtex_format) -> List[str]:
     return [
         "@string{",
         block.key,
+        _val_indent_string(bibtex_format, block.key),
         VAL_SEP,
         block.value,
         "}\n",
@@ -91,6 +92,8 @@ def _calculate_auto_value_align(library: Library) -> int:
     for entry in library.entries:
         for key in entry.fields_dict:
             max_key_len = max(max_key_len, len(key))
+    for string in library.strings:
+        max_key_len = max(max_key_len, len(string.key))
     return max_key_len + len(VAL_SEP)
 
 
@@ -177,13 +180,16 @@ class BibtexFormat:
         This impacts String and Entry blocks.
 
         An integer value x specifies that spaces should be added before the " = ",
-        such that, if possible, the value is written at column `len(self.indent) + x`.
+        such that, if possible, the value starts x characters after the line prefix
+        (the ``indent`` for entry fields, ``@string{`` for string values).
+        Entry and string values are thus each aligned among themselves.
         Note that for long keys, the value may be written at a later column.
 
         Thus, a value of 0 means that the value is written directly after the " = ".
 
-        The special value "auto" specifies that the bibtex field value should be aligned
-        based on the longest key in the library.
+        The special value "auto" specifies that values should be aligned
+        based on the longest key in the library
+        (considering both entry field keys and string keys).
         """
         return self._align_field_values
 
