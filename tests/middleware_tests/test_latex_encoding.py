@@ -4,14 +4,19 @@ Note: All encoding/decoding is done using the pylatexenc library.
 Thus, we merely test that the middleware is correctly configured."""
 
 from copy import deepcopy
+from typing import Tuple
 
 import pytest
 
 from bibtexparser import Library
+from bibtexparser.exceptions import PartialMiddlewareException
 from bibtexparser.middlewares.latex_encoding import LatexDecodingMiddleware
 from bibtexparser.middlewares.latex_encoding import LatexEncodingMiddleware
+from bibtexparser.middlewares.latex_encoding import _PyStringTransformerMiddleware
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
+from bibtexparser.model import MiddlewareErrorBlock
+from bibtexparser.model import String
 from tests.middleware_tests.middleware_test_util import assert_inplace_is_respected
 from tests.middleware_tests.middleware_test_util import assert_nonfield_entry_attributes_unchanged
 
@@ -109,6 +114,49 @@ def test_latex_special_chars_encoding(human_string, expected_latex_string):
 
     # Make sure other attributes are not changed
     assert_nonfield_entry_attributes_unchanged(original_copy, transformed_entry)
+
+
+@pytest.mark.parametrize(
+    "middleware_class,input_value,expected_value",
+    [
+        pytest.param(LatexDecodingMiddleware, r"M{\"u}ller", "Müller", id="decoding"),
+        pytest.param(LatexEncodingMiddleware, "Müller", r"M\"uller", id="encoding"),
+    ],
+)
+def test_string_block_value_transformation(middleware_class, input_value, expected_value):
+    """String block values must be transformed like field values (issue #529)."""
+    library = Library([String(key="me", value=input_value, start_line=1, raw="irrelevant")])
+
+    transformed_library = middleware_class(allow_inplace_modification=True).transform(library)
+
+    transformed_value = transformed_library.strings[0].value
+    assert isinstance(transformed_value, str)
+    assert transformed_value == expected_value
+
+
+def test_failing_string_transformation_becomes_error_block():
+    """Transformation errors on String blocks must not be swallowed (issue #529)."""
+
+    class _FailingMiddleware(_PyStringTransformerMiddleware):
+        """Test dummy that fails on every value."""
+
+        # docstr-coverage: inherited
+        @classmethod
+        def metadata_key(cls) -> str:
+            return "failing_test_middleware"
+
+        # docstr-coverage: inherited
+        def _transform_python_value_string(self, python_string: str) -> Tuple[str, str]:
+            return python_string, "some error"
+
+    library = Library([String(key="me", value="some value", start_line=1, raw="irrelevant")])
+
+    transformed_library = _FailingMiddleware(allow_inplace_modification=True).transform(library)
+
+    assert len(transformed_library.failed_blocks) == 1
+    error_block = transformed_library.failed_blocks[0]
+    assert isinstance(error_block, MiddlewareErrorBlock)
+    assert isinstance(error_block.error, PartialMiddlewareException)
 
 
 @pytest.mark.parametrize("inplace", [True, False])
