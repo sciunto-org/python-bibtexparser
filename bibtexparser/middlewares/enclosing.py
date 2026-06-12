@@ -167,7 +167,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
         )
 
     # docstr-coverage: inherited
-    def transform_entry(self, entry: Entry, *args, **kwargs) -> Entry:
+    def transform_entry(self, entry: Entry, library: Library) -> Entry:
         field: Field
         metadata_enclosing = entry.parser_metadata.pop(
             RemoveEnclosingMiddleware.metadata_key(), None
@@ -186,7 +186,7 @@ class AddEnclosingMiddleware(BlockMiddleware):
         return entry
 
     # docstr-coverage: inherited
-    def transform_string(self, string: String, *args, **kwargs) -> String:
+    def transform_string(self, string: String, library: Library) -> String:
         metadata_key = RemoveEnclosingMiddleware.metadata_key()
         string.value = self._enclose(
             string.value,
