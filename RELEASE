@@ -7,8 +7,8 @@ Oder/Manual release instructions:
 * Commit and open PR on Github to see that all tests pass,
   and then merge the PR.
 * Check out master locally
-* Build wheel
-    python setup.py sdist upload
+* Build sdist and wheel
+    python -m build
 * Check long description
     twine check dist/*
 * Upload to pypi-test
