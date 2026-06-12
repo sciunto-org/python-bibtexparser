@@ -35,6 +35,26 @@ def test_string_interpolation_middleware_interpolates_string():
     )
 
 
+def test_string_interpolation_is_case_insensitive():
+    bibtex = """
+    @string{lowercase = "Lower Case Note."}
+    @string{UPPERCASE = "Upper Case Note."}
+
+    @article{test_article,
+      note    = LOWERCASE,
+      comment = uppercase
+    }
+    """
+    library = Splitter(bibtex).split()
+
+    m = ResolveStringReferencesMiddleware()
+    library = m.transform(library)
+
+    fields = library.entries_dict["test_article"].fields_dict
+    assert fields["note"].value == '"Lower Case Note."'
+    assert fields["comment"].value == '"Upper Case Note."'
+
+
 def test_warning_is_raised_if_enclosings_are_removed():
     original_lib = Splitter(bibtex_string).split()
     m = RemoveEnclosingMiddleware(allow_inplace_modification=False)
