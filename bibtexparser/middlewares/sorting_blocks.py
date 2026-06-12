@@ -1,11 +1,8 @@
+from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Any
-from typing import Callable
-from typing import List
-from typing import Tuple
-from typing import Type
 
 from bibtexparser.library import Library
 from bibtexparser.model import Block
@@ -25,7 +22,7 @@ class _BlockChunk:
     """Data-Structure reflecting zero or more comments together with a block."""
 
     # The blocks (comments and the main block) are stored in the order they were parsed.
-    blocks: List[Block] = field(default_factory=list)
+    blocks: list[Block] = field(default_factory=list)
 
     @property
     def main_block(self) -> Block:
@@ -104,7 +101,7 @@ class SortBlocksMiddleware(LibraryMiddleware):
         super().__init__(allow_inplace_modification=False)
 
     @staticmethod
-    def _block_chunks(blocks: List[Block]) -> List[_BlockChunk]:
+    def _block_chunks(blocks: list[Block]) -> list[_BlockChunk]:
         block_chunks = []
         current_chunk = _BlockChunk()
         for block in blocks:
@@ -141,7 +138,7 @@ class SortBlocksByTypeAndKeyMiddleware(SortBlocksMiddleware):
 
     def __init__(
         self,
-        block_type_order: Tuple[Type[Block], ...] = DEFAULT_BLOCK_TYPE_ORDER,
+        block_type_order: tuple[type[Block], ...] = DEFAULT_BLOCK_TYPE_ORDER,
         preserve_comments_on_top: bool = True,
     ):
         self._verify_all_types_are_block_types(block_type_order)
@@ -160,7 +157,7 @@ class SortBlocksByTypeAndKeyMiddleware(SortBlocksMiddleware):
                     "Sort order must only contain Block subclasses, " f"but got {str(t)}"
                 )
 
-    def _type_and_key_sort_key(self, block: Block) -> Tuple[int, str]:
+    def _type_and_key_sort_key(self, block: Block) -> tuple[int, str]:
         """Sort key for blocks. Based on (block type, string-or-entry-key)."""
         try:
             type_index = self._block_type_order.index(type(block))

@@ -1,6 +1,4 @@
 from copy import deepcopy
-from typing import Dict
-from typing import List
 
 import pytest as pytest
 
@@ -83,7 +81,7 @@ from tests.middleware_tests.middleware_test_util import assert_nonfield_entry_at
         ("~~~ and J. Smith", ["~~~", "J. Smith"]),
     ],
 )
-def test_split_coauthors_consistent_with_bibtex(field_value: str, expected: List[str]):
+def test_split_coauthors_consistent_with_bibtex(field_value: str, expected: list[str]):
     """Tests the utility function which splits a string of coauthors into a list of names.
 
     The test cases are taken from https://github.com/sciunto-org/python-bibtexparser/pull/140/files
@@ -203,7 +201,7 @@ def _dict_to_nameparts(as_dict):
         ),
     ),
 )
-def test_name_splitting_no_strict_mode(name: str, expected: Dict[str, List[str]]):
+def test_name_splitting_no_strict_mode(name: str, expected: dict[str, list[str]]):
     result = parse_single_name_into_parts(name, strict=False)
     expected = _dict_to_nameparts(expected)
     assert result == expected
@@ -883,7 +881,7 @@ def test_merge_last_name_first_inverse(name, expected_as_dict, strict):
 
     # cases where either the last name or "von" part ends with an odd number of `\` cannot be handled,
     # since in those cases the `,` is escaped when the name parts are put back together
-    def ends_with_odd_slash(names: List[str]) -> bool:
+    def ends_with_odd_slash(names: list[str]) -> bool:
         if len(names) == 0:
             return False
         name = names[-1]
@@ -1027,7 +1025,7 @@ def test_split_name_parts(inplace: bool):
         ),
     ],
 )
-def test_merge_name_parts(inplace: bool, style: str, names: List[str]):
+def test_merge_name_parts(inplace: bool, style: str, names: list[str]):
     input_entry = Entry(
         start_line=0,
         raw="irrelevant-for-this-test",

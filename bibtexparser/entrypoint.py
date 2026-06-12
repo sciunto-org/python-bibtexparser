@@ -1,11 +1,8 @@
 import codecs
 import warnings
-from typing import Iterable
-from typing import List
+from collections.abc import Iterable
 from typing import Optional
 from typing import TextIO
-from typing import Tuple
-from typing import Union
 
 from .library import Library
 from .middlewares.middleware import Middleware
@@ -17,9 +14,9 @@ from .writer import write
 
 
 def _build_parse_stack(
-    parse_stack: Optional[Iterable[Middleware]],
-    append_middleware: Optional[Iterable[Middleware]],
-) -> List[Middleware]:
+    parse_stack: Iterable[Middleware] | None,
+    append_middleware: Iterable[Middleware] | None,
+) -> list[Middleware]:
     if parse_stack is not None and append_middleware is not None:
         raise ValueError(
             "Provided both parse_stack and append_middleware. "
@@ -47,9 +44,9 @@ def _build_parse_stack(
 
 
 def _build_unparse_stack(
-    unparse_stack: Optional[Iterable[Middleware]],
-    prepend_middleware: Optional[Iterable[Middleware]],
-) -> List[Middleware]:
+    unparse_stack: Iterable[Middleware] | None,
+    prepend_middleware: Iterable[Middleware] | None,
+) -> list[Middleware]:
     if unparse_stack is not None and prepend_middleware is not None:
         raise ValueError(
             "Provided both unparse_stack and prepend_middleware. "
@@ -77,11 +74,11 @@ def _build_unparse_stack(
 
 
 def _handle_deprecated_write_params(
-    unparse_stack: Optional[Iterable[Middleware]],
-    prepend_middleware: Optional[Iterable[Middleware]],
+    unparse_stack: Iterable[Middleware] | None,
+    prepend_middleware: Iterable[Middleware] | None,
     kwargs: dict,
     function_name: str,
-) -> Tuple[Optional[Iterable[Middleware]], Optional[Iterable[Middleware]]]:
+) -> tuple[Iterable[Middleware] | None, Iterable[Middleware] | None]:
     """Handle deprecated parameter names for write functions.
 
     :param unparse_stack: Current unparse_stack value
@@ -124,9 +121,9 @@ def _handle_deprecated_write_params(
 
 def parse_string(
     bibtex_str: str,
-    parse_stack: Optional[Iterable[Middleware]] = None,
-    append_middleware: Optional[Iterable[Middleware]] = None,
-    library: Optional[Library] = None,
+    parse_stack: Iterable[Middleware] | None = None,
+    append_middleware: Iterable[Middleware] | None = None,
+    library: Library | None = None,
 ) -> Library:
     """Parse a BibTeX string.
 
@@ -156,8 +153,8 @@ def parse_string(
 
 def parse_file(
     path: str,
-    parse_stack: Optional[Iterable[Middleware]] = None,
-    append_middleware: Optional[Iterable[Middleware]] = None,
+    parse_stack: Iterable[Middleware] | None = None,
+    append_middleware: Iterable[Middleware] | None = None,
     encoding: str = "UTF-8",
 ) -> Library:
     """Parse a BibTeX file
@@ -188,11 +185,11 @@ def parse_file(
 
 
 def write_file(
-    file: Union[str, TextIO],
+    file: str | TextIO,
     library: Library,
-    unparse_stack: Optional[Iterable[Middleware]] = None,
-    prepend_middleware: Optional[Iterable[Middleware]] = None,
-    bibtex_format: Optional[BibtexFormat] = None,
+    unparse_stack: Iterable[Middleware] | None = None,
+    prepend_middleware: Iterable[Middleware] | None = None,
+    bibtex_format: BibtexFormat | None = None,
     encoding: str = "UTF-8",
     **kwargs,
 ) -> None:
@@ -230,8 +227,8 @@ def write_file(
 
 def write_string(
     library: Library,
-    unparse_stack: Optional[Iterable[Middleware]] = None,
-    prepend_middleware: Optional[Iterable[Middleware]] = None,
+    unparse_stack: Iterable[Middleware] | None = None,
+    prepend_middleware: Iterable[Middleware] | None = None,
     bibtex_format: Optional["BibtexFormat"] = None,
     **kwargs,
 ) -> str:

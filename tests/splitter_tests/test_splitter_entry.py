@@ -112,15 +112,13 @@ def test_field_value(field_value: str, enclosing: str):
 def test_trailing_comma(enclosing: str):
     """Test that a trailing comma is correctly parsed (i.e., ignored)."""
     value_before_trailing_comma = enclosing.format("valueBeforeTrailingComma")
-    bibtex_str = dedent(
-        f"""\
+    bibtex_str = dedent(f"""\
     @article{{test,
         firstfield = {{some value}},
         fieldBeforeTrailingComma = {value_before_trailing_comma},
     }}
 
-    @string{{someString = "some value"}}"""
-    )
+    @string{{someString = "some value"}}""")
     library: Library = Splitter(bibtex_str).split()
     assert len(library.failed_blocks) == 0
     assert len(library.entries) == 1
@@ -139,8 +137,7 @@ def test_trailing_comma(enclosing: str):
 
 
 def test_multiple_identical_field_keys():
-    bibtex_str = dedent(
-        """\
+    bibtex_str = dedent("""\
         @article{test,
             title = {The first title},
             author = {The first author},
@@ -148,8 +145,7 @@ def test_multiple_identical_field_keys():
             title = {The third title},
             author = {The second author},
             journal = {Some journal}
-        }"""
-    )
+        }""")
     library: Library = Splitter(bibtex_str).split()
 
     assert len(library.blocks) == 1

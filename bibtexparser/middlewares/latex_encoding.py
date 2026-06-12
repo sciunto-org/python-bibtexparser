@@ -1,9 +1,6 @@
 import abc
 import logging
 import re
-from typing import List
-from typing import Optional
-from typing import Tuple
 
 import pylatexenc
 from pylatexenc.latex2text import LatexNodes2Text
@@ -29,7 +26,7 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
     """Abstract utility class allowing to modify python-strings"""
 
     @abc.abstractmethod
-    def _transform_python_value_string(self, python_string: str) -> Tuple[str, str]:
+    def _transform_python_value_string(self, python_string: str) -> tuple[str, str]:
         """Called for every python (value, not key) string found on Entry and String blocks.
 
         Returns:
@@ -39,7 +36,7 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
         raise NotImplementedError("called abstract method")
 
     # docstr-coverage: inherited
-    def _transform_all_strings(self, list_of_strings: List[str], errors: List[str]) -> List[str]:
+    def _transform_all_strings(self, list_of_strings: list[str], errors: list[str]) -> list[str]:
         """Called for every python (value, not key) string found on Entry and String blocks"""
         res = []
         for s in list_of_strings:
@@ -92,9 +89,9 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
 
     def __init__(
         self,
-        keep_math: Optional[bool] = None,
-        enclose_urls: Optional[bool] = None,
-        encoder: Optional[UnicodeToLatexEncoder] = None,
+        keep_math: bool | None = None,
+        enclose_urls: bool | None = None,
+        encoder: UnicodeToLatexEncoder | None = None,
         allow_inplace_modification: bool = True,
     ):
         super().__init__(
@@ -150,7 +147,7 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
         return "latex_encoding"
 
     # docstr-coverage: inherited
-    def _transform_python_value_string(self, python_string: str) -> Tuple[str, str]:
+    def _transform_python_value_string(self, python_string: str) -> tuple[str, str]:
         try:
             return self._encoder.unicode_to_latex(python_string), ""
         except Exception as e:
@@ -163,9 +160,9 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
     def __init__(
         self,
         allow_inplace_modification: bool = True,
-        keep_braced_groups: Optional[bool] = None,
-        keep_math_mode: Optional[bool] = None,
-        decoder: Optional[LatexNodes2Text] = None,
+        keep_braced_groups: bool | None = None,
+        keep_math_mode: bool | None = None,
+        decoder: LatexNodes2Text | None = None,
     ):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
@@ -218,7 +215,7 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
         return "latex_decoding"
 
     # docstr-coverage: inherited
-    def _transform_python_value_string(self, python_string: str) -> Tuple[str, str]:
+    def _transform_python_value_string(self, python_string: str) -> tuple[str, str]:
         """Transforms a python string to a latex string
 
         Returns:

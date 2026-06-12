@@ -21,14 +21,12 @@ from bibtexparser.splitter import Splitter
     "bibtex_str,expected_key,expected_field,expected_substring",
     [
         pytest.param(
-            dedent(
-                """\
+            dedent("""\
                 @inproceedings{DBLP:conf/cikm/EsuliM021,
                   author = {Andrea Esuli},
                   title = {LeQua @ {CLEF} 2022: {A} Shared Task},
                   year = {2021}
-                }"""
-            ),
+                }"""),
             "DBLP:conf/cikm/EsuliM021",
             "title",
             "@ {CLEF}",
@@ -165,29 +163,23 @@ def test_mixed_blocks_same_line(
     "bibtex_str,expected_valid_key",
     [
         pytest.param(
-            dedent(
-                """\
+            dedent("""\
                 @article{broken, title={Unclosed
-                @article{valid, title={Valid Entry}}"""
-            ),
+                @article{valid, title={Valid Entry}}"""),
             "valid",
             id="unclosed_entry_field",
         ),
         pytest.param(
-            dedent(
-                """\
+            dedent("""\
                 @string{broken = {unclosed value
-                @article{valid, title={Valid Entry}}"""
-            ),
+                @article{valid, title={Valid Entry}}"""),
             "valid",
             id="unclosed_string",
         ),
         pytest.param(
-            dedent(
-                """\
+            dedent("""\
                 @article{broken, title={Unclosed
-                    @article{valid, title={Valid Entry}}"""
-            ),
+                    @article{valid, title={Valid Entry}}"""),
             "valid",
             id="indented_new_block",
         ),
@@ -204,11 +196,9 @@ def test_error_recovery_at_line_start(bibtex_str: str, expected_valid_key: str):
 
 def test_error_recovery_preserves_failed_block_raw():
     """The failed block should contain raw text up to where recovery started."""
-    bibtex_str = dedent(
-        """\
+    bibtex_str = dedent("""\
         @article{broken, title={This is unclosed
-        @article{valid, title={OK}}"""
-    )
+        @article{valid, title={OK}}""")
     library = Splitter(bibtex_str).split()
 
     assert len(library.failed_blocks) == 1

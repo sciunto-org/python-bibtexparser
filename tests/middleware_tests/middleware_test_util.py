@@ -1,5 +1,4 @@
 from copy import deepcopy
-from typing import Optional
 
 from bibtexparser.library import Library
 from bibtexparser.middlewares.middleware import Middleware
@@ -10,7 +9,7 @@ from bibtexparser.model import Preamble
 
 
 def assert_block_does_not_change(
-    block_type: str, middleware: Middleware, same_instance: Optional[bool]
+    block_type: str, middleware: Middleware, same_instance: bool | None
 ):
     """Utility to make sure blocks of some types are not changed by middleware."""
     block_type = block_type.lower()

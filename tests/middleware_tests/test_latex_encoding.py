@@ -4,7 +4,6 @@ Note: All encoding/decoding is done using the pylatexenc library.
 Thus, we merely test that the middleware is correctly configured."""
 
 from copy import deepcopy
-from typing import Tuple
 
 import pytest
 
@@ -146,7 +145,7 @@ def test_failing_string_transformation_becomes_error_block():
             return "failing_test_middleware"
 
         # docstr-coverage: inherited
-        def _transform_python_value_string(self, python_string: str) -> Tuple[str, str]:
+        def _transform_python_value_string(self, python_string: str) -> tuple[str, str]:
             return python_string, "some error"
 
     library = Library([String(key="me", value="some value", start_line=1, raw="irrelevant")])

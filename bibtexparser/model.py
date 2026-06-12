@@ -1,15 +1,10 @@
 import abc
 from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
 
 _ALLOWED_ENCLOSINGS = (None, "{", '"', "no-enclosing")
 
 
-def _validated_enclosing(enclosing: Optional[str]) -> Optional[str]:
+def _validated_enclosing(enclosing: str | None) -> str | None:
     if enclosing not in _ALLOWED_ENCLOSINGS:
         raise ValueError(
             "enclosing must be one of None, '{', '\"' or 'no-enclosing', " f"not {enclosing!r}"
@@ -25,23 +20,23 @@ class Block(abc.ABC):
 
     def __init__(
         self,
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
-        parser_metadata: Optional[Dict[str, Any]] = None,
+        start_line: int | None = None,
+        raw: str | None = None,
+        parser_metadata: dict[str, Any] | None = None,
     ):
         self._start_line_in_file = start_line
         self._raw = raw
         if parser_metadata is None:
             parser_metadata = {}
-        self._parser_metadata: Dict[str, Any] = parser_metadata
+        self._parser_metadata: dict[str, Any] = parser_metadata
 
     @property
-    def start_line(self) -> Optional[int]:
+    def start_line(self) -> int | None:
         """The line number of the first line of this block in the parsed string."""
         return self._start_line_in_file
 
     @property
-    def raw(self) -> Optional[str]:
+    def raw(self) -> str | None:
         """The raw, unmodified string (bibtex) representation of this block.
 
         Note: Middleware does not update this field, hence, after applying middleware
@@ -50,7 +45,7 @@ class Block(abc.ABC):
         return self._raw
 
     @property
-    def parser_metadata(self) -> Dict[str, Any]:
+    def parser_metadata(self) -> dict[str, Any]:
         """EXPERIMENTAL: field for middleware to store auxiliary information.
 
         As an end-user, as long as you are not writing middleware, you probably
@@ -66,7 +61,7 @@ class Block(abc.ABC):
         """
         return self._parser_metadata
 
-    def get_parser_metadata(self, key: str) -> Optional[Any]:
+    def get_parser_metadata(self, key: str) -> Any | None:
         """EXPERIMENTAL: get auxiliary information stored in ``parser_metadata``.
 
         See attribute ``parser_metadata`` for more information."""
@@ -100,9 +95,9 @@ class String(Block):
         self,
         key: str,
         value: str,
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
-        enclosing: Optional[str] = None,
+        start_line: int | None = None,
+        raw: str | None = None,
+        enclosing: str | None = None,
     ):
         super().__init__(start_line, raw)
         self._key = key
@@ -129,7 +124,7 @@ class String(Block):
         self._enclosing = None
 
     @property
-    def enclosing(self) -> Optional[str]:
+    def enclosing(self) -> str | None:
         """The enclosing demanded when writing this string, e.g. ``'{'``.
 
         Allowed values are ``'{'``, ``'"'`` and ``'no-enclosing'``.
@@ -140,7 +135,7 @@ class String(Block):
         return self._enclosing
 
     @enclosing.setter
-    def enclosing(self, enclosing: Optional[str]):
+    def enclosing(self, enclosing: str | None):
         self._enclosing = _validated_enclosing(enclosing)
 
     def __str__(self) -> str:
@@ -156,7 +151,7 @@ class String(Block):
 class Preamble(Block):
     """Bibtex Blocks of the ``@preamble`` type, e.g. ``@preamble{This is a preamble}``."""
 
-    def __init__(self, value: str, start_line: Optional[int] = None, raw: Optional[str] = None):
+    def __init__(self, value: str, start_line: int | None = None, raw: str | None = None):
         super().__init__(start_line, raw)
         self._value = value
 
@@ -179,7 +174,7 @@ class Preamble(Block):
 class ExplicitComment(Block):
     """Bibtex Blocks of the ``@comment`` type, e.g. ``@comment{This is a comment}``."""
 
-    def __init__(self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None):
+    def __init__(self, comment: str, start_line: int | None = None, raw: str | None = None):
         super().__init__(start_line, raw)
         self._comment = comment
 
@@ -205,7 +200,7 @@ class ExplicitComment(Block):
 class ImplicitComment(Block):
     """Bibtex outside of an ``@{...}`` block, which is treated as a comment."""
 
-    def __init__(self, comment: str, start_line: Optional[int] = None, raw: Optional[str] = None):
+    def __init__(self, comment: str, start_line: int | None = None, raw: str | None = None):
         super().__init__(start_line, raw)
         self._comment = comment
 
@@ -235,8 +230,8 @@ class Field:
         self,
         key: str,
         value: Any,
-        start_line: Optional[int] = None,
-        enclosing: Optional[str] = None,
+        start_line: int | None = None,
+        enclosing: str | None = None,
     ):
         self._start_line = start_line
         self._key = key
@@ -263,7 +258,7 @@ class Field:
         self._enclosing = None
 
     @property
-    def enclosing(self) -> Optional[str]:
+    def enclosing(self) -> str | None:
         """The enclosing demanded when writing this field, e.g. ``'{'``.
 
         Allowed values are ``'{'``, ``'"'`` and ``'no-enclosing'``.
@@ -279,7 +274,7 @@ class Field:
         return self._enclosing
 
     @enclosing.setter
-    def enclosing(self, enclosing: Optional[str]):
+    def enclosing(self, enclosing: str | None):
         self._enclosing = _validated_enclosing(enclosing)
 
     @property
@@ -318,9 +313,9 @@ class Entry(Block):
         self,
         entry_type: str,
         key: str,
-        fields: List[Field],
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
+        fields: list[Field],
+        start_line: int | None = None,
+        raw: str | None = None,
     ):
         super().__init__(start_line, raw)
         self._entry_type = entry_type
@@ -346,16 +341,16 @@ class Entry(Block):
         self._key = value
 
     @property
-    def fields(self) -> List[Field]:
+    def fields(self) -> list[Field]:
         """The key-value attributes of an entry, as ``Field`` instances."""
         return self._fields
 
     @fields.setter
-    def fields(self, value: List[Field]):
+    def fields(self, value: list[Field]):
         self._fields = value
 
     @property
-    def fields_dict(self) -> Dict[str, Field]:
+    def fields_dict(self) -> dict[str, Field]:
         """A dict of fields, with field keys as keys.
 
         Note that with duplicate field keys, the behavior is undefined."""
@@ -369,7 +364,7 @@ class Entry(Block):
         else:
             self._fields.append(field)
 
-    def pop(self, key: str, default=None) -> Optional[Field]:
+    def pop(self, key: str, default=None) -> Field | None:
         """Removes and returns the field with the given key.
 
         :param key: The key of the field to remove.
@@ -382,7 +377,7 @@ class Entry(Block):
         self._fields = [f for f in self._fields if f.key != key]
         return field
 
-    def get(self, key: str, default=None) -> Optional[Field]:
+    def get(self, key: str, default=None) -> Field | None:
         """Returns the field with the given key, or the default value if it does not exist.
 
         :param key: The key of the field.
@@ -436,7 +431,7 @@ class Entry(Block):
         """
         self.pop(key)
 
-    def items(self) -> List[Tuple[str, Any]]:
+    def items(self) -> list[tuple[str, Any]]:
         """Dict-mimicking, for partial v1.x backwards compatibility.
 
         For newly written code, it's recommended to use `entry.entry_type`,
@@ -464,9 +459,9 @@ class ParsingFailedBlock(Block):
     def __init__(
         self,
         error: Exception,
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
-        ignore_error_block: Optional[Block] = None,
+        start_line: int | None = None,
+        raw: str | None = None,
+        ignore_error_block: Block | None = None,
     ):
         super().__init__(start_line, raw)
         self._error = error
@@ -478,7 +473,7 @@ class ParsingFailedBlock(Block):
         return self._error
 
     @property
-    def ignore_error_block(self) -> Optional[Block]:
+    def ignore_error_block(self) -> Block | None:
         """The possibly faulty block when ignoring the error.
 
         This may be None, as it may not always be possible to ignore the error.
@@ -512,8 +507,8 @@ class DuplicateBlockKeyBlock(ParsingFailedBlock):
         key: str,
         previous_block: Block,
         duplicate_block: Block,
-        start_line: Optional[int] = None,
-        raw: Optional[str] = None,
+        start_line: int | None = None,
+        raw: str | None = None,
     ):
         super().__init__(
             error=Exception(f"Duplicate entry key '{key}'"),
@@ -545,7 +540,7 @@ class DuplicateFieldKeyBlock(ParsingFailedBlock):
     The entry containing the duplicate field keys is available as
     `block.ignore_error_block`, the duplicate keys as `block.duplicate_keys`."""
 
-    def __init__(self, duplicate_keys: Set[str], entry: Entry):
+    def __init__(self, duplicate_keys: set[str], entry: Entry):
         sorted_duplicate_keys = sorted(list(duplicate_keys))
         super().__init__(
             error=Exception(
@@ -557,9 +552,9 @@ class DuplicateFieldKeyBlock(ParsingFailedBlock):
             raw=entry.raw,
             ignore_error_block=entry,
         )
-        self._duplicate_keys: Set[str] = duplicate_keys
+        self._duplicate_keys: set[str] = duplicate_keys
 
     @property
-    def duplicate_keys(self) -> Set[str]:
+    def duplicate_keys(self) -> set[str]:
         """The field-keys that occurred more than once in the entry."""
         return self._duplicate_keys
