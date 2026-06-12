@@ -277,4 +277,91 @@ def test_no_addition_block_types(
     )
 
 
+@pytest.mark.parametrize("demanded_enclosing", ["{", '"', "no-enclosing"])
+@pytest.mark.parametrize("metadata_enclosing", ["{", '"', "no-enclosing", None])
+@pytest.mark.parametrize("default_enclosing", ["{", '"'])
+@pytest.mark.parametrize("reuse_previous_enclosing", [True, False], ids=["reuse", "no_reuse"])
+def test_demanded_enclosing_takes_precedence_on_entry(
+    demanded_enclosing: str,
+    metadata_enclosing: str,
+    default_enclosing: str,
+    reuse_previous_enclosing: bool,
+):
+    """A `field.enclosing` demand must win over all other enclosing rules. See issue #447."""
+    field = Field(key="month", value="jan", start_line=6, enclosing=demanded_enclosing)
+    input_entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[field],
+    )
+    if metadata_enclosing is not None:
+        input_entry.parser_metadata["removed_enclosing"] = {"month": metadata_enclosing}
+
+    middleware = AddEnclosingMiddleware(
+        allow_inplace_modification=True,
+        default_enclosing=default_enclosing,
+        reuse_previous_enclosing=reuse_previous_enclosing,
+        enclose_integers=True,
+    )
+
+    transformed = middleware.transform(library=Library([input_entry])).entries[0]
+
+    expected = {"{": "{jan}", '"': '"jan"', "no-enclosing": "jan"}[demanded_enclosing]
+    assert transformed["month"] == expected
+    # The demand is consumed when the new (enclosed) value is assigned
+    assert transformed.fields_dict["month"].enclosing is None
+
+
+@pytest.mark.parametrize("value", [8, "8"], ids=["int", "digit-str"])
+def test_demanded_no_enclosing_on_int_value(value):
+    """Demanding 'no-enclosing' on an int field must yield an unenclosed string value."""
+    field = Field(key="month", value=value, start_line=6, enclosing="no-enclosing")
+    input_entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[field],
+    )
+
+    middleware = AddEnclosingMiddleware(
+        allow_inplace_modification=True,
+        default_enclosing="{",
+        reuse_previous_enclosing=False,
+        enclose_integers=True,
+    )
+
+    transformed = middleware.transform(library=Library([input_entry])).entries[0]
+    assert transformed["month"] == "8"
+
+
+@pytest.mark.parametrize("demanded_enclosing", ["{", '"', "no-enclosing"])
+def test_demanded_enclosing_takes_precedence_on_string(demanded_enclosing: str):
+    input_string = String(
+        start_line=5,
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        value="intro # outro",
+        enclosing=demanded_enclosing,
+    )
+
+    middleware = AddEnclosingMiddleware(
+        allow_inplace_modification=True,
+        default_enclosing="{",
+        reuse_previous_enclosing=False,
+        enclose_integers=True,
+    )
+
+    transformed = middleware.transform(library=Library([input_string])).strings[0]
+    expected = {
+        "{": "{intro # outro}",
+        '"': '"intro # outro"',
+        "no-enclosing": "intro # outro",
+    }[demanded_enclosing]
+    assert transformed.value == expected
+    assert transformed.enclosing is None
+
+
 # TODO round-trip tests (removal -> addition -> removal)

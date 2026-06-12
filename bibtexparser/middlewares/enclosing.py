@@ -1,3 +1,4 @@
+from typing import Optional
 from typing import Tuple
 from typing import Union
 
@@ -78,6 +79,17 @@ class AddEnclosingMiddleware(BlockMiddleware):
 
     This middleware adds enclosing characters to a field value.
     It is useful when the field value is enclosed in braces or quotes.
+
+    The enclosing to add is determined with the following precedence:
+
+    1. An enclosing demanded on the field or string itself
+       (i.e., a non-None ``field.enclosing``, e.g. set by a month middleware)
+       is always honored.
+    2. If ``reuse_previous_enclosing`` is True, the enclosing removed by the
+       ``RemoveEnclosingMiddleware`` (if any) is used.
+    3. If the value is an integer in a common int field
+       and ``enclose_integers`` is False, no enclosing is added.
+    4. Otherwise, the ``default_enclosing`` is used.
     """
 
     def __init__(
@@ -116,19 +128,27 @@ class AddEnclosingMiddleware(BlockMiddleware):
     def metadata_key(cls) -> str:
         return "remove_enclosing"
 
-    def _enclose(self, value: str, metadata_enclosing: str, apply_int_rule: bool) -> str:
+    def _enclose(
+        self,
+        value: str,
+        metadata_enclosing: Optional[str],
+        apply_int_rule: bool,
+        demanded_enclosing: Optional[str] = None,
+    ) -> str:
         enclosing = self._default_enclosing
-        if self._reuse_previous_enclosing and metadata_enclosing is not None:
+        if demanded_enclosing is not None:
+            enclosing = demanded_enclosing
+        elif self._reuse_previous_enclosing and metadata_enclosing is not None:
             enclosing = metadata_enclosing
-        elif apply_int_rule and not self._enclose_integers and value.isdigit():
-            return value
+        elif apply_int_rule and not self._enclose_integers and str(value).isdigit():
+            return str(value)
 
         if enclosing == "{":
             return f"{{{value}}}"
         if enclosing == '"':
             return f'"{value}"'
         if enclosing == "no-enclosing":
-            return value
+            return str(value)
         raise ValueError(
             f"enclosing must be either '{{' or '\"' or 'no-enclosing', " f"not '{enclosing}'"
         )
@@ -144,7 +164,12 @@ class AddEnclosingMiddleware(BlockMiddleware):
             prev_encoding = (
                 metadata_enclosing.get(field.key, None) if metadata_enclosing is not None else None
             )
-            field.value = self._enclose(field.value, prev_encoding, apply_int_rule=apply_int_rule)
+            field.value = self._enclose(
+                field.value,
+                prev_encoding,
+                apply_int_rule=apply_int_rule,
+                demanded_enclosing=field.enclosing,
+            )
         return entry
 
     # docstr-coverage: inherited
@@ -154,5 +179,6 @@ class AddEnclosingMiddleware(BlockMiddleware):
             string.value,
             string.parser_metadata.get(metadata_key),
             apply_int_rule=STRINGS_CAN_BE_UNESCAPED_INTS,
+            demanded_enclosing=string.enclosing,
         )
         return string
