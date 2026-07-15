@@ -22,6 +22,19 @@ def test_entry_type_case_is_preserved_on_string_roundtrip():
     assert write_string(library).startswith("@Article{test,")
 
 
+def test_entry_and_field_key_case_is_preserved_on_string_roundtrip():
+    """Default parsing and writing retain citation-key and field-key spelling."""
+    library = parse_string("@article{CamelCaseKey, Author_Keywords = {Systems}}")
+
+    entry = library.entries[0]
+    assert entry.key == "CamelCaseKey"
+    assert entry.fields[0].key == "Author_Keywords"
+
+    written = write_string(library)
+    assert written.startswith("@article{CamelCaseKey,")
+    assert "\tAuthor_Keywords = {Systems}" in written
+
+
 def test_gbk():
     library = parse_file("tests/resources/gbk_test.bib", encoding="gbk")
     assert library.entries[0]["author"] == "凯撒"
