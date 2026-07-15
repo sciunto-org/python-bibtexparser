@@ -64,7 +64,7 @@ def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat"
     if block.raw is None:
         raise ValueError(_failed_blocks_without_raw_error([block]))
     lines = len(block.raw.splitlines())
-    parsing_failed_comment = PARSING_FAILED_COMMENT.format(n=lines)
+    parsing_failed_comment = bibtex_format.parsing_failed_comment.format(n=lines)
     return [parsing_failed_comment, "\n", block.raw, "\n"]
 
 

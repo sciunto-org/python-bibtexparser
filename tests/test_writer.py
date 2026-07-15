@@ -179,6 +179,18 @@ def test_write_failed_block():
     assert lines[4] == "}"
 
 
+def test_write_failed_block_uses_configured_comment():
+    """Failed-block output must honor the public format setting and line placeholder."""
+    raw = "@article{broken,\ntitle = {Unclosed entry}"
+    block = ParsingFailedBlock(error=ValueError("Some error"), raw=raw)
+    bibtex_format = BibtexFormat()
+    bibtex_format.parsing_failed_comment = "% CUSTOM FAILURE ({n} source lines)"
+
+    string = writer.write(Library(blocks=[block]), bibtex_format)
+
+    assert string.startswith("% CUSTOM FAILURE (2 source lines)\n")
+
+
 def test_write_failed_block_without_raw_raises():
     """A failed block with no raw bibtex cannot be written (issue #400)."""
     block = ParsingFailedBlock(error=ValueError("Some error"), raw=None, ignore_error_block=None)
