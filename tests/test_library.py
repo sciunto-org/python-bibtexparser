@@ -4,6 +4,7 @@ from bibtexparser import Library
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
 from bibtexparser.model import ImplicitComment
+from bibtexparser.model import String
 
 
 def get_dummy_entry():
@@ -15,6 +16,10 @@ def get_dummy_entry():
             Field(key="author", value="An author"),
         ],
     )
+
+
+def get_dummy_string():
+    return String(key="duplicateKey", value='"A value"')
 
 
 def test_replace_with_duplicates():
@@ -95,6 +100,26 @@ def test_constructor_fails_on_duplicate_by_default():
     library = Library(blocks=[get_dummy_entry(), get_dummy_entry()], fail_on_duplicate_key=False)
     assert len(library.blocks) == 2
     assert len(library.failed_blocks) == 1
+
+
+def test_add_string_fails_on_duplicate_by_default():
+    """Strict duplicate handling applies to string blocks as well as entries."""
+    library = Library(blocks=[get_dummy_string()])
+
+    with pytest.raises(ValueError, match="duplicateKey"):
+        library.add(get_dummy_string())
+
+    assert len(library.strings) == 1
+    assert len(library.failed_blocks) == 0
+
+
+def test_entry_and_string_keys_use_separate_namespaces():
+    """An entry and string may share a key without becoming duplicate blocks."""
+    library = Library(blocks=[get_dummy_entry(), get_dummy_string()])
+
+    assert len(library.entries) == 1
+    assert len(library.strings) == 1
+    assert len(library.failed_blocks) == 0
 
 
 def test_remove_prefers_identical_instance_over_equal_block():
