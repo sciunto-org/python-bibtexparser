@@ -71,6 +71,17 @@ Core Middleware
 
 bibtexparser comes with a number of middleware options:
 
+Identifier Normalization
+::::::::::::::::::::::::
+
+Parsing preserves entry-type spelling by default. Use
+:class:`bibtexparser.middlewares.NormalizeEntryTypes` when canonical lowercase
+types are preferred. Field-key normalization remains a separate choice because
+it has different collision behavior:
+
+* :class:`bibtexparser.middlewares.NormalizeEntryTypes`
+* :class:`bibtexparser.middlewares.NormalizeFieldKeys`
+
 .. _middleware_encoding:
 
 Encoding and Enclosing of Values
