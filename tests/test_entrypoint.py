@@ -143,8 +143,9 @@ def test_write_file_both_parse_stack_and_unparse_stack_raises_error():
         temp_path = f.name
 
     try:
-        with pytest.raises(ValueError) as excinfo:
-            write_file(temp_path, library, parse_stack=[], unparse_stack=[])
+        with pytest.warns(DeprecationWarning):
+            with pytest.raises(ValueError) as excinfo:
+                write_file(temp_path, library, parse_stack=[], unparse_stack=[])
         assert "parse_stack" in str(excinfo.value)
         assert "unparse_stack" in str(excinfo.value)
         assert "Use 'unparse_stack' instead" in str(excinfo.value)
@@ -160,8 +161,9 @@ def test_write_file_both_append_and_prepend_middleware_raises_error():
         temp_path = f.name
 
     try:
-        with pytest.raises(ValueError) as excinfo:
-            write_file(temp_path, library, append_middleware=[], prepend_middleware=[])
+        with pytest.warns(DeprecationWarning):
+            with pytest.raises(ValueError) as excinfo:
+                write_file(temp_path, library, append_middleware=[], prepend_middleware=[])
         assert "append_middleware" in str(excinfo.value)
         assert "prepend_middleware" in str(excinfo.value)
         assert "Use 'prepend_middleware' instead" in str(excinfo.value)
@@ -215,8 +217,9 @@ def test_write_string_both_parse_stack_and_unparse_stack_raises_error():
     """Test that providing both parse_stack and unparse_stack raises ValueError."""
     library = Library([])
 
-    with pytest.raises(ValueError) as excinfo:
-        write_string(library, parse_stack=[], unparse_stack=[])
+    with pytest.warns(DeprecationWarning):
+        with pytest.raises(ValueError) as excinfo:
+            write_string(library, parse_stack=[], unparse_stack=[])
     assert "parse_stack" in str(excinfo.value)
     assert "unparse_stack" in str(excinfo.value)
     assert "Use 'unparse_stack' instead" in str(excinfo.value)
@@ -226,8 +229,9 @@ def test_write_string_both_append_and_prepend_middleware_raises_error():
     """Test that providing both append_middleware and prepend_middleware raises ValueError."""
     library = Library([])
 
-    with pytest.raises(ValueError) as excinfo:
-        write_string(library, append_middleware=[], prepend_middleware=[])
+    with pytest.warns(DeprecationWarning):
+        with pytest.raises(ValueError) as excinfo:
+            write_string(library, append_middleware=[], prepend_middleware=[])
     assert "append_middleware" in str(excinfo.value)
     assert "prepend_middleware" in str(excinfo.value)
     assert "Use 'prepend_middleware' instead" in str(excinfo.value)
