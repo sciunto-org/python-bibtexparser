@@ -421,4 +421,28 @@ def test_string_reference_roundtrip():
     assert "year = {2019}" in written
 
 
+def test_escaped_brace_sequence_roundtrip():
+    """The issue #452 field value remains parseable after default parse and write middleware."""
+    bibtex = r"""@Article{Konstadinidis2009,
+        abstract = {The 396$\{2}$ chip is fabricated in a 65-nm process.},
+        author_keywords = {Arrays; Chip multi-threading (CMT); Register files}
+    }"""
+    expected_abstract = r"The 396$\{2}$ chip is fabricated in a 65-nm process."
+
+    library = bibtexparser.parse_string(bibtex)
+    assert len(library.failed_blocks) == 0
+    parsed_abstract = library.entries[0]["abstract"]
+    assert parsed_abstract == expected_abstract
+
+    written = bibtexparser.write_string(library)
+    assert r"396$\{2}$" in written
+
+    reparsed = bibtexparser.parse_string(written)
+    assert len(reparsed.failed_blocks) == 0
+    assert reparsed.entries[0]["abstract"] == parsed_abstract
+    assert reparsed.entries[0]["author_keywords"] == (
+        "Arrays; Chip multi-threading (CMT); Register files"
+    )
+
+
 # TODO round-trip tests (removal -> addition -> removal)

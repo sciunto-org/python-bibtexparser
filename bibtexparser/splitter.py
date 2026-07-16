@@ -197,6 +197,12 @@ class Splitter:
                 return next_mark.start()
             # Check for end of entry:
             elif next_mark.group(0) == "}" and not _is_escaped():
+                # A malformed escaped-brace sequence can reduce the tracked depth too early.
+                # If a comma follows, this brace belongs to the field value; consume it and let
+                # the comma terminate the field instead of silently dropping subsequent fields.
+                remaining = self.bibstr[next_mark.end() :].lstrip()
+                if remaining.startswith(","):
+                    continue
                 self._unaccepted_mark = next_mark
                 return next_mark.start()
 
