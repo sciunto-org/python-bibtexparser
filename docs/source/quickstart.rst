@@ -196,12 +196,29 @@ The thorough preflight is opt-in because it parses twice and writes twice.
 Ordinary parsing continues to log detected block failures and exposes them in
 ``library.failed_blocks`` without paying that additional cost on every read.
 
-On incompatibility, the text and JSON CLI reports include a pre-filled GitHub
-issue-form URL unless ``--no-issue-link`` is supplied. The URL is only a draft:
-the command does not open it, perform a network request, or create an issue. It
-contains environment and check metadata plus a source hash, but no file path,
-bibliography content, or source snippet. Review the draft and add only a minimal
-example that is safe to disclose.
+On incompatibility, the text and JSON CLI reports include a pre-filled,
+privacy-safe GitHub issue-form URL unless ``--no-issue-link`` is supplied. The
+URL is only a draft: the command does not open it, perform a network request, or
+create an issue. It contains environment and check metadata plus a source hash,
+but no file path, bibliography content, or source snippet.
+
+The text report also points to the explicit source-disclosure option:
+
+.. code-block:: console
+
+    $ python -m bibtexparser check references.bib --include-source-in-issue-link
+
+That command keeps the privacy-safe draft and adds a second draft containing an
+exact failed block when the checker can extract a bounded reproduction. A
+duplicate-key reproduction includes both relevant blocks. The checker does not
+truncate an oversized block, because a partial block could be invalid or fail
+to reproduce the problem; in that case, add a reviewed minimal example
+manually.
+
+The source-bearing URL exposes bibliography content in terminal logs, browser
+history, and the GitHub draft even if the issue is never submitted. The command
+therefore requires explicit opt-in and prints a warning. Review the URL and the
+draft carefully before submitting anything.
 
 .. _writing_quickstart:
 

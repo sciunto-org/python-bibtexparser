@@ -86,11 +86,19 @@ output remains representable in the selected encoding. It reports exact source
 byte identity separately because normal writing may intentionally normalize
 layout. Use `--json` for applications.
 
-An incompatible result includes a reviewable GitHub issue-draft URL by default.
-Constructing the URL does not open a browser, make a network request, or create
-an issue. No file path, bibliography content, or source snippet is included;
-users must review the draft and add only a safe minimal reproduction. Use
-`--no-issue-link` to suppress it.
+An incompatible result includes a reviewable, privacy-safe GitHub issue-draft
+URL by default. Constructing the URL does not open a browser, make a network
+request, or create an issue. No file path, bibliography content, or source
+snippet is included.
+
+The same report explains how to rerun with
+`--include-source-in-issue-link`. That explicit opt-in retains the privacy-safe
+draft and adds a second draft containing an exact failed block when the checker
+can extract a bounded reproduction. For duplicate keys, it includes both
+relevant blocks. It never truncates a block into a potentially invalid example.
+The second URL exposes bibliography source in terminal logs, browser history,
+and the GitHub draft, so review all three before submission. Use
+`--no-issue-link` to suppress issue links entirely.
 
 A passing result means that the file passed the named checks with this version;
 it is not a proof that no unanticipated interpretation bug can exist.
