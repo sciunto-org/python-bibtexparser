@@ -154,6 +154,55 @@ def test_mixed_blocks_same_line(
     assert len(library.comments) == expected_comments
 
 
+@pytest.mark.parametrize(
+    "unsupported_block",
+    [
+        pytest.param(
+            "@article(test, title = {A (parenthesized) title})",
+            id="entry",
+        ),
+        pytest.param(
+            '@string(name = "value (draft)")',
+            id="string",
+        ),
+        pytest.param(
+            '@preamble("value (draft)")',
+            id="preamble",
+        ),
+        pytest.param(
+            "@comment(text (with nested parentheses))",
+            id="comment",
+        ),
+    ],
+)
+@pytest.mark.parametrize("same_line", [False, True], ids=["next-line", "same-line"])
+def test_parenthesis_delimited_block_is_explicit_failure(unsupported_block: str, same_line: bool):
+    """Unsupported standard syntax must never disappear into an implicit comment."""
+    separator = " " if same_line else "\n"
+    library = Splitter(
+        f"{unsupported_block}{separator}@book{{valid, title = {{Supported block}}}}"
+    ).split()
+
+    assert len(library.failed_blocks) == 1
+    assert library.failed_blocks[0].raw == unsupported_block
+    assert "Parenthesis-delimited blocks are not supported" in (
+        library.failed_blocks[0].error.abort_reason
+    )
+    assert len(library.comments) == 0
+    assert [entry.key for entry in library.entries] == ["valid"]
+
+
+def test_unclosed_parenthesis_block_recovers_at_next_line_block():
+    """An unclosed unsupported block does not hide a later supported block."""
+    library = Splitter(dedent("""\
+            @article(broken, title = {Unclosed parenthesis block}
+            @book{valid, title = {Supported block}}""")).split()
+
+    assert len(library.failed_blocks) == 1
+    assert library.failed_blocks[0].raw == ("@article(broken, title = {Unclosed parenthesis block}")
+    assert [entry.key for entry in library.entries] == ["valid"]
+
+
 # =============================================================================
 # Test: Error recovery when new block starts at line start
 # =============================================================================
