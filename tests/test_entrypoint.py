@@ -6,6 +6,7 @@ import warnings
 
 import pytest
 
+from bibtexparser import BibtexFormat
 from bibtexparser import parse_file
 from bibtexparser import parse_string
 from bibtexparser import write_file
@@ -38,6 +39,22 @@ def test_duplicate_block_roundtrip_retains_both_sources_and_stabilizes():
     assert "@article{same, title={Second}}" in first_write
     assert len(reparsed.failed_blocks) == 1
     assert second_write == first_write
+
+
+def test_failed_block_annotation_does_not_accumulate_across_roundtrips():
+    """Opt-in annotations remain a single diagnostic instead of growing on every save."""
+    source = "@article{broken,\n  title = {Still retained}\n"
+    bibtex_format = BibtexFormat()
+    bibtex_format.failed_block_policy = "annotate"
+
+    first_write = write_string(parse_string(source), bibtex_format=bibtex_format)
+    second_write = write_string(parse_string(first_write), bibtex_format=bibtex_format)
+    third_write = write_string(parse_string(second_write), bibtex_format=bibtex_format)
+
+    warning = "% WARNING Parsing failed for the following 2 lines."
+    assert first_write.count(warning) == 1
+    assert second_write == first_write
+    assert third_write == first_write
 
 
 def test_gbk():

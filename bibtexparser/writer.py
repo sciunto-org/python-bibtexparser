@@ -72,7 +72,27 @@ def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat"
         raise ValueError(_failed_blocks_forbidden_error([block]))
     lines = len(block.raw.splitlines())
     parsing_failed_comment = bibtex_format.parsing_failed_comment.format(n=lines)
-    return [parsing_failed_comment, "\n", block.raw, "\n"]
+    rendered = [parsing_failed_comment, "\n", block.raw]
+    if not block.raw.endswith(("\n", "\r")):
+        rendered.append("\n")
+    return rendered
+
+
+def _is_existing_failed_block_annotation(
+    block: object,
+    next_block: object,
+    bibtex_format: "BibtexFormat",
+) -> bool:
+    """Recognize an annotation emitted for the immediately following failure."""
+    if bibtex_format.failed_block_policy != "annotate":
+        return False
+    if not isinstance(block, ImplicitComment) or not isinstance(next_block, ParsingFailedBlock):
+        return False
+    if next_block.raw is None:
+        return False
+    source_lines = len(next_block.raw.splitlines())
+    expected = bibtex_format.parsing_failed_comment.format(n=source_lines)
+    return block.comment == expected
 
 
 def _failed_blocks_without_raw_error(blocks: list[ParsingFailedBlock]) -> str:
@@ -145,17 +165,16 @@ def write(library: Library, bibtex_format: Optional["BibtexFormat"] = None) -> s
         bibtex_format = deepcopy(bibtex_format)
         bibtex_format.value_column = auto_val
 
-    string_pieces = []
+    rendered_blocks: list[str] = []
+    for index, block in enumerate(library.blocks):
+        next_block = library.blocks[index + 1] if index + 1 < len(library.blocks) else None
+        if _is_existing_failed_block_annotation(block, next_block, bibtex_format):
+            # The following failed block recreates this exact annotation. Omitting
+            # the parsed copy prevents one new comment from appearing per cycle.
+            continue
+        rendered_blocks.append("".join(_treat_block(bibtex_format, block)))
 
-    for i, block in enumerate(library.blocks):
-        # Get string representation (as list of strings) of block
-        string_block_pieces = _treat_block(bibtex_format, block)
-        string_pieces.extend(string_block_pieces)
-        # Separate Blocks
-        if i < len(library.blocks) - 1:
-            string_pieces.append(bibtex_format.block_separator)
-
-    return "".join(string_pieces)
+    return bibtex_format.block_separator.join(rendered_blocks)
 
 
 def _treat_block(bibtex_format, block) -> list[str]:
