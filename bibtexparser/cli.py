@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from hashlib import sha256
 from pathlib import Path
 
 from . import __version__
@@ -124,18 +125,26 @@ def _run_check(args: argparse.Namespace) -> int:
         issue_url = build_issue_url(report)
         if args.include_source_in_issue_link:
             try:
-                source = args.file.read_bytes().decode(args.encoding)
-                reproduction = extract_reproduction_snippet(source)
-                if reproduction is None:
+                source_bytes = args.file.read_bytes()
+                if sha256(source_bytes).hexdigest() != report.source_sha256:
                     reproduction_notice = (
-                        "no exact bounded failed-block reproduction could be extracted; "
-                        "add a reviewed minimal example manually"
+                        "the file changed after the compatibility check; rerun the command"
                     )
                 else:
-                    reproduction_issue_url = build_issue_url(
-                        report,
-                        reproduction=reproduction,
-                    )
+                    source = source_bytes.decode(args.encoding)
+                    reproduction = extract_reproduction_snippet(source)
+                    if reproduction is None:
+                        reproduction_notice = (
+                            "no exact bounded failed-block reproduction could be "
+                            "extracted; add a reviewed minimal example manually"
+                        )
+                    else:
+                        reproduction_issue_url = build_issue_url(
+                            report,
+                            reproduction=reproduction,
+                        )
+            except OSError:
+                reproduction_notice = "the file could not be reread for a source-bearing draft"
             except (LookupError, UnicodeDecodeError):
                 reproduction_notice = "the selected encoding could not decode the source"
             except ValueError as error:

@@ -98,6 +98,34 @@ class TestCompatibilityCheckCli:
         assert "WARNING" in output
         assert "terminal logs and browser history" in output
 
+    def test_changed_file_cannot_be_attached_to_an_outdated_report(self, capsys, monkeypatch):
+        """The reproduction and privacy-safe report must describe identical bytes."""
+        original_source = b"@article{private-record, title={Original}"
+        changed_source = b"@article{private-record, title={Changed}"
+        path = self._source_file(original_source.decode())
+        original_read_bytes = Path.read_bytes
+        reads = 0
+
+        def changing_read_bytes(candidate):
+            nonlocal reads
+            if candidate == path:
+                reads += 1
+                return original_source if reads == 1 else changed_source
+            return original_read_bytes(candidate)
+
+        monkeypatch.setattr(Path, "read_bytes", changing_read_bytes)
+        try:
+            status = main(["check", str(path), "--include-source-in-issue-link"])
+            output = capsys.readouterr().out
+        finally:
+            os.unlink(path)
+
+        assert status == 1
+        assert "file changed after the compatibility check" in output
+        assert "Issue draft with reproduction:" not in output
+        assert original_source.decode() not in output
+        assert changed_source.decode() not in output
+
     def test_json_report_can_omit_issue_link(self, capsys):
         """Applications receive stable structured output and can suppress the URL."""
         path = self._source_file("@article{private-record, title={Secret title}")
