@@ -145,6 +145,64 @@ For these types, the block as parsed before the error was detected is available
 as ``failed_block.ignore_error_block``, which you may use to recover from the error
 manually (e.g. by fixing and re-adding it to the library) if you choose to do so.
 
+Optional compatibility preflight
+--------------------------------
+
+For a new or unusual file, the read-only compatibility preflight exercises the
+default parse/write contract without changing the source:
+
+.. code-block:: console
+
+    $ python -m bibtexparser check references.bib
+    COMPATIBLE: default bibliography codec checks
+      Source coverage: passed
+      Parse failures absent: passed
+      Semantic round trip: passed
+      Canonical output stable: passed
+      Output encodable: passed
+      Exact source bytes: would change
+      Note: default writing would normalize layout, but protected data is stable.
+
+After installation, the equivalent command is ``bibtexparser check
+references.bib``. Exit status 0 means compatible, 1 means one or more
+compatibility invariants failed, and 2 means the file could not be read. Pass
+``--json`` for a machine-readable report.
+
+The same check is available through Python:
+
+.. code-block:: python
+
+    report = bibtexparser.check_file("references.bib")
+    if not report.compatible:
+        for diagnostic in report.diagnostics:
+            print(diagnostic.code, diagnostic.line, diagnostic.message)
+
+The preflight verifies:
+
+* raw block spans cover every non-whitespace part of the source;
+* the parser retained no explicit failed blocks;
+* writing and reparsing preserve the ordered semantic inventory, including
+  field order, field enclosures, and supported comment blocks;
+* canonical output reaches a fixed point after the first write; and
+* canonical output can be represented in the selected source encoding.
+
+``exact_source_match`` is informational and compares encoded bytes. A false
+value is compatible when the only observed effect is permitted canonical
+formatting and every required check passes. The report deliberately says which
+invariants were checked: using the same parser for the first and second parse
+cannot independently prove that every possible input was interpreted correctly.
+
+The thorough preflight is opt-in because it parses twice and writes twice.
+Ordinary parsing continues to log detected block failures and exposes them in
+``library.failed_blocks`` without paying that additional cost on every read.
+
+On incompatibility, the text and JSON CLI reports include a pre-filled GitHub
+issue-form URL unless ``--no-issue-link`` is supplied. The URL is only a draft:
+the command does not open it, perform a network request, or create an issue. It
+contains environment and check metadata plus a source hash, but no file path,
+bibliography content, or source snippet. Review the draft and add only a minimal
+example that is safe to disclose.
+
 .. _writing_quickstart:
 
 Step 3: Exporting with Defaults

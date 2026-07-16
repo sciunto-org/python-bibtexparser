@@ -69,6 +69,32 @@ new_bibtex_string = bibtexparser.write_string(bib_database,
 These examples really only show the bare minimum.
 Consult the documentation for a list of available middleware, parsing options and write-formatting options.
 
+## Read-only compatibility preflight
+
+Before trusting a new or unusual bibliography file, exercise the default codec
+contract without modifying the source:
+
+```bash
+python -m bibtexparser check references.bib
+# or, after installation:
+bibtexparser check references.bib
+```
+
+The check verifies raw-source coverage, explicit parse failures, semantic
+parse/write/reparse preservation, canonical-output stability, and whether the
+output remains representable in the selected encoding. It reports exact source
+byte identity separately because normal writing may intentionally normalize
+layout. Use `--json` for applications.
+
+An incompatible result includes a reviewable GitHub issue-draft URL by default.
+Constructing the URL does not open a browser, make a network request, or create
+an issue. No file path, bibliography content, or source snippet is included;
+users must review the draft and add only a safe minimal reproduction. Use
+`--no-issue-link` to suppress it.
+
+A passing result means that the file passed the named checks with this version;
+it is not a proof that no unanticipated interpretation bug can exist.
+
 ## V2 Architecture and Terminology
 
 ![bibtexparserv2](https://user-images.githubusercontent.com/4815944/193734283-f19f94e8-7986-4acf-b1a3-1d215e297224.png)
