@@ -16,13 +16,6 @@ from tests.resources import EDGE_CASE_VALUES
 from tests.resources import ENCLOSINGS
 
 
-def _skip_pseudo_enclosing_value(value: str):
-    starts_and_ends_in_brackets = value.startswith("{") and value.endswith("}")
-    starts_and_ends_in_quotes = value.startswith('"') and value.endswith('"')
-    if starts_and_ends_in_quotes or starts_and_ends_in_brackets:
-        pytest.skip("No enclosing to remove")
-
-
 @pytest.mark.parametrize("enclosing", ENCLOSINGS + [pytest.param("{0}", id="no_enclosing")])
 @pytest.mark.parametrize("value", EDGE_CASE_VALUES)
 @pytest.mark.parametrize("inplace", [True, False], ids=["inplace", "not_inplace"])
@@ -31,9 +24,6 @@ def test_removal_of_enclosing_on_string(enclosing, value, inplace):
 
     Also covers the internals for other block types (i.e., Entry),
     which thus can be tested more light-weight."""
-
-    if enclosing == "{0}":
-        _skip_pseudo_enclosing_value(value)
 
     # Create test string
     key = "someKey"
@@ -51,8 +41,20 @@ def test_removal_of_enclosing_on_string(enclosing, value, inplace):
     assert len(transformed_library.strings) == 1
     # Assert correct removal of enclosing
     transformed = transformed_library.strings[0]
-    assert transformed.value == value
-    expected_enclosing = enclosing.format("")[0] if enclosing != "{0}" else "no-enclosing"
+    input_value = enclosing.format(value)
+    if input_value.startswith("{") and input_value.endswith("}"):
+        expected_value = input_value[1:-1]
+        expected_enclosing = "{"
+    elif input_value.startswith('"') and input_value.endswith('"'):
+        expected_value = input_value[1:-1]
+        expected_enclosing = '"'
+    else:
+        expected_value = input_value
+        expected_enclosing = "no-enclosing"
+
+    # Values that already look enclosed are necessarily interpreted as enclosed,
+    # even when the test did not add another wrapper around them.
+    assert transformed.value == expected_value
     assert transformed.parser_metadata["removed_enclosing"] == expected_enclosing
     # Assert remaining fields are unchanged
     assert transformed.start_line == start_line
@@ -162,9 +164,6 @@ def test_addition_of_enclosing_on_entry(
     transformed = transformed_library.entries[0]
     changed_value = transformed["year"]
 
-    # Figure out which enclosing was added
-    used_enclosing = _figure_out_added_enclosing(changed_value, value)
-
     # Assert correct enclosing was added
     if reuse_previous_enclosing and metadata_enclosing is not None:
         expected_enclosing = metadata_enclosing
@@ -174,9 +173,11 @@ def test_addition_of_enclosing_on_entry(
         expected_enclosing = default_enclosing
 
     if expected_enclosing == "no-enclosing":
-        _skip_pseudo_enclosing_value(value)
-
-    assert used_enclosing == expected_enclosing
+        # Inspect the exact output because a value may itself begin and end with
+        # enclosure-like characters even though the middleware added nothing.
+        assert changed_value == str(value)
+    else:
+        assert _figure_out_added_enclosing(changed_value, value) == expected_enclosing
 
     # Assert remaining fields are unchanged
     assert_nonfield_entry_attributes_unchanged(input_entry, transformed)
