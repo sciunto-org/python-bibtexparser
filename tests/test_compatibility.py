@@ -2,10 +2,14 @@
 
 import os
 import tempfile
+from urllib.parse import parse_qs
+from urllib.parse import urlparse
 
 import bibtexparser.compatibility as compatibility
+from bibtexparser import build_issue_url
 from bibtexparser import check_file
 from bibtexparser import check_string
+from bibtexparser import extract_reproduction_snippet
 
 
 class TestCompatibilityReport:
@@ -154,3 +158,38 @@ class TestCompatibilityReport:
             assert "encode-error" in [finding.code for finding in report.diagnostics]
         finally:
             os.unlink(path)
+
+
+class TestIssueReproduction:
+    """Protect explicit source disclosure and useful reproduction extraction."""
+
+    def test_failed_block_is_returned_without_truncation(self):
+        """A source-bearing draft uses the exact failed block seen by the parser."""
+        source = "@article{private-record, title={Secret title}"
+
+        assert extract_reproduction_snippet(source) == source
+
+    def test_duplicate_key_reproduction_contains_both_blocks(self):
+        """A duplicate-key report includes the original needed to trigger the failure."""
+        first = "@article{same, title={First}}"
+        duplicate = "@book{same, title={Second}}"
+        source = f"{first}\n{duplicate}"
+
+        assert extract_reproduction_snippet(source) == f"{first}\n\n{duplicate}"
+
+    def test_oversized_reproduction_is_refused_instead_of_truncated(self):
+        """An incomplete automatic excerpt must not masquerade as a reproduction."""
+        source = "@article{private-record, title={Secret title}"
+
+        assert extract_reproduction_snippet(source, max_characters=10) is None
+
+    def test_source_bearing_issue_url_uses_a_safe_markdown_fence(self):
+        """Backticks in source cannot escape the reproduction code block."""
+        source = "@article{private-record, note={```}"
+        report = check_string(source)
+
+        issue_url = build_issue_url(report, reproduction=source)
+        issue_body = parse_qs(urlparse(issue_url).query)["body"][0]
+
+        assert "````bibtex\n" + source + "\n````" in issue_body
+        assert "intentionally includes bibliography source" in issue_body

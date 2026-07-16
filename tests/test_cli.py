@@ -49,9 +49,9 @@ class TestCompatibilityCheckCli:
             os.unlink(path)
 
         issue_url = next(
-            line.removeprefix("  Report issue: ")
+            line.removeprefix("  Privacy-safe issue draft: ")
             for line in output.splitlines()
-            if line.startswith("  Report issue: ")
+            if line.startswith("  Privacy-safe issue draft: ")
         )
         query = parse_qs(urlparse(issue_url).query)
         issue_body = query["body"][0]
@@ -65,6 +65,38 @@ class TestCompatibilityCheckCli:
         assert source not in issue_body
         assert "Secret title" not in issue_body
         assert "No file path, bibliography content, or source snippet" in issue_body
+        assert "--include-source-in-issue-link" in output
+        assert "terminal logs, browser history" in output
+
+    def test_explicit_source_link_contains_exact_failed_block(self, capsys):
+        """The sensitive second draft is opt-in, reviewable, and reproducible."""
+        source = "@article{private-record, title={Secret title}"
+        path = self._source_file(source)
+        try:
+            status = main(["check", str(path), "--include-source-in-issue-link"])
+            output = capsys.readouterr().out
+        finally:
+            os.unlink(path)
+
+        safe_url = next(
+            line.removeprefix("  Privacy-safe issue draft: ")
+            for line in output.splitlines()
+            if line.startswith("  Privacy-safe issue draft: ")
+        )
+        reproduction_url = next(
+            line.removeprefix("  Issue draft with reproduction: ")
+            for line in output.splitlines()
+            if line.startswith("  Issue draft with reproduction: ")
+        )
+        safe_body = parse_qs(urlparse(safe_url).query)["body"][0]
+        reproduction_body = parse_qs(urlparse(reproduction_url).query)["body"][0]
+
+        assert status == 1
+        assert source not in safe_body
+        assert source in reproduction_body
+        assert "intentionally includes bibliography source" in reproduction_body
+        assert "WARNING" in output
+        assert "terminal logs and browser history" in output
 
     def test_json_report_can_omit_issue_link(self, capsys):
         """Applications receive stable structured output and can suppress the URL."""
@@ -79,6 +111,8 @@ class TestCompatibilityCheckCli:
         assert status == 1
         assert report["compatible"] is False
         assert report["issue_url"] is None
+        assert report["reproduction_issue_url"] is None
+        assert report["reproduction_notice"] is None
         assert report["diagnostics"][0]["code"] == "parse-failure"
 
     def test_missing_file_is_a_usage_error(self, capsys):

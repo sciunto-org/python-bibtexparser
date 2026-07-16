@@ -7,6 +7,7 @@ same implementation cannot independently validate every interpretation choice.
 """
 
 import platform
+import re
 from dataclasses import asdict
 from dataclasses import dataclass
 from hashlib import sha256
@@ -27,6 +28,8 @@ from .model import Preamble
 from .model import String
 
 ISSUE_TRACKER_URL = "https://github.com/sciunto-org/python-bibtexparser/issues/new"
+MAX_REPRODUCTION_CHARACTERS = 2_000
+MAX_ISSUE_URL_CHARACTERS = 7_500
 
 
 @dataclass(frozen=True)
@@ -343,12 +346,13 @@ def check_file(path: str | Path, encoding: str = "UTF-8") -> CompatibilityReport
 def build_issue_url(
     report: CompatibilityReport,
     issue_tracker_url: str = ISSUE_TRACKER_URL,
+    reproduction: str | None = None,
 ) -> str:
-    """Build a reviewable GitHub issue form URL without source text or paths.
+    """Build a reviewable GitHub issue form URL, optionally with source text.
 
     This function only constructs a URL. It performs no network request, opens
-    no browser, and creates no issue. Bibliography snippets must be added by the
-    user after checking that they are safe to disclose.
+    no browser, and creates no issue. Passing ``reproduction`` intentionally
+    embeds that text in the URL; callers must obtain explicit user consent first.
     """
     try:
         package_version = version("bibtexparser")
@@ -358,32 +362,94 @@ def build_issue_url(
     codes = sorted({diagnostic.code for diagnostic in report.diagnostics})
     code_summary = ", ".join(codes) if codes else "unspecified-check-failure"
     checks = report.to_dict()["checks"]
-    body = "\n".join(
-        [
-            "### Compatibility report",
-            "",
-            f"* bibtexparser: {package_version}",
-            f"* Python: {platform.python_implementation()} {platform.python_version()}",
-            f"* Platform: {platform.system()} {platform.release()} ({platform.machine()})",
-            f"* Source SHA-256: `{report.source_sha256}`",
-            f"* Source size: {report.source_bytes} bytes",
-            f"* Diagnostic codes: {code_summary}",
-            f"* Checks: `{checks}`",
-            "",
-            "### Reproduction",
-            "",
-            "Please add the smallest non-sensitive bibliography example that reproduces the result.",
-            "",
-            "### Privacy review",
-            "",
-            "No file path, bibliography content, or source snippet was included automatically. "
-            "Review this draft and anything you add before submitting it.",
-        ]
-    )
+    body_lines = [
+        "### Compatibility report",
+        "",
+        f"* bibtexparser: {package_version}",
+        f"* Python: {platform.python_implementation()} {platform.python_version()}",
+        f"* Platform: {platform.system()} {platform.release()} ({platform.machine()})",
+        f"* Source SHA-256: `{report.source_sha256}`",
+        f"* Source size: {report.source_bytes} bytes",
+        f"* Diagnostic codes: {code_summary}",
+        f"* Checks: `{checks}`",
+        "",
+        "### Reproduction",
+        "",
+    ]
+    if reproduction is None:
+        body_lines.extend(
+            [
+                "Please add the smallest non-sensitive bibliography example that reproduces the result.",
+                "",
+                "### Privacy review",
+                "",
+                "No file path, bibliography content, or source snippet was included automatically. "
+                "Review this draft and anything you add before submitting it.",
+            ]
+        )
+    else:
+        longest_backtick_run = max(
+            (len(run) for run in re.findall(r"`+", reproduction)),
+            default=0,
+        )
+        fence = "`" * max(3, longest_backtick_run + 1)
+        body_lines.extend(
+            [
+                fence + "bibtex",
+                reproduction,
+                fence,
+                "",
+                "### Privacy review",
+                "",
+                "This draft intentionally includes bibliography source requested by the user. "
+                "Treat both this URL and the draft as sensitive, review them before submission, "
+                "and remove anything that should not be public.",
+            ]
+        )
+    body = "\n".join(body_lines)
     query = urlencode(
         {
             "title": f"Compatibility check failed: {code_summary}",
             "body": body,
         }
     )
-    return f"{issue_tracker_url}?{query}"
+    issue_url = f"{issue_tracker_url}?{query}"
+    if reproduction is not None and len(issue_url) > MAX_ISSUE_URL_CHARACTERS:
+        raise ValueError("The reproduction makes the issue URL too long.")
+    return issue_url
+
+
+def extract_reproduction_snippet(
+    source: str,
+    max_characters: int = MAX_REPRODUCTION_CHARACTERS,
+) -> str | None:
+    """Return exact failed block source when it forms a bounded reproduction.
+
+    For duplicate block keys, both the original and duplicate blocks are needed
+    to reproduce the failure. No arbitrary truncation is performed because a
+    syntactically incomplete excerpt can be misleading or impossible to parse.
+    """
+    if max_characters < 1:
+        raise ValueError("max_characters must be positive")
+
+    library = parse_string(source)
+    candidates: list[tuple[int, str]] = []
+    seen: set[tuple[int, str]] = set()
+    for failed_block in library.failed_blocks:
+        previous_block = getattr(failed_block, "previous_block", None)
+        blocks = [previous_block, failed_block] if previous_block is not None else [failed_block]
+        for block in blocks:
+            if block is None or block.raw is None:
+                return None
+            line = block.start_line if block.start_line is not None else -1
+            identity = (line, block.raw)
+            if identity not in seen:
+                candidates.append(identity)
+                seen.add(identity)
+
+    if not candidates:
+        return None
+    reproduction = "\n\n".join(raw for _, raw in sorted(candidates))
+    if len(reproduction) > max_characters:
+        return None
+    return reproduction

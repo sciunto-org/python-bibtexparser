@@ -6,6 +6,7 @@ from bibtexparser.compatibility import CompatibilityReport
 from bibtexparser.compatibility import build_issue_url
 from bibtexparser.compatibility import check_file
 from bibtexparser.compatibility import check_string
+from bibtexparser.compatibility import extract_reproduction_snippet
 from bibtexparser.entrypoint import parse_file
 from bibtexparser.entrypoint import parse_string
 from bibtexparser.entrypoint import write_file
