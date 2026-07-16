@@ -154,6 +154,25 @@ def test_mixed_blocks_same_line(
     assert len(library.comments) == expected_comments
 
 
+@pytest.mark.parametrize(
+    "entry_type",
+    [
+        pytest.param("commentary", id="comment-prefix"),
+        pytest.param("preamble_study", id="preamble-prefix"),
+        pytest.param("string_theory", id="string-prefix"),
+    ],
+)
+def test_entry_type_extending_special_command_name_is_entry(entry_type: str):
+    """Special commands require an exact type match; longer custom types remain entries."""
+    library = Splitter(f"@{entry_type}{{key, title = {{Custom entry type}}}}").split()
+
+    assert len(library.failed_blocks) == 0
+    assert len(library.comments) == 0
+    assert len(library.preambles) == 0
+    assert len(library.strings) == 0
+    assert [(entry.entry_type, entry.key) for entry in library.entries] == [(entry_type, "key")]
+
+
 # =============================================================================
 # Test: Error recovery when new block starts at line start
 # =============================================================================
