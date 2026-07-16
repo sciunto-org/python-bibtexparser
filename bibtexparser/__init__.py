@@ -3,6 +3,7 @@ import bibtexparser.middlewares
 import bibtexparser.model
 from bibtexparser.compatibility import CompatibilityDiagnostic
 from bibtexparser.compatibility import CompatibilityReport
+from bibtexparser.compatibility import build_issue_url
 from bibtexparser.compatibility import check_file
 from bibtexparser.compatibility import check_string
 from bibtexparser.entrypoint import parse_file

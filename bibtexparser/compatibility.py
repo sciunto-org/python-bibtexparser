@@ -6,11 +6,15 @@ parser is correct for every possible input. In particular, reparsing with the
 same implementation cannot independently validate every interpretation choice.
 """
 
+import platform
 from dataclasses import asdict
 from dataclasses import dataclass
 from hashlib import sha256
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 
 from .entrypoint import parse_string
 from .entrypoint import write_string
@@ -21,6 +25,8 @@ from .model import ImplicitComment
 from .model import ParsingFailedBlock
 from .model import Preamble
 from .model import String
+
+ISSUE_TRACKER_URL = "https://github.com/sciunto-org/python-bibtexparser/issues/new"
 
 
 @dataclass(frozen=True)
@@ -332,3 +338,52 @@ def check_file(path: str | Path, encoding: str = "UTF-8") -> CompatibilityReport
             diagnostics=(diagnostic,),
         )
     return _check_source(source, source_bytes, output_encoding=encoding)
+
+
+def build_issue_url(
+    report: CompatibilityReport,
+    issue_tracker_url: str = ISSUE_TRACKER_URL,
+) -> str:
+    """Build a reviewable GitHub issue form URL without source text or paths.
+
+    This function only constructs a URL. It performs no network request, opens
+    no browser, and creates no issue. Bibliography snippets must be added by the
+    user after checking that they are safe to disclose.
+    """
+    try:
+        package_version = version("bibtexparser")
+    except PackageNotFoundError:
+        package_version = "unknown"
+
+    codes = sorted({diagnostic.code for diagnostic in report.diagnostics})
+    code_summary = ", ".join(codes) if codes else "unspecified-check-failure"
+    checks = report.to_dict()["checks"]
+    body = "\n".join(
+        [
+            "### Compatibility report",
+            "",
+            f"* bibtexparser: {package_version}",
+            f"* Python: {platform.python_implementation()} {platform.python_version()}",
+            f"* Platform: {platform.system()} {platform.release()} ({platform.machine()})",
+            f"* Source SHA-256: `{report.source_sha256}`",
+            f"* Source size: {report.source_bytes} bytes",
+            f"* Diagnostic codes: {code_summary}",
+            f"* Checks: `{checks}`",
+            "",
+            "### Reproduction",
+            "",
+            "Please add the smallest non-sensitive bibliography example that reproduces the result.",
+            "",
+            "### Privacy review",
+            "",
+            "No file path, bibliography content, or source snippet was included automatically. "
+            "Review this draft and anything you add before submitting it.",
+        ]
+    )
+    query = urlencode(
+        {
+            "title": f"Compatibility check failed: {code_summary}",
+            "body": body,
+        }
+    )
+    return f"{issue_tracker_url}?{query}"

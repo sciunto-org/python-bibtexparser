@@ -1,0 +1,105 @@
+"""Command-line interface for explicit bibliography compatibility checks."""
+
+import argparse
+import json
+import sys
+from collections.abc import Sequence
+from pathlib import Path
+
+from . import __version__
+from .compatibility import CompatibilityReport
+from .compatibility import build_issue_url
+from .compatibility import check_file
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="bibtexparser")
+    parser.add_argument("--version", action="version", version=__version__)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    check_parser = subparsers.add_parser(
+        "check",
+        help="exercise the default non-lossy contract without modifying the file",
+    )
+    check_parser.add_argument("file", type=Path, help="BibTeX or BibLaTeX file to check")
+    check_parser.add_argument(
+        "--encoding",
+        default="UTF-8",
+        help="source encoding (default: UTF-8)",
+    )
+    check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="emit a machine-readable report",
+    )
+    check_parser.add_argument(
+        "--no-issue-link",
+        action="store_true",
+        help="do not include a pre-filled GitHub issue form URL on failure",
+    )
+    return parser
+
+
+def _check_label(value: bool | None) -> str:
+    if value is None:
+        return "not run"
+    return "passed" if value else "failed"
+
+
+def _identity_label(value: bool | None) -> str:
+    if value is None:
+        return "not run"
+    return "unchanged" if value else "would change"
+
+
+def _print_text_report(report: CompatibilityReport, issue_url: str | None) -> None:
+    status = "COMPATIBLE" if report.compatible else "INCOMPATIBLE"
+    print(f"{status}: default bibliography codec checks")
+    print(f"  Source coverage: {_check_label(report.source_covered)}")
+    print(f"  Parse failures absent: {_check_label(report.parsed_without_failures)}")
+    print(f"  Semantic round trip: {_check_label(report.semantic_roundtrip)}")
+    print(f"  Canonical output stable: {_check_label(report.canonical_stable)}")
+    print(f"  Output encodable: {_check_label(report.output_encodable)}")
+    print(f"  Exact source bytes: {_identity_label(report.exact_source_match)}")
+    if report.exact_source_match is False and report.compatible:
+        print("  Note: default writing would normalize layout, but protected data is stable.")
+
+    for diagnostic in report.diagnostics:
+        location = f" line {diagnostic.line}" if diagnostic.line is not None else ""
+        print(
+            f"  {diagnostic.severity.upper()} [{diagnostic.code}]{location}: "
+            f"{diagnostic.message}"
+        )
+
+    if issue_url is not None:
+        print("  The link below opens a reviewable draft; it does not create an issue.")
+        print("  It contains no file path, bibliography content, or source snippet.")
+        print(f"  Report issue: {issue_url}")
+
+
+def _run_check(args: argparse.Namespace) -> int:
+    try:
+        report = check_file(args.file, encoding=args.encoding)
+    except OSError as error:
+        print(f"Could not read {args.file}: {error}", file=sys.stderr)
+        return 2
+
+    issue_url = None
+    if not report.compatible and not args.no_issue_link:
+        issue_url = build_issue_url(report)
+
+    if args.json:
+        serialized = report.to_dict()
+        serialized["issue_url"] = issue_url
+        print(json.dumps(serialized, indent=2, sort_keys=True))
+    else:
+        _print_text_report(report, issue_url)
+    return 0 if report.compatible else 1
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Run the command-line interface and return its process exit status."""
+    args = _parser().parse_args(argv)
+    if args.command == "check":
+        return _run_check(args)
+    raise AssertionError(f"Unhandled command: {args.command}")

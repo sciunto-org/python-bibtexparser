@@ -34,6 +34,9 @@ test = [
     "jupyter",  # For runnable examples
 ]
 
+[project.scripts]
+bibtexparser = "bibtexparser.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/sciunto-org/python-bibtexparser"
 Repository = "https://github.com/sciunto-org/python-bibtexparser"
