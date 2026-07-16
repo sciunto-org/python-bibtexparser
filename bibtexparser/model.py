@@ -306,6 +306,47 @@ class Field:
         )
 
 
+class EntryComment:
+    """A Biber-style ``%`` comment positioned between fields of an entry.
+
+    ``field_index`` records how many fields preceded the comment in the parsed
+    source. It lets the canonical writer retain comments while keeping
+    ``Entry.fields`` restricted to active bibliography data.
+    """
+
+    def __init__(self, comment: str, field_index: int):
+        if field_index < 0:
+            raise ValueError("field_index must be non-negative")
+        self._comment = comment
+        self._field_index = field_index
+
+    @property
+    def comment(self) -> str:
+        """Content following the source line's leading ``%`` marker."""
+        return self._comment
+
+    @comment.setter
+    def comment(self, value: str):
+        self._comment = value
+
+    @property
+    def field_index(self) -> int:
+        """Number of active fields that preceded this comment when parsed."""
+        return self._field_index
+
+    @field_index.setter
+    def field_index(self, value: int):
+        if value < 0:
+            raise ValueError("field_index must be non-negative")
+        self._field_index = value
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, EntryComment) and self.__dict__ == other.__dict__
+
+    def __repr__(self) -> str:
+        return f"EntryComment(comment={self.comment!r}, field_index={self.field_index})"
+
+
 class Entry(Block):
     """Bibtex Blocks of the ``@entry`` type, e.g. ``@article{Cesar2013, ...}``."""
 
@@ -316,11 +357,13 @@ class Entry(Block):
         fields: list[Field],
         start_line: int | None = None,
         raw: str | None = None,
+        comments: list[EntryComment] | None = None,
     ):
         super().__init__(start_line, raw)
         self._entry_type = entry_type
         self._key = key
         self._fields = fields
+        self._comments = [] if comments is None else comments
 
     @property
     def entry_type(self) -> str:
@@ -348,6 +391,15 @@ class Entry(Block):
     @fields.setter
     def fields(self, value: list[Field]):
         self._fields = value
+
+    @property
+    def comments(self) -> list[EntryComment]:
+        """Biber-style percent comments nested within this entry, in source order."""
+        return self._comments
+
+    @comments.setter
+    def comments(self, value: list[EntryComment]):
+        self._comments = value
 
     @property
     def fields_dict(self) -> dict[str, Field]:

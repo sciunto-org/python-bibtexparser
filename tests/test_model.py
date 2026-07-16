@@ -5,6 +5,7 @@ from textwrap import dedent
 import pytest
 
 from bibtexparser.model import Entry
+from bibtexparser.model import EntryComment
 from bibtexparser.model import ExplicitComment
 from bibtexparser.model import Field
 from bibtexparser.model import ImplicitComment
@@ -49,6 +50,16 @@ def test_entry_equality():
         "raw",
     )
     assert entry_1 != entry_4
+    # Not equal to an otherwise identical entry with a nested source comment
+    entry_5 = Entry(
+        "article",
+        "key",
+        [Field("field", "value", 1)],
+        1,
+        "raw",
+        comments=[EntryComment(" note", field_index=0)],
+    )
+    assert entry_1 != entry_5
 
 
 def test_entry_copy():
@@ -66,7 +77,14 @@ def test_entry_copy():
 
 
 def test_entry_deepcopy():
-    entry_1 = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    entry_1 = Entry(
+        "article",
+        "key",
+        [Field("field", "value", 1)],
+        1,
+        "raw",
+        comments=[EntryComment(" note", field_index=0)],
+    )
     entry_2 = deepcopy(entry_1)
     assert entry_1 == entry_2
     assert entry_1 is not entry_2
@@ -74,6 +92,25 @@ def test_entry_deepcopy():
     assert entry_1.fields == entry_2.fields
     assert entry_1.fields_dict["field"] is not entry_2.fields_dict["field"]
     assert entry_1.fields_dict["field"] == entry_2.fields_dict["field"]
+    assert entry_1.comments is not entry_2.comments
+    assert entry_1.comments[0] is not entry_2.comments[0]
+    assert entry_1.comments == entry_2.comments
+
+
+def test_entry_comment_rejects_negative_field_index():
+    """Comment positions are field boundaries and therefore cannot be negative."""
+    with pytest.raises(ValueError, match="non-negative"):
+        EntryComment(" note", field_index=-1)
+
+    comment = EntryComment(" note", field_index=0)
+    with pytest.raises(ValueError, match="non-negative"):
+        comment.field_index = -1
+
+
+def test_entry_comment_is_unhashable_while_mutable():
+    """Mutable comment content and positions must not become unstable mapping keys."""
+    with pytest.raises(TypeError):
+        hash(EntryComment(" note", field_index=0))
 
 
 def test_entry_get():

@@ -7,6 +7,7 @@ from .exceptions import RegexMismatchException
 from .library import Library
 from .model import DuplicateFieldKeyBlock
 from .model import Entry
+from .model import EntryComment
 from .model import ExplicitComment
 from .model import Field
 from .model import ImplicitComment
@@ -15,6 +16,11 @@ from .model import Preamble
 from .model import String
 
 logger = logging.getLogger(__name__)
+
+
+def _is_line_comment_mark(mark: re.Match) -> bool:
+    """Return whether a splitter mark starts a percent-comment line."""
+    return mark.group(0).lstrip().startswith("%")
 
 
 class Splitter:
@@ -65,6 +71,20 @@ class Splitter:
                 return False
         # Start of string counts as line start
         return True
+
+    def _skip_marks_before(self, end_index: int) -> None:
+        """Advance the mark iterator to the first mark at or after ``end_index``."""
+        while True:
+            mark = self._next_mark(accept_eof=True)
+            if mark is None:
+                break
+            if mark.start() >= end_index:
+                self._unaccepted_mark = mark
+                break
+
+        # Normal block handlers leave this index at their closing delimiter.
+        # Mirror that state so line tracking resumes after the consumed comment.
+        self._current_char_index = end_index - 1
 
     def _end_implicit_comment(self, end_char_index) -> ImplicitComment | None:
         if self._implicit_comment_start is None:
@@ -192,6 +212,12 @@ class Splitter:
                 continue
 
             # Check for end of field
+            elif _is_line_comment_mark(next_mark) and not _is_escaped():
+                # A Biber line comment is whitespace at this grammar level. Returning
+                # its boundary prevents the comment from becoming part of the value;
+                # the entry parser consumes and positions the comment itself.
+                self._unaccepted_mark = next_mark
+                return next_mark.start()
             elif next_mark.group(0) == "," and not _is_escaped():
                 self._unaccepted_mark = next_mark
                 return next_mark.start()
@@ -220,18 +246,38 @@ class Splitter:
                     end_index=next_mark.start() - 1,
                 )
 
-    def _move_to_end_of_entry(self, first_key_start: int) -> tuple[list[Field], int, set[str]]:
-        """Move to the end of the entry and return the fields and the end index."""
+    def _consume_entry_comment(self, mark: re.Match, field_index: int) -> EntryComment:
+        """Consume one Biber-style line comment and retain its field boundary."""
+        percent_index = mark.end() - 1
+        line_end = self.bibstr.find("\n", percent_index)
+        if line_end == -1:
+            line_end = len(self.bibstr)
+        comment_end = line_end
+        if comment_end > percent_index and self.bibstr[comment_end - 1] == "\r":
+            comment_end -= 1
+        comment = self.bibstr[percent_index + 1 : comment_end]
+        self._skip_marks_before(line_end + 1)
+        return EntryComment(comment=comment, field_index=field_index)
+
+    def _move_to_end_of_entry(
+        self, first_key_start: int
+    ) -> tuple[list[Field], list[EntryComment], int, set[str]]:
+        """Move to the end of the entry and return its fields and comments."""
         result = []
+        comments = []
         keys = set()
         duplicate_keys = set()
 
         key_start = first_key_start
         while True:
             equals_mark = self._next_mark(accept_eof=False)
+            if _is_line_comment_mark(equals_mark):
+                comments.append(self._consume_entry_comment(equals_mark, field_index=len(result)))
+                key_start = self._current_char_index + 1
+                continue
             if equals_mark.group(0) == "}":
                 # End of entry
-                return result, equals_mark.end(), duplicate_keys
+                return result, comments, equals_mark.end(), duplicate_keys
 
             if equals_mark.group(0) != "=":
                 self._unaccepted_mark = equals_mark
@@ -261,6 +307,11 @@ class Splitter:
 
             # If next mark is a comma, continue
             after_field_mark = self._next_mark(accept_eof=False)
+            while _is_line_comment_mark(after_field_mark):
+                comments.append(
+                    self._consume_entry_comment(after_field_mark, field_index=len(result))
+                )
+                after_field_mark = self._next_mark(accept_eof=False)
             if after_field_mark.group(0) == ",":
                 key_start = after_field_mark.end()
             elif after_field_mark.group(0) == "}":
@@ -284,7 +335,9 @@ class Splitter:
             The library with the added blocks.
         """
         self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
+            r"(?<!\\)[\{\}\",=\n]|(?<=\n)[ \t]*%|@[\w]*( |\t)*(?={)",
+            self.bibstr,
+            re.MULTILINE,
         )
 
         if library is None:
@@ -403,7 +456,7 @@ class Splitter:
             # This is an entry without any comma after the key, and with no fields
             #   Used e.g. by RefTeX (see issue #384)
             key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
-            fields, end_index, duplicate_keys = [], comma_mark.end(), []
+            fields, comments, end_index, duplicate_keys = [], [], comma_mark.end(), []
         elif comma_mark.group(0) != ",":
             self._unaccepted_mark = comma_mark
             raise BlockAbortedException(
@@ -412,7 +465,9 @@ class Splitter:
             )
         else:
             key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
-            fields, end_index, duplicate_keys = self._move_to_end_of_entry(comma_mark.end())
+            fields, comments, end_index, duplicate_keys = self._move_to_end_of_entry(
+                comma_mark.end()
+            )
 
         entry = Entry(
             start_line=start_line,
@@ -420,6 +475,7 @@ class Splitter:
             key=key,
             fields=fields,
             raw=self.bibstr[m.start() : end_index],
+            comments=comments,
         )
 
         # If there were duplicate field keys, we return a DuplicateFieldKeyBlock wrapping

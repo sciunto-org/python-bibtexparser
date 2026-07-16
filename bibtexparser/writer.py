@@ -3,6 +3,7 @@ from typing import Optional
 
 from .library import Library
 from .model import Entry
+from .model import EntryComment
 from .model import ExplicitComment
 from .model import Field
 from .model import ImplicitComment
@@ -16,16 +17,31 @@ PARSING_FAILED_COMMENT = "% WARNING Parsing failed for the following {n} lines."
 
 def _treat_entry(block: Entry, bibtex_format) -> list[str]:
     res = ["@", block.entry_type, "{", block.key, ",\n"]
+    comments_by_field_index: dict[int, list[EntryComment]] = {}
+    for comment in block.comments:
+        # If callers removed fields without repositioning comments, retaining the
+        # comment at the end is safer than losing it or failing serialization.
+        field_index = min(comment.field_index, len(block.fields))
+        comments_by_field_index.setdefault(field_index, []).append(comment)
+
     field: Field
     for i, field in enumerate(block.fields):
+        for comment in comments_by_field_index.get(i, []):
+            res.extend([bibtex_format.indent, "%", comment.comment, "\n"])
         res.append(bibtex_format.indent)
         res.append(field.key)
         res.append(_val_indent_string(bibtex_format, field.key))
         res.append(VAL_SEP)
         res.append(field.value)
-        if bibtex_format.trailing_comma or i < len(block.fields) - 1:
+        if (
+            bibtex_format.trailing_comma
+            or i < len(block.fields) - 1
+            or len(block.fields) in comments_by_field_index
+        ):
             res.append(",")
         res.append("\n")
+    for comment in comments_by_field_index.get(len(block.fields), []):
+        res.extend([bibtex_format.indent, "%", comment.comment, "\n"])
     res.append("}\n")
     return res
 
