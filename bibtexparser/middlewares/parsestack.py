@@ -19,7 +19,7 @@ def default_unparse_stack(allow_inplace_modification: bool = False) -> list[Midd
         AddEnclosingMiddleware(
             allow_inplace_modification=allow_inplace_modification,
             default_enclosing="{",
-            reuse_previous_enclosing=False,
+            reuse_previous_enclosing=True,
             enclose_integers=True,
         )
     ]

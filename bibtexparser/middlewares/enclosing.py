@@ -148,7 +148,12 @@ class AddEnclosingMiddleware(BlockMiddleware):
         if demanded_enclosing is not None:
             enclosing = demanded_enclosing
         elif self._reuse_previous_enclosing and metadata_enclosing is not None:
-            enclosing = metadata_enclosing
+            # Parser metadata describes the source value, not necessarily its
+            # current edited value. Reusing a bare integer's metadata for new
+            # ordinary text would emit invalid BibTeX, so fall back to the
+            # configured default unless the bare representation remains safe.
+            if metadata_enclosing != "no-enclosing" or str(value).isdigit():
+                enclosing = metadata_enclosing
         elif apply_int_rule and not self._enclose_integers and str(value).isdigit():
             return str(value)
 

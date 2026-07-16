@@ -55,6 +55,13 @@ The default write stack consists of the following layers:
 
 * :class:`bibtexparser.middlewares.AddEnclosingMiddleware`: Encloses values in curly braces where needed.
 
+For parsed values, the default writer reuses the quote, brace, or safe
+unenclosed style recorded by
+:class:`bibtexparser.middlewares.RemoveEnclosingMiddleware`. New programmatic
+values without prior enclosure metadata use curly braces. If a formerly bare
+integer is edited to ordinary text, the writer also falls back to braces rather
+than emitting invalid bare text.
+
 When specifying their own stack, user get to chose if they want to add to or overwrite the default stack
 by selecting the corresponding argument when calling :code:`bibtexparser.parse` or :code:`bibtexparser.write`:
 

@@ -166,7 +166,10 @@ def test_addition_of_enclosing_on_entry(
     used_enclosing = _figure_out_added_enclosing(changed_value, value)
 
     # Assert correct enclosing was added
-    if reuse_previous_enclosing and metadata_enclosing is not None:
+    can_safely_reuse_metadata = metadata_enclosing != "no-enclosing" or (
+        isinstance(value, int) or value.isdigit()
+    )
+    if reuse_previous_enclosing and metadata_enclosing is not None and can_safely_reuse_metadata:
         expected_enclosing = metadata_enclosing
     elif (isinstance(value, int) or value.isdigit()) and not enclose_ints:
         expected_enclosing = "no-enclosing"
@@ -417,8 +420,53 @@ def test_string_reference_roundtrip():
 
     assert "month = jan" in written
     assert 'pages = intro # "--" # outro' in written
-    # Ints are still enclosed by the default unparse stack
-    assert "year = {2019}" in written
+    # The default unparse stack also retains the integer's bare source style.
+    assert "year = 2019" in written
+
+
+def test_default_roundtrip_reuses_parsed_value_enclosures():
+    """Ordinary writing retains quote, brace, and safe bare source choices."""
+    library = bibtexparser.parse_string(
+        '@article{key, quoted="Quoted", braced={Braced}, year=2019}'
+    )
+
+    written = bibtexparser.write_string(library)
+
+    assert 'quoted = "Quoted"' in written
+    assert "braced = {Braced}" in written
+    assert "year = 2019" in written
+
+
+def test_edit_reuses_quoted_and_braced_enclosures():
+    """Changing a value must not also replace its established safe enclosure style."""
+    library = bibtexparser.parse_string('@article{key, quoted="Before", braced={Before}}')
+    library.entries[0]["quoted"] = "After"
+    library.entries[0]["braced"] = "After"
+
+    written = bibtexparser.write_string(library)
+
+    assert 'quoted = "After"' in written
+    assert "braced = {After}" in written
+
+
+def test_editing_bare_integer_to_text_falls_back_to_braces():
+    """Stale bare metadata cannot make an edited ordinary string invalid BibTeX."""
+    library = bibtexparser.parse_string("@article{key, year=2019}")
+    library.entries[0]["year"] = "forthcoming soon"
+
+    written = bibtexparser.write_string(library)
+
+    assert "year = {forthcoming soon}" in written
+
+
+def test_new_field_without_enclosure_metadata_uses_braces():
+    """Source-style reuse does not change the safe default for programmatic values."""
+    library = bibtexparser.parse_string('@article{key, title="Existing"}')
+    library.entries[0]["note"] = "New value"
+
+    written = bibtexparser.write_string(library)
+
+    assert "note = {New value}" in written
 
 
 # TODO round-trip tests (removal -> addition -> removal)
