@@ -1,5 +1,6 @@
 import pytest
 
+import bibtexparser
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
 from bibtexparser.middlewares.interpolate import ResolveStringReferencesMiddleware
 from bibtexparser.splitter import Splitter
@@ -16,6 +17,28 @@ bibtex_string = """
 }
 
 """
+
+
+def test_default_parse_retains_string_reference_linkage():
+    """Ordinary parse/write use must not replace a reusable macro with its current value."""
+    library = bibtexparser.parse_string(bibtex_string)
+
+    assert library.entries_dict["test_article"]["note"] == "test_note"
+    written = bibtexparser.write_string(library)
+    assert "note = test_note" in written
+
+
+def test_public_parse_can_expand_string_references_explicitly():
+    """Callers can request dereferencing before the enclosing representation changes."""
+    library = bibtexparser.parse_string(
+        bibtex_string,
+        parse_stack=[
+            ResolveStringReferencesMiddleware(),
+            RemoveEnclosingMiddleware(),
+        ],
+    )
+
+    assert library.entries_dict["test_article"]["note"] == "This is a test note."
 
 
 def test_string_interpolation_middleware_interpolates_string():

@@ -48,8 +48,21 @@ part of the expected functionality for most users.
 
 Currently, the default parse stack consists of the following layers:
 
-* :class:`bibtexparser.middlewares.ResolveStringReferencesMiddleware`: De-Reference reference to @string definitions.
 * :class:`bibtexparser.middlewares.RemoveEnclosingMiddleware`: Removes enclosing (e.g. curly braces or "") from values.
+
+String references are retained by default because replacing a reference with
+its current value destroys the relationship with its ``@string`` definition.
+Applications that intentionally want dereferenced values can select
+:class:`bibtexparser.middlewares.ResolveStringReferencesMiddleware` explicitly,
+before removing enclosures:
+
+.. code-block:: python
+
+    layers = [
+        m.ResolveStringReferencesMiddleware(),
+        m.RemoveEnclosingMiddleware(),
+    ]
+    library = bibtexparser.parse_file("bibtex.bib", parse_stack=layers)
 
 The default write stack consists of the following layers:
 
