@@ -143,8 +143,14 @@ class NameParts:
         last = " ".join(self.last) if self.last else None
         jr = " ".join(self.jr) if self.jr else None
 
-        von_last = " ".join(name for name in [von, last] if name)
-        return ", ".join(escape_last_slash(name) for name in [von_last, jr, first] if name)
+        sections = [
+            name for name in [" ".join(name for name in [von, last] if name), jr, first] if name
+        ]
+
+        # Only sections followed by a comma need protection from a trailing backslash.
+        # Escaping the final section changes its value even though no delimiter follows it.
+        escaped_sections = [escape_last_slash(section) for section in sections[:-1]]
+        return ", ".join([*escaped_sections, sections[-1]])
 
 
 class SplitNameParts(_NameTransformerMiddleware):
@@ -311,6 +317,7 @@ def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
             # If we're at the end of the string, then the \ is just a \.
             except StopIteration:
                 word.append(char)
+                continue
 
         # Start of a braced expression.
         if char == "{":
