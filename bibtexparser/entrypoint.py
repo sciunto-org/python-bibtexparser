@@ -31,6 +31,7 @@ def _build_parse_stack(
     if append_middleware is None:
         return list(parse_stack)
 
+    append_middleware = list(append_middleware)
     parse_stack_types = [type(m) for m in parse_stack]
     append_stack_types = {type(m) for m in append_middleware}
     stack_types_intersect = set(parse_stack_types).intersection(append_stack_types)
@@ -61,13 +62,14 @@ def _build_unparse_stack(
     if prepend_middleware is None:
         return list(unparse_stack)
 
-    parse_stack_types = [type(m) for m in unparse_stack]
-    append_stack_types = {type(m) for m in prepend_middleware}
-    stack_types_intersect = set(parse_stack_types).intersection(append_stack_types)
+    prepend_middleware = list(prepend_middleware)
+    unparse_stack_types = [type(m) for m in unparse_stack]
+    prepend_stack_types = {type(m) for m in prepend_middleware}
+    stack_types_intersect = set(unparse_stack_types).intersection(prepend_stack_types)
     if len(stack_types_intersect) > 0:
         warnings.warn(
-            "Some middleware passed in append_middleware are "
-            f"already in the default parse_stack ({stack_types_intersect})."
+            "Some middleware passed in prepend_middleware are "
+            f"already in the default unparse_stack ({stack_types_intersect})."
         )
 
     return list(prepend_middleware) + list(unparse_stack)

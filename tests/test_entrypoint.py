@@ -7,11 +7,47 @@ import warnings
 import pytest
 
 from bibtexparser import parse_file
+from bibtexparser import parse_string
 from bibtexparser import write_file
 from bibtexparser import write_string
 from bibtexparser.library import Library
+from bibtexparser.middlewares import NormalizeFieldKeys
+from bibtexparser.middlewares import SortFieldsCustomMiddleware
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
+
+
+def test_parse_string_applies_append_middleware_from_iterator():
+    """One-shot middleware iterables must not be exhausted while checking duplicates."""
+    middleware = iter([NormalizeFieldKeys()])
+
+    library = parse_string(
+        "@article{test, TITLE = {Iterator middleware}}",
+        append_middleware=middleware,
+    )
+
+    assert library.entries[0].fields[0].key == "title"
+
+
+def test_write_string_applies_prepend_middleware_from_iterator():
+    """One-shot unparse middleware iterables must execute before the default stack."""
+    library = Library(
+        [
+            Entry(
+                entry_type="article",
+                key="test",
+                fields=[
+                    Field(key="title", value="Iterator middleware"),
+                    Field(key="year", value="2026"),
+                ],
+            )
+        ]
+    )
+    middleware = iter([SortFieldsCustomMiddleware(order=("year", "title"))])
+
+    written = write_string(library, prepend_middleware=middleware)
+
+    assert written.index("\tyear") < written.index("\ttitle")
 
 
 def test_gbk():
