@@ -48,27 +48,27 @@ def test_field_enclosings(field_key: str, value: str, line: int):
 
 
 @pytest.mark.parametrize(
-    "declared_block_type,expected",
+    "declared_block_type",
     [
-        ("@article", "article"),
-        ("@ARTICLE", "article"),
-        ("@Article", "article"),
-        ("@book", "book"),
-        ("@BOOK", "book"),
-        ("@Book", "book"),
-        ("@inbook", "inbook"),
-        ("@INBOOK", "inbook"),
-        ("@Inbook", "inbook"),
-        ("@incollection", "incollection"),
-        ("@INCOLLECTION", "incollection"),
-        ("@Incollection", "incollection"),
-        ("@inproceedings", "inproceedings"),
-        ("@INPROCEEDINGS", "inproceedings"),
-        ("@InprocEEdings", "inproceedings"),
+        "@article",
+        "@ARTICLE",
+        "@Article",
+        "@book",
+        "@BOOK",
+        "@Book",
+        "@inbook",
+        "@INBOOK",
+        "@Inbook",
+        "@incollection",
+        "@INCOLLECTION",
+        "@Incollection",
+        "@inproceedings",
+        "@INPROCEEDINGS",
+        "@InprocEEdings",
     ],
 )
-def test_entry_type(declared_block_type, expected):
-    """Test that the entry type is case insensitive."""
+def test_entry_type_case_is_preserved(declared_block_type):
+    """Entry type recognition is case-insensitive without normalizing its spelling."""
     bibtex_str = """@article{test,
     author = "John Doe"
     }"""
@@ -77,7 +77,7 @@ def test_entry_type(declared_block_type, expected):
 
     assert len(library.failed_blocks) == 0
     assert len(library.entries) == 1
-    assert library.entries[0].entry_type == expected
+    assert library.entries[0].entry_type == declared_block_type[1:]
 
 
 @pytest.mark.parametrize("field_value", EDGE_CASE_VALUES)
@@ -287,7 +287,7 @@ def test_entry_with_space_before_bracket(entry: str):
     assert library.entries[0].key == "normal_entry"
     assert len(library.entries[0].fields) == 2
 
-    assert library.entries[1].entry_type == "article"
+    assert library.entries[1].entry_type == "Article"
     assert library.entries[1].key == "articleTestKey"
     assert len(library.entries[1].fields) == 1
 

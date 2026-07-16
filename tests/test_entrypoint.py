@@ -7,11 +7,19 @@ import warnings
 import pytest
 
 from bibtexparser import parse_file
+from bibtexparser import parse_string
 from bibtexparser import write_file
 from bibtexparser import write_string
 from bibtexparser.library import Library
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
+
+
+def test_entry_type_case_is_preserved_on_string_roundtrip():
+    """Writing a parsed entry must not create case-only changes in versioned BibTeX files."""
+    library = parse_string('@Article{test, title = "Case-sensitive entry type"}')
+
+    assert write_string(library).startswith("@Article{test,")
 
 
 def test_gbk():
