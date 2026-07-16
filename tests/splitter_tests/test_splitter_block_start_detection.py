@@ -204,6 +204,34 @@ def test_newline_before_parenthesis_delimiter_is_explicit_failure():
 
 
 @pytest.mark.parametrize(
+    "entry_type", ["article", "systematic-review", "review:type", "software/package"]
+)
+@pytest.mark.parametrize("separator", ["", " ", "\n  ", "\r\n\t"])
+@pytest.mark.parametrize(
+    "opening, closing, expected_kind",
+    [("{", "}", "entry"), ("(", ")", "failed")],
+    ids=["supported-curly", "unsupported-parenthesis"],
+)
+def test_structural_block_candidate_never_becomes_implicit_comment(
+    entry_type: str, separator: str, opening: str, closing: str, expected_kind: str
+):
+    """A standard-delimited candidate must be parsed or explicitly retained as failed."""
+    source = f"@{entry_type}{separator}{opening}key, title = {{Visible block}}{closing}"
+
+    library = Splitter(source).split()
+
+    assert len(library.comments) == 0
+    assert len(library.blocks) == 1
+    if expected_kind == "entry":
+        assert len(library.entries) == 1
+        assert len(library.failed_blocks) == 0
+    else:
+        assert len(library.entries) == 0
+        assert len(library.failed_blocks) == 1
+        assert library.failed_blocks[0].raw == source
+
+
+@pytest.mark.parametrize(
     "unsupported_block",
     [
         pytest.param(
