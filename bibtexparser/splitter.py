@@ -66,6 +66,27 @@ class Splitter:
         # Start of string counts as line start
         return True
 
+    def _find_outer_delimiter(self, mark: re.Match) -> tuple[int, str]:
+        """Return the standard outer delimiter following a block-type mark.
+
+        The mark expression guarantees that only whitespace separates the type
+        from the delimiter. Keeping newlines outside the mark lets ``_next_mark``
+        continue to maintain accurate source-line information.
+        """
+        delimiter_index = mark.end()
+        while self.bibstr[delimiter_index].isspace():
+            delimiter_index += 1
+
+        delimiter = self.bibstr[delimiter_index]
+        if delimiter not in "{(":
+            raise ParserStateException(
+                message=(
+                    "A block-start mark was not followed by a supported outer delimiter. "
+                    "Please report this bug."
+                )
+            )
+        return delimiter_index, delimiter
+
     def _find_parenthesis_block_end(self, opening_parenthesis_index: int) -> int:
         """Find the recoverable end of an unsupported parenthesis-delimited block.
 
@@ -124,10 +145,12 @@ class Splitter:
         # Mirror that state so the next implicit-comment boundary starts correctly.
         self._current_char_index = end_index - 1
 
-    def _handle_parenthesis_block(self, mark: re.Match) -> ParsingFailedBlock:
+    def _handle_parenthesis_block(
+        self, mark: re.Match, opening_parenthesis_index: int
+    ) -> ParsingFailedBlock:
         """Return an explicit failure for an unsupported parenthesis-delimited block."""
         start_line = self._current_line
-        end_index = self._find_parenthesis_block_end(mark.end())
+        end_index = self._find_parenthesis_block_end(opening_parenthesis_index)
         raw = self.bibstr[mark.start() : end_index].rstrip()
         self._skip_marks_before(end_index)
         return ParsingFailedBlock(
@@ -360,7 +383,9 @@ class Splitter:
             The library with the added blocks.
         """
         self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?=[{(])", self.bibstr, re.MULTILINE
+            r"""(?<!\\)[\{\}\",=\n]|@[^\s"#%'(),={}]*[ \t]*(?=\s*[{(])""",
+            self.bibstr,
+            re.MULTILINE,
         )
 
         if library is None:
@@ -377,6 +402,7 @@ class Splitter:
 
             if m_val.startswith("@"):
                 block_type = m_val[1:].strip()
+                opening_delimiter_index, opening_delimiter = self._find_outer_delimiter(m)
                 # Clean up previous block implicit_comment
                 implicit_comment = self._end_implicit_comment(m.start())
                 if implicit_comment is not None:
@@ -386,8 +412,8 @@ class Splitter:
                 start_line = self._current_line
                 try:
                     # Start new block parsing
-                    if self.bibstr[m.end()] == "(":
-                        library.add(self._handle_parenthesis_block(m))
+                    if opening_delimiter == "(":
+                        library.add(self._handle_parenthesis_block(m, opening_delimiter_index))
                     elif block_type == "comment":
                         library.add(self._handle_explicit_comment())
                     elif block_type == "preamble":
@@ -481,7 +507,7 @@ class Splitter:
         if comma_mark.group(0) == "}":
             # This is an entry without any comma after the key, and with no fields
             #   Used e.g. by RefTeX (see issue #384)
-            key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
+            key = self.bibstr[start_bracket_mark.end() : comma_mark.start()].strip()
             fields, end_index, duplicate_keys = [], comma_mark.end(), []
         elif comma_mark.group(0) != ",":
             self._unaccepted_mark = comma_mark
@@ -490,7 +516,7 @@ class Splitter:
                 end_index=comma_mark.end(),
             )
         else:
-            key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
+            key = self.bibstr[start_bracket_mark.end() : comma_mark.start()].strip()
             fields, end_index, duplicate_keys = self._move_to_end_of_entry(comma_mark.end())
 
         entry = Entry(
@@ -528,7 +554,7 @@ class Splitter:
                 f" but found {equals_mark.group(0)}",
                 end_index=equals_mark.end(),
             )
-        key = self.bibstr[m.end() + 1 : equals_mark.start()].strip()
+        key = self.bibstr[start_bracket_mark.end() : equals_mark.start()].strip()
         value_start = equals_mark.end()
         end_i = self._move_to_closed_bracket()
         value = self.bibstr[value_start:end_i].strip()

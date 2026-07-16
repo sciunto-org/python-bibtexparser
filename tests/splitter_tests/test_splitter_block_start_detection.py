@@ -10,6 +10,10 @@ from textwrap import dedent
 
 import pytest
 
+from bibtexparser.model import Entry
+from bibtexparser.model import ExplicitComment
+from bibtexparser.model import Preamble
+from bibtexparser.model import String
 from bibtexparser.splitter import Splitter
 
 # =============================================================================
@@ -152,6 +156,51 @@ def test_mixed_blocks_same_line(
     assert len(library.entries) == expected_entries
     assert len(library.strings) == expected_strings
     assert len(library.comments) == expected_comments
+
+
+@pytest.mark.parametrize(
+    "bibtex, expected_block_type",
+    [
+        pytest.param(
+            "@article\n  {key, title = {Line-separated delimiter}}",
+            Entry,
+            id="entry",
+        ),
+        pytest.param('@string\n  {name = "Line-separated delimiter"}', String, id="string"),
+        pytest.param('@preamble\n  {"Line-separated delimiter"}', Preamble, id="preamble"),
+        pytest.param("@comment\n  {Line-separated delimiter}", ExplicitComment, id="comment"),
+    ],
+)
+def test_newline_before_curly_delimiter_starts_block(bibtex: str, expected_block_type: type):
+    """BibTeX whitespace may separate a block type from its outer delimiter."""
+    library = Splitter(bibtex).split()
+
+    assert len(library.failed_blocks) == 0
+    assert len(library.blocks) == 1
+    assert isinstance(library.blocks[0], expected_block_type)
+    assert library.blocks[0].raw == bibtex
+
+
+@pytest.mark.parametrize("entry_type", ["systematic-review", "review:type", "software/package"])
+def test_punctuation_in_entry_type_is_not_silently_ignored(entry_type: str):
+    """BibTeX identifiers permit punctuation beyond Python word characters."""
+    library = Splitter(f"@{entry_type}{{key, title = {{Custom entry type}}}}").split()
+
+    assert len(library.failed_blocks) == 0
+    assert len(library.comments) == 0
+    assert [(entry.entry_type, entry.key) for entry in library.entries] == [(entry_type, "key")]
+
+
+def test_newline_before_parenthesis_delimiter_is_explicit_failure():
+    """Unsupported parenthesis syntax remains visible when whitespace precedes its delimiter."""
+    bibtex = "@article\n  (key, title = {Line-separated delimiter})"
+
+    library = Splitter(bibtex).split()
+
+    assert len(library.blocks) == 1
+    assert len(library.failed_blocks) == 1
+    assert len(library.comments) == 0
+    assert library.failed_blocks[0].raw == bibtex
 
 
 @pytest.mark.parametrize(
