@@ -1,0 +1,32 @@
+% A synthetic BibLaTeX data source exercising syntax beyond traditional BibTeX.
+@XData{shared-publisher,
+  publisher = {Example Press},
+  location = {Berlin and London},
+}
+
+@Set{review-set,
+  entryset = {online-record,software-record},
+  date = {2024},
+}
+
+@Online{online-record,
+  author = {Family, Given and given=Sam, family=Researcher, prefix=von},
+  author+an = {1:family=lead;2=corresponding},
+  title = {A UTF-8 Überblick},
+  title+an:translation = {="An overview"},
+  date = {2024-03/2024-05},
+  urldate = {2025-01-31},
+  url = {https://example.invalid/overview},
+  xdata = {shared-publisher},
+  related = {software-record},
+  relatedtype = {reviewof},
+  keywords = {review and reproducibility},
+}
+
+@Software{software-record,
+  author = {Tooling Team},
+  title = {Review Helper},
+  date = {2024-02-29},
+  version = {2.0},
+  url = {https://example.invalid/review-helper},
+}
