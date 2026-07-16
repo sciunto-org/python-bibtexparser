@@ -164,19 +164,26 @@ def test_block_separator(block_separator):
         assert lines[1 + len(expected_lines)] == '@preamble{"myValue"}'
 
 
-def test_write_failed_block():
+def test_write_failed_block_preserves_raw_by_default():
+    """Writing a parsed failure must not modify its only authoritative representation."""
     raw = "@article{irrelevant-for-this-test,\nexcept = {that-there-need-to-be},\nother = {multiple-lines}\n}"
     block = ParsingFailedBlock(error=ValueError("Some error"), raw=raw, ignore_error_block=None)
     library = Library(blocks=[block])
     string = writer.write(library)
-    lines = string.splitlines()
 
-    assert len(lines) == 5
-    assert lines[0].startswith("% WARNING")
-    assert lines[1] == "@article{irrelevant-for-this-test,"
-    assert lines[2] == "except = {that-there-need-to-be},"
-    assert lines[3] == "other = {multiple-lines}"
-    assert lines[4] == "}"
+    assert string == raw
+
+
+def test_write_failed_block_can_retain_legacy_annotation():
+    """Annotation remains opt-in for callers that want failures embedded in output."""
+    raw = "@article{broken,\ntitle = {Unclosed entry}"
+    block = ParsingFailedBlock(error=ValueError("Some error"), raw=raw)
+    bibtex_format = BibtexFormat()
+    bibtex_format.failed_block_policy = "annotate"
+
+    string = writer.write(Library(blocks=[block]), bibtex_format)
+
+    assert string == "% WARNING Parsing failed for the following 2 lines.\n" + raw + "\n"
 
 
 def test_write_failed_block_uses_configured_comment():
@@ -184,11 +191,31 @@ def test_write_failed_block_uses_configured_comment():
     raw = "@article{broken,\ntitle = {Unclosed entry}"
     block = ParsingFailedBlock(error=ValueError("Some error"), raw=raw)
     bibtex_format = BibtexFormat()
+    bibtex_format.failed_block_policy = "annotate"
     bibtex_format.parsing_failed_comment = "% CUSTOM FAILURE ({n} source lines)"
 
     string = writer.write(Library(blocks=[block]), bibtex_format)
 
     assert string.startswith("% CUSTOM FAILURE (2 source lines)\n")
+
+
+def test_write_failed_block_can_fail_closed():
+    """Strict consumers can require resolution of every retained parse failure."""
+    first = ParsingFailedBlock(error=ValueError("first error"), raw="@article(first)")
+    second = ParsingFailedBlock(error=ValueError("second error"), raw="@article(second)")
+    bibtex_format = BibtexFormat()
+    bibtex_format.failed_block_policy = "raise"
+
+    with pytest.raises(ValueError, match="(?s)first error.*second error"):
+        writer.write(Library(blocks=[first, second]), bibtex_format)
+
+
+def test_failed_block_policy_rejects_unknown_value():
+    """A misspelled integrity policy must fail instead of selecting accidental behavior."""
+    bibtex_format = BibtexFormat()
+
+    with pytest.raises(ValueError, match="preserve.*annotate.*raise"):
+        bibtex_format.failed_block_policy = "discard"
 
 
 def test_write_failed_block_without_raw_raises():

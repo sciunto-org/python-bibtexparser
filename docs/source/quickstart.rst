@@ -174,3 +174,10 @@ This can be quickly achieved using the following:
 
 As you can see, the content (besides some white-spacing and other layout) is identical to the original string.
 Naturally, the writer can be configured to your needs. For more information on that, see :ref:`the customization documentation <customizing>`.
+
+Failed blocks retain their raw source and are written unchanged by default. This
+prevents a parse/write cycle from silently dropping failed input or adding new
+content to it. Applications that require every failure to be resolved before
+export can select the ``"raise"`` failed-block policy; the legacy behavior of
+inserting a warning comment is available as ``"annotate"``. See
+:ref:`the formatting options <writing_formatting>` for an example.

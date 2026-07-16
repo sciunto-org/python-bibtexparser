@@ -12,6 +12,7 @@ from .model import String
 
 VAL_SEP = " = "
 PARSING_FAILED_COMMENT = "% WARNING Parsing failed for the following {n} lines."
+FAILED_BLOCK_POLICIES = ("preserve", "annotate", "raise")
 
 
 def _treat_entry(block: Entry, bibtex_format) -> list[str]:
@@ -63,6 +64,12 @@ def _treat_expl_comment(block: ExplicitComment, bibtex_format: "BibtexFormat") -
 def _treat_failed_block(block: ParsingFailedBlock, bibtex_format: "BibtexFormat") -> list[str]:
     if block.raw is None:
         raise ValueError(_failed_blocks_without_raw_error([block]))
+    if bibtex_format.failed_block_policy == "preserve":
+        return [block.raw]
+    if bibtex_format.failed_block_policy == "raise":
+        # The complete-library check in `write` normally reports all failures at
+        # once. Keep this guard so direct internal use cannot bypass the policy.
+        raise ValueError(_failed_blocks_forbidden_error([block]))
     lines = len(block.raw.splitlines())
     parsing_failed_comment = bibtex_format.parsing_failed_comment.format(n=lines)
     return [parsing_failed_comment, "\n", block.raw, "\n"]
@@ -79,10 +86,30 @@ def _failed_blocks_without_raw_error(blocks: list[ParsingFailedBlock]) -> str:
     )
 
 
+def _failed_blocks_forbidden_error(blocks: list[ParsingFailedBlock]) -> str:
+    descriptions = "\n".join(f"  - {type(b).__name__}: {b.error}" for b in blocks)
+    return (
+        "Cannot write library with failed_block_policy='raise':\n"
+        f"{descriptions}\n"
+        "Inspect `library.failed_blocks` and resolve or remove every failed block, "
+        "or select the 'preserve' or 'annotate' policy explicitly."
+    )
+
+
 def _raise_on_unwritable_blocks(library: Library) -> None:
     unwritable = [b for b in library.blocks if isinstance(b, ParsingFailedBlock) and b.raw is None]
     if unwritable:
         raise ValueError(_failed_blocks_without_raw_error(unwritable))
+
+
+def _raise_when_failed_blocks_are_forbidden(
+    library: Library, bibtex_format: "BibtexFormat"
+) -> None:
+    if bibtex_format.failed_block_policy != "raise":
+        return
+    failed_blocks = [b for b in library.blocks if isinstance(b, ParsingFailedBlock)]
+    if failed_blocks:
+        raise ValueError(_failed_blocks_forbidden_error(failed_blocks))
 
 
 def _calculate_auto_value_align(library: Library) -> int:
@@ -105,10 +132,11 @@ def write(library: Library, bibtex_format: Optional["BibtexFormat"] = None) -> s
     :param bibtex_format: Customized BibTeX format to use (optional).
     :raises ValueError: If the library contains failed blocks without raw bibtex
         (e.g. duplicate-key blocks resulting from programmatically created entries)."""
-    _raise_on_unwritable_blocks(library)
-
     if bibtex_format is None:
         bibtex_format = BibtexFormat()
+
+    _raise_on_unwritable_blocks(library)
+    _raise_when_failed_blocks_are_forbidden(library, bibtex_format)
 
     if bibtex_format.value_column == "auto":
         auto_val: int = _calculate_auto_value_align(library)
@@ -161,6 +189,7 @@ class BibtexFormat:
         self._block_separator: str = "\n\n"
         self._trailing_comma: bool = False
         self._parsing_failed_comment: str = PARSING_FAILED_COMMENT
+        self._failed_block_policy: str = "preserve"
 
     @property
     def indent(self) -> str:
@@ -232,3 +261,27 @@ class BibtexFormat:
     @parsing_failed_comment.setter
     def parsing_failed_comment(self, parsing_failed_comment: str):
         self._parsing_failed_comment = parsing_failed_comment
+
+    @property
+    def failed_block_policy(self) -> str:
+        """Control writing of blocks that could not be parsed.
+
+        ``"preserve"`` (the default) writes the retained raw block without
+        modifying it. This makes repeated parse/write cycles stable and avoids
+        accumulating generated warning comments.
+
+        ``"annotate"`` prepends ``parsing_failed_comment`` to the raw block.
+        This is the behavior used before the policy was introduced, but it
+        intentionally changes the document on every parse/write cycle.
+
+        ``"raise"`` refuses to write a library containing any failed block.
+        Use it when every parse failure must be resolved before export.
+        """
+        return self._failed_block_policy
+
+    @failed_block_policy.setter
+    def failed_block_policy(self, failed_block_policy: str):
+        if failed_block_policy not in FAILED_BLOCK_POLICIES:
+            choices = ", ".join(repr(policy) for policy in FAILED_BLOCK_POLICIES)
+            raise ValueError(f"failed_block_policy must be one of {choices}")
+        self._failed_block_policy = failed_block_policy

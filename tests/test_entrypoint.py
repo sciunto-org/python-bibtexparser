@@ -7,11 +7,37 @@ import warnings
 import pytest
 
 from bibtexparser import parse_file
+from bibtexparser import parse_string
 from bibtexparser import write_file
 from bibtexparser import write_string
 from bibtexparser.library import Library
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
+
+
+def test_failed_block_roundtrip_is_idempotent_by_default():
+    """Repeated saves must not annotate or otherwise mutate retained failed input."""
+    source = "@article{broken,\n  title = {Still retained}\n"
+
+    first_write = write_string(parse_string(source))
+    second_write = write_string(parse_string(first_write))
+
+    assert first_write == source
+    assert second_write == first_write
+
+
+def test_duplicate_block_roundtrip_retains_both_sources_and_stabilizes():
+    """A duplicate remains visible and repeated serialization neither drops nor annotates it."""
+    source = "@article{same, title={First}}\n\n@article{same, title={Second}}"
+
+    first_write = write_string(parse_string(source))
+    reparsed = parse_string(first_write)
+    second_write = write_string(reparsed)
+
+    assert first_write.count("@article{same") == 2
+    assert "@article{same, title={Second}}" in first_write
+    assert len(reparsed.failed_blocks) == 1
+    assert second_write == first_write
 
 
 def test_gbk():

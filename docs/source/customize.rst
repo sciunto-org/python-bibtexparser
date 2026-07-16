@@ -296,3 +296,31 @@ Specifically, a user may pass a :class:`bibtexparser.BibtexFormatter` object to 
 
 A few more options are provided and we refer to the docstrings of :class:`bibtexparser.BibtexFormat` for details.
 Note: Sorting of blocks and fields is done with the corresponding middleware, as described above.
+
+Failed-block Writing Policy
+---------------------------
+
+Blocks that fail to parse retain their raw BibTeX. They are preserved unchanged
+when writing by default so that saving a file does not alter the input merely
+because parsing failed. Strict applications can reject such output, while the
+former behavior of inserting a warning comment remains available explicitly:
+
+.. code-block:: python
+
+    bibtex_format = bibtexparser.BibtexFormat()
+    bibtex_format.failed_block_policy = "raise"     # "preserve" is the default
+    bib_str = bibtexparser.write_string(library, bibtex_format=bibtex_format)
+
+    bibtex_format.failed_block_policy = "annotate"
+    bibtex_format.parsing_failed_comment = "% REVIEW REQUIRED ({n} source lines)"
+
+The three policies are:
+
+* ``"preserve"``: write the retained raw block without modification;
+* ``"annotate"``: prepend ``parsing_failed_comment`` to the retained block;
+* ``"raise"``: refuse to write until all failed blocks are resolved or removed.
+
+This setting affects failed blocks only. Normal parsed blocks are serialized
+from their current model values, because their ``raw`` property may be stale
+after middleware or user edits. Consequently, the regular writer is not a
+byte-for-byte concrete-syntax editor for otherwise valid blocks.
