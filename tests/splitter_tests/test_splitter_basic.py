@@ -348,7 +348,7 @@ author = {S.-H. Kueh and J. Benatar and R. Stewart}
         },
         {
             "key": "9837531",
-            "type": "inproceedings",
+            "type": "INPROCEEDINGS",
             "raw": "@INPROCEEDINGS{9837531,\n"
             "  author={Hassan, Mona Bakri and Saeed, Rashid A. and Khalifa, Othman and Ali, Elmustafa Sayed and Mokhtar, Rania A. and Hashim, Aisha A.},\n"
             "  title={Green Machine Learning for Green Cloud Energy Efficiency},\n"
@@ -357,7 +357,7 @@ author = {S.-H. Kueh and J. Benatar and R. Stewart}
         },
         {
             "key": "9372936",
-            "type": "article",
+            "type": "ARTICLE",
             "raw": "@ARTICLE{9372936,\n"
             "  author={Hu, Ning and Tian, Zhihong and Du, Xiaojiang and Guizani, Nadra and Zhu, Zhihan},\n"
             "  title={Deep-Green: A Dispersed Energy-Efficiency Computing Paradigm for Green Industrial IoT},\n"
@@ -366,7 +366,7 @@ author = {S.-H. Kueh and J. Benatar and R. Stewart}
         },
         {
             "key": "5445167",
-            "type": "article",
+            "type": "ARTICLE",
             "raw": "@ARTICLE{5445167,\n"
             "  author={Kumar, Karthik and Lu, Yung-Hsiang},\n"
             "  title={Cloud Computing for Mobile Users: Can Offloading Computation Save Energy?},\n"

@@ -316,7 +316,7 @@ class Splitter:
                     elif m_val.startswith("@string"):
                         library.add(self._handle_string(m), fail_on_duplicate_key=False)
                     else:
-                        library.add(self._handle_entry(m, m_val), fail_on_duplicate_key=False)
+                        library.add(self._handle_entry(m), fail_on_duplicate_key=False)
 
                 except BlockAbortedException as e:
                     logger.warning(
@@ -385,10 +385,12 @@ class Splitter:
             raw=self.bibstr[start_index : end_bracket_index + 1],
         )
 
-    def _handle_entry(self, m, m_val) -> Entry | ParsingFailedBlock:
+    def _handle_entry(self, m) -> Entry | ParsingFailedBlock:
         """Handle entry block. Return end index"""
         start_line = self._current_line
-        entry_type = m_val[1:].strip()
+        # Dispatch uses a normalized marker, but retaining the source spelling here prevents
+        # parse-write round trips from creating case-only changes in BibTeX files.
+        entry_type = m.group(0)[1:].strip()
         start_bracket_mark = self._next_mark(accept_eof=False)
         if start_bracket_mark.group(0) != "{":
             self._unaccepted_mark = start_bracket_mark
