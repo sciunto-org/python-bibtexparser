@@ -66,6 +66,82 @@ class Splitter:
         # Start of string counts as line start
         return True
 
+    def _find_parenthesis_block_end(self, opening_parenthesis_index: int) -> int:
+        """Find the recoverable end of an unsupported parenthesis-delimited block.
+
+        Parentheses inside braces or quotes are field content. If the outer
+        parenthesis is unclosed, a new block at the start of a line is used as
+        the recovery boundary so subsequent supported blocks can still parse.
+        """
+        parenthesis_depth = 0
+        brace_depth = 0
+        in_quote = False
+
+        for index in range(opening_parenthesis_index, len(self.bibstr)):
+            char = self.bibstr[index]
+            escaped = index > 0 and self.bibstr[index - 1] == "\\"
+
+            if (
+                index > opening_parenthesis_index
+                and char == "@"
+                and parenthesis_depth == 1
+                and brace_depth == 0
+                and not in_quote
+                and self._is_at_line_start(index)
+            ):
+                return index
+
+            if escaped:
+                continue
+            if char == '"' and brace_depth == 0:
+                in_quote = not in_quote
+            elif in_quote:
+                continue
+            elif char == "{":
+                brace_depth += 1
+            elif char == "}" and brace_depth > 0:
+                brace_depth -= 1
+            elif brace_depth == 0 and char == "(":
+                parenthesis_depth += 1
+            elif brace_depth == 0 and char == ")":
+                parenthesis_depth -= 1
+                if parenthesis_depth == 0:
+                    return index + 1
+
+        return len(self.bibstr)
+
+    def _skip_marks_before(self, end_index: int) -> None:
+        """Advance the mark iterator to the first mark at or after ``end_index``."""
+        while True:
+            mark = self._next_mark(accept_eof=True)
+            if mark is None:
+                break
+            if mark.start() >= end_index:
+                self._unaccepted_mark = mark
+                break
+
+        # The normal block handlers leave this index at their closing delimiter.
+        # Mirror that state so the next implicit-comment boundary starts correctly.
+        self._current_char_index = end_index - 1
+
+    def _handle_parenthesis_block(self, mark: re.Match) -> ParsingFailedBlock:
+        """Return an explicit failure for an unsupported parenthesis-delimited block."""
+        start_line = self._current_line
+        end_index = self._find_parenthesis_block_end(mark.end())
+        raw = self.bibstr[mark.start() : end_index].rstrip()
+        self._skip_marks_before(end_index)
+        return ParsingFailedBlock(
+            start_line=start_line,
+            raw=raw,
+            error=BlockAbortedException(
+                abort_reason=(
+                    "Parenthesis-delimited blocks are not supported. "
+                    "Use curly braces or handle this failed block explicitly."
+                ),
+                end_index=end_index,
+            ),
+        )
+
     def _end_implicit_comment(self, end_char_index) -> ImplicitComment | None:
         if self._implicit_comment_start is None:
             return  # No implicit comment started
@@ -284,7 +360,7 @@ class Splitter:
             The library with the added blocks.
         """
         self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
+            r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?=[{(])", self.bibstr, re.MULTILINE
         )
 
         if library is None:
@@ -309,7 +385,9 @@ class Splitter:
                 start_line = self._current_line
                 try:
                     # Start new block parsing
-                    if m_val.startswith("@comment"):
+                    if self.bibstr[m.end()] == "(":
+                        library.add(self._handle_parenthesis_block(m))
+                    elif m_val.startswith("@comment"):
                         library.add(self._handle_explicit_comment())
                     elif m_val.startswith("@preamble"):
                         library.add(self._handle_preamble())
