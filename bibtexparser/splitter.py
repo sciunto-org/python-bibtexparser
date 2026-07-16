@@ -376,6 +376,7 @@ class Splitter:
             m_val = m.group(0).lower()
 
             if m_val.startswith("@"):
+                block_type = m_val[1:].strip()
                 # Clean up previous block implicit_comment
                 implicit_comment = self._end_implicit_comment(m.start())
                 if implicit_comment is not None:
@@ -387,11 +388,11 @@ class Splitter:
                     # Start new block parsing
                     if self.bibstr[m.end()] == "(":
                         library.add(self._handle_parenthesis_block(m))
-                    elif m_val.startswith("@comment"):
+                    elif block_type == "comment":
                         library.add(self._handle_explicit_comment())
-                    elif m_val.startswith("@preamble"):
+                    elif block_type == "preamble":
                         library.add(self._handle_preamble())
-                    elif m_val.startswith("@string"):
+                    elif block_type == "string":
                         library.add(self._handle_string(m), fail_on_duplicate_key=False)
                     else:
                         library.add(self._handle_entry(m, m_val), fail_on_duplicate_key=False)
