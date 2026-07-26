@@ -421,4 +421,46 @@ def test_string_reference_roundtrip():
     assert "year = {2019}" in written
 
 
+@pytest.mark.parametrize(
+    "expression",
+    [
+        '"first" # "second"',
+        "{first} # {second}",
+        '"prefix" # unknown_macro # "suffix"',
+        # The splitter treats a backslash-escaped delimiter as content, so this
+        # is a two-token expression rather than one quoted value.
+        '"sch\\"on" # "!"',
+    ],
+)
+def test_removal_keeps_multi_token_expressions_intact(expression: str):
+    """The first and last character of a `#` expression are not one enclosing pair.
+
+    Cases adapted from @claell's comparison branch on issue #396.
+    """
+    library = Library(
+        [
+            Entry(
+                entry_type="article", key="someKey", fields=[Field(key="title", value=expression)]
+            ),
+            String(key="someString", value=expression),
+        ]
+    )
+
+    transformed = RemoveEnclosingMiddleware().transform(library)
+
+    assert transformed.entries[0].fields[0].value == expression
+    assert transformed.entries[0].fields[0].enclosing == "no-enclosing"
+    assert transformed.strings[0].value == expression
+    assert transformed.strings[0].enclosing == "no-enclosing"
+
+
+def test_string_definition_expression_roundtrip():
+    """A definition whose expression starts and ends with a delimiter must not be stripped."""
+    bibtex = '@string{quoted = "Asia" # "crypt"}\n@string{braced = {Asia} # {crypt}}'
+    written = bibtexparser.write_string(bibtexparser.parse_string(bibtex))
+
+    assert 'quoted = "Asia" # "crypt"' in written
+    assert "braced = {Asia} # {crypt}" in written
+
+
 # TODO round-trip tests (removal -> addition -> removal)

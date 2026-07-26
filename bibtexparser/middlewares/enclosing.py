@@ -20,6 +20,73 @@ ENTRY_POTENTIALLY_INT_FIELDS = [
 ]
 
 
+def _is_escaped(value: str, index: int) -> bool:
+    """Whether the character at `index` is escaped, as the splitter defines it."""
+    return index > 0 and value[index - 1] == "\\"
+
+
+def _split_concatenation(value: str) -> list[str] | None:
+    """Split a top-level bibtex `#` concatenation into its tokens.
+
+    Returns None if `value` is not a concatenation expression, i.e., if it holds
+    no `#` outside of a `"..."` or `{...}` group, or if its delimiters are
+    unbalanced (in which case its structure is unknown and must not be guessed).
+    """
+    tokens = []
+    token_start = 0
+    depth = 0
+    in_quotes = False
+    for index, char in enumerate(value):
+        if _is_escaped(value, index):
+            continue
+        if char == '"' and depth == 0:
+            in_quotes = not in_quotes
+        elif in_quotes:
+            continue
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth < 0:
+                return None
+        elif char == "#" and depth == 0:
+            tokens.append(value[token_start:index].strip())
+            token_start = index + 1
+
+    if not tokens or in_quotes or depth != 0:
+        return None
+
+    tokens.append(value[token_start:].strip())
+    return tokens
+
+
+def _literal_content(token: str) -> str | None:
+    """The content of a token that is one fully quoted or brace-enclosed literal."""
+    if len(token) < 2:
+        return None
+
+    if token.startswith('"'):
+        for index in range(1, len(token)):
+            if token[index] == '"' and not _is_escaped(token, index):
+                return token[1:index] if index == len(token) - 1 else None
+        return None
+
+    if token.startswith("{"):
+        depth = 0
+        for index, char in enumerate(token):
+            if _is_escaped(token, index):
+                continue
+            if char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth == 0:
+                    return token[1:index] if index == len(token) - 1 else None
+                if depth < 0:
+                    return None
+    return None
+
+
 class RemoveEnclosingMiddleware(BlockMiddleware):
     """Remove enclosing characters from values such as field and strings.
 
@@ -51,6 +118,10 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     @staticmethod
     def _strip_enclosing(value: str) -> tuple[str, str | None]:
         value = value.strip()
+        if _split_concatenation(value) is not None:
+            # The first and last character of a `#` expression do not enclose it,
+            # so stripping them would corrupt the expression.
+            return value, "no-enclosing"
         if value.startswith("{") and value.endswith("}"):
             return value[1:-1], "{"
         if value.startswith('"') and value.endswith('"'):

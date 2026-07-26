@@ -129,3 +129,97 @@ def test_parse_string_resolves_concatenation_end_to_end():
     assert "month = {10~Jan.}" in written
     reparsed = bibtexparser.parse_string(written)
     assert reparsed.entries[0].fields_dict["month"].value == "10~Jan."
+
+
+def test_string_interpolation_resolves_string_definitions_recursively():
+    """A definition may itself be an expression or another reference (cases via @claell)."""
+    bibtex = """
+    @string{asiacryptname = "Asiacrypt"}
+    @string{asiacrypt91name = asiacryptname # "'91"}
+    @string{alias = asiacrypt91name}
+    @string{quoted = "Asia" # "crypt"}
+    @string{vol = 1 # 0}
+
+    @inbook{test_inbook,
+      booktitle = asiacrypt91name,
+      series    = alias,
+      note      = asiacrypt91name # " proceedings",
+      title     = quoted,
+      volume    = vol
+    }
+    """
+    library = bibtexparser.parse_string(bibtex)
+
+    fields = library.entries_dict["test_inbook"].fields_dict
+    assert fields["booktitle"].value == "Asiacrypt'91"
+    assert fields["series"].value == "Asiacrypt'91"
+    assert fields["note"].value == "Asiacrypt'91 proceedings"
+    assert fields["title"].value == "Asiacrypt"
+    assert fields["volume"].value == "10"
+
+    # The definitions keep their expression form, so the file still writes validly.
+    written = bibtexparser.write_string(library)
+    assert 'asiacrypt91name = asiacryptname # "\'91"' in written
+    assert 'quoted = "Asia" # "crypt"' in written
+
+
+def test_string_interpolation_leaves_cyclic_definitions_unresolved():
+    """Cyclic definitions resolve to nothing rather than to a partial value (case via @claell)."""
+    bibtex = """
+    @string{first = second # " one"}
+    @string{second = first # " two"}
+    @string{itself = itself}
+
+    @inbook{test_inbook,
+      title = first # "!",
+      note  = second,
+      other = itself
+    }
+    """
+    library = bibtexparser.parse_string(bibtex)
+
+    fields = library.entries_dict["test_inbook"].fields_dict
+    assert fields["title"].value == 'first # "!"'
+    assert fields["note"].value == "second"
+    assert fields["other"].value == "itself"
+
+    # Writing and re-parsing is a fixpoint, i.e. it does not substitute one more level.
+    written = bibtexparser.write_string(library)
+    reparsed = bibtexparser.parse_string(written).entries_dict["test_inbook"].fields_dict
+    assert reparsed["title"].value == 'first # "!"'
+    assert reparsed["note"].value == "second"
+    assert reparsed["other"].value == "itself"
+
+
+def test_string_interpolation_resolves_long_definition_chains():
+    """A chain of definitions is resolved iteratively, so it cannot exhaust the stack."""
+    length = 500
+    bibtex = "".join(f'@string{{s{i} = s{i + 1} # "x"}}\n' for i in range(length))
+    bibtex += f'@string{{s{length} = "end"}}\n@inbook{{test_inbook, title = s0}}'
+
+    library = bibtexparser.parse_string(bibtex)
+
+    title = library.entries_dict["test_inbook"].fields_dict["title"]
+    assert title.value == "end" + "x" * length
+
+
+def test_unresolvable_concatenation_survives_a_round_trip():
+    """An expression with an unknown reference is written back exactly as it was read."""
+    bibtex = (
+        "@inbook{test_inbook,\n"
+        '  note = "prefix" # unknown_macro # "suffix",\n'
+        "  title = {first} # unknown_macro # {second}\n"
+        "}"
+    )
+    library = bibtexparser.parse_string(bibtex)
+
+    fields = library.entries_dict["test_inbook"].fields_dict
+    assert fields["note"].value == '"prefix" # unknown_macro # "suffix"'
+    assert fields["title"].value == "{first} # unknown_macro # {second}"
+
+    written = bibtexparser.write_string(library)
+    assert 'note = "prefix" # unknown_macro # "suffix"' in written
+    assert "title = {first} # unknown_macro # {second}" in written
+    reparsed = bibtexparser.parse_string(written).entries_dict["test_inbook"].fields_dict
+    assert reparsed["note"].value == fields["note"].value
+    assert reparsed["title"].value == fields["title"].value
