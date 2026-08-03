@@ -1,5 +1,6 @@
 import logging
 import re
+from collections.abc import Iterator
 
 from .exceptions import BlockAbortedException
 from .exceptions import ParserStateException
@@ -20,10 +21,22 @@ logger = logging.getLogger(__name__)
 #   The opening delimiter is not part of the block start mark, so that a `{` after an
 #   `@` within a value (e.g. `LeQua @ {CLEF}`) is still counted as a mark of its own.
 _BLOCK_START = r"@[\w]*( |\t)*(?=[{(])"
-_MARK_PATTERN = re.compile(r"(?<!\\)[\{\}\",=\n]|" + _BLOCK_START)
+# A backslash escapes the character right after it, so a backslash that is itself
+#   escaped cannot escape the next one. Matching the escape pairs (and then dropping
+#   them, see `_iter_marks`) gets that parity right, which a look-behind cannot.
+#   Newlines are not escapable: they are marks for line counting only.
+_MARK_PATTERN = re.compile(r"\\[\\\{\}\",=]|[\{\}\",=\n]|" + _BLOCK_START)
 # Inside a `(`-delimited block, the closing `)` is a mark too.
 #   It is not a mark elsewhere, so `)` in `{`-delimited blocks needs no special handling.
-_PAREN_BLOCK_MARK_PATTERN = re.compile(r"(?<!\\)[\{\}\",=\n)]|" + _BLOCK_START)
+_PAREN_BLOCK_MARK_PATTERN = re.compile(r"\\[\\\{\}\",=)]|[\{\}\",=\n)]|" + _BLOCK_START)
+
+
+def _iter_marks(pattern: re.Pattern, string: str, pos: int = 0) -> Iterator[re.Match]:
+    """The marks of `pattern` in `string`, starting at `pos`, without the escape pairs.
+
+    `pos` must not be within a run of backslashes, as the pairing starts there.
+    """
+    return (m for m in pattern.finditer(string, pos) if m.group(0)[0] != "\\")
 
 
 class Splitter:
@@ -137,7 +150,7 @@ class Splitter:
         if self.bibstr[m.end()] == "(":
             self._closing_delimiter = ")"
             # `(` is not a mark, hence the block-specific marks start right after it.
-            self._markiter = _PAREN_BLOCK_MARK_PATTERN.finditer(self.bibstr, m.end() + 1)
+            self._markiter = _iter_marks(_PAREN_BLOCK_MARK_PATTERN, self.bibstr, m.end() + 1)
         else:
             self._closing_delimiter = "}"
             # The `{` is a mark (guaranteed to be the next one by the block start regex)
@@ -152,7 +165,7 @@ class Splitter:
                 resume_index = self._unaccepted_mark.end()
             else:
                 resume_index = self._current_char_index + 1
-            self._markiter = _MARK_PATTERN.finditer(self.bibstr, resume_index)
+            self._markiter = _iter_marks(_MARK_PATTERN, self.bibstr, resume_index)
             self._closing_delimiter = "}"
 
     def _move_to_closing_delimiter(self, track_quotes: bool) -> int:
@@ -334,7 +347,7 @@ class Splitter:
         Returns:
             A new library containing the split blocks.
         """
-        self._markiter = _MARK_PATTERN.finditer(self.bibstr)
+        self._markiter = _iter_marks(_MARK_PATTERN, self.bibstr)
 
         library = Library()
 
