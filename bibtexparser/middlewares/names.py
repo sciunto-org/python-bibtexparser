@@ -21,8 +21,16 @@ class InvalidNameError(ValueError):
     """Exception raised by :py:func:`parse_single_name_into_parts` when facing an invalid name."""
 
     def __init__(self, name: str, reason: str):
+        self.name = name
+        self.reason = reason
         message: str = f"Cannot split the following name `{name}` into parts: {reason}"
         super().__init__(message)
+
+    def __reduce__(self):
+        # Rebuild from name and reason so the exception stays copyable and
+        # picklable; the base ValueError stores only the formatted message in
+        # args, which does not match this two-argument __init__.
+        return (self.__class__, (self.name, self.reason))
 
 
 class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
