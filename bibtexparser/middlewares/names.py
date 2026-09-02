@@ -62,7 +62,10 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
         try:
             for field in entry.fields:
                 if field.key in self.name_fields:
+                    # The value setter resets `enclosing`; only the representation changes.
+                    enclosing = field.enclosing
                     field.value = self._transform_field_value(field.value)
+                    field.enclosing = enclosing
             return entry
         except InvalidNameError as e:
             return MiddlewareErrorBlock(entry, e)

@@ -50,7 +50,10 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
         errors = []
         for field in entry.fields:
             if isinstance(field.value, str):
+                # The value setter resets `enclosing`; only the representation changes here.
+                enclosing = field.enclosing
                 field.value, e = self._transform_python_value_string(field.value)
+                field.enclosing = enclosing
                 errors.append(e)
             elif isinstance(field.value, NameParts):
                 field.value.first = self._transform_all_strings(field.value.first, errors)
@@ -73,7 +76,10 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
     # docstr-coverage: inherited
     def transform_string(self, string: String, library: "Library") -> Block:
         if isinstance(string.value, str):
+            # See `transform_entry`.
+            enclosing = string.enclosing
             string.value, error = self._transform_python_value_string(string.value)
+            string.enclosing = enclosing
             if error != "":
                 return MiddlewareErrorBlock(block=string, error=PartialMiddlewareException([error]))
         else:
