@@ -132,6 +132,24 @@ def test_name_splitting_strict_mode(name: str, reason: str):
         parse_single_name_into_parts(name, strict=True)
 
 
+def test_invalid_name_error_is_copyable():
+    # A MiddlewareErrorBlock stores the InvalidNameError, and later middlewares
+    # (for example SortBlocksByTypeAndKeyMiddleware) deepcopy the library, so
+    # the exception has to survive copy and pickle. It could not before: its
+    # two-argument __init__ did not match the single message stored in args.
+    import pickle
+
+    with pytest.raises(InvalidNameError) as exc_info:
+        parse_single_name_into_parts("AA, BB, CC, DD", strict=True)
+    error = exc_info.value
+
+    for clone in (deepcopy(error), pickle.loads(pickle.dumps(error))):
+        assert isinstance(clone, InvalidNameError)
+        assert str(clone) == str(error)
+        assert clone.name == error.name
+        assert clone.reason == error.reason
+
+
 def _dict_to_nameparts(as_dict):
     return NameParts(
         first=as_dict["first"],
