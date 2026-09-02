@@ -27,9 +27,14 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
     It is useful when the field value is enclosed in braces or quotes
     (which is the case for the vast majority of values).
 
+    Only a delimiter pair enclosing the *whole* value is removed:
+    `pages = {intro} # {outro}` merely starts and ends in braces,
+    but these do not belong to the same pair and are thus kept.
+
     Values that were not enclosed and are not plain integers
     (i.e., unresolved bibtex string references such as `month = jan`
-    and concatenation expressions such as `pages = intro # outro`)
+    and concatenation expressions such as `pages = intro # outro`
+    or `pages = {intro} # {outro}`)
     get a `no-enclosing` demand (see `Field.enclosing`),
     as enclosing them when writing would change their semantics.
 
@@ -49,12 +54,63 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         return REMOVED_ENCLOSING_KEY
 
     @staticmethod
-    def _strip_enclosing(value: str) -> tuple[str, str | None]:
+    def _is_enclosed_in_braces(value: str) -> bool:
+        """Whether the brace opened at the first char is the one closed at the last char.
+
+        This is False for values that merely start and end in braces, such as the
+        concatenation expression `{intro} # {outro}`, whose outer braces do not enclose
+        the whole value. Backslash-escaped braces are not counted.
+        """
+        depth = 0
+        escaped = False
+        last_index = len(value) - 1
+        for index, char in enumerate(value):
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth < 0:
+                    return False
+                if depth == 0 and index != last_index:
+                    return False
+        return depth == 0
+
+    @staticmethod
+    def _is_enclosed_in_quotes(value: str) -> bool:
+        """Whether the quote at the first char is the one closed at the last char.
+
+        This is False for values that merely start and end in quotes, such as the
+        concatenation expression `"intro" # "outro"`. Backslash-escaped quotes and
+        quotes inside braces are not counted.
+        """
+        depth = 0
+        escaped = False
+        for char in value[1:-1]:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == "{":
+                depth += 1
+            elif char == "}":
+                depth = max(depth - 1, 0)
+            elif char == '"' and depth == 0:
+                return False
+        return True
+
+    @classmethod
+    def _strip_enclosing(cls, value: str) -> tuple[str, str | None]:
         value = value.strip()
-        if value.startswith("{") and value.endswith("}"):
-            return value[1:-1], "{"
-        if value.startswith('"') and value.endswith('"'):
-            return value[1:-1], '"'
+        # A single `{` or `"` starts and ends with the same char, but is no enclosing.
+        if len(value) >= 2:
+            if value.startswith("{") and value.endswith("}") and cls._is_enclosed_in_braces(value):
+                return value[1:-1], "{"
+            if value.startswith('"') and value.endswith('"') and cls._is_enclosed_in_quotes(value):
+                return value[1:-1], '"'
         return value, "no-enclosing"
 
     # docstr-coverage: inherited

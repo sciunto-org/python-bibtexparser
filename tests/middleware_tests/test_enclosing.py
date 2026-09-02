@@ -422,3 +422,112 @@ def test_string_reference_roundtrip():
 
 
 # TODO round-trip tests (removal -> addition -> removal)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("{intro} # {outro}", id="brace_concatenation"),
+        pytest.param('"intro" # "outro"', id="quote_concatenation"),
+        pytest.param('{intro} # "outro"', id="mixed_concatenation"),
+        pytest.param("{a} and {b}", id="two_brace_groups"),
+        pytest.param('"a" "b"', id="two_quote_groups"),
+        pytest.param("{a} # b # {c}", id="concatenation_with_reference"),
+    ],
+)
+def test_no_removal_if_delimiters_do_not_enclose_whole_value(value: str):
+    """Values whose first and last char are delimiters, but not a matching pair,
+    must not be stripped, as this would corrupt them."""
+    field = Field(value=value, start_line=6, key="pages")
+    input_entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[field],
+    )
+
+    middleware = RemoveEnclosingMiddleware(allow_inplace_modification=True)
+    transformed = middleware.transform(library=Library([input_entry])).entries[0]
+
+    assert transformed["pages"] == value
+    assert transformed.parser_metadata["removed_enclosing"]["pages"] == "no-enclosing"
+    assert transformed.fields_dict["pages"].enclosing == "no-enclosing"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("{intro} # {outro}", id="brace_concatenation"),
+        pytest.param('"intro" # "outro"', id="quote_concatenation"),
+        pytest.param("{a} and {b}", id="two_brace_groups"),
+    ],
+)
+def test_no_removal_on_string_block_if_delimiters_do_not_enclose_whole_value(value: str):
+    """Same as above, for `@string` blocks."""
+    input_string = String(
+        start_line=5,
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        value=value,
+    )
+
+    middleware = RemoveEnclosingMiddleware(allow_inplace_modification=True)
+    transformed = middleware.transform(library=Library([input_string])).strings[0]
+
+    assert transformed.value == value
+    assert transformed.parser_metadata["removed_enclosing"] == "no-enclosing"
+    assert transformed.enclosing == "no-enclosing"
+
+
+@pytest.mark.parametrize(
+    "value, expected_stripped, expected_enclosing",
+    [
+        pytest.param("{a {b} c}", "a {b} c", "{", id="nested_group"),
+        pytest.param("{{nested}}", "{nested}", "{", id="doubly_braced"),
+        pytest.param("{}", "", "{", id="empty_braces"),
+        pytest.param('""', "", '"', id="empty_quotes"),
+        pytest.param('{"quoted"}', '"quoted"', "{", id="quotes_in_braces"),
+        pytest.param('"a {b} c"', "a {b} c", '"', id="braces_in_quotes"),
+        pytest.param('"a {"} c"', 'a {"} c', '"', id="braced_quote_in_quotes"),
+        pytest.param(r"{a \{ b}", r"a \{ b", "{", id="escaped_open_brace"),
+        pytest.param(r"{a \} b}", r"a \} b", "{", id="escaped_close_brace"),
+        pytest.param(r'"a \" b"', r"a \" b", '"', id="escaped_quote"),
+        pytest.param(r"{{\`a} {\`a}}", r"{\`a} {\`a}", "{", id="enclosed_groups"),
+    ],
+)
+def test_removal_of_genuinely_enclosing_delimiters(
+    value: str, expected_stripped: str, expected_enclosing: str
+):
+    """Values that really are enclosed by a single delimiter pair must still be stripped."""
+    assert RemoveEnclosingMiddleware._strip_enclosing(value) == (
+        expected_stripped,
+        expected_enclosing,
+    )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("", id="empty"),
+        pytest.param(" ", id="whitespace"),
+        pytest.param("{", id="lone_open_brace"),
+        pytest.param("}", id="lone_close_brace"),
+        pytest.param('"', id="lone_quote"),
+        pytest.param("\\", id="lone_backslash"),
+    ],
+)
+def test_degenerate_values_are_not_stripped(value: str):
+    """Short/degenerate values must neither raise nor lose characters."""
+    assert RemoveEnclosingMiddleware._strip_enclosing(value) == (value.strip(), "no-enclosing")
+
+
+def test_concatenation_roundtrip():
+    """Default parse -> write must reproduce concatenations of delimited parts
+    verbatim, rather than corrupting them."""
+    bibtex = '@article{a,\n\tpages = {intro} # {outro},\n\ttitle = "x" # "y"\n}\n'
+    written = bibtexparser.write_string(bibtexparser.parse_string(bibtex))
+
+    assert "pages = {intro} # {outro}" in written
+    assert 'title = "x" # "y"' in written
+    assert written == bibtex
