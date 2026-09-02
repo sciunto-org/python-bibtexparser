@@ -172,11 +172,16 @@ def test_write_failed_block():
     lines = string.splitlines()
 
     assert len(lines) == 5
-    assert lines[0].startswith("% WARNING")
+    assert lines[0] == "% WARNING Parsing failed for the following 4 lines."
     assert lines[1] == "@article{irrelevant-for-this-test,"
     assert lines[2] == "except = {that-there-need-to-be},"
     assert lines[3] == "other = {multiple-lines}"
     assert lines[4] == "}"
+
+    bib_format = BibtexFormat()
+    bib_format.parsing_failed_comment = "% CUSTOM {n} lines"
+    custom_string = writer.write(library, bib_format)
+    assert custom_string.splitlines()[0] == "% CUSTOM 4 lines"
 
 
 def test_write_failed_block_without_raw_raises():
