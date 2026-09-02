@@ -337,3 +337,58 @@ def test_escaped_quotes_in_field_value(bibtex_str: str, expected_title: str):
     assert len(library.failed_blocks) == 0
     assert len(library.entries) == 1
     assert library.entries[0].fields_dict["title"].value == expected_title
+
+
+@pytest.mark.parametrize(
+    "entry, dangling_key",
+    [
+        pytest.param(
+            "@article{test, title = {Some title}, year}",
+            "year",
+            id="dangling key after regular field",
+        ),
+        pytest.param(
+            "@article{test, title = {Some title},\n    year\n}",
+            "year",
+            id="dangling key on its own line",
+        ),
+        pytest.param("@article{test, title}", "title", id="entry with only a dangling key"),
+    ],
+)
+def test_entry_with_dangling_key(entry: str, dangling_key: str):
+    """A key without a `=` and value must not be silently dropped.
+
+    Such an entry is malformed and must end up in the failed blocks,
+    instead of being reported as a successfully parsed (but incomplete) entry.
+    """
+    subsequent_article = "@Article{subsequentArticle, title = {Some title}}"
+    full_bibtex = f"{entry}\n\n{subsequent_article}"
+    library: Library = Splitter(full_bibtex).split()
+
+    assert len(library.failed_blocks) == 1
+    assert dangling_key in library.failed_blocks[0].error.abort_reason
+    assert library.failed_blocks[0].raw == entry
+
+    assert len(library.entries) == 1
+    assert library.entries[0].key == "subsequentArticle"
+    assert len(library.entries[0].fields) == 1
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        pytest.param("@article{test, title = {Some title}}", id="regular last field"),
+        pytest.param("@article{test, title = {Some title}, }", id="trailing comma"),
+        pytest.param("@article{test, title = {Some title},\n}", id="trailing comma and newline"),
+        pytest.param('@article{test, title = "Some title", }', id="quoted, trailing comma"),
+        pytest.param("@article{test, title = SomeString, }", id="unenclosed, trailing comma"),
+        pytest.param("@article{test, title = {Some {nested} title}}", id="nested braces"),
+    ],
+)
+def test_entry_without_dangling_key_is_not_aborted(entry: str):
+    """Entries legally ending in `}` (with or without trailing comma) still parse cleanly."""
+    library: Library = Splitter(entry).split()
+    assert len(library.failed_blocks) == 0
+    assert len(library.entries) == 1
+    assert len(library.entries[0].fields) == 1
+    assert library.entries[0].fields[0].key == "title"

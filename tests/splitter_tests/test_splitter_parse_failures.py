@@ -27,6 +27,11 @@ from tests.resources import VALID_BIBTEX_SNIPPETS
             """@article{article1, title="title1 author={author1}""",
             id="field_missing_closing_quote",
         ),
+        pytest.param(
+            """@article{article1, title={title1}, danglingKey}""",
+            id="entry_with_dangling_key",
+        ),
+        pytest.param("""@article{article1, danglingKey}""", id="entry_with_only_dangling_key"),
         pytest.param("""@string{foo = "bar""", id="string_without_closing_brace"),
         pytest.param("""@preamble{e = mc^2""", id="preable_without_closing_brace"),
         pytest.param("""@comment{foo = "bar""", id="preable_without_closing_brace"),

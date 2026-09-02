@@ -231,6 +231,13 @@ class Splitter:
         while True:
             equals_mark = self._next_mark(accept_eof=False)
             if equals_mark.group(0) == "}":
+                dangling_key = self.bibstr[key_start : equals_mark.start()].strip()
+                if dangling_key:
+                    raise BlockAbortedException(
+                        abort_reason=f"Expected a `=` after entry key `{dangling_key}`, "
+                        "but found the end of the entry (`}`).",
+                        end_index=equals_mark.end(),
+                    )
                 # End of entry
                 return result, equals_mark.end(), duplicate_keys
 
@@ -267,6 +274,8 @@ class Splitter:
             elif after_field_mark.group(0) == "}":
                 # If next mark is a closing bracket, put it back (will return in next loop iteration)
                 self._unaccepted_mark = after_field_mark
+                # Advance past the value, else the check above aborts a valid entry.
+                key_start = after_field_mark.start()
                 continue
             else:
                 self._unaccepted_mark = after_field_mark
