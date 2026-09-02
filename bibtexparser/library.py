@@ -115,6 +115,7 @@ class Library:
             return None
 
         def is_claimed(key: str) -> bool:
+            """Whether this key was already claimed by an earlier block in this call."""
             return any(d is by_key and k == key for d, k in claimed)
 
         for key, registered in by_key.items():
