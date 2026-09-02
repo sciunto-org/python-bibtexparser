@@ -1,16 +1,23 @@
 import codecs
 import warnings
 from collections.abc import Iterable
+from copy import deepcopy
 from typing import Optional
 from typing import TextIO
 
 from .library import Library
+from .middlewares.enclosing import REMOVED_ENCLOSING_KEY
 from .middlewares.middleware import Middleware
 from .middlewares.parsestack import default_parse_stack
 from .middlewares.parsestack import default_unparse_stack
+from .model import Block
+from .model import String
 from .splitter import Splitter
 from .writer import BibtexFormat
 from .writer import write
+
+#: Marks a seeded copy of a pre-existing `@string`, dropped before merging back.
+_PREEXISTING_STRING_KEY = "bibtexparser_preexisting_string"
 
 
 def _build_parse_stack(
@@ -137,18 +144,95 @@ def parse_string(
         (ignored if a not-``None`` parse_stack is passed).
 
     :param library:
-        Library to add entries to. If ``None`` (default), a new library will be created.
+        Library to add the newly parsed blocks to.
+        If ``None`` (default), a new library is created and returned.
+        If a library is passed, it is returned (mutated) and:
+
+        - the parse stack is applied **only** to the newly parsed blocks;
+          blocks already contained in the passed library are left untouched
+          (they were already transformed when they were parsed);
+        - ``@string`` blocks already contained in the passed library are visible
+          to the parse stack, i.e. string references in ``bibtex_str`` resolve
+          against them (unless ``bibtex_str`` redefines the same key);
+        - keys defined both in the passed library and in ``bibtex_str``
+          do not raise, but yield ``DuplicateBlockKeyBlock`` instances
+          (see ``library.failed_blocks``), just like duplicates within a single string.
 
     :return: Library: Parsed BibTeX database
     """
     splitter = Splitter(bibstr=bibtex_str)
-    library = splitter.split(library=library)
+    parsed = splitter.split()
+
+    _seed_preexisting_strings(parsed, library)
 
     middleware: Middleware
     for middleware in _build_parse_stack(parse_stack, append_middleware):
-        library = middleware.transform(library=library)
+        parsed = middleware.transform(library=parsed)
 
+    if library is None:
+        return parsed
+
+    new_blocks = [b for b in parsed.blocks if not _is_seeded_string(b)]
+    library.add(new_blocks, fail_on_duplicate_key=False)
     return library
+
+
+def _is_seeded_string(block: Block) -> bool:
+    """True for blocks seeded by `_seed_preexisting_strings` (and their transformations)."""
+    return bool(block.get_parser_metadata(_PREEXISTING_STRING_KEY))
+
+
+def _restore_enclosing(string: String) -> None:
+    """Make sure the value of an already-parsed string is enclosed again.
+
+    The parse stack expects freshly split (i.e. still enclosed) values.
+    Feeding it an already-stripped value would make that value be treated
+    as an unenclosed literal (a string reference), which does not round-trip
+    to valid bibtex.
+    """
+    enclosing = string.parser_metadata.pop(REMOVED_ENCLOSING_KEY, None)
+    if string.enclosing == "no-enclosing" or enclosing == "no-enclosing":
+        return
+    value = string.value
+    if not isinstance(value, str):
+        return
+    if enclosing is None and (
+        (value.startswith("{") and value.endswith("}"))
+        or (value.startswith('"') and value.endswith('"'))
+    ):
+        return
+    string.value = f'"{value}"' if enclosing == '"' else f"{{{value}}}"
+
+
+def _seed_preexisting_strings(parsed: Library, library: Library | None) -> list[String]:
+    """Make the ``@string`` blocks of an existing library visible to the parse stack.
+
+    Copies (never the originals, which must not be transformed again) of the
+    strings of ``library`` are added to ``parsed``, unless the newly parsed
+    content redefines the same key. The copies are tagged so that they can be
+    dropped again before merging the parsed blocks back into ``library``.
+
+    :param parsed: The freshly split library, modified in place.
+    :param library: The pre-existing library, or ``None``.
+    :return: The seeded (tagged) string copies.
+    """
+    if library is None:
+        return []
+
+    # Bibtex string keys are case-insensitive, hence compare in lower case.
+    redefined = {key.lower() for key in parsed.strings_dict}
+    seeds = []
+    for key, string in library.strings_dict.items():
+        if key.lower() in redefined:
+            continue
+        seed = deepcopy(string)
+        seed.set_parser_metadata(_PREEXISTING_STRING_KEY, True)
+        _restore_enclosing(seed)
+        seeds.append(seed)
+
+    if seeds:
+        parsed.add(seeds, fail_on_duplicate_key=False)
+    return seeds
 
 
 def parse_file(
