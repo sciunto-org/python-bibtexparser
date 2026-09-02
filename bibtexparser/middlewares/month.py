@@ -27,7 +27,9 @@ class _MonthInterpolator(BlockMiddleware, abc.ABC):
             return entry
 
         new_val, meta = self.resolve_month_field_val(month)
-        month.value = new_val
+        # Assigning `Field.value` resets the `enclosing` demand references rely on.
+        if type(new_val) is not type(month.value) or new_val != month.value:
+            month.value = new_val
         demanded_enclosing = self._demanded_enclosing(new_val)
         if demanded_enclosing is not None:
             month.enclosing = demanded_enclosing

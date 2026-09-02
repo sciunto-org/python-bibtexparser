@@ -7,6 +7,7 @@ from copy import deepcopy
 
 import pytest
 
+import bibtexparser
 from bibtexparser import Library
 from bibtexparser.exceptions import PartialMiddlewareException
 from bibtexparser.middlewares.latex_encoding import LatexDecodingMiddleware
@@ -175,7 +176,69 @@ def test_inplace(inplace: bool, middleware_class):
     assert_inplace_is_respected(inplace, input_entry, transformed_library.entries[0])
 
 
-def _entry_with_latex_string(latex_string):
+@pytest.mark.parametrize("middleware_class", [LatexEncodingMiddleware, LatexDecodingMiddleware])
+@pytest.mark.parametrize("enclosing", ["no-enclosing", "{", '"'])
+def test_enclosing_demand_survives_field_transformation(middleware_class, enclosing):
+    """Latex de-/encoding changes the representation of a value, not its kind.
+
+    Thus, the enclosing demand (which the `Field.value` setter resets) must be restored."""
+    input_entry = _entry_with_latex_string("jan", enclosing=enclosing)
+
+    transformed_library = middleware_class(allow_inplace_modification=True).transform(
+        Library([input_entry])
+    )
+
+    transformed_field = transformed_library.entries[0].fields_dict["tested_field"]
+    assert transformed_field.value == "jan"
+    assert transformed_field.enclosing == enclosing
+
+
+@pytest.mark.parametrize("middleware_class", [LatexEncodingMiddleware, LatexDecodingMiddleware])
+@pytest.mark.parametrize("enclosing", ["no-enclosing", "{", '"'])
+def test_enclosing_demand_survives_string_transformation(middleware_class, enclosing):
+    """Same as `test_enclosing_demand_survives_field_transformation`, for String blocks."""
+    input_string = String(
+        key="me", value="jan", start_line=1, raw="irrelevant", enclosing=enclosing
+    )
+
+    transformed_library = middleware_class(allow_inplace_modification=True).transform(
+        Library([input_string])
+    )
+
+    transformed_string = transformed_library.strings[0]
+    assert transformed_string.value == "jan"
+    assert transformed_string.enclosing == enclosing
+
+
+@pytest.mark.parametrize("middleware_class", [LatexEncodingMiddleware, LatexDecodingMiddleware])
+@pytest.mark.parametrize(
+    "bibtex",
+    [
+        pytest.param("@article{someEntry,\n\tmonth = jan\n}", id="entry_string_reference"),
+        pytest.param("@string{intro = tro}", id="string_block_reference"),
+    ],
+)
+def test_unenclosed_values_are_written_verbatim(middleware_class, bibtex):
+    """Unenclosed values must not be enclosed on write, even with a de-/encoder in the stack."""
+    library = bibtexparser.parse_string(
+        bibtex, append_middleware=[middleware_class(allow_inplace_modification=True)]
+    )
+    assert bibtexparser.write_string(library).strip() == bibtex.strip()
+
+
+def test_concatenation_roundtrips_with_latex_decoding():
+    """Concatenation expressions must survive a parse-transform-write roundtrip.
+
+    Note: Only decoding is tested here, as the encoder (correctly, for regular values)
+    escapes the `#` of the concatenation itself."""
+    bibtex = "@article{someEntry,\n\tpages = intro # outro\n}"
+    library = bibtexparser.parse_string(
+        bibtex, append_middleware=[LatexDecodingMiddleware(allow_inplace_modification=True)]
+    )
+    assert bibtexparser.write_string(library).strip() == bibtex.strip()
+
+
+def _entry_with_latex_string(latex_string, enclosing=None):
     return Entry(
         start_line=1,
         raw="Not relevant for this test",
@@ -186,6 +249,7 @@ def _entry_with_latex_string(latex_string):
                 start_line=1,
                 key="tested_field",
                 value=latex_string,
+                enclosing=enclosing,
             )
         ],
     )
