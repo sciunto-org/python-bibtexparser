@@ -4,6 +4,8 @@ from textwrap import dedent
 
 import pytest
 
+import bibtexparser
+from bibtexparser.middlewares import NameParts
 from bibtexparser.model import Entry
 from bibtexparser.model import ExplicitComment
 from bibtexparser.model import Field
@@ -419,6 +421,103 @@ def test_field_hash():
     field_1.value = ["some", "unhashable", "value"]
     assert len({field_1, deepcopy(field_1)}) == 1
     assert {field_1: "value"}[deepcopy(field_1)] == "value"
+
+
+def test_programmatically_created_blocks_have_distinct_hashes():
+    """Blocks without start_line/raw must not all collide. See issue 565."""
+    entries = [Entry("article", f"key_{i}", [Field("field", "value")]) for i in range(100)]
+    assert len({hash(entry) for entry in entries}) == 100
+    assert hash(Entry("article", "key", [])) != hash(Entry("book", "key", []))
+
+    strings = [String(f"key_{i}", "value") for i in range(100)]
+    assert len({hash(string) for string in strings}) == 100
+
+    preambles = [Preamble(f"value_{i}") for i in range(100)]
+    assert len({hash(preamble) for preamble in preambles}) == 100
+
+    explicit_comments = [ExplicitComment(f"comment_{i}") for i in range(100)]
+    assert len({hash(comment) for comment in explicit_comments}) == 100
+
+    implicit_comments = [ImplicitComment(f"comment_{i}") for i in range(100)]
+    assert len({hash(comment) for comment in implicit_comments}) == 100
+
+    fields = [Field(f"key_{i}", "value") for i in range(100)]
+    assert len({hash(field) for field in fields}) == 100
+
+
+def test_equal_blocks_have_equal_hashes():
+    """The hash invariant: `a == b` implies `hash(a) == hash(b)`."""
+    equal_pairs = [
+        (
+            Entry("article", "key", [Field("field", "value")]),
+            Entry("article", "key", [Field("field", "value")]),
+        ),
+        (String("key", "value"), String("key", "value")),
+        (Preamble("value"), Preamble("value")),
+        (ExplicitComment("comment"), ExplicitComment("comment")),
+        (ImplicitComment("comment"), ImplicitComment("comment")),
+        (Field("key", "value"), Field("key", "value")),
+    ]
+    for first, second in equal_pairs:
+        assert first == second
+        assert hash(first) == hash(second)
+        assert hash(first) == hash(deepcopy(first))
+        assert hash(first) == hash(copy(first))
+
+
+def test_parsed_block_hashes_equal_to_identically_constructed_block():
+    """A parsed block and an identically constructed one are equal, hence hash equal."""
+    library = bibtexparser.parse_string("@article{key,\n  field = {value},\n}\n")
+    parsed_entry = library.entries[0]
+    constructed_entry = Entry(
+        entry_type="article",
+        key="key",
+        fields=[Field("field", "value", start_line=1)],
+        start_line=0,
+        raw="@article{key,\n  field = {value},\n}",
+    )
+    constructed_entry.set_parser_metadata("removed_enclosing", {"field": "{"})
+    assert parsed_entry == constructed_entry
+    assert hash(parsed_entry) == hash(constructed_entry)
+
+
+def test_hash_of_blocks_with_unhashable_values():
+    """Unhashable field values (e.g. after middleware) must not break hashing."""
+    list_valued = Entry("article", "key", [Field("author", ["Doe, John", "Roe, Jane"])])
+    assert isinstance(hash(list_valued), int)
+
+    name_parts_valued = Entry(
+        "article", "key", [Field("author", [NameParts(first=["John"], last=["Doe"])])]
+    )
+    assert isinstance(hash(name_parts_valued), int)
+
+    assert isinstance(hash(Field("author", ["Doe, John"])), int)
+    assert isinstance(hash(Field("author", NameParts(last=["Doe"]))), int)
+
+    with_metadata = Entry("article", "key", [])
+    with_metadata.set_parser_metadata("some_key", ["some", "unhashable", "value"])
+    assert isinstance(hash(with_metadata), int)
+
+
+def test_blocks_in_sets_and_dicts():
+    """Distinct blocks are kept apart, equal blocks are deduplicated."""
+    first = Entry("article", "first", [Field("field", "value")])
+    second = Entry("article", "second", [Field("field", "value")])
+    assert len({first, second}) == 2
+    assert len({first, second, deepcopy(first)}) == 2
+
+    block_dict = {first: "first_value", second: "second_value"}
+    assert block_dict[deepcopy(first)] == "first_value"
+    assert block_dict[deepcopy(second)] == "second_value"
+
+    blocks = [
+        Entry("article", "same", []),
+        String("same", "same"),
+        Preamble("same"),
+        ExplicitComment("same"),
+        ImplicitComment("same"),
+    ]
+    assert len(set(blocks)) == len(blocks)
 
 
 def test_entry_fields_shorthand():
