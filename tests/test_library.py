@@ -4,6 +4,7 @@ from bibtexparser import Library
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
 from bibtexparser.model import ImplicitComment
+from bibtexparser.model import String
 
 
 def get_dummy_entry():
@@ -15,6 +16,12 @@ def get_dummy_entry():
             Field(key="author", value="An author"),
         ],
     )
+
+
+def get_dummy_entry_with_key(key: str):
+    entry = get_dummy_entry()
+    entry.key = key
+    return entry
 
 
 def test_replace_with_duplicates():
@@ -125,3 +132,89 @@ def test_replace_prefers_identical_instance_over_equal_block():
     assert len(library.blocks) == 2
     assert library.blocks[0] is first_comment
     assert library.blocks[1] is new_comment
+
+
+def test_remove_entry_with_changed_key():
+    """Removing an entry whose key changed after adding must not fail. See issue 565."""
+    library = Library()
+    entry = get_dummy_entry()
+    other_entry = get_dummy_entry()
+    other_entry.key = "otherKey"
+    library.add([entry, other_entry])
+
+    entry.key = "changedKey"
+    library.remove(entry)
+
+    assert library.blocks == [other_entry]
+    assert library.entries == [other_entry]
+    assert library.entries_dict == {"otherKey": other_entry}
+    library.add(get_dummy_entry())
+    assert len(library.blocks) == 2
+    assert len(library.failed_blocks) == 0
+
+
+def test_remove_string_with_changed_key():
+    """Removing a string whose key changed after adding must not fail."""
+    library = Library()
+    string = String(key="someString", value='"some value"')
+    other_string = String(key="otherString", value='"other value"')
+    library.add([string, other_string])
+
+    string.key = "changedKey"
+    library.remove(string)
+
+    assert library.blocks == [other_string]
+    assert library.strings == [other_string]
+    assert library.strings_dict == {"otherString": other_string}
+
+
+def test_remove_block_not_in_library_raises_value_error():
+    library = Library()
+    entry = get_dummy_entry()
+    library.add(entry)
+
+    with pytest.raises(ValueError):
+        library.remove(get_dummy_entry_with_key("notInLibrary"))
+
+    assert library.blocks == [entry]
+    assert library.entries_dict == {"duplicateKey": entry}
+
+
+def test_remove_list_with_missing_block_is_atomic():
+    """If one block of a removed list is missing, no block is removed."""
+    library = Library()
+    entry = get_dummy_entry()
+    library.add(entry)
+
+    with pytest.raises(ValueError):
+        library.remove([entry, get_dummy_entry_with_key("notInLibrary")])
+
+    assert library.blocks == [entry]
+    assert library.entries == [entry]
+    assert library.entries_dict == {"duplicateKey": entry}
+
+
+def test_remove_list_of_blocks():
+    library = Library()
+    entries = [get_dummy_entry_with_key(f"key{i}") for i in range(3)]
+    library.add(entries)
+
+    library.remove([entries[0], entries[2]])
+
+    assert library.blocks == [entries[1]]
+    assert library.entries_dict == {"key1": entries[1]}
+
+
+def test_replace_entry_with_changed_key():
+    """Replacing an entry whose key changed after adding must not fail. See issue 565."""
+    library = Library()
+    entry = get_dummy_entry()
+    library.add(entry)
+    entry.key = "changedKey"
+
+    replacement = get_dummy_entry_with_key("replacementKey")
+    library.replace(entry, replacement)
+
+    assert library.blocks == [replacement]
+    assert library.entries == [replacement]
+    assert library.entries_dict == {"replacementKey": replacement}
