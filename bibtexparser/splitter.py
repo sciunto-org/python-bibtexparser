@@ -102,22 +102,23 @@ class Splitter:
             self._current_char_index = m.start()
             return m
 
-        # Get next mark from iterator
-        m = next(self._markiter, None)
-        if m is not None:
+        while True:
+            m = next(self._markiter, None)
+            if m is None:
+                # Reached end of file
+                self._current_char_index = len(self.bibstr)
+                if not accept_eof:
+                    raise BlockAbortedException(
+                        abort_reason="Unexpectedly reached end of file.",
+                        end_index=self._current_char_index,
+                    )
+                return None
+
             self._current_char_index = m.start()
-            if m.group(0) == "\n":
-                self._current_line += 1
-                return self._next_mark(accept_eof=accept_eof)
-        else:
-            # Reached end of file
-            self._current_char_index = len(self.bibstr)
-            if not accept_eof:
-                raise BlockAbortedException(
-                    abort_reason="Unexpectedly reached end of file.",
-                    end_index=self._current_char_index,
-                )
-        return m
+            if m.group(0) != "\n":
+                return m
+
+            self._current_line += 1
 
     def _move_to_closed_bracket(self) -> int:
         """Index of the curly bracket closing a just opened one."""
