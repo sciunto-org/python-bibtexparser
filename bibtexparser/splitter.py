@@ -102,7 +102,6 @@ class Splitter:
             self._current_char_index = m.start()
             return m
 
-        # Iterative: long newline runs would exhaust the recursion limit.
         while True:
             m = next(self._markiter, None)
             if m is None:
