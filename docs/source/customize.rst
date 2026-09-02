@@ -62,7 +62,7 @@ by selecting the corresponding argument when calling :code:`bibtexparser.parse` 
 * :code:`parse_stack`: Overwrite the default parse stack (similarly :code:`write_stack` for write stack).
 
 .. warning::
-    The default parse and write stacks may change on **minor** version updates and between pre-releases.
+    The default parse and write stacks may change on **minor** version updates.
     To reduce the risk of unnoticed changes in parsing stack, critical applications may want to hard-code
     the full parse stack in their code using :code:`parse_stack` and :code:`write_stack` arguments.
 

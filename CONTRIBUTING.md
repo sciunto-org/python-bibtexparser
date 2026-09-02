@@ -18,8 +18,8 @@ We are always looking for people to improve the library. Contributions include, 
 ### Version 1 vs version 2
 
 Also note that there are currently two independent "default" branches:
-First, `main`, where we maintain the `v2` of bibtexparser, which is a complete re-write and currently still in beta and not feature complete.
-Second, `v1` where we maintain the stable `v1` version of bibtexparser. Note that on `v1` we accept only small, non-breaking changes and are planning to stop support as soon as `v2` reaches reasonable stability.
+First, `main`, where we maintain the `v2` of bibtexparser, which is a complete re-write and the current, recommended version.
+Second, `v1` where we maintain the legacy `v1` version of bibtexparser. Note that `v1` is in maintenance mode: we accept only small, non-breaking changes there.
 The two branches are never going to be merged anymore, thus if you want to change something for both versions, you will have to open two PRs.
 
 Issues are labelled `v1` and `v2`, correspondingly.
