@@ -27,9 +27,6 @@ class InvalidNameError(ValueError):
         super().__init__(message)
 
     def __reduce__(self):
-        # Rebuild from name and reason so the exception stays copyable and
-        # picklable; the base ValueError stores only the formatted message in
-        # args, which does not match this two-argument __init__.
         return (self.__class__, (self.name, self.reason))
 
 
