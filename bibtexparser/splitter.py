@@ -285,22 +285,17 @@ class Splitter:
                     end_index=after_field_mark.start(),
                 )
 
-    def split(self, library: Library | None = None) -> Library:
-        """Split the bibtex-string into blocks and add them to the library.
+    def split(self) -> Library:
+        """Split the bibtex-string into blocks and return them as a new library.
 
-        Args:
-            library: The library to add the blocks to. If None, a new library is created.
         Returns:
-            The library with the added blocks.
+            A new library containing the split blocks.
         """
         self._markiter = re.finditer(
             r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
         )
 
-        if library is None:
-            library = Library()
-        else:
-            logger.info("Adding blocks to existing library.")
+        library = Library()
 
         while True:
             m = self._next_mark(accept_eof=True)
