@@ -62,18 +62,25 @@ class Library:
 
     def _find_duplicate_keys(self, blocks: list[Block]) -> list[str]:
         """Keys of blocks that would become duplicates when added to the library."""
+        # Look keys up in the by-key dicts directly (rather than copying them into
+        # sets), so that the cost depends only on the number of blocks being added,
+        # not on the size of the library.
         duplicate_keys = []
-        seen_entry_keys = set(self._entries_by_key)
-        seen_string_keys = set(self._strings_by_key)
+        new_entry_keys = set()
+        new_string_keys = set()
         for block in blocks:
             if isinstance(block, Entry):
-                if block.key in seen_entry_keys:
-                    duplicate_keys.append(block.key)
-                seen_entry_keys.add(block.key)
+                key = block.key
+                if key in self._entries_by_key or key in new_entry_keys:
+                    duplicate_keys.append(key)
+                else:
+                    new_entry_keys.add(key)
             elif isinstance(block, String):
-                if block.key in seen_string_keys:
-                    duplicate_keys.append(block.key)
-                seen_string_keys.add(block.key)
+                key = block.key
+                if key in self._strings_by_key or key in new_string_keys:
+                    duplicate_keys.append(key)
+                else:
+                    new_string_keys.add(key)
         return duplicate_keys
 
     def _block_index(self, block: Block, skip: set[int] | None = None) -> int:

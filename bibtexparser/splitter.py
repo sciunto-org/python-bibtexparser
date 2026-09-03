@@ -308,16 +308,16 @@ class Splitter:
                 # Clean up previous block implicit_comment
                 implicit_comment = self._end_implicit_comment(m.start())
                 if implicit_comment is not None:
-                    library.add(implicit_comment)
+                    library.add(implicit_comment, fail_on_duplicate_key=False)
                 self._implicit_comment_start = None
 
                 start_line = self._current_line
                 try:
                     # Start new block parsing
                     if m_val.startswith("@comment"):
-                        library.add(self._handle_explicit_comment())
+                        library.add(self._handle_explicit_comment(), fail_on_duplicate_key=False)
                     elif m_val.startswith("@preamble"):
-                        library.add(self._handle_preamble())
+                        library.add(self._handle_preamble(), fail_on_duplicate_key=False)
                     elif m_val.startswith("@string"):
                         library.add(self._handle_string(m), fail_on_duplicate_key=False)
                     else:
@@ -338,7 +338,8 @@ class Splitter:
                             start_line=start_line,
                             raw=self.bibstr[m.start() : e.end_index],
                             error=e,
-                        )
+                        ),
+                        fail_on_duplicate_key=False,
                     )
 
                 except ParserStateException as e:
@@ -365,7 +366,7 @@ class Splitter:
         if self._implicit_comment_start is not None:
             comment = self._end_implicit_comment(len(self.bibstr))
             if comment is not None:
-                library.add(comment)
+                library.add(comment, fail_on_duplicate_key=False)
 
         return library
 

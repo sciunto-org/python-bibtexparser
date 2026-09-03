@@ -218,3 +218,37 @@ def test_replace_entry_with_changed_key():
     assert library.blocks == [replacement]
     assert library.entries == [replacement]
     assert library.entries_dict == {"replacementKey": replacement}
+
+
+class _NonIterableDict(dict):
+    """A dict that supports lookups but refuses to be iterated or copied.
+
+    Used to make sure that `Library.add` does not walk the whole by-key dicts
+    (i.e., does not scale with the library size) when checking for duplicates."""
+
+    def __iter__(self):
+        raise AssertionError("by-key dict must not be iterated on add")
+
+    def keys(self):
+        raise AssertionError("by-key dict must not be iterated on add")
+
+
+def test_add_duplicate_check_does_not_iterate_library():
+    """Checking for duplicates must not iterate over all existing keys (was O(library size))."""
+    library = Library()
+    library.add([get_dummy_entry_with_key("existing"), String(key="s", value="{v}")])
+    library._entries_by_key = _NonIterableDict(library._entries_by_key)
+    library._strings_by_key = _NonIterableDict(library._strings_by_key)
+
+    library.add(ImplicitComment(comment="a comment"))
+    library.add(get_dummy_entry_with_key("new"))
+    library.add(String(key="t", value="{w}"))
+    assert len(library.blocks) == 5
+
+    with pytest.raises(ValueError):
+        library.add(get_dummy_entry_with_key("existing"))
+    with pytest.raises(ValueError):
+        library.add(String(key="s", value="{v}"))
+    with pytest.raises(ValueError):
+        library.add([get_dummy_entry_with_key("twice"), get_dummy_entry_with_key("twice")])
+    assert len(library.blocks) == 5
