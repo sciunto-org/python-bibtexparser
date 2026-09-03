@@ -1,3 +1,4 @@
+import pickle
 from copy import copy
 from copy import deepcopy
 from textwrap import dedent
@@ -6,10 +7,14 @@ import pytest
 
 import bibtexparser
 from bibtexparser.middlewares import NameParts
+from bibtexparser.model import DuplicateBlockKeyBlock
+from bibtexparser.model import DuplicateFieldKeyBlock
 from bibtexparser.model import Entry
 from bibtexparser.model import ExplicitComment
 from bibtexparser.model import Field
 from bibtexparser.model import ImplicitComment
+from bibtexparser.model import MiddlewareErrorBlock
+from bibtexparser.model import ParsingFailedBlock
 from bibtexparser.model import Preamble
 from bibtexparser.model import String
 
@@ -545,3 +550,213 @@ def test_entry_fields_shorthand():
     assert len([f for f in entry.fields if f.key == "myNewField"]) == 0
     with pytest.raises(KeyError):
         entry["myNewField"]
+
+
+# --- Deep-copying of blocks and fields ---------------------------------------
+# Blocks and fields implement a fast `__deepcopy__` (middleware deep-copies every
+# block by default). The following tests ensure it behaves like the generic one.
+
+
+def _all_block_types():
+    entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    entry.set_parser_metadata("meta", {"nested": ["list"]})
+    return [
+        entry,
+        String("key", "value", 2, "raw", enclosing="{"),
+        Preamble("value", 3, "raw"),
+        ExplicitComment("comment", 4, "raw"),
+        ImplicitComment("comment", 5, "raw"),
+        ParsingFailedBlock(ValueError("error"), 6, "raw"),
+        MiddlewareErrorBlock(Entry("article", "key", []), ValueError("error")),
+        DuplicateBlockKeyBlock("key", Entry("article", "key", []), Entry("book", "key", []), 7),
+        DuplicateFieldKeyBlock(
+            {"a", "b"}, Entry("article", "key", [Field("a", "1"), Field("a", "2")])
+        ),
+    ]
+
+
+def _assert_same_state(block, other):
+    """Asserts that two distinct block instances carry the same state.
+
+    Blocks holding an exception (``ParsingFailedBlock``) are never ``==``
+    to a copy of themselves, as exceptions compare by identity only."""
+    assert block is not other
+    assert type(block) is type(other)
+    if isinstance(block, ParsingFailedBlock):
+        assert type(block.error) is type(other.error)
+        assert str(block.error) == str(other.error)
+        assert block.error is not other.error
+        state = {key: value for key, value in block.__dict__.items() if key != "_error"}
+        other_state = {key: value for key, value in other.__dict__.items() if key != "_error"}
+        assert state == other_state
+    else:
+        assert block == other
+
+
+@pytest.mark.parametrize("block", _all_block_types(), ids=lambda b: type(b).__name__)
+def test_block_deepcopy_is_equal_but_independent(block):
+    block_copy = deepcopy(block)
+
+    _assert_same_state(block_copy, block)
+    assert hash(block_copy) == hash(block)
+    assert block_copy.__dict__.keys() == block.__dict__.keys()
+    # Mutable attributes are copied, not shared
+    assert block_copy.parser_metadata is not block.parser_metadata
+    block_copy.set_parser_metadata("added", True)
+    assert block.get_parser_metadata("added") is None
+    assert block_copy != block
+
+
+@pytest.mark.parametrize("block", _all_block_types(), ids=lambda b: type(b).__name__)
+def test_block_deepcopy_matches_pickle_roundtrip(block):
+    # Pickling reconstructs all state the way the generic `copy.deepcopy` does.
+    pickled_copy = pickle.loads(pickle.dumps(block))
+    deep_copy = deepcopy(block)
+    _assert_same_state(deep_copy, pickled_copy)
+
+
+def test_entry_deepcopy_nested_values_are_independent():
+    entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
+    entry.set_parser_metadata("meta", {"nested": ["list"]})
+    entry_copy = deepcopy(entry)
+
+    entry_copy.fields.append(Field("new", "value"))
+    entry_copy.fields[0].value = "changed"
+    entry_copy.parser_metadata["meta"]["nested"].append("added")
+    assert len(entry.fields) == 1
+    assert entry.fields[0].value == "value"
+    assert entry.parser_metadata == {"meta": {"nested": ["list"]}}
+
+    entry.fields[0].key = "renamed"
+    entry.set_parser_metadata("other", 1)
+    assert entry_copy.fields[0].key == "field"
+    assert entry_copy.get_parser_metadata("other") is None
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        ["Doe, John", "Smith, Jane"],
+        [NameParts(first=["John"], last=["Doe"]), NameParts(first=["Jane"], last=["Smith"])],
+        NameParts(first=["John"], von=["von"], last=["Doe"], jr=["Jr."]),
+        ("a", "tuple"),
+        {"a": ["dict"]},
+    ],
+    ids=["list", "nameparts_list", "nameparts", "tuple", "dict"],
+)
+def test_field_deepcopy_non_primitive_values_are_deep_copied(value):
+    field = Field("author", value, 1, enclosing="{")
+    field_copy = deepcopy(field)
+
+    assert field_copy == field
+    assert field_copy is not field
+    assert field_copy.value == value
+    assert field_copy.key == "author"
+    assert field_copy.start_line == 1
+    assert field_copy.enclosing == "{"
+    if isinstance(value, tuple):
+        # Tuples of immutables are shared by the generic `copy.deepcopy` as well
+        return
+    assert field_copy.value is not field.value
+    if isinstance(value, list):
+        original_length = len(value)
+        field_copy.value.append("added")
+        assert len(field.value) == original_length
+        if isinstance(value[0], NameParts):
+            assert field_copy.value[0] is not field.value[0]
+            field_copy.value[0].first.append("added")
+            assert field.value[0].first == ["John"]
+    if isinstance(value, NameParts):
+        field_copy.value.first.append("added")
+        assert field.value.first == ["John"]
+    if isinstance(value, dict):
+        field_copy.value["a"].append("added")
+        assert field.value == {"a": ["dict"]}
+
+
+def test_field_deepcopy_shares_immutable_primitives():
+    # Same behavior as generic `copy.deepcopy`: atomic values are not duplicated
+    field = Field("key", "value", 1, enclosing="{")
+    field_copy = deepcopy(field)
+    assert field_copy.value is field.value
+    assert field_copy.key is field.key
+    assert field_copy.enclosing is field.enclosing
+    # Changing the copy does not affect the original
+    field_copy.value = "new value"
+    assert field.value == "value"
+    assert field.enclosing == "{"
+    assert field_copy.enclosing is None
+
+
+def test_deepcopy_memo_keeps_shared_references_shared():
+    previous = Entry("article", "key", [Field("field", "value")], 1, "raw")
+    duplicate = Entry("article", "key", [Field("field", "other")], 2, "raw2")
+    error_block = DuplicateBlockKeyBlock("key", previous, duplicate, 2, "raw2")
+
+    previous_copy, error_block_copy = deepcopy([previous, error_block])
+
+    assert error_block_copy.previous_block is previous_copy
+    assert error_block_copy.previous_block is not previous
+    assert error_block_copy.ignore_error_block == duplicate
+    assert error_block_copy.ignore_error_block is not duplicate
+    assert error_block_copy.error is not error_block.error
+    assert str(error_block_copy.error) == str(error_block.error)
+
+    # A block deep-copied on its own also deep-copies the referenced blocks
+    lone_copy = deepcopy(error_block)
+    assert lone_copy.previous_block == previous
+    assert lone_copy.previous_block is not previous
+
+
+def test_deepcopy_handles_cyclic_references():
+    entry = Entry("article", "key", [Field("field", "value")])
+    entry.set_parser_metadata("self", entry)
+    entry.set_parser_metadata("field", entry.fields[0])
+
+    entry_copy = deepcopy(entry)
+    assert entry_copy.get_parser_metadata("self") is entry_copy
+    assert entry_copy.get_parser_metadata("field") is entry_copy.fields[0]
+
+
+def test_deepcopy_of_entry_subclass_yields_subclass():
+    class CustomEntry(Entry):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.custom_attribute = ["custom"]
+
+    entry = CustomEntry("article", "key", [Field("field", "value")], 1, "raw")
+    entry_copy = deepcopy(entry)
+
+    assert type(entry_copy) is CustomEntry
+    assert entry_copy == entry
+    assert entry_copy.custom_attribute == ["custom"]
+    assert entry_copy.custom_attribute is not entry.custom_attribute
+    assert entry_copy.fields == entry.fields
+    assert entry_copy.fields is not entry.fields
+
+
+def test_deepcopy_of_str_subclass_values_is_not_shared():
+    class CustomStr(str):
+        pass
+
+    field = Field("key", CustomStr("value"))
+    field_copy = deepcopy(field)
+    assert type(field_copy.value) is CustomStr
+    assert field_copy.value == "value"
+    assert field_copy.value is not field.value
+
+
+def test_deepcopy_honours_custom_deepcopy_of_nested_subclass():
+    class CustomEntry(Entry):
+        def __deepcopy__(self, memo):
+            copied = Entry.__deepcopy__(self, memo)
+            copied.set_parser_metadata("custom_deepcopy", True)
+            return copied
+
+    entry = CustomEntry("article", "key", [Field("field", "value")])
+    error_block = DuplicateBlockKeyBlock("key", entry, Entry("article", "key", []))
+
+    error_block_copy = deepcopy(error_block)
+    assert type(error_block_copy.previous_block) is CustomEntry
+    assert error_block_copy.previous_block.get_parser_metadata("custom_deepcopy") is True
+    assert entry.get_parser_metadata("custom_deepcopy") is None

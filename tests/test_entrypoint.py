@@ -1,6 +1,7 @@
 """Testing the parse_file and write_file functions."""
 
 import os
+import pickle
 import tempfile
 import warnings
 
@@ -401,3 +402,39 @@ def test_parse_string_into_existing_library_keeps_block_order():
         "Entry",
     ]
     assert [entry.key for entry in library.entries] == ["first", "second"]
+
+
+def test_write_string_roundtrip_is_stable_and_leaves_library_untouched():
+    """The default unparse stack deep-copies blocks; output and library must be unaffected."""
+    bibtex = (
+        "@string{me = {My Name}}\n\n"
+        "@preamble{\\newcommand{\\foo}{bar}}\n\n"
+        "% An implicit comment\n\n"
+        "@comment{An explicit comment}\n\n"
+        "@article{key,\n"
+        "\tauthor = {John Doe and Jane Smith},\n"
+        '\ttitle = "Some Title",\n'
+        "\tmonth = jan,\n"
+        "\tyear = 2020\n"
+        "}\n"
+    )
+    library = parse_string(bibtex)
+    # Output of the default unparse stack (verbatim, do not "fix" without a reason)
+    expected = (
+        "@string{me = {My Name}}\n\n\n"
+        "@preamble{\\newcommand{\\foo}{bar}}\n\n\n"
+        "% An implicit comment\n\n\n"
+        "@comment{An explicit comment}\n\n\n"
+        "@article{key,\n"
+        "\tauthor = {John Doe and Jane Smith},\n"
+        "\ttitle = {Some Title},\n"
+        "\tmonth = jan,\n"
+        "\tyear = {2020}\n"
+        "}\n"
+    )
+    blocks_before = [pickle.loads(pickle.dumps(block)) for block in library.blocks]
+
+    assert write_string(library) == expected
+    # Writing again yields the identical output, i.e. writing did not mutate the library
+    assert write_string(library) == expected
+    assert library.blocks == blocks_before

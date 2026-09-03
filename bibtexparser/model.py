@@ -1,7 +1,99 @@
 import abc
+from copy import deepcopy
 from typing import Any
+from typing import TypeVar
 
 _ALLOWED_ENCLOSINGS = (None, "{", '"', "no-enclosing")
+
+# --- Fast deep-copying of blocks and fields ----------------------------------
+# Middleware deep-copies every block by default (see ``BlockMiddleware``), which
+# dominated the runtime of ``write_string`` with the generic ``copy.deepcopy``.
+# The helpers below implement ``__deepcopy__`` for ``Block`` and ``Field`` with
+# identical semantics (fully independent copies, ``memo`` honoured, cycles and
+# shared references preserved, subclasses supported), but without the generic
+# ``__reduce_ex__`` machinery and without dispatching immutable primitives.
+
+# Types whose instances are immutable and hence may be shared between an
+# object and its deep copy (which is also what ``copy.deepcopy`` does for them).
+# Exact type matches only: subclasses of these types go through ``deepcopy``.
+_ATOMIC_TYPES = frozenset({str, int, float, bool, type(None)})
+_MISSING = object()
+
+_T = TypeVar("_T")
+
+
+def _deepcopy_value(value: _T, memo: dict[int, Any]) -> _T:
+    """``copy.deepcopy(value, memo)``, with shortcuts for the types making up blocks.
+
+    Immutable primitives are shared, plain lists and dicts as well as objects
+    using the fast ``__deepcopy__`` of this module are copied directly
+    (respecting ``memo`` exactly like ``copy.deepcopy`` does).
+    Anything else is delegated to ``copy.deepcopy``.
+
+    Note: Unlike ``copy.deepcopy``, no "keep alive" list of originals is
+    maintained in ``memo``. That is only needed for temporaries created while
+    copying (e.g. ``__reduce_ex__`` state); everything copied here is reachable
+    from (and kept alive by) the object the caller passed to ``deepcopy``.
+    """
+    value_type = type(value)
+    if value_type in _ATOMIC_TYPES:
+        return value
+    if value_type is list:
+        key = id(value)
+        copied = memo.get(key, _MISSING)
+        if copied is not _MISSING:
+            return copied
+        memo[key] = copied = []
+        for item in value:
+            item_type = type(item)
+            if item_type in _ATOMIC_TYPES:
+                copied.append(item)
+            elif getattr(item_type, "__deepcopy__", None) is _deepcopy_model_object:
+                # Inlined memo check, as lists of fields are the most common case
+                item_copy = memo.get(id(item), _MISSING)
+                if item_copy is _MISSING:
+                    item_copy = _deepcopy_model_object(item, memo)
+                copied.append(item_copy)
+            else:
+                copied.append(_deepcopy_value(item, memo))
+        return copied
+    if value_type is dict:
+        key = id(value)
+        copied = memo.get(key, _MISSING)
+        if copied is not _MISSING:
+            return copied
+        memo[key] = copied = {}
+        for item_key, item in value.items():
+            copied[
+                item_key if type(item_key) in _ATOMIC_TYPES else _deepcopy_value(item_key, memo)
+            ] = (item if type(item) in _ATOMIC_TYPES else _deepcopy_value(item, memo))
+        return copied
+    if getattr(value_type, "__deepcopy__", None) is _deepcopy_model_object:
+        copied = memo.get(id(value), _MISSING)
+        if copied is not _MISSING:
+            return copied
+        return _deepcopy_model_object(value, memo)
+    return deepcopy(value, memo)
+
+
+def _deepcopy_model_object(obj: _T, memo: dict[int, Any]) -> _T:
+    """Deep-copies ``obj`` by copying its ``__dict__``, attribute by attribute.
+
+    Used as ``__deepcopy__`` of ``Block`` and ``Field``. Semantically equivalent
+    to the generic ``copy.deepcopy`` of a plain object: all attribute values
+    (lists, dicts, nested blocks, exceptions, ...) are deep-copied with the
+    shared ``memo``, so references that are shared within one ``deepcopy``
+    call stay shared in the copy, and cycles are handled.
+    Subclasses (including their additional attributes) are supported.
+    """
+    cls = obj.__class__
+    copied = cls.__new__(cls)
+    # Register the copy before recursing, so cyclic references resolve to it.
+    memo[id(obj)] = copied
+    copied_dict = copied.__dict__
+    for key, value in obj.__dict__.items():
+        copied_dict[key] = value if type(value) in _ATOMIC_TYPES else _deepcopy_value(value, memo)
+    return copied
 
 
 def _validated_enclosing(enclosing: str | None) -> str | None:
@@ -87,6 +179,10 @@ class Block(abc.ABC):
         # unhashable attributes (e.g. fields, parser_metadata) are excluded.
         # Subclasses add a cheap identifier: both are None if not parsed.
         return hash((type(self), self._start_line_in_file, self._raw))
+
+    # Fast path for the frequent deep copies made by middleware
+    # (see ``BlockMiddleware.transform_block``). Same semantics as the default.
+    __deepcopy__ = _deepcopy_model_object
 
 
 class String(Block):
@@ -308,6 +404,10 @@ class Field:
         # (equal fields thus have equal hashes). The value is excluded as it
         # may be mutable or unhashable (e.g. a list after middleware was applied).
         return hash((type(self), self._start_line, self._key))
+
+    # Fast path, see ``Block.__deepcopy__``. Non-primitive values
+    # (e.g. lists or ``NameParts`` after middleware was applied) are deep-copied.
+    __deepcopy__ = _deepcopy_model_object
 
     def __str__(self) -> str:
         return f"Field (line: {self.start_line}, key: `{self.key}`): `{self.value}`"
