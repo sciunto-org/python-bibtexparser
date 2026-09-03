@@ -6,6 +6,7 @@ import bibtexparser
 from bibtexparser.library import Library
 from bibtexparser.middlewares.enclosing import AddEnclosingMiddleware
 from bibtexparser.middlewares.enclosing import RemoveEnclosingMiddleware
+from bibtexparser.middlewares.middleware import BlockMiddleware
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
 from bibtexparser.model import String
@@ -422,3 +423,232 @@ def test_string_reference_roundtrip():
 
 
 # TODO round-trip tests (removal -> addition -> removal)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("{intro} # {outro}", id="brace_concatenation"),
+        pytest.param('"intro" # "outro"', id="quote_concatenation"),
+        pytest.param('{intro} # "outro"', id="mixed_concatenation"),
+        pytest.param("{a} and {b}", id="two_brace_groups"),
+        pytest.param('"a" "b"', id="two_quote_groups"),
+        pytest.param("{a} # b # {c}", id="concatenation_with_reference"),
+    ],
+)
+def test_no_removal_if_delimiters_do_not_enclose_whole_value(value: str):
+    """Values whose first and last char are delimiters, but not a matching pair,
+    must not be stripped, as this would corrupt them."""
+    field = Field(value=value, start_line=6, key="pages")
+    input_entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[field],
+    )
+
+    middleware = RemoveEnclosingMiddleware(allow_inplace_modification=True)
+    transformed = middleware.transform(library=Library([input_entry])).entries[0]
+
+    assert transformed["pages"] == value
+    assert transformed.parser_metadata["removed_enclosing"]["pages"] == "no-enclosing"
+    assert transformed.fields_dict["pages"].enclosing == "no-enclosing"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("{intro} # {outro}", id="brace_concatenation"),
+        pytest.param('"intro" # "outro"', id="quote_concatenation"),
+        pytest.param("{a} and {b}", id="two_brace_groups"),
+    ],
+)
+def test_no_removal_on_string_block_if_delimiters_do_not_enclose_whole_value(value: str):
+    """Same as above, for `@string` blocks."""
+    input_string = String(
+        start_line=5,
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        value=value,
+    )
+
+    middleware = RemoveEnclosingMiddleware(allow_inplace_modification=True)
+    transformed = middleware.transform(library=Library([input_string])).strings[0]
+
+    assert transformed.value == value
+    assert transformed.parser_metadata["removed_enclosing"] == "no-enclosing"
+    assert transformed.enclosing == "no-enclosing"
+
+
+@pytest.mark.parametrize(
+    "value, expected_stripped, expected_enclosing",
+    [
+        pytest.param("{a {b} c}", "a {b} c", "{", id="nested_group"),
+        pytest.param("{{nested}}", "{nested}", "{", id="doubly_braced"),
+        pytest.param("{}", "", "{", id="empty_braces"),
+        pytest.param('""', "", '"', id="empty_quotes"),
+        pytest.param('{"quoted"}', '"quoted"', "{", id="quotes_in_braces"),
+        pytest.param('"a {b} c"', "a {b} c", '"', id="braces_in_quotes"),
+        pytest.param('"a {"} c"', 'a {"} c', '"', id="braced_quote_in_quotes"),
+        pytest.param(r"{a \{ b}", r"a \{ b", "{", id="escaped_open_brace"),
+        pytest.param(r"{a \} b}", r"a \} b", "{", id="escaped_close_brace"),
+        pytest.param(r'"a \" b"', r"a \" b", '"', id="escaped_quote"),
+        pytest.param(r"{{\`a} {\`a}}", r"{\`a} {\`a}", "{", id="enclosed_groups"),
+    ],
+)
+def test_removal_of_genuinely_enclosing_delimiters(
+    value: str, expected_stripped: str, expected_enclosing: str
+):
+    """Values that really are enclosed by a single delimiter pair must still be stripped."""
+    assert RemoveEnclosingMiddleware._strip_enclosing(value) == (
+        expected_stripped,
+        expected_enclosing,
+    )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("", id="empty"),
+        pytest.param(" ", id="whitespace"),
+        pytest.param("{", id="lone_open_brace"),
+        pytest.param("}", id="lone_close_brace"),
+        pytest.param('"', id="lone_quote"),
+        pytest.param("\\", id="lone_backslash"),
+    ],
+)
+def test_degenerate_values_are_not_stripped(value: str):
+    """Short/degenerate values must neither raise nor lose characters."""
+    assert RemoveEnclosingMiddleware._strip_enclosing(value) == (value.strip(), "no-enclosing")
+
+
+def test_concatenation_roundtrip():
+    """Default parse -> write must reproduce concatenations of delimited parts
+    verbatim, rather than corrupting them."""
+    bibtex = '@article{a,\n\tpages = {intro} # {outro},\n\ttitle = "x" # "y"\n}\n'
+    written = bibtexparser.write_string(bibtexparser.parse_string(bibtex))
+
+    assert "pages = {intro} # {outro}" in written
+    assert 'title = "x" # "y"' in written
+    assert written == bibtex
+
+
+@pytest.mark.parametrize(
+    "value, expected_stripped, expected_enclosing",
+    [
+        pytest.param(r"{\\}a}", r"\\}a", "{", id="doubled_backslash_before_brace"),
+        pytest.param(r"{a\\{}", r"a\\{", "{", id="doubled_backslash_before_open_brace"),
+        pytest.param(r'"\\""', r'\\"', '"', id="doubled_backslash_before_quote"),
+    ],
+)
+def test_escaping_follows_the_splitter_convention(
+    value: str, expected_stripped: str, expected_enclosing: str
+):
+    """A delimiter is escaped iff directly preceded by a backslash.
+
+    This is the convention of the splitter's mark regex, which skips such a
+    delimiter regardless of how many backslashes precede it. The two must agree,
+    or values the parser read as a single group are not stripped here.
+    """
+    assert RemoveEnclosingMiddleware._strip_enclosing(value) == (
+        expected_stripped,
+        expected_enclosing,
+    )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("Doe, John and Roe, Jane", id="top_level_comma"),
+        pytest.param("Foo # , Bar", id="concatenation_with_top_level_comma"),
+        pytest.param("a = b", id="top_level_equals"),
+        pytest.param("a\nb", id="top_level_newline"),
+        pytest.param("a} b", id="unbalanced_closing_brace"),
+        pytest.param("{a b", id="unbalanced_opening_brace"),
+    ],
+)
+def test_no_enclosing_demand_is_overruled_for_unwritable_values(value: str):
+    """A `no-enclosing` demand must not produce bibtex that does not parse back.
+
+    A value-transforming middleware may change a value after the demand was set
+    (e.g. by removing the braces it was derived from), which can leave a value
+    that the splitter would not read back in one piece.
+    """
+    field = Field(value=value, start_line=6, key="author", enclosing="no-enclosing")
+    entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[field],
+    )
+
+    middleware = AddEnclosingMiddleware(
+        reuse_previous_enclosing=True, enclose_integers=True, default_enclosing="{"
+    )
+    transformed = middleware.transform(library=Library([entry])).entries[0]
+
+    assert transformed["author"] == f"{{{value}}}"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("jan", id="string_reference"),
+        pytest.param("intro # outro", id="concatenation_of_references"),
+        pytest.param("{intro} # {outro}", id="concatenation_of_groups"),
+        pytest.param("ieeetc # {, Special Issue}", id="mixed_concatenation"),
+        pytest.param('"a, b" # c', id="quoted_part_with_comma"),
+    ],
+)
+def test_no_enclosing_demand_is_honored_for_writable_values(value: str):
+    """Values that do parse back verbatim keep their `no-enclosing` demand."""
+    field = Field(value=value, start_line=6, key="author", enclosing="no-enclosing")
+    entry = Entry(
+        start_line=5,
+        entry_type="article",
+        raw="<--- does not matter for this unit test -->",
+        key="someKey",
+        fields=[field],
+    )
+
+    middleware = AddEnclosingMiddleware(
+        reuse_previous_enclosing=True, enclose_integers=True, default_enclosing="{"
+    )
+    transformed = middleware.transform(library=Library([entry])).entries[0]
+
+    assert transformed["author"] == value
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        pytest.param("{Doe, John} and {Roe, Jane}", id="two_brace_groups"),
+        pytest.param("{Foo} # {, Bar}", id="concatenation_of_groups"),
+        pytest.param("ieeetc # {, Special Issue}", id="mixed_concatenation"),
+    ],
+)
+def test_written_output_reparses_after_a_value_transformation(value: str):
+    """Values kept verbatim carry their own delimiters and a `no-enclosing` demand.
+
+    A middleware rewriting such a value (here: removing the braces) must not
+    leave output that bibtexparser can no longer parse.
+    """
+
+    class _BraceRemovingMiddleware(BlockMiddleware):
+        def transform_entry(self, entry, library):
+            for field in entry.fields:
+                # As the latex middlewares do: the value setter resets `enclosing`.
+                enclosing = field.enclosing
+                field.value = field.value.replace("{", "").replace("}", "")
+                field.enclosing = enclosing
+            return entry
+
+    bibtex = f"@article{{a,\n\tauthor = {value}\n}}\n"
+    library = bibtexparser.parse_string(bibtex, append_middleware=[_BraceRemovingMiddleware()])
+    written = bibtexparser.write_string(library)
+
+    reparsed = bibtexparser.parse_string(written)
+    assert not reparsed.failed_blocks
+    assert len(reparsed.entries) == 1
