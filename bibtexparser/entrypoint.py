@@ -32,6 +32,10 @@ def _build_parse_stack(
     parse_stack: Iterable[Middleware] | None,
     append_middleware: Iterable[Middleware] | None,
 ) -> list[Middleware]:
+    # Materialize upfront: the arguments may be one-shot iterators.
+    parse_stack = None if parse_stack is None else list(parse_stack)
+    append_middleware = None if append_middleware is None else list(append_middleware)
+
     if parse_stack is not None and append_middleware is not None:
         raise ValueError(
             "Provided both parse_stack and append_middleware. "
@@ -46,9 +50,9 @@ def _build_parse_stack(
     if append_middleware is None:
         return list(parse_stack)
 
-    parse_stack_types = [type(m) for m in parse_stack]
+    parse_stack_types = {type(m) for m in parse_stack}
     append_stack_types = {type(m) for m in append_middleware}
-    stack_types_intersect = set(parse_stack_types).intersection(append_stack_types)
+    stack_types_intersect = parse_stack_types.intersection(append_stack_types)
     if len(stack_types_intersect) > 0:
         warnings.warn(
             "Some middleware passed in append_middleware are "
@@ -62,6 +66,10 @@ def _build_unparse_stack(
     unparse_stack: Iterable[Middleware] | None,
     prepend_middleware: Iterable[Middleware] | None,
 ) -> list[Middleware]:
+    # Materialize upfront: the arguments may be one-shot iterators.
+    unparse_stack = None if unparse_stack is None else list(unparse_stack)
+    prepend_middleware = None if prepend_middleware is None else list(prepend_middleware)
+
     if unparse_stack is not None and prepend_middleware is not None:
         raise ValueError(
             "Provided both unparse_stack and prepend_middleware. "
@@ -76,9 +84,9 @@ def _build_unparse_stack(
     if prepend_middleware is None:
         return list(unparse_stack)
 
-    parse_stack_types = [type(m) for m in unparse_stack]
+    parse_stack_types = {type(m) for m in unparse_stack}
     append_stack_types = {type(m) for m in prepend_middleware}
-    stack_types_intersect = set(parse_stack_types).intersection(append_stack_types)
+    stack_types_intersect = parse_stack_types.intersection(append_stack_types)
     if len(stack_types_intersect) > 0:
         warnings.warn(
             "Some middleware passed in append_middleware are "
