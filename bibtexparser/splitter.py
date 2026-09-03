@@ -291,8 +291,18 @@ class Splitter:
         Returns:
             A new library containing the split blocks.
         """
-        self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
+        # A backslash escapes the character right after it, so a backslash that is
+        # itself escaped cannot escape the next one. Matching the escape pairs and
+        # then dropping them gets that parity right, which a look-behind cannot.
+        # Newlines are not escapable: they are marks for line counting only.
+        self._markiter = (
+            m
+            for m in re.finditer(
+                r"\\[\\\{\}\",=]|[\{\}\",=\n]|@[\w]*( |\t)*(?={)",
+                self.bibstr,
+                re.MULTILINE,
+            )
+            if m.group(0)[0] != "\\"
         )
 
         library = Library()
