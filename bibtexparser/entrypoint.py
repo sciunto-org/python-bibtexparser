@@ -89,8 +89,8 @@ def _build_unparse_stack(
     stack_types_intersect = parse_stack_types.intersection(append_stack_types)
     if len(stack_types_intersect) > 0:
         warnings.warn(
-            "Some middleware passed in append_middleware are "
-            f"already in the default parse_stack ({stack_types_intersect})."
+            "Some middleware passed in prepend_middleware are "
+            f"already in the default unparse_stack ({stack_types_intersect})."
         )
 
     return list(prepend_middleware) + list(unparse_stack)
