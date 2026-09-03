@@ -28,7 +28,7 @@ Development of version one happens on the dedicated [v1 branch](https://github.c
 ## Documentation
 Go check out our documentation on [https://bibtexparser.readthedocs.io/en/main/](https://bibtexparser.readthedocs.io/en/main/).
 
-## Advantages of V2
+## Advantages of `v2` compared to `v1`
 
 - :rocket: Order of magnitudes faster
 - :wrench: Easily customizable parsing **and** writing
