@@ -102,22 +102,23 @@ class Splitter:
             self._current_char_index = m.start()
             return m
 
-        # Get next mark from iterator
-        m = next(self._markiter, None)
-        if m is not None:
+        while True:
+            m = next(self._markiter, None)
+            if m is None:
+                # Reached end of file
+                self._current_char_index = len(self.bibstr)
+                if not accept_eof:
+                    raise BlockAbortedException(
+                        abort_reason="Unexpectedly reached end of file.",
+                        end_index=self._current_char_index,
+                    )
+                return None
+
             self._current_char_index = m.start()
-            if m.group(0) == "\n":
-                self._current_line += 1
-                return self._next_mark(accept_eof=accept_eof)
-        else:
-            # Reached end of file
-            self._current_char_index = len(self.bibstr)
-            if not accept_eof:
-                raise BlockAbortedException(
-                    abort_reason="Unexpectedly reached end of file.",
-                    end_index=self._current_char_index,
-                )
-        return m
+            if m.group(0) != "\n":
+                return m
+
+            self._current_line += 1
 
     def _move_to_closed_bracket(self) -> int:
         """Index of the curly bracket closing a just opened one."""
@@ -230,6 +231,13 @@ class Splitter:
         while True:
             equals_mark = self._next_mark(accept_eof=False)
             if equals_mark.group(0) == "}":
+                dangling_key = self.bibstr[key_start : equals_mark.start()].strip()
+                if dangling_key:
+                    raise BlockAbortedException(
+                        abort_reason=f"Expected a `=` after entry key `{dangling_key}`, "
+                        "but found the end of the entry (`}`).",
+                        end_index=equals_mark.end(),
+                    )
                 # End of entry
                 return result, equals_mark.end(), duplicate_keys
 
@@ -266,6 +274,8 @@ class Splitter:
             elif after_field_mark.group(0) == "}":
                 # If next mark is a closing bracket, put it back (will return in next loop iteration)
                 self._unaccepted_mark = after_field_mark
+                # Advance past the value, else the check above aborts a valid entry.
+                key_start = after_field_mark.start()
                 continue
             else:
                 self._unaccepted_mark = after_field_mark
@@ -275,22 +285,17 @@ class Splitter:
                     end_index=after_field_mark.start(),
                 )
 
-    def split(self, library: Library | None = None) -> Library:
-        """Split the bibtex-string into blocks and add them to the library.
+    def split(self) -> Library:
+        """Split the bibtex-string into blocks and return them as a new library.
 
-        Args:
-            library: The library to add the blocks to. If None, a new library is created.
         Returns:
-            The library with the added blocks.
+            A new library containing the split blocks.
         """
         self._markiter = re.finditer(
             r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
         )
 
-        if library is None:
-            library = Library()
-        else:
-            logger.info("Adding blocks to existing library.")
+        library = Library()
 
         while True:
             m = self._next_mark(accept_eof=True)
@@ -303,16 +308,16 @@ class Splitter:
                 # Clean up previous block implicit_comment
                 implicit_comment = self._end_implicit_comment(m.start())
                 if implicit_comment is not None:
-                    library.add(implicit_comment)
+                    library.add(implicit_comment, fail_on_duplicate_key=False)
                 self._implicit_comment_start = None
 
                 start_line = self._current_line
                 try:
                     # Start new block parsing
                     if m_val.startswith("@comment"):
-                        library.add(self._handle_explicit_comment())
+                        library.add(self._handle_explicit_comment(), fail_on_duplicate_key=False)
                     elif m_val.startswith("@preamble"):
-                        library.add(self._handle_preamble())
+                        library.add(self._handle_preamble(), fail_on_duplicate_key=False)
                     elif m_val.startswith("@string"):
                         library.add(self._handle_string(m), fail_on_duplicate_key=False)
                     else:
@@ -333,7 +338,8 @@ class Splitter:
                             start_line=start_line,
                             raw=self.bibstr[m.start() : e.end_index],
                             error=e,
-                        )
+                        ),
+                        fail_on_duplicate_key=False,
                     )
 
                 except ParserStateException as e:
@@ -360,7 +366,7 @@ class Splitter:
         if self._implicit_comment_start is not None:
             comment = self._end_implicit_comment(len(self.bibstr))
             if comment is not None:
-                library.add(comment)
+                library.add(comment, fail_on_duplicate_key=False)
 
         return library
 

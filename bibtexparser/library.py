@@ -62,30 +62,75 @@ class Library:
 
     def _find_duplicate_keys(self, blocks: list[Block]) -> list[str]:
         """Keys of blocks that would become duplicates when added to the library."""
+        # Look keys up in the by-key dicts directly (rather than copying them into
+        # sets), so that the cost depends only on the number of blocks being added,
+        # not on the size of the library.
         duplicate_keys = []
-        seen_entry_keys = set(self._entries_by_key)
-        seen_string_keys = set(self._strings_by_key)
+        new_entry_keys = set()
+        new_string_keys = set()
         for block in blocks:
             if isinstance(block, Entry):
-                if block.key in seen_entry_keys:
-                    duplicate_keys.append(block.key)
-                seen_entry_keys.add(block.key)
+                key = block.key
+                if key in self._entries_by_key or key in new_entry_keys:
+                    duplicate_keys.append(key)
+                else:
+                    new_entry_keys.add(key)
             elif isinstance(block, String):
-                if block.key in seen_string_keys:
-                    duplicate_keys.append(block.key)
-                seen_string_keys.add(block.key)
+                key = block.key
+                if key in self._strings_by_key or key in new_string_keys:
+                    duplicate_keys.append(key)
+                else:
+                    new_string_keys.add(key)
         return duplicate_keys
 
-    def _block_index(self, block: Block) -> int:
+    def _block_index(self, block: Block, skip: set[int] | None = None) -> int:
         """Index of a block in the library, preferring identity over equality.
 
         :param block: Block to look up.
+        :param skip: Indices to ignore, e.g. because they are already claimed
+            by another block of the same (multi-block) operation.
         :raises ValueError: If block is not in library."""
+        skip = set() if skip is None else skip
         for i, b in enumerate(self._blocks):
-            if b is block:
+            if i not in skip and b is block:
                 return i
-        # No identity match; fall back to equality (raises ValueError if not found).
-        return self._blocks.index(block)
+        # No identity match; fall back to equality.
+        for i, b in enumerate(self._blocks):
+            if i not in skip and b == block:
+                return i
+        raise ValueError("Block not in library.")
+
+    def _key_registration(
+        self, block: Block, claimed: list[tuple[dict, str]]
+    ) -> tuple[dict, str] | None:
+        """The by-key dict and key under which a block is registered, if any.
+
+        A block's key is mutable and may have been changed after the block was
+        added to the library. The registration is thus primarily located by
+        identity, and only then by the block's current key.
+
+        :param block: Block to look up.
+        :param claimed: Registrations already claimed by other blocks of the
+            same operation; these are not returned a second time.
+        :returns: Tuple of by-key dict and key, or None if the block is not
+            registered in any by-key dict (e.g. comments or failed blocks)."""
+        if isinstance(block, Entry):
+            by_key = self._entries_by_key
+        elif isinstance(block, String):
+            by_key = self._strings_by_key
+        else:
+            return None
+
+        def is_claimed(key: str) -> bool:
+            """Whether this key was already claimed by an earlier block in this call."""
+            return any(d is by_key and k == key for d, k in claimed)
+
+        for key, registered in by_key.items():
+            if registered is block and not is_claimed(key):
+                return by_key, key
+        if block.key in by_key and not is_claimed(block.key):
+            return by_key, block.key
+        return None
 
     def remove(self, blocks: list[Block] | Block):
         """Remove blocks from library.
@@ -93,17 +138,29 @@ class Library:
         If equal duplicate blocks exist in the library, the exact (identical)
         instance is removed, if present; otherwise the first equal block.
 
+        Blocks whose key was changed after they were added are removed
+        correctly, i.e., they are also de-registered from the by-key
+        dictionaries backing `entries_dict` and `strings_dict`.
+
         :param blocks: Block or list of blocks to remove.
-        :raises ValueError: If block is not in library."""
+        :raises ValueError: If a block is not in library. In this case, no
+            blocks are removed from the library."""
         if isinstance(blocks, Block):
             blocks = [blocks]
 
+        # Resolve all lookups before mutating, so a failure changes nothing.
+        indices: set[int] = set()
+        registrations: list[tuple[dict, str]] = []
         for block in blocks:
-            del self._blocks[self._block_index(block)]
-            if isinstance(block, Entry):
-                del self._entries_by_key[block.key]
-            elif isinstance(block, String):
-                del self._strings_by_key[block.key]
+            indices.add(self._block_index(block, skip=indices))
+            registration = self._key_registration(block, claimed=registrations)
+            if registration is not None:
+                registrations.append(registration)
+
+        for index in sorted(indices, reverse=True):
+            del self._blocks[index]
+        for by_key, key in registrations:
+            del by_key[key]
 
     def replace(self, old_block: Block, new_block: Block, fail_on_duplicate_key: bool = True):
         """Replace a block with another block, at the same position.

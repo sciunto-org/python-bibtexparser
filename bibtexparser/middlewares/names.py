@@ -21,8 +21,13 @@ class InvalidNameError(ValueError):
     """Exception raised by :py:func:`parse_single_name_into_parts` when facing an invalid name."""
 
     def __init__(self, name: str, reason: str):
+        self.name = name
+        self.reason = reason
         message: str = f"Cannot split the following name `{name}` into parts: {reason}"
         super().__init__(message)
+
+    def __reduce__(self):
+        return (self.__class__, (self.name, self.reason))
 
 
 class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
@@ -57,7 +62,10 @@ class _NameTransformerMiddleware(BlockMiddleware, abc.ABC):
         try:
             for field in entry.fields:
                 if field.key in self.name_fields:
+                    # The value setter resets `enclosing`; only the representation changes.
+                    enclosing = field.enclosing
                     field.value = self._transform_field_value(field.value)
+                    field.enclosing = enclosing
             return entry
         except InvalidNameError as e:
             return MiddlewareErrorBlock(entry, e)

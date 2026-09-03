@@ -85,6 +85,7 @@ class Block(abc.ABC):
         # Hash on a stable subset of the attributes compared in `__eq__`
         # (equal blocks thus have equal hashes). Mutable or potentially
         # unhashable attributes (e.g. fields, parser_metadata) are excluded.
+        # Subclasses add a cheap identifier: both are None if not parsed.
         return hash((type(self), self._start_line_in_file, self._raw))
 
 
@@ -138,6 +139,9 @@ class String(Block):
     def enclosing(self, enclosing: str | None):
         self._enclosing = _validated_enclosing(enclosing)
 
+    def __hash__(self) -> int:
+        return hash((type(self), self._start_line_in_file, self._raw, self._key))
+
     def __str__(self) -> str:
         return f"String (line: {self.start_line}, key: `{self.key}`): `{self.value}`"
 
@@ -164,6 +168,9 @@ class Preamble(Block):
     def value(self, value: str):
         self._value = value
 
+    def __hash__(self) -> int:
+        return hash((type(self), self._start_line_in_file, self._raw, self._value))
+
     def __str__(self) -> str:
         return f"Preamble (line: {self.start_line}): `{self.value}`"
 
@@ -186,6 +193,9 @@ class ExplicitComment(Block):
     @comment.setter
     def comment(self, value: str):
         self._comment = value
+
+    def __hash__(self) -> int:
+        return hash((type(self), self._start_line_in_file, self._raw, self._comment))
 
     def __str__(self) -> str:
         return f"ExplicitComment (line: {self.start_line}): `{self.comment}`"
@@ -212,6 +222,9 @@ class ImplicitComment(Block):
     @comment.setter
     def comment(self, value: str):
         self._comment = value
+
+    def __hash__(self) -> int:
+        return hash((type(self), self._start_line_in_file, self._raw, self._comment))
 
     def __str__(self) -> str:
         return f"ImplicitComment (line: {self.start_line}): `{self.comment}`"
@@ -440,6 +453,9 @@ class Entry(Block):
             ("ENTRYTYPE", self.entry_type),
             ("ID", self.key),
         ] + [(f.key, f.value) for f in self.fields]
+
+    def __hash__(self) -> int:
+        return hash((type(self), self._start_line_in_file, self._raw, self._entry_type, self._key))
 
     def __str__(self) -> str:
         lines = [f"Entry (line: {self.start_line}, type: `{self.entry_type}`, key: `{self.key}`):"]

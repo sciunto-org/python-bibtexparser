@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import pytest as pytest
 
+import bibtexparser
 from bibtexparser.library import Library
 from bibtexparser.middlewares.names import InvalidNameError
 from bibtexparser.middlewares.names import MergeCoAuthors
@@ -130,6 +131,24 @@ def test_name_splitting_strict_mode(name: str, reason: str):
     # message must contain the name and the reason
     with pytest.raises(InvalidNameError, match=f".*{name}.*{reason}.*"):
         parse_single_name_into_parts(name, strict=True)
+
+
+def test_invalid_name_error_is_copyable():
+    # A MiddlewareErrorBlock stores the InvalidNameError, and later middlewares
+    # (for example SortBlocksByTypeAndKeyMiddleware) deepcopy the library, so
+    # the exception has to survive copy and pickle. It could not before: its
+    # two-argument __init__ did not match the single message stored in args.
+    import pickle
+
+    with pytest.raises(InvalidNameError) as exc_info:
+        parse_single_name_into_parts("AA, BB, CC, DD", strict=True)
+    error = exc_info.value
+
+    for clone in (deepcopy(error), pickle.loads(pickle.dumps(error))):
+        assert isinstance(clone, InvalidNameError)
+        assert str(clone) == str(error)
+        assert clone.name == error.name
+        assert clone.reason == error.reason
 
 
 def _dict_to_nameparts(as_dict):
@@ -1107,3 +1126,54 @@ def test_split_name_parts_exception(name: str, reason: str):
     # Using same test as in test_name_splitting_strict_mode
     with pytest.raises(InvalidNameError, match=f".*{name}.*{reason}.*"):
         raise transformed_library.failed_blocks[0].error
+
+
+@pytest.mark.parametrize(
+    "middleware, field_value",
+    [
+        pytest.param(SeparateCoAuthors(), "someone", id="separate_coauthors"),
+        pytest.param(MergeCoAuthors(), ["someone"], id="merge_coauthors"),
+        pytest.param(SplitNameParts(), ["someone"], id="split_name_parts"),
+        pytest.param(MergeNameParts(), [NameParts(last=["someone"])], id="merge_name_parts"),
+    ],
+)
+@pytest.mark.parametrize("enclosing", ["no-enclosing", "{", '"'])
+def test_enclosing_demand_survives_name_transformation(middleware, field_value, enclosing):
+    """Name middlewares change the representation of a value, not its kind.
+
+    Thus, the enclosing demand (which the `Field.value` setter resets) must be restored."""
+    input_entry = Entry(
+        start_line=0,
+        raw="irrelevant-for-this-test",
+        entry_type="article",
+        key="articleKey",
+        fields=[
+            Field(start_line=1, key="author", value=deepcopy(field_value), enclosing=enclosing)
+        ],
+    )
+
+    transformed_library = middleware.transform(Library([input_entry]))
+
+    transformed_field = transformed_library.entries[0].fields_dict["author"]
+    assert transformed_field.enclosing == enclosing
+
+
+@pytest.mark.parametrize(
+    "bibtex",
+    [
+        pytest.param("@article{articleKey,\n\tauthor = someone\n}", id="string_reference"),
+        pytest.param("@article{articleKey,\n\tauthor = first # last\n}", id="concatenation"),
+    ],
+)
+def test_unenclosed_name_fields_roundtrip(bibtex):
+    """Unenclosed name values must not be enclosed on write, despite the name middlewares."""
+    library = bibtexparser.parse_string(
+        bibtex,
+        append_middleware=[
+            SeparateCoAuthors(),
+            SplitNameParts(),
+            MergeNameParts(),
+            MergeCoAuthors(),
+        ],
+    )
+    assert bibtexparser.write_string(library).strip() == bibtex.strip()

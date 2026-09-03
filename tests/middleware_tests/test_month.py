@@ -179,3 +179,89 @@ def test_int_month_not_enclosed_when_writing():
     library = bibtexparser.parse_string("@article{test447,\n month = {jan}\n}")
     written = bibtexparser.write_string(library, prepend_middleware=[MonthIntMiddleware()])
     assert "month = 1" in written
+
+
+def test_unresolvable_month_reference_keeps_no_enclosing_demand():
+    """An untransformable month must keep its `no-enclosing` demand (see `Field.enclosing`).
+
+    `month = foo` is a bibtex string reference; enclosing it when writing
+    would silently turn the reference into a literal.
+    """
+    library = Splitter("@article{a,\n month = foo,\n title = {x}\n}").split()
+    library = RemoveEnclosingMiddleware(allow_inplace_modification=True).transform(library)
+    assert library.entries[0].fields_dict["month"].enclosing == "no-enclosing"
+
+    for middleware in (
+        MonthLongStringMiddleware,
+        MonthAbbreviationMiddleware,
+        MonthIntMiddleware,
+    ):
+        transformed = middleware(allow_inplace_modification=False).transform(library)
+        month = transformed.entries[0].fields_dict["month"]
+        assert month.value == "foo"
+        assert month.enclosing == "no-enclosing"
+
+
+def test_unresolvable_month_reference_written_verbatim():
+    library = bibtexparser.parse_string("@article{a,\n month = foo,\n title = {x}\n}")
+    for middleware in (
+        MonthLongStringMiddleware,
+        MonthAbbreviationMiddleware,
+        MonthIntMiddleware,
+    ):
+        written = bibtexparser.write_string(library, prepend_middleware=[middleware()])
+        assert "month = foo" in written, f"{middleware.__name__} enclosed a string reference"
+        assert "title = {x}" in written
+
+
+def test_month_concatenation_round_trips():
+    """Concatenation expressions must be written verbatim, not enclosed."""
+    bibtex = '@article{a,\n month = mymonth # "foo",\n title = {x}\n}'
+    library = bibtexparser.parse_string(bibtex)
+    for middleware in (
+        MonthLongStringMiddleware,
+        MonthAbbreviationMiddleware,
+        MonthIntMiddleware,
+    ):
+        written = bibtexparser.write_string(library, prepend_middleware=[middleware()])
+        assert 'month = mymonth # "foo"' in written
+
+
+def test_out_of_range_int_month_left_alone():
+    library = Splitter("@article{a,\n month = 13\n}").split()
+    library = RemoveEnclosingMiddleware(allow_inplace_modification=True).transform(library)
+    before = library.entries[0].fields_dict["month"]
+
+    for middleware in (
+        MonthLongStringMiddleware,
+        MonthAbbreviationMiddleware,
+        MonthIntMiddleware,
+    ):
+        transformed = middleware(allow_inplace_modification=False).transform(library)
+        month = transformed.entries[0].fields_dict["month"]
+        assert month.value == "13"
+        assert month.enclosing == before.enclosing
+
+
+def test_transformed_months_keep_value_and_enclosing():
+    """The regular transformations are unaffected by the unchanged-value handling."""
+    library = Splitter("@article{a,\n month = jan,\n}\n@article{b,\n month = 1,\n}").split()
+    library = RemoveEnclosingMiddleware(allow_inplace_modification=True).transform(library)
+
+    long_string = MonthLongStringMiddleware(allow_inplace_modification=False).transform(library)
+    assert long_string.entries_dict["a"].fields_dict["month"].value == "January"
+    assert long_string.entries_dict["a"].fields_dict["month"].enclosing is None
+    assert long_string.entries_dict["b"].fields_dict["month"].value == "January"
+    assert long_string.entries_dict["b"].fields_dict["month"].enclosing is None
+
+    int_months = MonthIntMiddleware(allow_inplace_modification=False).transform(library)
+    assert int_months.entries_dict["a"].fields_dict["month"].value == 1
+    assert int_months.entries_dict["a"].fields_dict["month"].enclosing == "no-enclosing"
+    assert int_months.entries_dict["b"].fields_dict["month"].value == 1
+    assert int_months.entries_dict["b"].fields_dict["month"].enclosing == "no-enclosing"
+
+    abbreviations = MonthAbbreviationMiddleware(allow_inplace_modification=False).transform(library)
+    assert abbreviations.entries_dict["a"].fields_dict["month"].value == "jan"
+    assert abbreviations.entries_dict["a"].fields_dict["month"].enclosing == "no-enclosing"
+    assert abbreviations.entries_dict["b"].fields_dict["month"].value == "jan"
+    assert abbreviations.entries_dict["b"].fields_dict["month"].enclosing == "no-enclosing"
