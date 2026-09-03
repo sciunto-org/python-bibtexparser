@@ -121,8 +121,11 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         concatenation expression `"intro" # "outro"`. Escaped quotes and quotes
         inside braces are not counted.
         """
-        depth = 0
         last_index = len(value) - 1
+        if value.find('"', 1, last_index) < 0:
+            # Fast path for the common case of a value without inner quotes.
+            return True
+        depth = 0
         for match in _BRACES_AND_QUOTE.finditer(value):
             index = match.start()
             if index == 0 or index == last_index:
