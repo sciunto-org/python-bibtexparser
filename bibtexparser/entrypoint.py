@@ -1,4 +1,5 @@
 import codecs
+import logging
 import warnings
 from collections.abc import Iterable
 from copy import deepcopy
@@ -16,8 +17,15 @@ from .splitter import Splitter
 from .writer import BibtexFormat
 from .writer import write
 
+logger = logging.getLogger(__name__)
+
 #: Marks a seeded copy of a pre-existing `@string`, dropped before merging back.
 _PREEXISTING_STRING_KEY = "bibtexparser_preexisting_string"
+
+#: Number of blocks from which on `write_string`/`write_file` warn if the unparse
+#: stack deep-copies blocks. Copying costs roughly 30-60 µs per entry, i.e. it
+#: starts to dominate the write time at this size.
+LARGE_LIBRARY_WARNING_THRESHOLD = 10_000
 
 
 def _build_parse_stack(
@@ -78,6 +86,29 @@ def _build_unparse_stack(
         )
 
     return list(prepend_middleware) + list(unparse_stack)
+
+
+def _warn_if_large_library_is_copied(library: Library, unparse_stack: list[Middleware]) -> None:
+    """Warn if writing ``library`` will deep-copy its blocks and that is likely slow.
+
+    Middlewares with ``allow_inplace_modification=False`` (the default unparse stack
+    is built that way) deep-copy every block they transform, which dominates the
+    write time of large libraries.
+    """
+    n_blocks = len(library.blocks)
+    if n_blocks < LARGE_LIBRARY_WARNING_THRESHOLD:
+        return
+    if all(middleware.allow_inplace_modification for middleware in unparse_stack):
+        return
+    logger.warning(
+        f"Writing a library with {n_blocks} blocks: the unparse stack deep-copies blocks "
+        "(it contains middlewares with allow_inplace_modification=False), "
+        "which is slow for large libraries. "
+        "If you do not need the library after writing, pass an unparse stack whose "
+        "middlewares all allow in-place modification, e.g. "
+        "`unparse_stack=bibtexparser.middlewares.default_unparse_stack("
+        "allow_inplace_modification=True)`."
+    )
 
 
 def _handle_deprecated_write_params(
@@ -287,6 +318,9 @@ def write_file(
                         Only applicable if `unparse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional).
     :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``.
+    Writing a library with at least ``LARGE_LIBRARY_WARNING_THRESHOLD`` blocks logs a warning
+    if the unparse stack deep-copies blocks (middlewares with ``allow_inplace_modification=False``),
+    as that is slow; pass an all-in-place stack to avoid it.
 
     .. deprecated:: (next version)
         Parameters 'parse_stack' and 'append_middleware' are deprecated, will be deleted soon.
@@ -324,6 +358,9 @@ def write_string(
     :param prepend_middleware: List of middleware to prepend to the default stack.
                         Only applicable if `unparse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional).
+    Writing a library with at least ``LARGE_LIBRARY_WARNING_THRESHOLD`` blocks logs a warning
+    if the unparse stack deep-copies blocks (middlewares with ``allow_inplace_modification=False``),
+    as that is slow; pass an all-in-place stack to avoid it.
 
     .. deprecated:: (next version)
         Parameters 'parse_stack' and 'append_middleware' are deprecated.
@@ -333,8 +370,11 @@ def write_string(
         unparse_stack, prepend_middleware, kwargs, "write_string"
     )
 
+    stack = _build_unparse_stack(unparse_stack, prepend_middleware)
+    _warn_if_large_library_is_copied(library, stack)
+
     middleware: Middleware
-    for middleware in _build_unparse_stack(unparse_stack, prepend_middleware):
+    for middleware in stack:
         library = middleware.transform(library=library)
 
     return write(library, bibtex_format=bibtex_format)

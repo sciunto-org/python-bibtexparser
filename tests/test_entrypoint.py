@@ -1,5 +1,6 @@
 """Testing the parse_file and write_file functions."""
 
+import logging
 import os
 import tempfile
 import warnings
@@ -10,7 +11,9 @@ from bibtexparser import parse_file
 from bibtexparser import parse_string
 from bibtexparser import write_file
 from bibtexparser import write_string
+from bibtexparser.entrypoint import LARGE_LIBRARY_WARNING_THRESHOLD
 from bibtexparser.library import Library
+from bibtexparser.middlewares import default_unparse_stack
 from bibtexparser.model import DuplicateBlockKeyBlock
 from bibtexparser.model import Entry
 from bibtexparser.model import Field
@@ -401,3 +404,70 @@ def test_parse_string_into_existing_library_keeps_block_order():
         "Entry",
     ]
     assert [entry.key for entry in library.entries] == ["first", "second"]
+
+
+def _library_with_n_entries(n: int) -> Library:
+    return Library(
+        [
+            Entry(entry_type="article", key=f"key{i}", fields=[Field(key="title", value="T")])
+            for i in range(n)
+        ]
+    )
+
+
+def test_large_library_warning_threshold_is_reasonable():
+    assert 1_000 <= LARGE_LIBRARY_WARNING_THRESHOLD <= 100_000
+
+
+def test_write_string_warns_for_large_library_with_copying_stack(monkeypatch, caplog):
+    """The default unparse stack deep-copies blocks, which is slow for large libraries."""
+    monkeypatch.setattr("bibtexparser.entrypoint.LARGE_LIBRARY_WARNING_THRESHOLD", 5)
+    library = _library_with_n_entries(5)
+
+    with caplog.at_level(logging.WARNING, logger="bibtexparser.entrypoint"):
+        write_string(library)
+
+    warnings_ = [r for r in caplog.records if r.levelno == logging.WARNING]
+    assert len(warnings_) == 1
+    assert "Writing a library with 5 blocks" in warnings_[0].message
+    assert "allow_inplace_modification=True" in warnings_[0].message
+
+
+def test_write_file_warns_for_large_library_with_copying_stack(monkeypatch, caplog):
+    monkeypatch.setattr("bibtexparser.entrypoint.LARGE_LIBRARY_WARNING_THRESHOLD", 5)
+    library = _library_with_n_entries(5)
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".bib", delete=False) as f:
+        temp_path = f.name
+    try:
+        with caplog.at_level(logging.WARNING, logger="bibtexparser.entrypoint"):
+            write_file(temp_path, library)
+    finally:
+        os.unlink(temp_path)
+
+    assert caplog.text.count("Writing a library with 5 blocks") == 1
+
+
+def test_write_string_does_not_warn_below_threshold(monkeypatch, caplog):
+    monkeypatch.setattr("bibtexparser.entrypoint.LARGE_LIBRARY_WARNING_THRESHOLD", 5)
+    library = _library_with_n_entries(4)
+
+    with caplog.at_level(logging.WARNING, logger="bibtexparser.entrypoint"):
+        write_string(library)
+
+    assert "Writing a library" not in caplog.text
+
+
+def test_write_string_does_not_warn_with_inplace_stack(monkeypatch, caplog):
+    """The suggested workaround must itself not warn, and must produce identical output."""
+    expected = write_string(_library_with_n_entries(5))
+    monkeypatch.setattr("bibtexparser.entrypoint.LARGE_LIBRARY_WARNING_THRESHOLD", 5)
+
+    with caplog.at_level(logging.WARNING, logger="bibtexparser.entrypoint"):
+        actual = write_string(
+            _library_with_n_entries(5),
+            unparse_stack=default_unparse_stack(allow_inplace_modification=True),
+        )
+
+    assert "Writing a library" not in caplog.text
+    assert actual == expected
