@@ -16,6 +16,8 @@ from .model import String
 
 logger = logging.getLogger(__name__)
 
+_MARK_PATTERN = re.compile(r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?=[{(])", re.MULTILINE)
+
 
 class Splitter:
     """Object responsible for splitting a BibTeX string into blocks.
@@ -143,6 +145,56 @@ class Splitter:
                     f"Was still looking for closing bracket",
                     end_index=m.start() - 1,
                 )
+
+    def _abort_parenthesis_block(self, open_index: int) -> None:
+        """Skip the parenthesis-delimited block at `open_index` and report it as failed.
+
+        Parentheses are valid BibTeX block delimiters, but are not supported by this
+        parser. Failing loudly avoids silently swallowing such blocks as implicit
+        comments (see issue #533). The block is skipped without being parsed; braces
+        and quotes are honored so that a `)` inside a field value does not end it
+        prematurely, and an `@` starting a new line ends it (error recovery).
+        """
+        end_index = len(self.bibstr)
+        num_open_parens = 0
+        num_open_curls = 0
+        currently_quote_escaped = False
+        i = open_index
+        while i < len(self.bibstr):
+            char = self.bibstr[i]
+            if char == "\\":
+                i += 2
+                continue
+            if currently_quote_escaped:
+                currently_quote_escaped = char != '"'
+            elif char == "{":
+                num_open_curls += 1
+            elif num_open_curls > 0:
+                if char == "}":
+                    num_open_curls -= 1
+            elif char == '"':
+                currently_quote_escaped = True
+            elif char == "(":
+                num_open_parens += 1
+            elif char == ")":
+                num_open_parens -= 1
+                if num_open_parens == 0:
+                    end_index = i + 1
+                    break
+            elif char == "@" and self._is_at_line_start(i):
+                end_index = i
+                break
+            i += 1
+
+        self._current_line += self.bibstr.count("\n", open_index, end_index)
+        self._markiter = _MARK_PATTERN.finditer(self.bibstr, end_index)
+        self._current_char_index = end_index - 1
+
+        raise BlockAbortedException(
+            abort_reason="Blocks delimited by parentheses (e.g. `@article(...)`) are not "
+            "supported by bibtexparser. Use curly braces (e.g. `@article{...}`) instead.",
+            end_index=end_index,
+        )
 
     def _move_to_comma_or_closing_curly_bracket(
         self, currently_quote_escaped: bool = False, num_open_curls: int = 0
@@ -291,9 +343,7 @@ class Splitter:
         Returns:
             A new library containing the split blocks.
         """
-        self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
-        )
+        self._markiter = _MARK_PATTERN.finditer(self.bibstr)
 
         library = Library()
 
@@ -314,7 +364,9 @@ class Splitter:
                 start_line = self._current_line
                 try:
                     # Start new block parsing
-                    if m_val.startswith("@comment"):
+                    if self.bibstr[m.end()] == "(":
+                        self._abort_parenthesis_block(m.end())
+                    elif m_val.startswith("@comment"):
                         library.add(self._handle_explicit_comment(), fail_on_duplicate_key=False)
                     elif m_val.startswith("@preamble"):
                         library.add(self._handle_preamble(), fail_on_duplicate_key=False)
