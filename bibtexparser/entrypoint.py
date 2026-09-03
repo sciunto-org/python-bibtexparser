@@ -310,6 +310,10 @@ def write_file(
 ) -> None:
     """Write a BibTeX database to a file.
 
+    The passed library is never modified, unless *every* middleware in the
+    unparse stack allows in-place modification (e.g.
+    ``unparse_stack=default_unparse_stack(allow_inplace_modification=True)``).
+
     :param file: File to write to. Can be a file name or a file object.
     :param library: BibTeX database to serialize.
     :param unparse_stack: List of middleware to apply to the database before writing.
@@ -352,6 +356,10 @@ def write_string(
 ) -> str:
     """Serialize a BibTeX database to a string.
 
+    The passed library is never modified, unless *every* middleware in the
+    unparse stack allows in-place modification (e.g.
+    ``unparse_stack=default_unparse_stack(allow_inplace_modification=True)``).
+
     :param library: BibTeX database to serialize.
     :param unparse_stack: List of middleware to apply to the database before writing.
                         If None, a default stack will be used.
@@ -372,6 +380,12 @@ def write_string(
 
     stack = _build_unparse_stack(unparse_stack, prepend_middleware)
     _warn_if_large_library_is_copied(library, stack)
+    inplace = [middleware.allow_inplace_modification for middleware in stack]
+    if any(inplace) and not all(inplace):
+        # Some middleware would mutate the passed library before a copying
+        # middleware gets to run; copy once upfront so the caller's library
+        # stays untouched (an all-in-place stack is the caller's explicit opt-in).
+        library = deepcopy(library)
 
     middleware: Middleware
     for middleware in stack:

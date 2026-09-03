@@ -272,6 +272,11 @@ bibtex string references and concatenation expressions, such as month macros:
     # hence the written entry contains `month = jan` (a string reference)
     # and not `month = {jan}` (a literal).
 
+Note that ``write_string`` / ``write_file`` never modify the passed library
+(``library.entries[0]["month"]`` is still ``"1"`` above), unless *every* middleware
+in the unparse stack allows in-place modification, e.g.
+``unparse_stack=default_unparse_stack(allow_inplace_modification=True)``.
+
 You may also set the demand manually, e.g. ``entry.fields_dict["title"].enclosing = '"'``
 to enforce quotes for a specific field. Allowed values are ``'{'``, ``'"'`` and
 ``'no-enclosing'``; ``None`` (the default) leaves the choice to the middleware.

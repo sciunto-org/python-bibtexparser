@@ -7,12 +7,14 @@ import warnings
 
 import pytest
 
+from bibtexparser import entrypoint
 from bibtexparser import parse_file
 from bibtexparser import parse_string
 from bibtexparser import write_file
 from bibtexparser import write_string
 from bibtexparser.entrypoint import LARGE_LIBRARY_WARNING_THRESHOLD
 from bibtexparser.library import Library
+from bibtexparser.middlewares import MonthAbbreviationMiddleware
 from bibtexparser.middlewares import default_unparse_stack
 from bibtexparser.model import DuplicateBlockKeyBlock
 from bibtexparser.model import Entry
@@ -471,3 +473,59 @@ def test_write_string_does_not_warn_with_inplace_stack(monkeypatch, caplog):
 
     assert "Writing a library" not in caplog.text
     assert actual == expected
+
+
+MONTH_BIBTEX = "@article{a, month = {January}, title = {T}}"
+
+
+def test_write_string_with_inplace_prepend_middleware_does_not_mutate_library():
+    """An in-place middleware prepended to the (copying) default stack must not
+    leak its modifications into the caller's library."""
+    library = parse_string(MONTH_BIBTEX)
+
+    bib_str = write_string(library, prepend_middleware=[MonthAbbreviationMiddleware()])
+
+    assert "month = jan" in bib_str
+    assert library.entries[0]["month"] == "January"
+
+
+def test_write_file_with_inplace_prepend_middleware_does_not_mutate_library(tmp_path):
+    library = parse_string(MONTH_BIBTEX)
+    path = tmp_path / "out.bib"
+
+    write_file(str(path), library, prepend_middleware=[MonthAbbreviationMiddleware()])
+
+    assert "month = jan" in path.read_text(encoding="UTF-8")
+    assert library.entries[0]["month"] == "January"
+
+
+def test_write_string_default_stack_does_not_mutate_library():
+    library = parse_string(MONTH_BIBTEX)
+
+    write_string(library)
+
+    # An in-place AddEnclosingMiddleware would have turned this into "{January}".
+    assert library.entries[0]["month"] == "January"
+    assert library.entries[0]["title"] == "T"
+
+
+def test_write_string_all_inplace_stack_may_mutate_library():
+    """A stack in which every middleware allows in-place modification is the
+    caller's explicit opt-in to skip copying."""
+    library = parse_string(MONTH_BIBTEX)
+    stack = [MonthAbbreviationMiddleware()] + default_unparse_stack(allow_inplace_modification=True)
+
+    write_string(library, unparse_stack=stack)
+
+    assert library.entries[0]["month"] == "jan"
+
+
+def test_write_string_copying_stack_gets_no_upfront_copy(monkeypatch):
+    """No extra upfront copy if every middleware already copies on its own."""
+    library = parse_string(MONTH_BIBTEX)
+    monkeypatch.setattr(
+        entrypoint, "deepcopy", lambda *args, **kwargs: pytest.fail("unexpected upfront copy")
+    )
+
+    write_string(library, unparse_stack=default_unparse_stack(allow_inplace_modification=False))
+    write_string(library)
