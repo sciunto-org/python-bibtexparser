@@ -15,6 +15,8 @@ from bibtexparser import write_string
 from bibtexparser.entrypoint import LARGE_LIBRARY_WARNING_THRESHOLD
 from bibtexparser.library import Library
 from bibtexparser.middlewares import MonthAbbreviationMiddleware
+from bibtexparser.middlewares import RemoveEnclosingMiddleware
+from bibtexparser.middlewares import SeparateCoAuthors
 from bibtexparser.middlewares import default_unparse_stack
 from bibtexparser.model import DuplicateBlockKeyBlock
 from bibtexparser.model import Entry
@@ -529,3 +531,85 @@ def test_write_string_copying_stack_gets_no_upfront_copy(monkeypatch):
 
     write_string(library, unparse_stack=default_unparse_stack(allow_inplace_modification=False))
     write_string(library)
+
+
+COAUTHOR_BIBTEX = "@article{a, author = {Amy and Bob}, month = {January}, title = {T}}"
+
+
+def test_parse_string_accepts_generator_append_middleware():
+    """A one-shot iterator must not be silently exhausted before it is applied."""
+    library = parse_string(COAUTHOR_BIBTEX, append_middleware=iter([SeparateCoAuthors()]))
+    assert library.entries[0]["author"] == ["Amy", "Bob"]
+
+
+def test_parse_string_accepts_generator_parse_stack():
+    stack = [RemoveEnclosingMiddleware(), SeparateCoAuthors()]
+    library = parse_string(COAUTHOR_BIBTEX, parse_stack=(m for m in stack))
+    assert library.entries[0]["author"] == ["Amy", "Bob"]
+
+
+def test_parse_file_accepts_generator_append_middleware(tmp_path):
+    path = tmp_path / "in.bib"
+    path.write_text(COAUTHOR_BIBTEX, encoding="UTF-8")
+
+    library = parse_file(str(path), append_middleware=(m for m in [SeparateCoAuthors()]))
+    assert library.entries[0]["author"] == ["Amy", "Bob"]
+
+
+def test_write_string_accepts_generator_prepend_middleware():
+    library = parse_string(MONTH_BIBTEX)
+
+    bib_str = write_string(library, prepend_middleware=iter([MonthAbbreviationMiddleware()]))
+
+    assert "month = jan" in bib_str
+
+
+def test_write_string_accepts_generator_unparse_stack():
+    library = parse_string(MONTH_BIBTEX)
+
+    bib_str = write_string(
+        library, unparse_stack=(m for m in default_unparse_stack(allow_inplace_modification=False))
+    )
+
+    assert "month = {January}" in bib_str
+
+
+def test_write_file_accepts_generator_prepend_middleware(tmp_path):
+    library = parse_string(MONTH_BIBTEX)
+    path = tmp_path / "out.bib"
+
+    write_file(str(path), library, prepend_middleware=(m for m in [MonthAbbreviationMiddleware()]))
+
+    assert "month = jan" in path.read_text(encoding="UTF-8")
+
+
+def test_parse_string_with_generators_for_both_stack_and_append_raises_error():
+    with pytest.raises(ValueError) as excinfo:
+        parse_string(
+            COAUTHOR_BIBTEX,
+            parse_stack=iter([]),
+            append_middleware=iter([SeparateCoAuthors()]),
+        )
+    assert "append_middleware" in str(excinfo.value)
+
+
+def test_write_string_with_generators_for_both_stack_and_prepend_raises_error():
+    with pytest.raises(ValueError) as excinfo:
+        write_string(
+            Library([]),
+            unparse_stack=iter([]),
+            prepend_middleware=iter([MonthAbbreviationMiddleware()]),
+        )
+    assert "prepend_middleware" in str(excinfo.value)
+
+
+def test_parse_string_generator_append_middleware_warns_on_duplicate_type():
+    """The duplicate-type warning must still trigger for a one-shot iterator."""
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        library = parse_string(
+            COAUTHOR_BIBTEX, append_middleware=iter([RemoveEnclosingMiddleware()])
+        )
+
+    assert any("already in the default parse_stack" in str(warning.message) for warning in w)
+    assert library.entries[0]["title"] == "T"

@@ -3,7 +3,6 @@ import re
 
 from .exceptions import BlockAbortedException
 from .exceptions import ParserStateException
-from .exceptions import RegexMismatchException
 from .library import Library
 from .model import DuplicateFieldKeyBlock
 from .model import Entry
@@ -15,6 +14,16 @@ from .model import Preamble
 from .model import String
 
 logger = logging.getLogger(__name__)
+
+# "Marks" are the characters the splitter jumps between: value delimiters, field
+#   separators, newlines (for line counting) and block starts (`@type` followed by `{` or `(`).
+#   The opening delimiter is not part of the block start mark, so that a `{` after an
+#   `@` within a value (e.g. `LeQua @ {CLEF}`) is still counted as a mark of its own.
+_BLOCK_START = r"@[\w]*( |\t)*(?=[{(])"
+_MARK_PATTERN = re.compile(r"(?<!\\)[\{\}\",=\n]|" + _BLOCK_START)
+# Inside a `(`-delimited block, the closing `)` is a mark too.
+#   It is not a mark elsewhere, so `)` in `{`-delimited blocks needs no special handling.
+_PAREN_BLOCK_MARK_PATTERN = re.compile(r"(?<!\\)[\{\}\",=\n)]|" + _BLOCK_START)
 
 
 class Splitter:
@@ -34,6 +43,9 @@ class Splitter:
 
         self._markiter = None
         self._unaccepted_mark = None
+
+        # `}` or `)`, matching the delimiter that opened the block being parsed
+        self._closing_delimiter = "}"
 
         # Keep track of line we're currently looking at.
         #   `-1` compensates for manually added `\n` above
@@ -120,18 +132,49 @@ class Splitter:
 
             self._current_line += 1
 
-    def _move_to_closed_bracket(self) -> int:
-        """Index of the curly bracket closing a just opened one."""
-        num_additional_brackets = 0
+    def _open_block(self, m: re.Match) -> None:
+        """Consume the delimiter opening the block started by mark `m`, and set the closing one."""
+        if self.bibstr[m.end()] == "(":
+            self._closing_delimiter = ")"
+            # `(` is not a mark, hence the block-specific marks start right after it.
+            self._markiter = _PAREN_BLOCK_MARK_PATTERN.finditer(self.bibstr, m.end() + 1)
+        else:
+            self._closing_delimiter = "}"
+            # The `{` is a mark (guaranteed to be the next one by the block start regex)
+            self._next_mark(accept_eof=False)
+
+    def _close_block(self) -> None:
+        """Undo `_open_block` once the block was parsed (or its parsing aborted)."""
+        if self._closing_delimiter == ")":
+            # Resume default marks right after the last consumed mark,
+            #   which is either put back by an abort, or a single character.
+            if self._unaccepted_mark is not None:
+                resume_index = self._unaccepted_mark.end()
+            else:
+                resume_index = self._current_char_index + 1
+            self._markiter = _MARK_PATTERN.finditer(self.bibstr, resume_index)
+            self._closing_delimiter = "}"
+
+    def _move_to_closing_delimiter(self, track_quotes: bool) -> int:
+        """Index of the delimiter closing the current block, skipping nested `{...}`.
+
+        With `track_quotes`, a `)` within a `"..."` string is skipped as well:
+        Unlike `}`, which must be balanced within such strings, a `)` may occur there.
+        Free-text blocks (comments) do not track quotes, as these may be unbalanced there.
+        """
+        num_open_curls = 0
+        in_quotes = False
+        track_quotes = track_quotes and self._closing_delimiter == ")"
         while True:
             m = self._next_mark(accept_eof=False)
             if m.group(0) == "{":
-                num_additional_brackets += 1
-            elif m.group(0) == "}":
-                if num_additional_brackets == 0:
-                    return m.start()
-                else:
-                    num_additional_brackets -= 1
+                num_open_curls += 1
+            elif m.group(0) == "}" and num_open_curls > 0:
+                num_open_curls -= 1
+            elif num_open_curls == 0 and m.group(0) == '"' and track_quotes:
+                in_quotes = not in_quotes
+            elif num_open_curls == 0 and m.group(0) == self._closing_delimiter and not in_quotes:
+                return m.start()
             elif m.group(0).startswith("@") and self._is_at_line_start(m.start()):
                 # Only abort if the @ is at the start of a line.
                 # This allows @ signs in field values (e.g., "LeQua @ {CLEF}")
@@ -144,7 +187,7 @@ class Splitter:
                     end_index=m.start() - 1,
                 )
 
-    def _move_to_comma_or_closing_curly_bracket(
+    def _move_to_comma_or_closing_delimiter(
         self, currently_quote_escaped: bool = False, num_open_curls: int = 0
     ) -> int:
         """Index of the end of the field, taking quote-escape into account."""
@@ -197,7 +240,7 @@ class Splitter:
                 self._unaccepted_mark = next_mark
                 return next_mark.start()
             # Check for end of entry:
-            elif next_mark.group(0) == "}" and not _is_escaped():
+            elif next_mark.group(0) == self._closing_delimiter and not _is_escaped():
                 self._unaccepted_mark = next_mark
                 return next_mark.start()
 
@@ -213,7 +256,7 @@ class Splitter:
                 elif num_open_curls > 0:
                     looking_for = "`}`"
                 else:
-                    looking_for = "`,` or `}`"
+                    looking_for = f"`,` or `{self._closing_delimiter}`"
 
                 raise BlockAbortedException(
                     abort_reason=f"Unexpected block start: `{next_mark.group(0)}`. "
@@ -230,12 +273,12 @@ class Splitter:
         key_start = first_key_start
         while True:
             equals_mark = self._next_mark(accept_eof=False)
-            if equals_mark.group(0) == "}":
+            if equals_mark.group(0) == self._closing_delimiter:
                 dangling_key = self.bibstr[key_start : equals_mark.start()].strip()
                 if dangling_key:
                     raise BlockAbortedException(
                         abort_reason=f"Expected a `=` after entry key `{dangling_key}`, "
-                        "but found the end of the entry (`}`).",
+                        f"but found the end of the entry (`{self._closing_delimiter}`).",
                         end_index=equals_mark.end(),
                     )
                 # End of entry
@@ -254,7 +297,7 @@ class Splitter:
             start_line = self._current_line
             key_end = equals_mark.start()
             value_start = equals_mark.end()
-            value_end = self._move_to_comma_or_closing_curly_bracket(
+            value_end = self._move_to_comma_or_closing_delimiter(
                 currently_quote_escaped=False, num_open_curls=0
             )
 
@@ -271,8 +314,8 @@ class Splitter:
             after_field_mark = self._next_mark(accept_eof=False)
             if after_field_mark.group(0) == ",":
                 key_start = after_field_mark.end()
-            elif after_field_mark.group(0) == "}":
-                # If next mark is a closing bracket, put it back (will return in next loop iteration)
+            elif after_field_mark.group(0) == self._closing_delimiter:
+                # If next mark is the closing delimiter, put it back (will return in next loop iteration)
                 self._unaccepted_mark = after_field_mark
                 # Advance past the value, else the check above aborts a valid entry.
                 key_start = after_field_mark.start()
@@ -280,8 +323,8 @@ class Splitter:
             else:
                 self._unaccepted_mark = after_field_mark
                 raise BlockAbortedException(
-                    abort_reason="Expected either a `,` or `}` after a closed entry field value, "
-                    f"but found a {after_field_mark.group(0)} before.",
+                    abort_reason=f"Expected either a `,` or `{self._closing_delimiter}` "
+                    f"after a closed entry field value, but found a {after_field_mark.group(0)} before.",
                     end_index=after_field_mark.start(),
                 )
 
@@ -291,9 +334,7 @@ class Splitter:
         Returns:
             A new library containing the split blocks.
         """
-        self._markiter = re.finditer(
-            r"(?<!\\)[\{\}\",=\n]|@[\w]*( |\t)*(?={)", self.bibstr, re.MULTILINE
-        )
+        self._markiter = _MARK_PATTERN.finditer(self.bibstr)
 
         library = Library()
 
@@ -314,10 +355,11 @@ class Splitter:
                 start_line = self._current_line
                 try:
                     # Start new block parsing
+                    self._open_block(m)
                     if m_val.startswith("@comment"):
-                        library.add(self._handle_explicit_comment(), fail_on_duplicate_key=False)
+                        library.add(self._handle_explicit_comment(m), fail_on_duplicate_key=False)
                     elif m_val.startswith("@preamble"):
-                        library.add(self._handle_preamble(), fail_on_duplicate_key=False)
+                        library.add(self._handle_preamble(m), fail_on_duplicate_key=False)
                     elif m_val.startswith("@string"):
                         library.add(self._handle_string(m), fail_on_duplicate_key=False)
                     else:
@@ -357,6 +399,7 @@ class Splitter:
                     )
                     raise
 
+                self._close_block()
                 self._reset_block_status(current_char_index=self._current_char_index + 1)
             else:
                 # Part of implicit comment
@@ -370,42 +413,22 @@ class Splitter:
 
         return library
 
-    def _handle_explicit_comment(self) -> ExplicitComment:
+    def _handle_explicit_comment(self, m) -> ExplicitComment:
         """Handle explicit comment block. Return end index"""
-        start_index = self._current_char_index
         start_line = self._current_line
-        start_bracket_mark = self._next_mark(accept_eof=False)
-        if start_bracket_mark.group(0) != "{":
-            self._unaccepted_mark = start_bracket_mark
-            # Note: The following should never happen, as we check for the "{" in the regex
-            raise RegexMismatchException(
-                first_match="@comment{",
-                expected_match="{",
-                second_match=start_bracket_mark.group(0),
-            )
-        end_bracket_index = self._move_to_closed_bracket()
-        comment_str = self.bibstr[start_bracket_mark.end() : end_bracket_index].strip()
+        end_index = self._move_to_closing_delimiter(track_quotes=False)
         return ExplicitComment(
             start_line=start_line,
-            comment=comment_str,
-            raw=self.bibstr[start_index : end_bracket_index + 1],
+            comment=self.bibstr[m.end() + 1 : end_index].strip(),
+            raw=self.bibstr[m.start() : end_index + 1],
         )
 
     def _handle_entry(self, m, m_val) -> Entry | ParsingFailedBlock:
         """Handle entry block. Return end index"""
         start_line = self._current_line
         entry_type = m_val[1:].strip()
-        start_bracket_mark = self._next_mark(accept_eof=False)
-        if start_bracket_mark.group(0) != "{":
-            self._unaccepted_mark = start_bracket_mark
-            # Note: The following should never happen, as we check for the "{" in the regex
-            raise ParserStateException(
-                message="matched a regex that should end with `{`, "
-                "e.g. `@article{`, "
-                "but no closing bracket was found."
-            )
         comma_mark = self._next_mark(accept_eof=False)
-        if comma_mark.group(0) == "}":
+        if comma_mark.group(0) == self._closing_delimiter:
             # This is an entry without any comma after the key, and with no fields
             #   Used e.g. by RefTeX (see issue #384)
             key = self.bibstr[m.end() + 1 : comma_mark.start()].strip()
@@ -436,17 +459,8 @@ class Splitter:
 
     def _handle_string(self, m) -> String:
         """Handle string block. Return end index"""
-        # Get next mark, which should be an equals sign
-        start_i = self._current_char_index
         start_line = self._current_line
-        start_bracket_mark = self._next_mark(accept_eof=False)
-        if start_bracket_mark.group(0) != "{":
-            self._unaccepted_mark = start_bracket_mark
-            # Note: The following should never happen, as we check for the "{" in the regex
-            raise ParserStateException(
-                message="matched a string def regex (`@string{`) that "
-                "should end with `{`, but no closing bracket was found."
-            )
+        # Get next mark, which should be an equals sign
         equals_mark = self._next_mark(accept_eof=False)
         if equals_mark.group(0) != "=":
             self._unaccepted_mark = equals_mark
@@ -457,32 +471,21 @@ class Splitter:
             )
         key = self.bibstr[m.end() + 1 : equals_mark.start()].strip()
         value_start = equals_mark.end()
-        end_i = self._move_to_closed_bracket()
-        value = self.bibstr[value_start:end_i].strip()
+        end_index = self._move_to_closing_delimiter(track_quotes=True)
+        value = self.bibstr[value_start:end_index].strip()
         return String(
             start_line=start_line,
             key=key,
             value=value,
-            raw=self.bibstr[start_i : end_i + 1],
+            raw=self.bibstr[m.start() : end_index + 1],
         )
 
-    def _handle_preamble(self) -> Preamble:
+    def _handle_preamble(self, m) -> Preamble:
         """Handle preamble block. Return end index"""
-        start_i = self._current_char_index
         start_line = self._current_line
-        start_bracket_mark = self._next_mark(accept_eof=False)
-        if start_bracket_mark.group(0) != "{":
-            self._unaccepted_mark = start_bracket_mark
-            # Note: The following should never happen, as we check for the "{" in the regex
-            raise ParserStateException(
-                message="matched a preamble def regex (`@preamble{`) that "
-                "should end with `{`, but no closing bracket was found."
-            )
-
-        end_bracket_index = self._move_to_closed_bracket()
-        preamble = self.bibstr[start_bracket_mark.end() : end_bracket_index]
+        end_index = self._move_to_closing_delimiter(track_quotes=True)
         return Preamble(
             start_line=start_line,
-            value=preamble,
-            raw=self.bibstr[start_i : end_bracket_index + 1],
+            value=self.bibstr[m.end() + 1 : end_index],
+            raw=self.bibstr[m.start() : end_index + 1],
         )

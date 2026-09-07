@@ -1,0 +1,4 @@
+# The sdist ships the full test suite, so that it can be run from source.
+graft tests
+
+global-exclude __pycache__ *.py[cod]
