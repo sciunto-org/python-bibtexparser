@@ -8,9 +8,9 @@ and have a quick look at the tutorial to get a feeling for the new API.
 Status of v2
 ------------
 
-The v2 branch is well tested and reasonably stable, but it is not yet widely adopted - as an early adopter,
-you may encounter some bugs. If you do, please report them on the issue tracker.
-Also, note that some interfaces may change slightly before we release v2.0.0 as stable.
+V2 is released as stable and is the version we recommend for all projects.
+It is well tested and receives all development and maintenance effort, while v1 is in maintenance mode.
+If you encounter a bug, please report it on the issue tracker.
 
 Some customizations from v1 are not implemented in v2, as we doubt they are widely used. If you need one of
 these features, please let us know on the issue tracker.

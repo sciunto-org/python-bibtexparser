@@ -2,10 +2,10 @@
 
 Welcome to python-bibtexparser, a parser for `.bib` files with a long history and wide adoption.
 
-Bibtexparser is available in two versions: V1 and V2. For new projects, we recommend using v2 which, in the long run, will provide an overall more robust and faster experience. **For now, however, note that v2 is still in beta stage, and does not contain all features of v1**. Install v2 using pip:
+Bibtexparser is available in two versions: V1 and V2. **V2 is the current, recommended version** and the default you get from PyPI. It provides an overall more robust and faster experience than v1, and is where all development and maintenance effort goes. Install it using pip:
 
 ```bash
-pip install bibtexparser --pre
+pip install bibtexparser
 ```
 
 Or you can install the latest development version directly from the main branch:
@@ -13,22 +13,22 @@ Or you can install the latest development version directly from the main branch:
 pip install --no-cache-dir --force-reinstall git+https://github.com/sciunto-org/python-bibtexparser@main
 ```
 
-If instead, you want to use v1, install it using:
+If instead you still need v1, e.g. for a legacy project which you don't want to migrate right now, pin it explicitly:
 
 ```bash
 pip install bibtexparser~=1.0
 ```
 
-Note that all development and maintenance effort is focussed on v2.
-Small PRs for v1 are still accepted, but only as long as they are backwards compatible and don't introduce much additional technical debt.
-Development of version one happens on the dedicated [v1 branch](https://github.com/sciunto-org/python-bibtexparser/tree/v1).
+Note that v2 is a rewrite: a lot has changed since v1, including the primary entrypoints, the data structures and the way parsing and writing are customized.
+Existing v1 code will not run unchanged on v2 - have a look at our [migration guide](https://bibtexparser.readthedocs.io/en/main/migrate.html) when upgrading. While v2 has been thoroughly tested and has been in pre-release for a long time, please don't hesitate to report any issues you may encounter.
 
-The remainder of this README is specific to v2.
+V1 is in maintenance mode: small PRs are still accepted, but only as long as they are backwards compatible and don't introduce much additional technical debt.
+Development of version one happens on the dedicated [v1 branch](https://github.com/sciunto-org/python-bibtexparser/tree/v1).
 
 ## Documentation
 Go check out our documentation on [https://bibtexparser.readthedocs.io/en/main/](https://bibtexparser.readthedocs.io/en/main/).
 
-## Advantages of V2
+## Advantages of `v2` compared to `v1`
 
 - :rocket: Order of magnitudes faster
 - :wrench: Easily customizable parsing **and** writing
@@ -69,9 +69,9 @@ new_bibtex_string = bibtexparser.write_string(bib_database,
 These examples really only show the bare minimum.
 Consult the documentation for a list of available middleware, parsing options and write-formatting options.
 
-## V2 Architecture and Terminology
+## Architecture and Terminology
 
-![bibtexparserv2](https://user-images.githubusercontent.com/4815944/193734283-f19f94e8-7986-4acf-b1a3-1d215e297224.png)
+![bibtexparser](https://user-images.githubusercontent.com/4815944/193734283-f19f94e8-7986-4acf-b1a3-1d215e297224.png)
 
 The architecture consists of the following components:
 
@@ -90,7 +90,7 @@ Writes the content of a bibtex library to a ``.bib`` file. Optional formatting p
 
 ## About
 
-Since 2022, `bibtexparser` is primarily written and maintained by Michael Weiss ([@MiWeiss](https://github.com/MiWeiss/)). In 2024, Tom de Geus ([@tdegeus](https://github.com/tdegeus)) joined as co-maintainer.
+Since 2022, `bibtexparser` is primarily written and maintained by Michael Weiss ([@MiWeiss](https://github.com/MiWeiss/)), supported by various awesome contributors.
 
 Credits and thanks to the many contributors who helped creating this library, including
 François Boulogne ([@sciunto](https://github.com/sciunto/), creator of the first version) and Olivier Mangin ([@omangin](https://github.com/omangin/), long-term contributor).
