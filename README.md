@@ -1,4 +1,4 @@
-# python-bibtexparser v2
+# python-bibtexparser
 
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/bibtexparser?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/bibtexparser)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue)](https://github.com/sciunto-org/python-bibtexparser?tab=MIT-1-ov-file)
