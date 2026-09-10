@@ -15,8 +15,12 @@ build:
 sphinx:
   configuration: docs/source/conf.py
 
-# We recommend specifying your dependencies to enable reproducible builds:
-# https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
-# python:
-#   install:
-#   - requirements: docs/requirements.txt
+# Install the package itself (and its runtime dependencies) so that autodoc can
+# import it; without this, every autodoc directive outside bibtexparser.model
+# fails on the missing pylatexenc import and the API page comes out near-empty.
+python:
+  install:
+  - method: pip
+    path: .
+    extra_requirements:
+    - docs

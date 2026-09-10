@@ -330,6 +330,7 @@ def write_file(
                         Only applicable if `unparse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional).
     :param encoding: Encoding of the .bib file. Default encoding is ``"UTF-8"``.
+
     Writing a library with at least ``LARGE_LIBRARY_WARNING_THRESHOLD`` blocks logs a warning
     if the unparse stack deep-copies blocks (middlewares with ``allow_inplace_modification=False``),
     as that is slow; pass an all-in-place stack to avoid it.
@@ -374,6 +375,7 @@ def write_string(
     :param prepend_middleware: List of middleware to prepend to the default stack.
                         Only applicable if `unparse_stack` is None.
     :param bibtex_format: Customized BibTeX format to use (optional).
+
     Writing a library with at least ``LARGE_LIBRARY_WARNING_THRESHOLD`` blocks logs a warning
     if the unparse stack deep-copies blocks (middlewares with ``allow_inplace_modification=False``),
     as that is slow; pass an all-in-place stack to avoid it.
