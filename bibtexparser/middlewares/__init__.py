@@ -21,3 +21,31 @@ from bibtexparser.middlewares.sorting_entry_fields import SortFieldsCustomMiddle
 
 from .parsestack import default_parse_stack
 from .parsestack import default_unparse_stack
+
+# Declared explicitly so that sphinx autodoc documents these re-exports;
+# without __all__, `automodule:: bibtexparser.middlewares` skips them all
+# as imported members.
+__all__ = [
+    "AddEnclosingMiddleware",
+    "BlockMiddleware",
+    "LatexDecodingMiddleware",
+    "LatexEncodingMiddleware",
+    "LibraryMiddleware",
+    "MergeCoAuthors",
+    "MergeNameParts",
+    "MonthAbbreviationMiddleware",
+    "MonthIntMiddleware",
+    "MonthLongStringMiddleware",
+    "NameParts",
+    "NormalizeFieldKeys",
+    "RemoveEnclosingMiddleware",
+    "ResolveStringReferencesMiddleware",
+    "SeparateCoAuthors",
+    "SortBlocksByTypeAndKeyMiddleware",
+    "SortBlocksMiddleware",
+    "SortFieldsAlphabeticallyMiddleware",
+    "SortFieldsCustomMiddleware",
+    "SplitNameParts",
+    "default_parse_stack",
+    "default_unparse_stack",
+]
