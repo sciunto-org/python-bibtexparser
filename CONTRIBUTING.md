@@ -14,6 +14,13 @@ We are always looking for people to improve the library. Contributions include, 
 2. Add sufficient tests to your PRs.
 3. Document your code.
 4. Don't hesitate to ask questions.
+5. For bug reports, a minimal reproduction example plus a short note on real-world impact goes a long way.
+6. If an issue was found by an LLM rather than something you actually hit, and isn't security-critical, please only submit it if you can clearly justify a real practical impact — theoretical issues with no real-world relevance add review burden without much benefit.
+7. For anything beyond a small fix, open an issue to discuss scope and approach before investing time in an implementation.
+
+### A note on AI-generated PRs
+
+Using AI tools is fine, and encouraged — including to self-review your PR before opening it. What doesn't work well is large, auto-generated PRs or issues with no clear human benefit behind them: they're inefficient to review. We reserve the right to close these without merging, even when technically valid, since at that point it's faster for us to just generate a fix ourselves.
 
 ### Version 1 vs version 2
 
