@@ -1,0 +1,30 @@
+# Dependabot configuration
+# See https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+updates:
+
+  # GitHub Actions used in .github/workflows/*.yml.
+  # Actions pinned to a branch (e.g. `@main`) are not tracked by Dependabot.
+- package-ecosystem: github-actions
+  directory: /
+  schedule:
+    interval: weekly
+    day: monday
+  # One PR per week for all action bumps instead of one PR per action.
+  groups:
+    github-actions:
+      patterns: ['*']
+  commit-message:
+    prefix: "⬆️"
+
+  # Python dependencies declared in pyproject.toml (runtime + optional extras).
+- package-ecosystem: pip
+  directory: /
+  schedule:
+    interval: weekly
+    day: monday
+  groups:
+    python-dependencies:
+      patterns: ['*']
+  commit-message:
+    prefix: "⬆️"
