@@ -235,6 +235,13 @@ def test_name_splitting_commas_at_higher_brace_level(strict: bool):
 
 
 REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
+    ("van Gogh", {"first": [], "von": ["van"], "last": ["Gogh"], "jr": []}),
+    ("de Gaulle", {"first": [], "von": ["de"], "last": ["Gaulle"], "jr": []}),
+    ("von Neumann", {"first": [], "von": ["von"], "last": ["Neumann"], "jr": []}),
+    ("aa bb", {"first": [], "von": ["aa"], "last": ["bb"], "jr": []}),
+    (r"{\'e}douard Lucas", {"first": [], "von": [r"{\'e}douard"], "last": ["Lucas"], "jr": []}),
+    (r"{\'E}douard Lucas", {"first": [r"{\'E}douard"], "von": [], "last": ["Lucas"], "jr": []}),
+    ("{van} Gogh", {"first": ["{van}"], "von": [], "last": ["Gogh"], "jr": []}),
     (
         r"Per Brinch Hansen",
         {"first": ["Per", "Brinch"], "von": [], "last": ["Hansen"], "jr": []},
@@ -1177,3 +1184,18 @@ def test_unenclosed_name_fields_roundtrip(bibtex):
         ],
     )
     assert bibtexparser.write_string(library).strip() == bibtex.strip()
+
+
+def test_two_word_name_particles_survive_last_name_first_roundtrip():
+    """Name particles must not become first names when middleware rewrites a bibliography."""
+    library = bibtexparser.parse_string(
+        "@book{k, author = {de Gaulle and van Gogh}}",
+        append_middleware=[
+            SeparateCoAuthors(),
+            SplitNameParts(),
+            MergeNameParts(style="last"),
+            MergeCoAuthors(),
+        ],
+    )
+    roundtripped = bibtexparser.parse_string(bibtexparser.write_string(library))
+    assert roundtripped.entries[0].fields_dict["author"].value == "de Gaulle and van Gogh"

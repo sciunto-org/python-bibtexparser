@@ -432,11 +432,6 @@ def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
         if len(p0) == 1:
             parts.last = p0
 
-        # Two words: must be first and last.
-        elif len(p0) == 2:
-            parts.first = p0[:1]
-            parts.last = p0[1:]
-
         # Need to use the cases to figure it out.
         else:
             cases = cases[0]
