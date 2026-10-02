@@ -537,18 +537,20 @@ def test_concatenation_roundtrip():
 @pytest.mark.parametrize(
     "value, expected_stripped, expected_enclosing",
     [
-        pytest.param(r"{\\}a}", r"\\}a", "{", id="doubled_backslash_before_brace"),
-        pytest.param(r"{a\\{}", r"a\\{", "{", id="doubled_backslash_before_open_brace"),
-        pytest.param(r'"\\""', r'\\"', '"', id="doubled_backslash_before_quote"),
+        pytest.param(r"{\\}a}", r"{\\}a}", "no-enclosing", id="doubled_backslash_before_brace"),
+        pytest.param(
+            r"{a\\{}", r"{a\\{}", "no-enclosing", id="doubled_backslash_before_open_brace"
+        ),
+        pytest.param(r'"\\""', r'"\\""', "no-enclosing", id="doubled_backslash_before_quote"),
+        pytest.param(r"{\\\}a}", r"\\\}a", "{", id="tripled_backslash_before_brace"),
     ],
 )
 def test_escaping_follows_the_splitter_convention(
     value: str, expected_stripped: str, expected_enclosing: str
 ):
-    """A delimiter is escaped iff directly preceded by a backslash.
+    """A delimiter is escaped iff preceded by an odd number of backslashes.
 
-    This is the convention of the splitter's mark regex, which skips such a
-    delimiter regardless of how many backslashes precede it. The two must agree,
+    This is the convention of the splitter's mark regex. The two must agree,
     or values the parser read as a single group are not stripped here.
     """
     assert RemoveEnclosingMiddleware._strip_enclosing(value) == (
