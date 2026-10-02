@@ -103,6 +103,14 @@ def test_entry_contains():
     assert "ID" in entry
 
 
+def test_entry_dict_conversion():
+    entry = Entry("article", "key", [Field("field", "value", 1), Field("foo", "bar", 2)], 1, "raw")
+    assert list(entry) == ["ENTRYTYPE", "ID", "field", "foo"]
+    expected = {"ENTRYTYPE": "article", "ID": "key", "field": "value", "foo": "bar"}
+    assert dict(entry) == dict(entry.items()) == expected
+    assert {**entry} == expected
+
+
 def test_entry_setitem_field():
     entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
     entry["field"] = "new_value"

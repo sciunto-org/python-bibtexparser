@@ -1,4 +1,5 @@
 import abc
+from collections.abc import Iterator
 from typing import Any
 
 _ALLOWED_ENCLOSINGS = (None, "{", '"', "no-enclosing")
@@ -453,6 +454,16 @@ class Entry(Block):
             ("ENTRYTYPE", self.entry_type),
             ("ID", self.key),
         ] + [(f.key, f.value) for f in self.fields]
+
+    def keys(self) -> list[str]:
+        """Dict-mimicking, for partial v1.x backwards compatibility.
+
+        Same keys and order as in `items()`, e.g. allowing ``dict(entry)``."""
+        return [key for key, _ in self.items()]
+
+    def __iter__(self) -> Iterator[str]:
+        """Dict-mimicking iteration over the keys, as in `keys()`."""
+        return iter(self.keys())
 
     def __hash__(self) -> int:
         return hash((type(self), self._start_line_in_file, self._raw, self._entry_type, self._key))
