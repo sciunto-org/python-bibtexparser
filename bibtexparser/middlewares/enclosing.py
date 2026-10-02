@@ -1,4 +1,5 @@
 import re
+from collections.abc import Iterator
 
 from bibtexparser.library import Library
 from bibtexparser.model import Entry
@@ -10,10 +11,17 @@ from .middleware import BlockMiddleware
 REMOVED_ENCLOSING_KEY = "removed_enclosing"
 
 # Delimiters relevant when scanning a value, using the splitter's escaping
-# convention: a delimiter is escaped iff it is directly preceded by a backslash.
-_BRACES = re.compile(r"(?<!\\)[{}]")
-_BRACES_AND_QUOTE = re.compile(r"(?<!\\)[{}\"]")
-_UNENCLOSED_MARKS = re.compile(r"(?<!\\)[{}\",=\n]")
+# convention: a backslash escapes the character right after it, so a delimiter is
+# escaped iff it is preceded by an odd number of backslashes. As in the splitter,
+# escape pairs are matched (which gets that parity right) and then dropped.
+_BRACES = re.compile(r"\\[\\{}]|[{}]")
+_BRACES_AND_QUOTE = re.compile(r"\\[\\{}\"]|[{}\"]")
+_UNENCLOSED_MARKS = re.compile(r"\\[\\{}\",=]|[{}\",=\n]")
+
+
+def _unescaped(pattern: re.Pattern, value: str) -> Iterator[re.Match]:
+    """The delimiters of `pattern` in `value`, without the escape pairs."""
+    return (m for m in pattern.finditer(value) if m.group()[0] != "\\")
 
 
 def _is_writable_unenclosed(value: str) -> bool:
@@ -26,7 +34,7 @@ def _is_writable_unenclosed(value: str) -> bool:
     """
     depth = 0
     in_quotes = False
-    for match in _UNENCLOSED_MARKS.finditer(value):
+    for match in _unescaped(_UNENCLOSED_MARKS, value):
         char = match.group()
         if char == "{":
             depth += 1
@@ -98,11 +106,12 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
         """
         inner = value[1:-1]
         if "{" not in inner and "}" not in inner:
-            # Fast path for the common case of a plainly braced value.
-            return not inner.endswith("\\")
+            # Fast path for the common case of a plainly braced value:
+            #   enclosed unless an odd run of backslashes escapes the closing brace.
+            return (len(inner) - len(inner.rstrip("\\"))) % 2 == 0
         depth = 0
         last_index = len(value) - 1
-        for match in _BRACES.finditer(value):
+        for match in _unescaped(_BRACES, value):
             if match.group() == "{":
                 depth += 1
                 continue
@@ -126,7 +135,7 @@ class RemoveEnclosingMiddleware(BlockMiddleware):
             # Fast path for the common case of a value without inner quotes.
             return True
         depth = 0
-        for match in _BRACES_AND_QUOTE.finditer(value):
+        for match in _unescaped(_BRACES_AND_QUOTE, value):
             index = match.start()
             if index == 0 or index == last_index:
                 continue
