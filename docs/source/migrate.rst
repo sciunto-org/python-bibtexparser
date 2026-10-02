@@ -88,6 +88,21 @@ While in v1 entries were represented as dicts, in v2 they are represented as ``E
         # ... but to facilitate migration or simple cases, this shorthand notation also works ...
         print(entry['title'])
 
+If you need plain dicts as in v1 (e.g. to pass them on to another library), you can convert the entries:
+
+.. code-block:: python
+
+    # v1
+    entries = bib_database.entries
+    entries_dict = bib_database.entries_dict
+
+    # v2
+    entries = [dict(entry.items()) for entry in library.entries]
+    entries_dict = {key: dict(entry.items()) for key, entry in library.entries_dict.items()}
+
+As in v1, these dicts contain the ``ENTRYTYPE`` and ``ID`` keys. Field values are whatever the middleware produced
+(e.g. a list of names after ``SeparateCoAuthors``), so they are not necessarily strings.
+
 
 Similarly, other block types (comments, strings, ...) are now also represented as dedicated :ref:`object types <vocab>`,
 but for them, the migration is straight forward and we will not go into detail here.
