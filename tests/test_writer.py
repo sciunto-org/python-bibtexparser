@@ -81,6 +81,21 @@ def test_write_entry_with_trailing_comma(trailing_comma):
     )
 
 
+def test_write_entry_with_comments():
+    entry_block = Entry(
+        entry_type="article",
+        key="myKey",
+        fields=[Field(key="title", value='"myTitle"', comments=["a", " b\nc\rd"])],
+        trailing_comments=["year = 2020"],
+    )
+    string = writer.write(Library(blocks=[entry_block]))
+    # The comma after the last field is needed for the trailing comments to be parsed as such
+    assert (
+        string
+        == '@article{myKey,\n\t%a\n\t% b\n\t%c\n\t%d\n\ttitle = "myTitle",\n\t%year = 2020\n}\n'
+    )
+
+
 @pytest.mark.parametrize("value_column", [None, 10, "auto"])
 def test_entry_value_column(value_column):
     entry_block = _dummy_entry()

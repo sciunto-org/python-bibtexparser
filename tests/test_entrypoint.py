@@ -106,6 +106,14 @@ def test_write_file_roundtrip_gbk():
         os.unlink(temp_path)
 
 
+def test_entry_comments_roundtrip():
+    bibtex_str = "@article{key,\n  % a\n  author = {A},\n  %title = {T},\n}"
+    library = parse_string(write_string(parse_string(bibtex_str)))
+    entry = library.entries[0]
+    assert [(f.key, f.value, f.comments) for f in entry.fields] == [("author", "A", (" a",))]
+    assert entry.trailing_comments == ("title = {T},",)
+
+
 # Deprecation warning tests for write_file and write_string
 def test_write_file_deprecated_parse_stack_parameter():
     """Test that using deprecated 'parse_stack' parameter issues a warning."""

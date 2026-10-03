@@ -1,3 +1,4 @@
+import re
 from copy import deepcopy
 from typing import Optional
 
@@ -11,6 +12,8 @@ from .model import Preamble
 from .model import String
 
 VAL_SEP = " = "
+# Line breaks as recognized when reading files (universal newlines)
+_LINE_BREAK = re.compile(r"\r\n?|\n")
 PARSING_FAILED_COMMENT = "% WARNING Parsing failed for the following {n} lines."
 
 
@@ -18,16 +21,29 @@ def _treat_entry(block: Entry, bibtex_format) -> list[str]:
     res = ["@", block.entry_type, "{", block.key, ",\n"]
     field: Field
     for i, field in enumerate(block.fields):
+        if field.comments:
+            res.extend(_comment_lines(field.comments, bibtex_format))
         res.append(bibtex_format.indent)
         res.append(field.key)
         res.append(_val_indent_string(bibtex_format, field.key))
         res.append(VAL_SEP)
         res.append(field.value)
-        if bibtex_format.trailing_comma or i < len(block.fields) - 1:
+        # Comments after the last field are only parsed as such after a comma
+        if bibtex_format.trailing_comma or i < len(block.fields) - 1 or block.trailing_comments:
             res.append(",")
         res.append("\n")
+    res.extend(_comment_lines(block.trailing_comments, bibtex_format))
     res.append("}\n")
     return res
+
+
+def _comment_lines(comments: tuple[str, ...], bibtex_format: "BibtexFormat") -> list[str]:
+    # A line break would end the comment, hence each line is commented separately
+    return [
+        f"{bibtex_format.indent}%{line}\n"
+        for comment in comments
+        for line in _LINE_BREAK.split(comment)
+    ]
 
 
 def _val_indent_string(bibtex_format: "BibtexFormat", key: str) -> str:

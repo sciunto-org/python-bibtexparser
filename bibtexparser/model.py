@@ -1,4 +1,5 @@
 import abc
+from collections.abc import Iterable
 from collections.abc import Iterator
 from typing import Any
 
@@ -11,6 +12,13 @@ def _validated_enclosing(enclosing: str | None) -> str | None:
             "enclosing must be one of None, '{', '\"' or 'no-enclosing', " f"not {enclosing!r}"
         )
     return enclosing
+
+
+def _validated_comments(comments: Iterable[str]) -> tuple[str, ...] | None:
+    if isinstance(comments, str):
+        raise TypeError("comments must be an iterable of strings, not a string")
+    # `None` if empty, as that is much cheaper to deep-copy than an empty tuple
+    return tuple(comments) or None
 
 
 class Block(abc.ABC):
@@ -246,11 +254,14 @@ class Field:
         value: Any,
         start_line: int | None = None,
         enclosing: str | None = None,
+        comments: Iterable[str] = (),
     ):
         self._start_line = start_line
         self._key = key
         self._value = value
         self._enclosing = _validated_enclosing(enclosing)
+        # Skipping the call for empty comments is notably faster when parsing large files
+        self._comments = _validated_comments(comments) if comments else None
 
     @property
     def key(self) -> str:
@@ -292,6 +303,18 @@ class Field:
         self._enclosing = _validated_enclosing(enclosing)
 
     @property
+    def comments(self) -> tuple[str, ...]:
+        """The ``%``-comment lines right before this field, as supported by biber.
+
+        Each comment is the text after the ``%``, e.g. ``year = 2020`` for ``%year = 2020``.
+        When writing, they are written on the lines above the field."""
+        return self._comments or ()
+
+    @comments.setter
+    def comments(self, value: Iterable[str]):
+        self._comments = _validated_comments(value)
+
+    @property
     def start_line(self) -> int:
         """The line number of the first line of this field in the originally parsed string."""
         return self._start_line
@@ -316,7 +339,8 @@ class Field:
     def __repr__(self) -> str:
         return (
             f"Field(key=`{self.key}`, value=`{self.value}`, "
-            f"start_line={self.start_line}, enclosing={self._enclosing!r})"
+            f"start_line={self.start_line}, enclosing={self._enclosing!r}, "
+            f"comments={self.comments!r})"
         )
 
 
@@ -330,11 +354,15 @@ class Entry(Block):
         fields: list[Field],
         start_line: int | None = None,
         raw: str | None = None,
+        trailing_comments: Iterable[str] = (),
     ):
         super().__init__(start_line, raw)
         self._entry_type = entry_type
         self._key = key
         self._fields = fields
+        self._trailing_comments = (
+            _validated_comments(trailing_comments) if trailing_comments else None
+        )
 
     @property
     def entry_type(self) -> str:
@@ -362,6 +390,17 @@ class Entry(Block):
     @fields.setter
     def fields(self, value: list[Field]):
         self._fields = value
+
+    @property
+    def trailing_comments(self) -> tuple[str, ...]:
+        """The ``%``-comment lines after the last field, as supported by biber.
+
+        Comments before a field are attached to that field instead (see ``Field.comments``)."""
+        return self._trailing_comments or ()
+
+    @trailing_comments.setter
+    def trailing_comments(self, value: Iterable[str]):
+        self._trailing_comments = _validated_comments(value)
 
     @property
     def fields_dict(self) -> dict[str, Field]:
@@ -426,6 +465,7 @@ class Entry(Block):
 
         This serves for partial v1.x backwards compatibility,
         as well as for a shorthand for `set_field`.
+        The comments of a replaced field are kept.
 
         Mirroring ``__getitem__``, the keys ``ENTRYTYPE`` and ``ID``
         set ``entry_type`` and ``key`` instead of a field.
@@ -435,7 +475,9 @@ class Entry(Block):
         elif key == "ID":
             self.key = value
         else:
-            self.set_field(Field(key, value))
+            replaced = self.get(key)
+            comments = replaced.comments if replaced is not None else ()
+            self.set_field(Field(key, value, comments=comments))
 
     def __delitem__(self, key: str) -> None:
         """Dict-mimicking index.
@@ -476,7 +518,8 @@ class Entry(Block):
     def __repr__(self) -> str:
         return (
             f"Entry(entry_type=`{self.entry_type}`, key=`{self.key}`, "
-            f"fields=`{self.fields.__repr__()}`, start_line={self.start_line})"
+            f"fields=`{self.fields.__repr__()}`, start_line={self.start_line}, "
+            f"trailing_comments={self.trailing_comments!r})"
         )
 
 
