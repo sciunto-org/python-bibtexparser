@@ -102,6 +102,15 @@ If you need plain dicts as in v1, e.g. to pass entries on to another library, co
 
 Field values are whatever the middleware produced (e.g. a list of names after ``SeparateCoAuthors``), not necessarily strings.
 
+Also note that v1 converted all field keys to lowercase, while v2 keeps them as written in the ``.bib`` file
+(e.g. ``Title`` stays ``Title``, so ``entry['title']`` fails). To get lowercase keys as in v1, add the ``NormalizeFieldKeys`` middleware:
+
+.. code-block:: python
+
+    from bibtexparser.middlewares import NormalizeFieldKeys
+
+    library = bibtexparser.parse_file('bibtex.bib', append_middleware=[NormalizeFieldKeys()])
+
 
 Similarly, other block types (comments, strings, ...) are now also represented as dedicated :ref:`object types <vocab>`,
 but for them, the migration is straight forward and we will not go into detail here.
