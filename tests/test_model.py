@@ -120,6 +120,19 @@ def test_entry_setitem_field():
     assert [f.key for f in entry.fields] == ["field", "other"]
 
 
+def test_entry_setitem_keeps_field_comments():
+    entry = Entry("article", "key", [Field("field", "value", 1, comments=["note"])], 1, "raw")
+    entry["field"] = "new_value"
+    assert entry.fields[0].comments == ("note",)
+
+
+def test_comments_must_not_be_a_single_string():
+    with pytest.raises(TypeError):
+        Field("field", "value", comments="note")
+    with pytest.raises(TypeError):
+        Entry("article", "key", []).trailing_comments = "note"
+
+
 def test_entry_setitem_entrytype_and_id():
     entry = Entry("article", "key", [Field("field", "value", 1)], 1, "raw")
     entry["ENTRYTYPE"] = "book"
