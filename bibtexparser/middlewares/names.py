@@ -279,12 +279,24 @@ def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
     case = -1  # Case of the current word.
     level = 0  # Current brace level.
     bracestart = False  # Will the next character be the first within a brace?
-    controlseq = True  # Are we currently processing a control sequence?
-    specialchar = None  # Are we currently processing a special character?
+    controlseq = ""  # Control sequence within a special character.
+    specialchar = False  # Are we currently processing a special character?
 
     # Using an iterator allows us to deal with escapes in a simple manner.
     nameiter = iter(name)
     for char in nameiter:
+        if controlseq:
+            if char.isalpha():
+                controlseq += char
+                word.append(char)
+                continue
+            if case == -1:
+                if controlseq in ("L", "O", "AA", "AE", "OE"):
+                    case = 1
+                elif controlseq in ("l", "o", "aa", "ae", "oe", "i", "j", "ss"):
+                    case = 0
+            controlseq = ""
+
         # An escape.
         if char == "\\":
             try:
@@ -300,11 +312,11 @@ def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
                     # Is this the first character in a brace?
                     if bracestart:
                         bracestart = False
-                        controlseq = escaped.isalpha()
+                        controlseq = escaped if escaped.isalpha() else ""
                         specialchar = True
 
                     # Can we use it to determine the case?
-                    elif (case == -1) and escaped.isalpha():
+                    elif (case == -1) and (not level or specialchar) and escaped.isalpha():
                         if escaped.isupper():
                             case = 1
                         else:
@@ -324,9 +336,9 @@ def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
         if char == "{":
             level += 1
             word.append(char)
-            bracestart = True
-            controlseq = False
-            specialchar = False
+            # Only a top-level group beginning with a backslash is special.
+            # Nested braces do not end an existing special character.
+            bracestart = level == 1
             continue
 
         # All the below cases imply this (and don't test its previous value).
@@ -343,20 +355,18 @@ def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
                 word.insert(0, "{")
 
             # Update the state, append the character, and move on.
-            controlseq = False
-            specialchar = False
+            if not level:
+                if specialchar and case == -1:
+                    # BibTeX treats a caseless special character as non-von.
+                    case = 1
+                specialchar = False
             word.append(char)
             continue
 
         # Inside a braced expression.
         if level:
-            # Is this the end of a control sequence?
-            if controlseq:
-                if not char.isalpha():
-                    controlseq = False
-
             # If it's a special character, can we use it for a case?
-            elif specialchar:
+            if specialchar:
                 if (case == -1) and char.isalpha():
                     if char.isupper():
                         case = 1
@@ -376,7 +386,7 @@ def parse_single_name_into_parts(name: str, strict: bool = True) -> NameParts:
                 word = []
                 cases[-1].append(case)
                 case = -1
-                controlseq = False
+                controlseq = ""
                 specialchar = False
 
             # End of a section.

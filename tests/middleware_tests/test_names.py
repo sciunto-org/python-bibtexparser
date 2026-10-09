@@ -242,6 +242,55 @@ REGULAR_NAME_PARTS_PARSING_TEST_CASES = (
     (r"{\'e}douard Lucas", {"first": [], "von": [r"{\'e}douard"], "last": ["Lucas"], "jr": []}),
     (r"{\'E}douard Lucas", {"first": [r"{\'E}douard"], "von": [], "last": ["Lucas"], "jr": []}),
     ("{van} Gogh", {"first": ["{van}"], "von": [], "last": ["Gogh"], "jr": []}),
+    # Expected parts verified with BibTeX's format.name$.
+    (
+        r"{\L}ukasz Chmielewski",
+        {"first": [r"{\L}ukasz"], "von": [], "last": ["Chmielewski"], "jr": []},
+    ),
+    (
+        r"{\O}yvind Ytrehus",
+        {"first": [r"{\O}yvind"], "von": [], "last": ["Ytrehus"], "jr": []},
+    ),
+    (
+        r"{\'{E}}ric Brier",
+        {"first": [r"{\'{E}}ric"], "von": [], "last": ["Brier"], "jr": []},
+    ),
+    (
+        r"{Jean-Fran\c{c}ois} Biasse",
+        {"first": [r"{Jean-Fran\c{c}ois}"], "von": [], "last": ["Biasse"], "jr": []},
+    ),
+    *(
+        (f"{first} Last", {"first": [first], "von": [], "last": ["Last"], "jr": []})
+        for first in (
+            r"{\AA}ke",
+            r"{\AE}gir",
+            r"{\OE}dipus",
+            r"{\v{Z}}denek",
+            r"{\'{\'{E}}}ric",
+            r"{jean-Fran\c{c}ois}",
+            r"{\relax {\O}}yvind",
+            r"{\Lfoo}ukasz",
+            r"{\relax}abc",
+        )
+    ),
+    *(
+        (f"{von} Last", {"first": [], "von": [von], "last": ["Last"], "jr": []})
+        for von in (
+            r"{\l}UKASZ",
+            r"{\o}YVIND",
+            r"{\aa}KE",
+            r"{\ae}GIR",
+            r"{\oe}DIPUS",
+            r"{\i}AN",
+            r"{\j}AN",
+            r"{\ss}AN",
+            r"{\'{e}}RIC",
+            r"{\Lfoo abc}",
+            r"{{\L}}ukasz",
+            r"{\relax\v{Z}}denek",
+            r"{\relax\foo ABC}",
+        )
+    ),
     (
         r"Per Brinch Hansen",
         {"first": ["Per", "Brinch"], "von": [], "last": ["Hansen"], "jr": []},
@@ -1199,3 +1248,27 @@ def test_two_word_name_particles_survive_last_name_first_roundtrip():
     )
     roundtripped = bibtexparser.parse_string(bibtexparser.write_string(library))
     assert roundtripped.entries[0].fields_dict["author"].value == "de Gaulle and van Gogh"
+
+
+@pytest.mark.parametrize(
+    "name, rewritten",
+    [
+        (r"{\L}ukasz Chmielewski", r"Chmielewski, {\L}ukasz"),
+        (r"{\O}yvind Ytrehus", r"Ytrehus, {\O}yvind"),
+        (r"{\'{E}}ric Brier", r"Brier, {\'{E}}ric"),
+        (r"{Jean-Fran\c{c}ois} Biasse", r"Biasse, {Jean-Fran\c{c}ois}"),
+    ],
+)
+def test_braced_given_names_survive_last_name_first_roundtrip(name, rewritten):
+    """Rewriting author fields must preserve the given names and their LaTeX spelling."""
+    library = bibtexparser.parse_string(
+        f"@book{{k, author = {{{name}}}}}",
+        append_middleware=[
+            SeparateCoAuthors(),
+            SplitNameParts(),
+            MergeNameParts(style="last"),
+            MergeCoAuthors(),
+        ],
+    )
+    roundtripped = bibtexparser.parse_string(bibtexparser.write_string(library))
+    assert roundtripped.entries[0].fields_dict["author"].value == rewritten
