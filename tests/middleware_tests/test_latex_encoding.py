@@ -6,6 +6,7 @@ Thus, we merely test that the middleware is correctly configured."""
 from copy import deepcopy
 
 import pytest
+from pylatexenc.latex2text import LatexNodes2Text
 
 import bibtexparser
 from bibtexparser import Library
@@ -236,6 +237,134 @@ def test_concatenation_roundtrips_with_latex_decoding():
         bibtex, append_middleware=[LatexDecodingMiddleware(allow_inplace_modification=True)]
     )
     assert bibtexparser.write_string(library).strip() == bibtex.strip()
+
+
+def test_excluded_fields_preserve_identifiers_after_default_stack_resolution():
+    """Excluded fields keep URL-like identifiers while regular text is decoded."""
+    bibtex = r"""
+    @article{someEntry,
+        Title = {An {\"u}ber title},
+        URL = url_reference,
+        doi = {10.1234/article~id},
+        Custom_Url = {https://example.com/custom~id},
+        url_extra = {A~regular text value}
+    }
+    @string{url_reference = {https://example.com/reference~id}}
+    """
+
+    library = bibtexparser.parse_string(
+        bibtex,
+        append_middleware=[LatexDecodingMiddleware(exclude_fields=("uRl", "DOI", "custom_url"))],
+    )
+
+    fields = library.entries[0].fields_dict
+    assert fields["Title"].value == "An über title"
+    assert fields["URL"].value == "https://example.com/reference~id"
+    assert fields["doi"].value == "10.1234/article~id"
+    assert fields["Custom_Url"].value == "https://example.com/custom~id"
+    assert fields["url_extra"].value == "A\xa0regular text value"
+    # @string blocks remain subject to transformation. The default parse stack
+    # resolves the reference before this middleware sees the entry field.
+    assert library.strings[0].value == "https://example.com/reference\xa0id"
+
+
+@pytest.mark.parametrize(
+    "middleware_class,input_value,expected_value",
+    [
+        pytest.param(LatexDecodingMiddleware, r"M{\"u}ller", "Müller", id="decoding"),
+        pytest.param(LatexEncodingMiddleware, "Müller", r"M\"uller", id="encoding"),
+    ],
+)
+def test_excluded_fields_are_case_insensitive_and_exact(
+    middleware_class, input_value, expected_value
+):
+    """An exclusion matches a complete field key, regardless of its casing."""
+    entry = Entry(
+        start_line=1,
+        raw="irrelevant",
+        entry_type="article",
+        key="someEntry",
+        fields=[
+            Field(key="URL", value="A~B"),
+            Field(key="url_extra", value=input_value),
+        ],
+    )
+
+    transformed_library = middleware_class(exclude_fields=("url",)).transform(Library([entry]))
+    fields = transformed_library.entries[0].fields_dict
+
+    assert fields["URL"].value == "A~B"
+    assert fields["url_extra"].value == expected_value
+
+
+@pytest.mark.parametrize(
+    "middleware_class,excluded_value,included_value,expected_included_value",
+    [
+        pytest.param(
+            LatexDecodingMiddleware,
+            "A~B",
+            r"M{\"u}ller",
+            "Müller",
+            id="decoding",
+        ),
+        pytest.param(
+            LatexEncodingMiddleware,
+            "A~B",
+            "Müller",
+            r"M\"uller",
+            id="encoding",
+        ),
+    ],
+)
+def test_excluded_fields_respect_copy_mode_and_enclosing_metadata(
+    middleware_class, excluded_value, included_value, expected_included_value
+):
+    """Skipping a field does not drop its enclosing demand or mutate the input copy."""
+    entry = Entry(
+        start_line=1,
+        raw="irrelevant",
+        entry_type="article",
+        key="someEntry",
+        fields=[
+            Field(key="URL", value=excluded_value, enclosing='"'),
+            Field(key="title", value=included_value, enclosing="{"),
+        ],
+    )
+    original_copy = deepcopy(entry)
+
+    transformed_library = middleware_class(
+        allow_inplace_modification=False, exclude_fields=("url",)
+    ).transform(Library([entry]))
+    transformed_entry = transformed_library.entries[0]
+
+    assert transformed_entry is not entry
+    assert transformed_entry.fields_dict["URL"].value == excluded_value
+    assert transformed_entry.fields_dict["URL"].enclosing == '"'
+    assert transformed_entry.fields_dict["title"].value == expected_included_value
+    assert entry == original_copy
+
+
+def test_excluded_fields_work_with_custom_decoder():
+    """Exclusions apply without replacing a user-provided decoder."""
+    entry = Entry(
+        start_line=1,
+        raw="irrelevant",
+        entry_type="article",
+        key="someEntry",
+        fields=[
+            Field(key="url", value="A~B"),
+            Field(key="title", value=r"{Walther Andreas} Muller"),
+        ],
+    )
+
+    decoder = LatexNodes2Text(keep_braced_groups=True)
+    transformed_library = LatexDecodingMiddleware(
+        decoder=decoder, exclude_fields=("URL",)
+    ).transform(Library([entry]))
+    fields = transformed_library.entries[0].fields_dict
+
+    assert fields["url"].value == "A~B"
+    assert fields["title"].value == "{Walther Andreas} Muller"
 
 
 def _entry_with_latex_string(latex_string, enclosing=None):

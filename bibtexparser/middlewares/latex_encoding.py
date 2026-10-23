@@ -1,6 +1,7 @@
 import abc
 import logging
 import re
+from collections.abc import Collection
 
 import pylatexenc
 from pylatexenc.latex2text import LatexNodes2Text
@@ -23,7 +24,23 @@ logger = logging.getLogger(__name__)
 
 
 class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
-    """Abstract utility class allowing to modify python-strings"""
+    """Abstract utility class allowing to modify python-strings.
+
+    :param exclude_fields: Entry field keys whose values should not be transformed.
+        Matching is case-insensitive and exact. String blocks are always transformed.
+    """
+
+    def __init__(
+        self,
+        allow_parallel_execution: bool = True,
+        allow_inplace_modification: bool = True,
+        exclude_fields: Collection[str] = (),
+    ):
+        super().__init__(
+            allow_parallel_execution=allow_parallel_execution,
+            allow_inplace_modification=allow_inplace_modification,
+        )
+        self._exclude_fields = {field.casefold() for field in exclude_fields}
 
     @abc.abstractmethod
     def _transform_python_value_string(self, python_string: str) -> tuple[str, str]:
@@ -49,6 +66,8 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
     def transform_entry(self, entry: Entry, library: Library) -> Block:
         errors = []
         for field in entry.fields:
+            if field.key.casefold() in self._exclude_fields:
+                continue
             if isinstance(field.value, str):
                 # The value setter resets `enclosing`; only the representation changes here.
                 enclosing = field.enclosing
@@ -91,7 +110,10 @@ class _PyStringTransformerMiddleware(BlockMiddleware, abc.ABC):
 
 
 class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
-    """Latex-Encodes all strings in the library"""
+    """Latex-encode entry fields and string blocks.
+
+    All entry fields are transformed by default; ``exclude_fields`` can skip named fields.
+    """
 
     def __init__(
         self,
@@ -99,10 +121,12 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
         enclose_urls: bool | None = None,
         encoder: UnicodeToLatexEncoder | None = None,
         allow_inplace_modification: bool = True,
+        exclude_fields: Collection[str] = (),
     ):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
             allow_parallel_execution=True,
+            exclude_fields=exclude_fields,
         )
 
         if encoder is not None and (keep_math is not None or enclose_urls is not None):
@@ -161,7 +185,10 @@ class LatexEncodingMiddleware(_PyStringTransformerMiddleware):
 
 
 class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
-    """Latex-Decodes all strings in the library"""
+    """Latex-decode entry fields and string blocks.
+
+    All entry fields are transformed by default; ``exclude_fields`` can skip named fields.
+    """
 
     def __init__(
         self,
@@ -169,10 +196,12 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
         keep_braced_groups: bool | None = None,
         keep_math_mode: bool | None = None,
         decoder: LatexNodes2Text | None = None,
+        exclude_fields: Collection[str] = (),
     ):
         super().__init__(
             allow_inplace_modification=allow_inplace_modification,
             allow_parallel_execution=True,
+            exclude_fields=exclude_fields,
         )
 
         if decoder is not None and (keep_braced_groups is not None or keep_math_mode is not None):

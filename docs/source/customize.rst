@@ -81,6 +81,26 @@ Encoding and Enclosing of Values
 * :mod:`bibtexparser.middlewares.LatexEncodingMiddleware`
 * :mod:`bibtexparser.middlewares.LatexDecodingMiddleware`
 
+The LaTeX encoding and decoding middlewares transform all entry fields by default.
+Pass ``exclude_fields`` to skip a collection of exact field keys; matching is case-insensitive,
+and the default is an empty collection. For example, this keeps identifiers unchanged while
+decoding regular text fields:
+
+.. code-block:: python
+
+    library = bibtexparser.parse_string(
+        bibtex,
+        append_middleware=[
+            m.LatexDecodingMiddleware(exclude_fields=("url", "doi", "custom_url"))
+        ],
+    )
+
+``@string`` blocks are still transformed. With the normal default parse stack, string references
+are resolved before appended middleware runs, so an excluded entry field also remains unchanged
+when its value came from an ``@string`` definition. Excluded values are preserved verbatim, which
+keeps plain identifiers containing a literal ``~`` intact; LaTeX escapes in those fields are not
+decoded.
+
 .. _middleware_references:
 
 Value References and Representation
