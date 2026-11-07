@@ -5,6 +5,7 @@ import re
 import pylatexenc
 from pylatexenc.latex2text import LatexNodes2Text
 from pylatexenc.latex2text import MacroTextSpec
+from pylatexenc.latex2text import SpecialsTextSpec
 from pylatexenc.latexencode import RULE_REGEX
 from pylatexenc.latexencode import UnicodeToLatexConversionRule
 from pylatexenc.latexencode import UnicodeToLatexEncoder
@@ -202,6 +203,8 @@ class LatexDecodingMiddleware(_PyStringTransformerMiddleware):
                     # Do not wrap urls in '< ... >'
                     MacroTextSpec("url", simplify_repl="%s")
                 ],
+                # Bibliographic values often contain literal '&', not tabular alignment.
+                specials=[SpecialsTextSpec("&", "&")],
             )
 
             decoder = LatexNodes2Text(

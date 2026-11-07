@@ -6,6 +6,7 @@ Thus, we merely test that the middleware is correctly configured."""
 from copy import deepcopy
 
 import pytest
+from pylatexenc.latex2text import LatexNodes2Text
 
 import bibtexparser
 from bibtexparser import Library
@@ -28,6 +29,18 @@ from tests.middleware_tests.middleware_test_util import assert_nonfield_entry_at
         pytest.param(r"Kristoffer H\o{}gsbro Rose", "Kristoffer Høgsbro Rose", id=r"\o{}"),
         pytest.param(r"Einstein $ e=m_c^2 $", "Einstein $ e=m_c^2 $", id=r"Keep math mode"),
         pytest.param(r"I payed \$10", "I payed $10", id=r"Keep \$"),
+        pytest.param("Cats & Dogs", "Cats & Dogs", id="literal ampersand"),
+        pytest.param(r"Cats \& Dogs", "Cats & Dogs", id="escaped ampersand"),
+        pytest.param("R&D & A&B", "R&D & A&B", id="multiple ampersands"),
+        pytest.param(
+            r"\textit{Research & Development}", "Research & Development", id="macro ampersand"
+        ),
+        pytest.param(r"$a & b$", r"$a & b$", id="math ampersand"),
+        pytest.param(
+            r"\url{https://example.org/?a=1&b=2}",
+            "https://example.org/?a=1&b=2",
+            id="url ampersand",
+        ),
         pytest.param(
             r"{Walther Andreas} Muller",
             "Walther Andreas Muller",
@@ -132,6 +145,41 @@ def test_string_block_value_transformation(middleware_class, input_value, expect
     transformed_value = transformed_library.strings[0].value
     assert isinstance(transformed_value, str)
     assert transformed_value == expected_value
+
+
+@pytest.mark.parametrize("enclosing", ["{}", '""'])
+@pytest.mark.parametrize("inplace", [True, False])
+def test_ampersands_survive_parse_encode_decode_roundtrip(enclosing, inplace):
+    """Unescaped ampersands in imported fields and string definitions must not lose data."""
+    value = f"{enclosing[0]}Cats & Dogs{enclosing[1]}"
+    bibtex = f"@string{{publisher = {value}}}\n@article{{k, title = {value}}}"
+    decoded = bibtexparser.parse_string(
+        bibtex,
+        append_middleware=[LatexDecodingMiddleware(allow_inplace_modification=inplace)],
+    )
+    assert not decoded.failed_blocks
+    assert decoded.entries[0]["title"] == "Cats & Dogs"
+    assert decoded.strings[0].value == "Cats & Dogs"
+
+    encoded = bibtexparser.write_string(
+        decoded, prepend_middleware=[LatexEncodingMiddleware(allow_inplace_modification=False)]
+    )
+    assert encoded.count(r"Cats \& Dogs") == 2
+    reparsed = bibtexparser.parse_string(encoded, append_middleware=[LatexDecodingMiddleware()])
+    assert not reparsed.failed_blocks
+    assert reparsed.entries[0]["title"] == "Cats & Dogs"
+    assert reparsed.strings[0].value == "Cats & Dogs"
+
+
+def test_custom_decoder_controls_ampersands():
+    """A supplied decoder retains its own rules, independently of middleware defaults."""
+    decoder = LatexNodes2Text()
+    middleware = LatexDecodingMiddleware(decoder=decoder)
+    # Constructing a default middleware must not change pylatexenc's global context either.
+    LatexDecodingMiddleware()
+    library = middleware.transform(Library([_entry_with_latex_string("Cats & Dogs")]))
+    assert library.entries[0]["tested_field"] == "Cats     Dogs"
+    assert LatexNodes2Text().latex_to_text("Cats & Dogs") == "Cats     Dogs"
 
 
 def test_failing_string_transformation_becomes_error_block():

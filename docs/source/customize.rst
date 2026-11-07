@@ -81,6 +81,11 @@ Encoding and Enclosing of Values
 * :mod:`bibtexparser.middlewares.LatexEncodingMiddleware`
 * :mod:`bibtexparser.middlewares.LatexDecodingMiddleware`
 
+The default :class:`bibtexparser.middlewares.LatexDecodingMiddleware` preserves
+literal ampersands in bibliographic values: both ``Cats & Dogs`` and
+``Cats \& Dogs`` decode to ``Cats & Dogs``. This also preserves query separators
+in URLs. If you pass a custom ``decoder``, its own conversion rules apply.
+
 .. _middleware_references:
 
 Value References and Representation
