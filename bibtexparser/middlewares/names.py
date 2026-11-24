@@ -573,6 +573,10 @@ def split_multiple_persons_names(names: str) -> list[str]:
 
         # Escaped character.
         if char == "\\":
+            if step == NEXT_WORD:
+                spans[-1].append(possible_end)
+                spans.append([pos - 1])
+            step = START_WHITESPACE
             try:
                 next(namesiter)
             # If we're at the end of the string, then the \ is just a \.

@@ -91,6 +91,36 @@ def test_split_coauthors_consistent_with_bibtex(field_value: str, expected: list
 
 
 @pytest.mark.parametrize(
+    "names, expected",
+    [
+        (r"John Smith and \'{E}lodie Dupont", ["John Smith", r"\'{E}lodie Dupont"]),
+        (r"John Smith and \AA berg", ["John Smith", r"\AA berg"]),
+        (
+            r"John Smith and \'{E}lodie Dupont and \AA berg",
+            ["John Smith", r"\'{E}lodie Dupont", r"\AA berg"],
+        ),
+        (r"John Smith a\'nd Jane Doe", [r"John Smith a\'nd Jane Doe"]),
+    ],
+)
+def test_split_coauthors_preserves_escapes(names: str, expected: list[str]):
+    """Escapes belong to names and cannot form part of an `and` delimiter."""
+    assert split_multiple_persons_names(names) == expected
+
+
+def test_escaped_coauthors_survive_split_and_merge():
+    """Splitting and merging coauthors must preserve their LaTeX accent commands."""
+    authors = r"John Smith and \'{E}lodie Dupont and \AA berg"
+    library = bibtexparser.parse_string(
+        "@article{example, author={" + authors + "}}",
+        append_middleware=[SeparateCoAuthors()],
+    )
+    written = bibtexparser.write_string(library, prepend_middleware=[MergeCoAuthors()])
+    reparsed = bibtexparser.parse_string(written)
+
+    assert reparsed.entries[0]["author"] == authors
+
+
+@pytest.mark.parametrize(
     "name",
     [
         pytest.param("", id="empty string"),
